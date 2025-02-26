@@ -1,11 +1,15 @@
-import logo from './logo.svg';
+
+import { Route, Routes } from 'react-router-dom';
 import './App.css';
+import Home from "./Page/Home";
 
 function App() {
   return (
-    <div>
-      <h1>Zoom Meeting</h1>
-    </div>
+
+    <Routes>
+      <Route path="/aaa" element={<Home />} />
+    </Routes>
+
   );
 }
 
