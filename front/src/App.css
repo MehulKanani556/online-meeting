@@ -3,8 +3,361 @@
   padding: 0;
   box-sizing: border-box;
 }
+
 img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+.row {
+  margin: 0;
+  padding: 0;
+}
+
+.container_new {
+  width: 100%;
+  margin: 0 auto;
+}
+
+.B_Main_section {
+  padding: 70px 0;
+}
+
+.B_PTag_text {
+  width: 85%;
+  line-height: 28px;
+}
+
+.B_Button_text {
+  border-radius: 5px;
+  padding: 8px 14px;
+  font-weight: 500;
+  font-size: 17px;
+  margin-top: 18px;
+}
+
+.B_Connecting_section {
+  padding: 70px 0;
+}
+
+.B_Con_head_text {
+  font-size: 32px;
+}
+
+.B_Features_section {
+  padding: 50px 0;
+}
+
+.feature-card {
+  background-color: #0D141E;
+  padding: 40px 30px;
+  border-radius: 8px;
+}
+
+.feature-icon {
+  font-size: 50px;
+  margin-bottom: 10px;
+}
+
+.B_box_head {
+  font-size: 24px;
+  margin-top: 30px;
+  font-weight: 400;
+}
+
+.B_box_text {
+  font-size: 15px;
+  margin-top: 15px;
+}
+
+.B_Connecting_head_text {
+  width: 75%;
+}
+
+.B_Connecting_text {
+  width: 92%;
+}
+
+
+/*  MEDIA QUERY START.............. */
+
+@media (min-width: 540px) {
+  .container_new {
+    width: 540px;
+    /* sm */
+  }
+}
+
+@media (min-width: 720px) {
+  .container_new {
+    width: 720px;
+    /* md */
+  }
+}
+
+@media (min-width: 960px) {
+  .container_new {
+    width: 960px;
+    /* lg */
+  }
+}
+
+@media (min-width: 1140px) {
+  .container_new {
+    width: 1140px;
+    /* xl */
+  }
+}
+
+@media (min-width: 1520px) {
+  .container_new {
+    width: 1320px;
+    /* xxl */
+  }
+}
+
+@media (max-width: 1440px) {
+  .B_PTag_text {
+    width: 100%;
+  }
+
+
+  .feature-icon {
+    font-size: 40px;
+  }
+
+  .feature-card {
+    padding: 30px 20px;
+  }
+
+  .B_box_text {
+    font-size: 14px;
+  }
+
+  .B_Connecting_head_text {
+    width: 80%;
+  }
+
+  .B_Connecting_text {
+    width: 100%;
+  }
+}
+
+@media (max-width: 1024px) {
+  .B_Connecting_head_text {
+    width: 90%;
+  }
+
+  .B_Connecting_section {
+    padding: 40px 0 60px 0;
+  }
+
+}
+
+@media (max-width: 768px) {
+  .B_Main_section {
+    padding: 30px 0;
+  }
+
+  .B_Head_text {
+    font-size: 28px;
+  }
+
+  .B_PTag_text {
+    line-height: 22px;
+    font-size: 14px;
+  }
+
+  .B_Connecting_section {
+    padding: 50px 0;
+  }
+
+  .B_Con_head_text {
+    font-size: 24px;
+  }
+
+  .B_Connecting_text1,
+  .B_Connecting_text2 {
+    font-size: 14px;
+  }
+
+  .B_Features_section {
+    padding: 30px 0;
+  }
+
+  .feature-card {
+    padding: 20px 15px;
+  }
+
+  .B_box_text {
+    font-size: 13px;
+  }
+
+  .B_Connecting_section {
+    padding: 30px 0;
+  }
+
+  .B_Connecting_head_text {
+    font-size: 25px;
+    width: 100%;
+  }
+
+  .B_Connecting_text {
+    font-size: 13px;
+  }
+
+}
+
+@media (max-width: 425px) {
+  .B_Head_text {
+    margin: 0 2px;
+    font-size: 20px;
+  }
+
+  .B_PTag_text {
+    margin: 0 2px;
+    font-size: 14px;
+    line-height: 19px;
+  }
+
+  .B_Button_text {
+    font-size: 15px;
+    padding: 6px 13px;
+    font-weight: bolder;
+    margin-bottom: 20px;
+  }
+
+  .B_Con_head_text {
+    font-size: 20px;
+    margin-top: 30px;
+  }
+
+  .B_Connecting_text1,
+  .B_Connecting_text2 {
+    font-size: 14px;
+  }
+
+  .B_Connecting_section {
+    padding: 40px 0;
+  }
+
+  .B_Features_section {
+    padding: 20px 0;
+  }
+
+  .B_Feature_head_text {
+    font-size: 20px;
+  }
+
+  .B_Feature_text {
+    font-size: 14px;
+  }
+
+  .B_box_head {
+    font-size: 20px;
+  }
+
+  .feature-icon {
+    font-size: 23px;
+  }
+
+  .B_Connecting_section {
+    padding: 30px 0;
+  }
+
+  .B_Connecting_head_text {
+    font-size: 20px;
+  }
+
+  .B_Connecting_text {
+    font-size: 13px;
+    margin-bottom: 40px;
+  }
+}
+
+@media (max-width: 375px) {
+  .B_Head_text {
+    margin: 0 10px;
+    font-size: 18px;
+  }
+
+  .B_PTag_text {
+    margin: 0 10px;
+    font-size: 13px;
+  }
+
+  .B_Button_text {
+    margin: 20px 0 20px 10px;
+    font-size: 15px;
+    padding: 5px 10px;
+    font-weight: bolder;
+  }
+
+  .UL_text {
+    font-size: 14px;
+  }
+
+  .B_Con_head_text {
+    font-size: 16px;
+  }
+
+  .B_Connecting_text1,
+  .B_Connecting_text2 {
+    font-size: 13px;
+  }
+
+  .B_Feature_head_text {
+    font-size: 16px;
+  }
+
+  .B_Feature_text {
+    font-size: 13px;
+  }
+
+  .B_Features_section {
+    padding: 5px 0 30px 0;
+  }
+
+  .B_Connecting_head_text {
+    font-size: 18px;
+  }
+
+  .B_Connecting_text {
+    font-size: 13px;
+  }
+
+  .B_Connecting_section {
+    padding: 0px 0 40px 0;
+  }
+}
+
+@media (max-width: 320px) {
+  .B_Main_section {
+    padding: 20px 0;
+  }
+
+  .B_Head_text {
+    margin: 0 5px;
+    font-size: 16px;
+  }
+
+  .B_PTag_text {
+    margin: 0 5px;
+  }
+
+  .B_Button_text {
+    margin: 20px 0 20px 10px;
+    font-size: 14px;
+    padding: 4px 8px;
+    font-weight: bolder;
+  }
+
+  .feature-card {
+    padding: 15px 15px;
+  }
+
+  .B_Connecting_head_text {
+    font-size: 16px;
+  }
 }
