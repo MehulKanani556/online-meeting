@@ -9,6 +9,7 @@ import OTPVerification from './Page/OTPVerification';
 import ResetPassword from './Page/ResetPassword';
 import { configureStore } from './Redux/Store';
 import { Provider } from 'react-redux';
+import Index from './Page/Index';
 
 function App() {
   const { store, persistor } = configureStore();
@@ -20,6 +21,7 @@ function App() {
         <Route path="/resetpassword" element={<ResetPassword />} />
         <Route path="/otpVerification" element={<OTPVerification />} />
         <Route path="/home" element={<Home />} />
+        <Route path="/index" element={<Index />} />
       </Routes>
     </Provider>
 

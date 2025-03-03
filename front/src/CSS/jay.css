@@ -12,6 +12,10 @@
     height: 100vh
 }
 
+.j_nav_padding {
+    padding: 10px 48px;
+}
+
 .j_login_img {
     width: 500px;
     height: 372px;
@@ -111,6 +115,8 @@
 }
 
 .j_Login_social {
+    width: 100%;
+    background-color: transparent;
     border: 1px solid white;
     padding: 8px 12px;
     border-radius: 6px;
@@ -179,6 +185,42 @@
     outline: none;
 }
 
+.j_nav_btn {
+    transition: all 0.5s;
+}
+
+.j_Home_sidebar {
+    height: 100vh;
+    background-color: #202F41;
+    color: white;
+    border-top: 3px solid #595E63;
+}
+
+.j_Home_sidebar ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+.j_Home_sidebar .j_sidebar_a {
+    margin-top: 20px;
+    margin-bottom: 30px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+}
+
+.j_home_connent_h4 {
+    font-size: 28px;
+    margin-bottom: 0;
+}
+
+.j_home_cards {
+    background-color: #121B26;
+}
+
 @media (max-width: 1024px) {
     .j_login_img {
         width: 450px;
@@ -187,6 +229,10 @@
 
     .signin-container {
         width: 400px;
+    }
+
+    .j_nav_padding {
+        padding: 10px 40px;
     }
 }
 
@@ -221,14 +267,27 @@
     }
 
     .j_col_img img {
-        margin-top: 20px;
-        height: 340px;
+        margin: 20px 0;
+        height: 300px;
+    }
+
+    .j_nav_padding {
+        padding: 10px 20px;
+    }
+
+    .j_nav_btn {
+        font-size: 13px;
     }
 }
 
 @media (max-width: 375px) {
     .j_col_img img {
         height: 265px;
+        width: 340px;
+    }
+
+    .signin-container {
+        width: 350px;
     }
 }
 
@@ -237,19 +296,25 @@
         padding: 10px;
     }
 
-    .j_col_img img {
-        margin-bottom: 30px;
-    }
-
     .j_login_center {
-        height: 100%
+        height: 100%;
     }
 
     .j_col_img img {
+        margin: 29px 0;
         height: 225px;
+        width: 300px;
     }
 
     .signin-container h1 {
         font-size: 20px !important;
+    }
+
+    .signin-container {
+        width: 300px;
+    }
+
+    .j_nav_btn {
+        font-size: 13px;
     }
 }

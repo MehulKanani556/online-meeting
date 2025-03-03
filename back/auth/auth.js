@@ -30,20 +30,22 @@ exports.userLogin = async (req, res) => {
 }
 exports.googleLogin = async (req, res) => {
     try {
-        let { uid, userName, email, photo } = req.body;
+        let { uid, name, email, photo } = req.body;
+
         let checkUser = await user.findOne({ email });
         if (!checkUser) {
             checkUser = await user.create({
                 uid,
-                userName,
+                name,
                 email,
                 photo
             });
         }
         checkUser = checkUser.toObject();
+
         let token = await jwt.sign({ _id: checkUser._id }, process.env.SECRET_KEY, { expiresIn: "1D" })
         // checkUser.token = generateToken(checkUser._id);
-        return res.status(200).json({ message: 'login successful', success: true, user: checkUser, token: token });
+        return res.status(200).json({ message: 'Google Login successful...', success: true, user: checkUser, token: token });
     } catch (error) {
         throw new Error(error);
     }
@@ -68,7 +70,7 @@ exports.forgotPassword = async (req, res) => {
             }
         });
 
-        let otp = Math.floor(1000 + Math.random() * 9000);
+        let otp = Math.floor(100000 + Math.random() * 900000);
 
         const mailOptions = {
             from: process.env.EMAIL_USER,
@@ -98,6 +100,8 @@ exports.forgotPassword = async (req, res) => {
 exports.verifyOtp = async (req, res) => {
     try {
         let { email, otp } = req.body
+        console.log(email, otp);
+
 
         let chekcEmail = await user.findOne({ email })
 

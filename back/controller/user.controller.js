@@ -18,10 +18,16 @@ exports.createNewUser = async (req, res) => {
         chekUser = await user.create({
             name,
             email,
-            password: hashPassword
+            password: hashPassword,
         });
 
-        return res.json({ status: 200, message: "User Created Successfully", user: chekUser });
+        let token = await jwt.sign(
+            { _id: chekUser._id },
+            process.env.SECRET_KEY,
+            { expiresIn: "1D" }
+        );
+
+        return res.json({ status: 200, message: "User Created Successfully", user: chekUser, token: token });
 
     } catch (error) {
         res.json({ status: 500, message: error.message });
@@ -39,12 +45,6 @@ exports.getAllUsers = async (req, res) => {
 
         if (count === 0) {
             return res.json({ status: 400, message: "Users Not Found" })
-        }
-
-        if (page && pageSize) {
-            startIndex = (page - 1) * pageSize;
-            lastIndex = (startIndex + pageSize);
-            paginatedUser = paginatedUser.slice(startIndex, lastIndex)
         }
 
         return res.json({ status: 200, totalUsers: count, message: "All User Found SuccessFully", user: paginatedUser })
