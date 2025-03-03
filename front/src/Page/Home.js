@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react'
-import logo from '../Image/logo.svg'
 import image1 from '../Image/image1.png'
 import image2 from '../Image/image2.png'
 import image3 from '../Image/Video.svg'
@@ -11,19 +10,16 @@ import image8 from '../Image/sharing.svg'
 import image9 from '../Image/Group.png'
 import image10 from '../Image/image3.png'
 import image11 from '../Image/image4.png'
-import image12 from '../Image/Facebook.svg'
-import image13 from '../Image/Twitter.svg'
-import image14 from '../Image/Instagram.svg'
-import image15 from '../Image/Linkedin.svg'
 import { BsArrowRight } from "react-icons/bs";
-import { FiAlignJustify } from "react-icons/fi";
 import OwlCarousel from 'react-owl-carousel';
 import 'owl.carousel/dist/assets/owl.carousel.css';
 import 'owl.carousel/dist/assets/owl.theme.default.css';
+import NavBar from '../Component/NavBar'
+import Footer from '../Component/Footer'
 
 
 function Home() {
-  const [activeLink, setActiveLink] = useState('Home')
+
 
   const options = {
     center: true,
@@ -105,52 +101,9 @@ function Home() {
       <section style={{ backgroundColor: "#060A11" }}>
 
         <div className='B_container_new' >
-
           {/* TOP NAV BAR START.............. */}
-          <nav className="navbar navbar-expand-lg py-4" >
-            <div className="container-fluid ">
-              <a className="navbar-brand text-white" href="#">
-                <img src={logo} style={{ height: "30px", width: "35 px" }} alt="" />
-              </a>
-
-              <button className="navbar-toggler text-white " style={{ boxShadow: "0 0 3px 1px white" }} type="button" data-bs-toggle="collapse" data-bs-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
-                {/* <span className="navbar-toggler-icon " style={{ backgroundColor: 'white', height: '25px', width: '25px' }}></span> */}
-                <FiAlignJustify style={{ color: 'white', height: '25px', width: '25px' }} />
-
-              </button>
-
-              <div className="collapse navbar-collapse " id="navbarText">
-
-                <ul className="navbar-nav me-auto mb-2 mb-lg-0 m-auto gap-lg-5" >
-                  {['Home', 'Help Center', 'Pricing', 'Contact Us'].map((item) => (
-                    <li className="nav-item" key={item}>
-                      <a
-                        className={`nav-link ${activeLink === item ? 'active' : ''} B_UL_text`}
-                        style={{
-                          color: activeLink === item ? 'white' : '#BFBFBF',
-                          borderBottom: activeLink === item ? '2px solid white' : 'none',
-                          paddingBottom: "5px",
-                          width: "fit-content",
-                          fontWeight: "500",
-                        }}
-                        onClick={() => setActiveLink(item)}
-                        href="#"
-                      >
-                        {item}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-
-                <button className="btn btn-outline-light px-4 py-2">
-                  Get Started
-                </button>
-
-              </div>
-            </div>
-          </nav>
+          <NavBar />
           {/* TOP NAV BAR END.............. */}
-
 
           {/* MAIN SECTION START.............. */}
           <section className=' B_Main_section'>
@@ -354,43 +307,9 @@ function Home() {
 
       {/* Footer Section Start.............. */}
 
-      <section className='B_Footer_section' style={{ backgroundColor: "#060A11" }}>
-        <div className='B_container_new' >
-          <div className='d-flex B_Footer_container justify-content-between align-items-center'>
-            <div>
-              <img src={logo} alt="Logo" style={{ height: "30px", width: "45px" }} />
+        <Footer />
 
-              <div className='B_footer-links d-flex gap-4 mt-4' style={{ color: "#d2d7dd" }} >
-                <p className='' >Help center</p>
-                <p className=''>Pricing</p>
-                <p className=''>Contact us</p>
-              </div>
-              <div>
-                <p className='B_Footer_text' style={{ color: "#87898B" }}>&copy; 2021 Gentler Streak. All rights reserved</p>
-              </div>
-            </div>
-
-
-            <div>
-              <h5 style={{ color: "#d2d7dd" }} >Keep in touch</h5>
-              <div className='d-flex B_footer_link1  gap-3 mt-3'>
-                <div className="B_social_icon" >
-                  <img src={image12} alt="Facebook" />
-                </div>
-                <div className="B_social_icon" >
-                  <img src={image13} alt="Twitter" />
-                </div>
-                <div className="B_social_icon" >
-                  <img src={image14} alt="Instagram" />
-                </div>
-                <div className="B_social_icon" >
-                  <img src={image15} alt="LinkedIn" />
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* Footer Section End.............. */}
     </div>
   )
 }

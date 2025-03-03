@@ -94,7 +94,7 @@ img {
   padding: 0 20px;
 }
 
-.B_Owl .owl-carousel .owl-stage  {
+.B_Owl .owl-carousel .owl-stage {
   display: flex;
   padding: 30px 0;
 }
@@ -145,7 +145,7 @@ img {
   color: #BFBFBF;
 }
 
- .B_Owl .owl-nav button {
+.B_Owl .owl-nav button {
   background: transparent;
   color: white;
   border: none;
@@ -203,8 +203,6 @@ img {
   align-items: center;
   justify-content: center;
   transition: background-color 0.3s, transform 0.3s;
-  /* Smooth transition */
-
 }
 
 .B_social_icon img {
@@ -214,19 +212,155 @@ img {
 
 .B_social_icon:hover {
   background: linear-gradient(to bottom, #287BE0, #043B7D);
-  /* Change background color on hover */
   transform: scale(1.1);
-  /* Slightly enlarge the icon on hover */
   cursor: pointer;
 }
 
 .B_social_icon:hover img {
   filter: brightness(0) invert(1);
-  /* This will make the icon white */
+}
+
+.B_Here_Help {
+  padding: 70px 0;
+}
+
+.B_input_search {
+  width: 38%;
+}
+
+.B_input_search input {
+  padding: 11px 0px;
+}
+
+.B_search-container input::placeholder {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.search-container input:focus {
+  box-shadow: none;
+  background-color: #1A2634 !important;
+  border: 1px solid #287BE0;
+}
+
+.B_acc_card_section {
+  padding: 0px 0 50px 0;
+}
+
+.B_box_div {
+  background-color: #090E16;
+  padding: 30px 50px 18px;
+  border-radius: 2px;
+  height: 100%;
+  box-shadow: 0 0 2px 0 rgb(113 111 111 / 50%);
+}
+
+.B_card_space {
+  margin: 0 -20px;
+  /* Negative margin to counteract padding */
+}
+
+.B_card_space1 {
+  padding: 0 30px;
+  margin-bottom: 50px;
+  /* Increase padding between columns */
+}
+
+.B_Cardicon {
+  height: 38px;
+  width: 38px;
+}
+
+.B_Cardicon1 {
+  height: 31px;
+}
+
+.B_card1_head {
+  margin: 20px 0;
+}
+
+.B_card1_text {
+  font-size: 15px;
+}
+
+.B_FAQ_head_text {
+  margin: 20px 0 60px 0;
+}
+
+.B_FAQ_section {
+  padding: 0 50px;
+}
+
+.B_FAQ_button_text {
+  font-size: 18px;
+}
+
+.B_FAQ_section .accordion-button {
+  background-color: #090E16;
+  color: #87898B;
+}
+
+.B_FAQ_section .accordion {
+  --bs-accordion-border-color: #202122;
+  --bs-accordion-btn-focus-box-shadow: 0 0 0 0.25rem rgba(54, 54, 54, 0.25);
+}
+
+.B_FAQ_section .accordion-button:not(.collapsed) {
+  background-color: #090E16;
+  color: #87898B;
+}
+
+.B_Footer_section1 {
+  padding: 70px 0 0 0;
+}
+
+.B_simple_affordable {
+  padding: 70px 0;
+}
+
+.B_pricing_section {
+  padding: 0 0 70px 0;
+}
+
+.B_pricing_button {
+  padding: 8px 48px;
+}
+
+.B_CARD_Price {
+  padding: 60px 0px;
+}
+
+.B_cardPrice_text {
+  font-size: 14px;
+  margin-bottom: 50px;
+}
+
+.B_Card_padding {
+  padding: 30px;
+  box-shadow: 0 0 2px 0 rgb(113 111 111 / 50%);
+}
+
+.B_price_text {
+  margin-top: 30px;
+}
+
+.B_price_btn {
+  padding: 10px;
+  margin-bottom: 15px;
+}
+
+.B_true_icon {
+  height: 20px;
+  width: 20px;
+  margin-right: 20px;
+}
+
+.B_PRIC_feature {
+  margin-top: 30px;
 }
 
 
-/*  MEDIA QUERY START.............. */
+
+/* MiN MEDIA QUERY START.............. */
 
 @media (min-width: 540px) {
   .B_container_new {
@@ -269,6 +403,8 @@ img {
   }
 }
 
+/* MAX WIDTH QUERY START.............. */
+
 @media (max-width: 1440px) {
   .B_PTag_text {
     width: 100%;
@@ -293,6 +429,15 @@ img {
 
   .B_Connecting_text {
     width: 100%;
+  }
+
+  .B_card_space1 {
+    padding: 0 20px;
+    margin-bottom: 40px;
+  }
+
+  .B_FAQ_body_text {
+    font-size: 15px;
   }
 }
 
@@ -339,6 +484,30 @@ img {
 
   .B_opacity_button {
     padding: 8px 30px;
+  }
+
+  .B_box_div {
+    padding: 30px 28px 18px;
+  }
+
+  .B_FAQ_button_text {
+    font-size: 16px;
+  }
+
+  .B_FAQ_body_text {
+    font-size: 14px;
+  }
+
+  .B_Card_padding {
+    padding: 20px;
+  }
+
+  .B_Ture_text {
+    font-size: 15px;
+  }
+
+  .B_pricing_section {
+    padding: 0 0 20px 0;
   }
 
 }
@@ -454,6 +623,53 @@ img {
     font-size: 14px;
   }
 
+  .B_help_head_text {
+    font-size: 24px;
+  }
+
+  .B_Here_Help {
+    padding: 30px 0 50px 0;
+  }
+
+  .B_card1_head {
+    font-size: 20px;
+  }
+
+  .B_card1_text {
+    font-size: 14px;
+  }
+
+  .B_FAQ_section {
+    padding: 0 10px;
+  }
+
+  .B_simple_affordable {
+    padding: 30px 0;
+  }
+
+  .B_simple_affo_head_text {
+    font-size: 24px;
+  }
+
+  .B_simple_affo_text {
+    font-size: 14px;
+  }
+
+  .B_pricing_button {
+    padding: 7px 40px;
+  }
+
+  .B_card_margin {
+    margin-bottom: 40px;
+  }
+
+  .B_CARD_Price {
+    padding-bottom: 21px;
+  }
+
+  .navbar-collapse {
+    margin-top: 25px;
+  }
 }
 
 @media (max-width: 425px) {
@@ -588,13 +804,76 @@ img {
     justify-content: center !important;
   }
 
+  .B_help_head_text {
+    font-size: 20px;
+  }
 
+  .B_Here_Help {
+    padding: 20px 0 50px 0;
+  }
 
+  .B_card_space {
+    margin: 0px 0px;
+  }
 
+  .B_card_space1 {
+    margin-bottom: 25px;
+  }
 
+  .B_FAQ_button_text {
+    font-size: 14px;
+  }
+
+  .B_FAQ_body_text {
+    font-size: 13px;
+  }
+
+  .B_acc_card_section {
+    padding: 0px 0 20px 0;
+  }
+
+  .B_Footer_section1 {
+    padding: 30px 0 0 0;
+  }
+
+  .B_simple_affo_head_text {
+    font-size: 20px;
+  }
+
+  .B_simple_affo_text {
+    font-size: 13px;
+  }
+
+  .B_pricing_button {
+    padding: 6px 30px;
+  }
+
+  .B_price_text {
+    font-size: 20px;
+    margin-top: 20px;
+  }
+
+  .B_cardPrice_text {
+    font-size: 14px;
+    margin-bottom: 30px;
+  }
+
+  .B_Ture_text {
+    font-size: 14px;
+  }
+
+  .B_price_btn {
+    padding: 7px;
+    margin-bottom: 9px;
+  }
+
+  .B_CARD_Price {
+    padding-bottom: 0px;
+  }
 }
 
 @media (max-width: 375px) {
+
   .B_Head_text {
     margin: 0 10px;
     font-size: 18px;
@@ -655,12 +934,37 @@ img {
 
   .B_footer-links {
     font-size: 15px;
-
   }
 
   .B_social_icon {
     padding: 7px;
   }
+
+  .B_help_head_text {
+    font-size: 16px;
+  }
+
+  .B_input_search input {
+    padding: 7% 0px;
+  }
+
+  .B_card1_text {
+    font-size: 13px;
+  }
+
+  .B_box_div {
+    padding: 20px 18px 18px;
+  }
+
+  .B_FAQ_body_text {
+    font-size: 12.5px;
+  }
+
+  .B_pricing_button {
+    padding: 4px 22px;
+  }
+
+
 }
 
 @media (max-width: 320px) {
@@ -704,4 +1008,25 @@ img {
   .B_opacity_button {
     font-size: 13px;
   }
+
+  .B_Card_padding {
+    padding: 15px;
+  }
+
+  .B_cardPrice_text {
+    font-size: 13px;
+
+  }
+
+  .B_Ture_text {
+    font-size: 13px;
+  }
+
+  .B_price_btn {
+    padding: 6px;
+    margin-bottom: 5px;
+    font-size: 14.5px;
+  }
+
+
 }
