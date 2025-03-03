@@ -1,0 +1,21 @@
+# Ignore all files in the first folder
+folder1/*
+
+# Ignore all files in the second folder
+folder2/*
+
+# Node.js
+node_modules/
+npm-debug.log
+
+
+
+# IDEs
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+
+# OS generated files
+.DS_Store
+Thumbs.db
