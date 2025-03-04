@@ -41,7 +41,6 @@ function HelpCenter() {
                     <NavBar />
                     {/* NavBar Section End.............. */}
 
-
                     {/* Help Center Section Start.............. */}
                     <div className='text-center text-white B_Here_Help '>
                         <h2 className='B_help_head_text'>We're here to help you </h2>
@@ -59,8 +58,8 @@ function HelpCenter() {
                     </div>
                     {/* Help Center Section End.............. */}
 
-                    {/* Card Section Start.............. */}
 
+                    {/* Card Section Start.............. */}
                     <section className='B_acc_card_section'>
                         <div className="row B_card_space text-white justify-content-center  ">
                             <div className="col-md-6 col-lg-4 col-12  B_card_space1 "
@@ -108,7 +107,7 @@ function HelpCenter() {
                                     <div>
                                         <img 
                                             src={image3} 
-                                            className='B_Cardicon' 
+                                            className='B_Cardicon B_Cardicon1' 
                                             alt="" 
                                             style={getIconStyle('screen')}
                                         />
@@ -162,11 +161,10 @@ function HelpCenter() {
                             </div>
                         </div>
                     </section>
-
                     {/* Card Section End.............. */}
 
-                    {/*  FAQ  Section Start .............. */}
 
+                    {/*  FAQ  Section Start .............. */}
                     <section className='B_FAQ_section'>
                         <div>
                             <h3 className='B_FAQ_head_text text-center text-white '>Frequently Asked Questions</h3>
@@ -411,10 +409,8 @@ function HelpCenter() {
                  
 
                     </section>
-
                     {/*  FAQ  Section End.............. */}
-
-
+                    
 
                     {/* Footer Section Start.............. */}
                     <div className='B_Footer_section1'>

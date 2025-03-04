@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import NavBar from '../Component/NavBar';
 import check_icon from '../Image/True.svg';
 import Footer from '../Component/Footer';
+import { Link } from 'react-router-dom';
 
 function Pricing() {
     const [billingCycle, setBillingCycle] = useState('yearly');
@@ -69,7 +70,9 @@ function Pricing() {
                                         </h4>
                                         <p className='B_cardPrice_text' style={{ color: '#b8babb' }}>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ip</p>
 
-                                        <button className='btn B_price_btn btn-light fw-bold w-100 '>Continue To Pay</button>
+                                        <Link to="/payment">
+                                            <button className='btn B_price_btn btn-light fw-bold w-100 '>Continue To Pay</button>
+                                        </Link>
 
                                         <div>
                                             <div className='OR-login'>
@@ -107,7 +110,9 @@ function Pricing() {
                                         </h4>
                                         <p className='B_cardPrice_text' style={{ color: '#b8babb' }}>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ip</p>
 
-                                        <button className='btn B_price_btn btn-light fw-bold w-100 '>Continue To Pay</button>
+                                        <Link to="/payment">
+                                            <button className='btn B_price_btn btn-light fw-bold w-100 '>Continue To Pay</button>
+                                        </Link>
 
                                         <div>
                                             <div className='OR-login'>
@@ -149,8 +154,9 @@ function Pricing() {
                                         </h4>
                                         <p className='B_cardPrice_text' style={{ color: '#b8babb' }}>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ip</p>
 
-                                        <button className='btn B_price_btn btn-light fw-bold w-100 '>Continue To Pay</button>
-
+                                        <Link to="/payment">
+                                            <button className='btn B_price_btn btn-light fw-bold w-100 '>Continue To Pay</button>
+                                        </Link>
 
                                         <div>
 

@@ -269,6 +269,10 @@ img {
   height: 38px;
   width: 38px;
 }
+.B_Cardicon1 {
+  height: 33px;
+  width: 38px;
+}
 
 .B_Cardicon1 {
   height: 31px;
@@ -358,6 +362,237 @@ img {
   margin-top: 30px;
 }
 
+.B_payment_section {
+  padding: 70px 0;
+}
+
+.B_billing_details {
+  width: 450px;
+}
+
+.B_form_control {
+  background-color: #202F41;
+  border: none;
+  color: white;
+  padding: 11px 15px;
+  margin-bottom: 22px;
+}
+
+.B_form_control::placeholder {
+  color: #979b9e;
+}
+
+.B_payment_card {
+  background-color: #090E16;
+  width: 550px;
+  padding: 40px 50px;
+  box-shadow: 0 0 2px 0 rgb(113 111 111 / 50%);
+}
+
+.B_btn_primary {
+  background-color: #0070ba;
+  border: none;
+}
+
+.B_payment_head_text {
+  margin-bottom: 40px;
+}
+
+.B_biling_text {
+  font-size: 22px;
+}
+
+.B_pay {
+  background-color: #FFFFFF;
+  color: #000000;
+  border-radius: 8px;
+  padding: 10px;
+  border: none;
+  font-weight: 500;
+  margin-top: 15px;
+  width: 75%;
+  transition: all 0.3s ease;
+}
+
+
+.B_pay_withPay {
+  background-color: transparent;
+  color: #FFFFFF;
+  border-radius: 8px;
+  padding: 10px;
+  border: 1px solid #30363D;
+  font-weight: 500;
+  width: 75%;
+  transition: all 0.3s ease;
+}
+
+.B_form_control:focus {
+  background-color: #202F41;
+  border: none;
+  color: white;
+  border-color: #b2b8c0;
+  outline: 0;
+  box-shadow: 0 0 2px 0 rgb(113 111 111 / 50%);
+}
+
+.B_form_control:-webkit-autofill,
+.B_form_control:-webkit-autofill:hover,
+.B_form_control:-webkit-autofill:focus,
+.B_form_control:-webkit-autofill:active {
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: #fff;
+  transition: background-color 5000s ease-in-out 0s;
+  box-shadow: inset 0 0 20px 20px #202F41;
+}
+
+.B_Get_In_Touch {
+  padding: 70px 0 50px 0;
+}
+
+.B_contact_form {
+  max-width: 1080px;
+  margin: 40px auto;
+  padding: 40px 52px;
+  background-color: #090E16;
+  box-shadow: 0 0 2px 0 rgb(113 111 111 / 50%);
+}
+
+.B_contact_form form {
+  width: 100%;
+}
+
+.B_form_row {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.B_form_group {
+  flex: 1;
+}
+
+.B_form_group label {
+  display: block;
+  color: white;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.B_form_group input,
+.B_form_group textarea {
+  width: 100%;
+  padding: 12px;
+  background-color: #202F41;
+  border: none;
+  border-radius: 6px;
+  color: #fff;
+  outline: none;
+}
+
+
+.B_form_group input:-webkit-autofill,
+.B_form_group input:-webkit-autofill:hover,
+.B_form_group input:-webkit-autofill:focus,
+.B_form_group input:-webkit-autofill:active {
+  -webkit-text-fill-color: #fff;
+  transition: background-color 5000s ease-in-out 0s;
+  box-shadow: inset 0 0 20px 20px #202F41;
+
+}
+
+.B_form_group textarea {
+  height: 90px;
+  resize: none;
+}
+
+.B_contact_form button {
+  width: 40%;
+  padding: 11px 12px;
+  background-color: white;
+  border: none;
+  border-radius: 6px;
+  color: black;
+  font-weight: 500;
+  cursor: pointer;
+  margin-top: 24px;
+}
+
+.B_contact_form button:hover {
+  background-color: #f0f0f0;
+}
+
+.B_form_group input::placeholder,
+.B_form_group textarea::placeholder {
+  color: #9da2ac;
+}
+
+.B_contact_form_button {
+  margin-top: 20px;
+}
+
+.B_Get_SEC_text {
+  margin-bottom: 70px;
+}
+
+.B_addCARD_section {
+  padding: 0px 0 80px 0;
+}
+
+.B_contact_card {
+  background-color: #090E16;
+  padding: 20px 30px 15px;
+  border-radius: 8px;
+  box-shadow: 0 0 2px 0 rgb(113 111 111 / 60%);
+  height: 100%;
+}
+
+.B_contact_card .B_icon {
+  margin-bottom: 20px;
+}
+
+.B_contact_card .B_icon1 img {
+  width: 34px;
+  height: 39px;
+}
+
+.B_contact_card .B_icon2 img {
+  width: 34px;
+  height: 38px;
+}
+
+.B_contact_card .B_icon3 img {
+  width: 43px;
+  height: 31px;
+}
+
+.B_contact_card h4 {
+  font-size: 24px;
+  margin-bottom: 10px;
+  color: #ababac;
+}
+
+.B_contact_card p {
+  color: #ababac;
+  line-height: 1.6;
+  margin-bottom: 8px;
+}
+
+.B_contact_card_row {
+  --bs-gutter-x: 3.5rem;
+  --bs-gutter-y: 0rem;
+}
+.B_footer_hover a:hover{
+  color: #0f82cf !important;
+}
+
+.B_contact-icon {
+  transition: transform 0.3s ease;
+}
+
+.B_contact-icon:hover {
+  transform: scale(0.9);
+  filter: brightness(0) saturate(100%) invert(46%) sepia(72%) saturate(2538%) hue-rotate(199deg) brightness(103%) contrast(101%); 
+}
 
 
 /* MiN MEDIA QUERY START.............. */
@@ -439,6 +674,14 @@ img {
   .B_FAQ_body_text {
     font-size: 15px;
   }
+
+  .B_contact_card p {
+    font-size: 15px;
+  }
+
+  .B_contact_card {
+    padding: 20px 16px 15px;
+  }
 }
 
 @media (max-width: 1024px) {
@@ -509,6 +752,70 @@ img {
   .B_pricing_section {
     padding: 0 0 20px 0;
   }
+
+  .B_payment_section {
+    padding: 40px 0;
+  }
+
+  .B_payment_head_text {
+    font-size: 25px;
+  }
+
+  .B_payment_card {
+    width: 460px;
+    padding: 34px 35px;
+  }
+
+  .B_billing_details {
+    width: 400px;
+  }
+
+  .B_GetHead_text {
+    font-size: 24px;
+  }
+
+  .B_GetText {
+    font-size: 15px;
+  }
+
+  .B_Get_In_Touch {
+    padding: 60px 0;
+  }
+
+  .B_Get_SEC_text {
+    margin-bottom: 50px;
+  }
+
+  .B_contact_form {
+    max-width: 960px;
+    padding: 35px 40px;
+
+  }
+
+  .B_form_group input,
+  .B_form_group textarea {
+    padding: 11px;
+
+  }
+
+  .B_contact_card_row {
+    --bs-gutter-x: 2rem;
+    --bs-gutter-y: 0rem;
+  }
+
+  .B_contact_card p {
+    font-size: 14px;
+  }
+
+  .B_contact_card h4 {
+    font-size: 22px;
+  }
+
+  .B_addCARD_section {
+    padding: 0px 0 60px 0;
+  }
+
+
 
 }
 
@@ -669,6 +976,76 @@ img {
 
   .navbar-collapse {
     margin-top: 25px;
+  }
+
+  .B_payment_section {
+    padding: 30px 0 50px 0;
+  }
+
+  .B_payment_head_text {
+    font-size: 24px;
+  }
+
+  .B_form_responsive {
+    display: flex;
+    justify-content: center;
+  }
+
+  .B_billing_details {
+    width: 500px;
+  }
+
+  .B_payment_card {
+    width: 565px;
+    background-color: #060A11;
+  }
+
+  .B_payment_section {
+    padding: 10px 0 50px 0;
+  }
+
+  .B_Get_In_Touch {
+    padding: 25px 0 40px 0;
+  }
+
+  .B_contact_form {
+    max-width: 720px;
+  }
+
+  .B_contact_form {
+    padding: 25px 30px;
+  }
+
+  .B_form_group input,
+  .B_form_group textarea {
+    padding: 9px 11px;
+  }
+
+  .B_contact_card_row {
+    justify-content: center;
+  }
+
+  .B_contact_card3 {
+    margin-bottom: 30px;
+  }
+
+  .B_contact_card h4 {
+    font-size: 20px;
+  }
+
+  .B_contact_card .B_icon1 img {
+    width: 30px;
+    height: 34px;
+  }
+
+  .B_contact_card .B_icon2 img {
+    width: 29px;
+    height: 33px;
+  }
+
+  .B_contact_card .B_icon3 img {
+    width: 36px;
+    height: 26px;
   }
 }
 
@@ -870,6 +1247,82 @@ img {
   .B_CARD_Price {
     padding-bottom: 0px;
   }
+
+  .B_payment_head_text {
+    font-size: 20px;
+  }
+
+  .B_payment_section {
+    padding: 30px 0 50px 0;
+  }
+
+  .B_billing_details {
+    width: 370px;
+  }
+
+  .B_payment_card {
+    width: 400px;
+    padding: 20px;
+
+  }
+
+  .B_biling_text {
+    font-size: 18px;
+  }
+
+  .B_form_control {
+    padding: 7px 15px;
+    margin-bottom: 18px;
+  }
+
+  .B_formStart_padding {
+    padding: 0;
+  }
+
+  .B_GetHead_text {
+    font-size: 20px;
+  }
+
+  .B_GetText {
+    font-size: 13px;
+  }
+
+  .B_Get_In_Touch {
+    padding: 15px 0 40px 0;
+  }
+
+
+  .B_form_group input,
+  .B_form_group textarea {
+    padding: 7px 11px;
+    font-size: 14px;
+  }
+
+  .B_form_row {
+    gap: 20px !important;
+  }
+
+  .B_contact_form {
+    padding: 18px 19px;
+  }
+
+  .B_contact_form {
+    max-width: 390px;
+  }
+
+  .B_form_group input::placeholder {
+    font-size: 14px;
+  }
+
+  .B_form_row {
+    flex-direction: column;
+  }
+
+  .B_contact_form button {
+    width: 48%;
+    padding: 7px 14px;
+  }
+
 }
 
 @media (max-width: 375px) {
@@ -964,6 +1417,49 @@ img {
     padding: 4px 22px;
   }
 
+  .B_billing_details {
+    width: 340px;
+  }
+
+  .B_payment_card {
+    width: 350px;
+    padding: 18px 16px;
+  }
+
+  .B_form_control {
+    padding: 6px 15px;
+  }
+
+  .B_biling_text {
+    font-size: 16px;
+  }
+
+  .B_contact_form {
+    max-width: 350px;
+  }
+
+  .B_contact_form button {
+    margin-top: 10px;
+  }
+
+  .B_contact_form button {
+    width: 50%;
+    padding: 6px 12px;
+  }
+
+  .B_contact_card p {
+    font-size: 13px;
+  }
+
+  .B_contact_card .B_icon2 img {
+    width: 27px;
+    height: 29px;
+  }
+
+  .B_contact_card .B_icon3 img {
+    width: 30px;
+    height: 21px;
+  }
 
 }
 
@@ -1028,5 +1524,47 @@ img {
     font-size: 14.5px;
   }
 
+  .B_billing_details {
+    width: 290px;
+  }
+
+  .B_payment_card {
+    width: 296px;
+    padding: 18px 10px
+  }
+
+  .B_contact_form {
+    max-width: 298px;
+  }
+
+  .B_contact_form {
+    padding: 14px 13px;
+  }
+
+  .B_contact_form {
+    margin: 22px auto;
+  }
+
+  .B_Get_SEC_text {
+    margin-bottom: 40px;
+  }
+
+  .B_contact_form button {
+    width: 50%;
+    padding: 5px 12px;
+  }
+
+  .B_contact_card h4 {
+    font-size: 20px;
+  }
+
+  .B_contact_card .B_icon1 img {
+    width: 26px;
+    height: 29px;
+  }
+
+  .B_contact_card h4 {
+    font-size: 18px;
+  }
 
 }

@@ -6,21 +6,21 @@ import { Link, useLocation } from 'react-router-dom';
 
 function NavBar() {
 
-    const [activeLink, setActiveLink] = useState('Home')
+    const [activeLink, setActiveLink] = useState('')
     const location = useLocation();
 
     useEffect(() => {
         const path = location.pathname;
         if (path === '/') setActiveLink('Home');
         else if (path === '/helpcenter') setActiveLink('Help Center');
-        else if (path === '/pricing') setActiveLink('Pricing');
-        else if (path === '/contact-us') setActiveLink('Contact Us');
+        else if (path === '/pricing' || path === '/payment') setActiveLink('Pricing');
+        else if (path === '/contactus') setActiveLink('Contact Us');
     }, [location]);
 
     const getPath = (item) => {
         if (item === 'Home') return '/';
         else if (item === 'Help Center') return '/helpcenter';
-        else if (item === 'Pricing') return '/pricing';
+        else if (item === 'Pricing' || item === 'Payment') return '/pricing';
         else if (item === 'Contact Us') return '/contactus';
     };
 
@@ -40,12 +40,12 @@ function NavBar() {
 
                     <div className="collapse navbar-collapse " id="navbarText">
 
-                        <ul className="navbar-nav me-auto mb-2 mb-lg-0 m-auto gap-lg-5" >
+                        <ul className="navbar-nav  me-auto mb-2 mb-lg-0 m-auto gap-lg-5" >
                             {['Home', 'Help Center', 'Pricing', 'Contact Us'].map((item) => (
                                 <li className="nav-item" key={item}>
                                     <Link
                                         to={getPath(item)}
-                                        className={`nav-link ${activeLink === item ? 'active' : ''} B_UL_text`}
+                                        className={`nav-link ${activeLink === item ? 'active' : ''} B_UL_text `}
                                         style={{
                                             color: activeLink === item ? 'white' : '#BFBFBF',
                                             borderBottom: activeLink === item ? '2px solid white' : 'none',

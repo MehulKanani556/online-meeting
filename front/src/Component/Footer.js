@@ -12,12 +12,12 @@ function Footer() {
                 <div className='B_container_new' >
                     <div className='d-flex B_Footer_container justify-content-between align-items-center'>
                         <div>
-                            <img src={logo} alt="Logo" style={{ height: "30px", width: "45px" }} />
+                            <a href="/" style={{ textDecoration: "none" }}><img src={logo} alt="Logo" style={{ height: "30px", width: "45px" }} /></a>
 
                             <div className='B_footer-links d-flex gap-4 mt-4' style={{ color: "#d2d7dd" }} >
-                                <p className='' >Help center</p>
-                                <p className=''>Pricing</p>
-                                <p className=''>Contact us</p>
+                                <p className='B_footer_hover'><a href="" className='text-decoration-none' style={{ color: "#d2d7dd" }}>Help center</a></p>
+                                <p className='B_footer_hover'><a href="" className='text-decoration-none' style={{ color: "#d2d7dd" }}>Pricing</a></p>
+                                <p className='B_footer_hover'><a href="" className='text-decoration-none' style={{ color: "#d2d7dd" }}>Contact us</a></p>
                             </div>
                             <div>
                                 <p className='B_Footer_text' style={{ color: "#87898B" }}>&copy; 2021 Gentler Streak. All rights reserved</p>
