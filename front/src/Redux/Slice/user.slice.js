@@ -34,17 +34,13 @@ export const getAllUsers = createAsyncThunk(
     }
 );
 
-export const addUser = createAsyncThunk(
+export const createUser = createAsyncThunk(
     'users/add',
     async (data, { dispatch, rejectWithValue }) => {
         try {
-
-            const response = await axios.post(BASE_URL + '/createUser', data, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                    Authorization: `Bearer ${Cookies.get("accessToken")}`
-                }
-            });
+            const response = await axios.post(BASE_URL + '/createUser', data);
+            sessionStorage.setItem("token", response.data.token);
+            sessionStorage.setItem("userId", response.data.user._id);
             dispatch(getAllUsers());
             return response.data.user;
         } catch (error) {
@@ -58,9 +54,10 @@ export const deleteUser = createAsyncThunk(
     async (id, { dispatch, rejectWithValue }) => {
         console.log(id);
         try {
+            const token = await sessionStorage.getItem("token");
             const response = await axios.delete(`${BASE_URL}/deleteUser/${id}`, {
                 headers: {
-                    Authorization: `Bearer ${Cookies.get("accessToken")}`
+                    Authorization: `Bearer ${token}`,
                 }
             });
             return id;
@@ -98,9 +95,10 @@ export const getUserById = createAsyncThunk(
     async (id, { dispatch, rejectWithValue }) => {
         console.log(id, "data");
         try {
+            const token = await sessionStorage.getItem("token");
             const response = await axios.get(`${BASE_URL}/getUserById/${id}`, {
                 headers: {
-                    Authorization: `Bearer ${Cookies.get("accessToken")}`
+                    Authorization: `Bearer ${token}`,
                 }
             });
             dispatch(getAllUsers());
@@ -132,17 +130,17 @@ const usersSlice = createSlice({
                 state.success = false;
                 state.message = action.payload?.message || 'Failed to fetch users';
             })
-            .addCase(addUser.pending, (state) => {
+            .addCase(createUser.pending, (state) => {
                 state.loading = true;
                 state.message = 'Adding user...';
             })
-            .addCase(addUser.fulfilled, (state, action) => {
+            .addCase(createUser.fulfilled, (state, action) => {
                 state.loading = false;
                 state.success = true;
                 state.allusers.push(action.payload);
                 state.message = action.payload?.message || 'User added successfully';
             })
-            .addCase(addUser.rejected, (state, action) => {
+            .addCase(createUser.rejected, (state, action) => {
                 state.loading = false;
                 state.success = false;
                 state.message = action.payload?.message || 'Failed to add user';

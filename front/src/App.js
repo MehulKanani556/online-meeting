@@ -8,6 +8,7 @@ import { configureStore } from './Redux/Store';
 import { Provider } from 'react-redux';
 import HelpCenter from './Page/HelpCenter';
 import Pricing from './Page/Pricing';
+import Index from './Page/Index';
 
 function App() {
   const { store, persistor } = configureStore();
@@ -18,6 +19,12 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/helpcenter" element={<HelpCenter />} />
         <Route path="/pricing" element={<Pricing />} />
+        <Route path="/" element={<Login />} />
+        <Route path="/forgetpassword" element={<ForgetPassword />} />
+        <Route path="/resetpassword" element={<ResetPassword />} />
+        <Route path="/otpVerification" element={<OTPVerification />} />
+        <Route path="/home" element={<Home />} />
+        <Route path="/index" element={<Index />} />
       </Routes>
     </Provider>
 
