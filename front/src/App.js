@@ -15,16 +15,11 @@ function App() {
   return (
     <Provider store={store}>
       <Routes>
-        <Route path="/" element={<Home />} />
+        <Route path="/" element={<Index />} />
+        <Route path="/home" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/helpcenter" element={<HelpCenter />} />
         <Route path="/pricing" element={<Pricing />} />
-        <Route path="/" element={<Login />} />
-        <Route path="/forgetpassword" element={<ForgetPassword />} />
-        <Route path="/resetpassword" element={<ResetPassword />} />
-        <Route path="/otpVerification" element={<OTPVerification />} />
-        <Route path="/home" element={<Home />} />
-        <Route path="/index" element={<Index />} />
       </Routes>
     </Provider>
 

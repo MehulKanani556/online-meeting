@@ -11,14 +11,14 @@ function NavBar() {
 
     useEffect(() => {
         const path = location.pathname;
-        if (path === '/home') setActiveLink('Home');
+        if (path === '/') setActiveLink('Home');
         else if (path === '/helpcenter') setActiveLink('Help Center');
         else if (path === '/pricing') setActiveLink('Pricing');
         else if (path === '/contact-us') setActiveLink('Contact Us');
     }, [location]);
 
     const getPath = (item) => {
-        if (item === 'Home') return '/home';
+        if (item === 'Home') return '/';
         else if (item === 'Help Center') return '/helpcenter';
         else if (item === 'Pricing') return '/pricing';
         else if (item === 'Contact Us') return '/contactus';
@@ -61,9 +61,11 @@ function NavBar() {
                             ))}
                         </ul>
 
-                        <button className="btn btn-outline-light px-4 py-2">
-                            Get Started
-                        </button>
+                        <Link to={'/home'}>
+                            <button className="btn btn-outline-light px-4 py-2">
+                                Get Started
+                            </button>
+                        </Link>
 
                     </div>
                 </div>
