@@ -2,6 +2,7 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import axios from "axios";
 import { BASE_URL } from "../../Utils/baseUrl";
 import Cookies from 'js-cookie';
+import { setAlert } from "./alert.slice";
 
 const initialStateUsers = {
     allusers: [],
@@ -13,12 +14,13 @@ const initialStateUsers = {
 
 const handleErrors = (error, dispatch, rejectWithValue) => {
     const errorMessage = error.response?.data?.message || 'An error occurred';
+    dispatch(setAlert({ text: errorMessage, color: 'error' }));
     return rejectWithValue(error.response?.data || { message: errorMessage });
 };
 
 export const getAllUsers = createAsyncThunk(
     "user/getAllUsers",
-    async (_, { rejectWithValue }) => {
+    async (_, { dispatch, rejectWithValue }) => {
         try {
             const token = await sessionStorage.getItem("token");
             const response = await axios.get(`${BASE_URL}/allUsers`, {
@@ -26,10 +28,9 @@ export const getAllUsers = createAsyncThunk(
                     Authorization: `Bearer ${token}`,
                 },
             });
-
             return response.data.users;
         } catch (error) {
-            return handleErrors(error, null, rejectWithValue);
+            return handleErrors(error, dispatch, rejectWithValue);
         }
     }
 );
@@ -41,6 +42,7 @@ export const createUser = createAsyncThunk(
             const response = await axios.post(BASE_URL + '/createUser', data);
             sessionStorage.setItem("token", response.data.token);
             sessionStorage.setItem("userId", response.data.user._id);
+            dispatch(setAlert({ text: response.data.message, color: 'success' }));
             dispatch(getAllUsers());
             return response.data.user;
         } catch (error) {
@@ -60,6 +62,7 @@ export const deleteUser = createAsyncThunk(
                     Authorization: `Bearer ${token}`,
                 }
             });
+            dispatch(setAlert({ text: response.data.message, color: 'success' }));
             return id;
         } catch (error) {
             return handleErrors(error, dispatch, rejectWithValue);
@@ -69,7 +72,7 @@ export const deleteUser = createAsyncThunk(
 
 export const updateUser = createAsyncThunk(
     "users/updateUser",
-    async ({ id, values }, { rejectWithValue }) => {
+    async ({ id, values }, { dispatch, rejectWithValue }) => {
         const token = await sessionStorage.getItem("token");
         const formData = new FormData();
         Object.keys(values).forEach((key) => {
@@ -82,6 +85,7 @@ export const updateUser = createAsyncThunk(
                     "Content-Type": "multipart/form-data",
                 },
             });
+            dispatch(setAlert({ text: response.data.message, color: 'success' }));
             return response.data;
         } catch (error) {
             return handleErrors(error, null, rejectWithValue);
@@ -93,7 +97,6 @@ export const updateUser = createAsyncThunk(
 export const getUserById = createAsyncThunk(
     'users/getUserById',
     async (id, { dispatch, rejectWithValue }) => {
-        console.log(id, "data");
         try {
             const token = await sessionStorage.getItem("token");
             const response = await axios.get(`${BASE_URL}/getUserById/${id}`, {
@@ -101,6 +104,7 @@ export const getUserById = createAsyncThunk(
                     Authorization: `Bearer ${token}`,
                 }
             });
+            // dispatch(setAlert({ text: response.data.message, color: 'success' }));
             dispatch(getAllUsers());
             return response.data.user;
         } catch (error) {

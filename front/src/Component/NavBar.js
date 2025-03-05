@@ -2,12 +2,26 @@ import React, { useState, useEffect } from 'react'
 import logo from '../Image/logo.svg'
 import { FiAlignJustify } from "react-icons/fi";
 import { Link, useLocation } from 'react-router-dom';
+import { useSelector, useDispatch } from 'react-redux';
+import { setauth } from '../Redux/Slice/auth.slice';
 
 
 function NavBar() {
 
+
     const [activeLink, setActiveLink] = useState('')
     const location = useLocation();
+    const dispatch = useDispatch();
+    const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
+
+    useEffect(() => {
+        const token = sessionStorage.getItem('token');
+        if (token) {
+            dispatch(setauth(true));
+        } else {
+            dispatch(setauth(false));
+        }
+    }, [dispatch]);
 
     useEffect(() => {
         const path = location.pathname;
@@ -61,11 +75,20 @@ function NavBar() {
                             ))}
                         </ul>
 
-                        <Link to={'/home'}>
-                            <button className="btn btn-outline-light px-4 py-2">
-                                Get Started
-                            </button>
-                        </Link>
+                        {isAuthenticated ? (
+                            <Link to={'/home'}>
+                                <button className="btn btn-outline-light px-4 py-2">
+                                    Get Started
+                                </button>
+                            </Link>
+                        ) : (
+                            <Link to={'/login'}>
+                                <button className="btn btn-outline-light px-4 py-2">
+                                    Log In
+                                </button>
+                            </Link>
+                        )}
+
 
                     </div>
                 </div>

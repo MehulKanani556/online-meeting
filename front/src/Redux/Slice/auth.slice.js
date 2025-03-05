@@ -2,15 +2,18 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import sessionStorage from 'redux-persist/es/storage/session';
 import axios from 'axios';
 import { BASE_URL } from '../../Utils/baseUrl';
+import { setAlert } from './alert.slice';
+
 
 const handleErrors = (error, dispatch, rejectWithValue) => {
     const errorMessage = error.response?.data?.message || 'An error occurred';
+    dispatch(setAlert({ text: errorMessage, color: 'error' }));
     return rejectWithValue(error.response?.data || { message: errorMessage });
 };
 
 const initialState = {
     user: null,
-    isAuthenticated: !!sessionStorage.getItem('token'),
+    isAuthenticated: false,
     loading: false,
     error: null,
     loggedIn: false,
@@ -20,28 +23,30 @@ const initialState = {
 
 export const loginuser = createAsyncThunk(
     'auth/login',
-    async (credentials, { rejectWithValue }) => {
+    async (credentials, { dispatch, rejectWithValue }) => {
         try {
             const response = await axios.post(`${BASE_URL}/userLogin`, credentials);
             sessionStorage.setItem('token', response.data.token);
             sessionStorage.setItem('userId', response.data.user._id);
+            dispatch(setAlert({ text: response.data.message, color: 'success' }));
             return response.data;
         } catch (error) {
-            return handleErrors(error, null, rejectWithValue);
+            return handleErrors(error, dispatch, rejectWithValue);
         }
     }
 );
 
 export const register = createAsyncThunk(
     'auth/register',
-    async (userData, { rejectWithValue }) => {
+    async (userData, { dispatch, rejectWithValue }) => {
         try {
             const response = await axios.post(`${BASE_URL}/createUser`, userData);
             sessionStorage.setItem('token', response.data.token);
             sessionStorage.setItem('userId', response.data.user._id);
-            return response.data;
+            dispatch(setAlert({ text: response.data.message, color: 'success' }));
+            return response.data.user;
         } catch (error) {
-            return handleErrors(error, null, rejectWithValue);
+            return handleErrors(error, dispatch, rejectWithValue);
         }
     }
 );
@@ -49,60 +54,80 @@ export const register = createAsyncThunk(
 
 export const forgotPassword = createAsyncThunk(
     'auth/forgotPassword',
-    async (email, { rejectWithValue }) => {
+    async (email, { dispatch, rejectWithValue }) => {
         try {
-            console.log(email);
             const response = await axios.post(`${BASE_URL}/forgotPassword`, { email });
             if (response.status === 200) {
+                dispatch(setAlert({ text: response.data.message, color: 'success' }));
                 return response.data;
             }
         } catch (error) {
-            return handleErrors(error, null, rejectWithValue);
+            return handleErrors(error, dispatch, rejectWithValue);
         }
     }
 );
 
 export const verifyOtp = createAsyncThunk(
     'auth/verifyOtp',
-    async ({ email, otp }, { rejectWithValue }) => {
+    async ({ email, otp }, { dispatch, rejectWithValue }) => {
         try {
             const response = await axios.post(`${BASE_URL}/verifyOtp`, { email, otp });
             if (response.status === 200) {
+                dispatch(setAlert({ text: response.data.message, color: 'success' }));
                 return response.data;
             }
         } catch (error) {
-            return handleErrors(error, null, rejectWithValue);
+            return handleErrors(error, dispatch, rejectWithValue);
         }
     }
 );
 
 export const resetPassword = createAsyncThunk(
     'auth/resetPassword',
-    async ({ email, newPassword }, { rejectWithValue }) => {
+    async ({ email, newPassword }, { dispatch, rejectWithValue }) => {
         try {
             const response = await axios.post(`${BASE_URL}/changePassword`, { email, newPassword });
             if (response.status === 200) {
+                dispatch(setAlert({ text: response.data.message, color: 'success' }));
                 return response.data;
             }
         } catch (error) {
-            return handleErrors(error, null, rejectWithValue);
+            return handleErrors(error, dispatch, rejectWithValue);
         }
     }
 );
 
 export const googleLogin = createAsyncThunk(
     'auth/google-login',
-    async ({ uid, name, email, photo }, { rejectWithValue }) => {
+    async ({ uid, name, email, photo }, { dispatch, rejectWithValue }) => {
         try {
             const response = await axios.post(`${BASE_URL}/google-login`, { uid, name, email, photo });
             sessionStorage.setItem('token', response.data.token);
             sessionStorage.setItem('userId', response.data.user._id);
-            console.log(response.data);
-
+            dispatch(setAlert({ text: response.data.message, color: 'success' }));
             return response.data;
 
         } catch (error) {
-            return handleErrors(error, null, rejectWithValue);
+            return handleErrors(error, dispatch, rejectWithValue);
+        }
+    }
+);
+
+export const logoutUser = createAsyncThunk(
+    'auth/logout',
+    async (id, { dispatch, rejectWithValue }) => {
+        console.log(id);
+
+        try {
+            const response = await axios.post(`${BASE_URL}/logout/${id}`);
+            if (response.status === 200) {
+                sessionStorage.removeItem('userId')
+                sessionStorage.removeItem('token')
+                dispatch(setAlert({ text: response.data.message, color: 'success' }));
+                return response.data;
+            }
+        } catch (error) {
+            return handleErrors(error, dispatch, rejectWithValue);
         }
     }
 );
@@ -112,15 +137,18 @@ const authSlice = createSlice({
     name: 'auth',
     initialState,
     reducers: {
-        logout: (state, action) => {
-            state.user = null;
-            state.isAuthenticated = false;
-            state.loggedIn = false;
-            state.isLoggedOut = true;
-            state.message = action.payload?.message || "Logged out successfully";
-            window.localStorage.clear();
-            window.sessionStorage.clear();
-        },
+        // logout: (state, action) => {
+        //     state.user = null;
+        //     state.isAuthenticated = false;
+        //     state.loggedIn = false;
+        //     state.isLoggedOut = true;
+        //     state.message = action.payload?.message || "Logged out successfully";
+        //     window.localStorage.clear();
+        //     window.sessionStorage.clear();
+        // },
+        setauth: (state, action) => {
+            state.isAuthenticated = action.payload;
+        }
     },
     extraReducers: (builder) => {
         builder
@@ -210,8 +238,19 @@ const authSlice = createSlice({
                 state.message = action.payload?.message || "Google Login Failed";
                 // enqueueSnackbar(state.message, { variant: 'error' });
             })
+            .addCase(logoutUser.fulfilled, (state, action) => {
+                state.user = null;
+                state.isAuthenticated = false;
+                state.loggedIn = false;
+                state.isLoggedOut = true;
+                state.message = action.payload?.message || "Logged out successfully";
+            })
+            .addCase(logoutUser.rejected, (state, action) => {
+                state.error = action.payload.message;
+                state.message = action.payload?.message || "Logout Failed";
+            })
     },
 });
 
-export const { logout } = authSlice.actions;
+export const { logout, setauth } = authSlice.actions;
 export default authSlice.reducer;

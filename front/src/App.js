@@ -12,22 +12,27 @@ import Index from './Page/Index';
 import Payment from './Page/Payment';
 import ContactUs from './Page/ContactUs';
 import Meeting from './Page/Meeting';
+import Alert from './Page/Alert';
+import { SnackbarProvider } from 'notistack';
 
 function App() {
   const { store, persistor } = configureStore();
   return (
-    <Provider store={store}>
-      <Routes>
-        <Route path="/" element={<Index />} />
-        <Route path="/home" element={<Home />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/helpcenter" element={<HelpCenter />} />
-        <Route path="/pricing" element={<Pricing />} />
-        <Route path="/payment" element={<Payment />} />
-        <Route path="/contactus" element={<ContactUs />} />
-        <Route path="/meeting" element={<Meeting />} />
-      </Routes>
-    </Provider>
+    <SnackbarProvider autoHideDuration={3000}>
+      <Provider store={store}>
+        <Alert />
+        <Routes>
+          <Route path="/" element={<Index />} />
+          <Route path="/home" element={<Home />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/helpcenter" element={<HelpCenter />} />
+          <Route path="/pricing" element={<Pricing />} />
+          <Route path="/payment" element={<Payment />} />
+          <Route path="/contactus" element={<ContactUs />} />
+          <Route path="/meeting" element={<Meeting />} />
+        </Routes>
+      </Provider>
+    </SnackbarProvider>
 
   );
 }

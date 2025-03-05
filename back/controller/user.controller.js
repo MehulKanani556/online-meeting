@@ -27,7 +27,7 @@ exports.createNewUser = async (req, res) => {
             { expiresIn: "1D" }
         );
 
-        return res.json({ status: 200, message: "User Created Successfully", user: chekUser, token: token });
+        return res.json({ status: 200, message: "User Register Successfully...", user: chekUser, token: token });
 
     } catch (error) {
         res.json({ status: 500, message: error.message });
