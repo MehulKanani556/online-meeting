@@ -94,6 +94,10 @@
     color: white;
 }
 
+.j_sidebar_width {
+    width: 6%;
+}
+
 .j_Login_button {
     margin: 50px 0 5px 0;
     width: 100%;
@@ -393,13 +397,14 @@
 }
 
 .j_day_btn {
+    height: 30px;
+    width: 30px;
     background-color: #202F41;
     border: none;
-    padding: 10px 12px;
-    margin: 10px 10px 0 0;
-    color: white;
-    font-size: 14px;
     border-radius: 50%;
+    color: white;
+    padding: 0;
+    font-size: 14px;
 }
 
 .j_day_btn:hover {
@@ -419,6 +424,10 @@
 }
 
 .j_day_selected_btn {
+    height: 30px;
+    width: 30px;
+    font-size: 14px;
+    padding: 0;
     border: 2px solid white;
     border-radius: 50%;
     color: white;
@@ -430,6 +439,22 @@
     background-color: #202F41;
     border: 2px solid white;
     border-radius: 50%;
+}
+
+.j_custom_footer {
+    justify-content: space-between;
+}
+
+.j_input::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+}
+
+.j_special_m {
+    margin-top: 12px;
+}
+
+.j_custom_button {
+    padding: 5px 75px;
 }
 
 @media (max-width: 1440px) {
@@ -469,6 +494,10 @@
         width: 210px;
     }
 
+    .j_sidebar_width {
+        width: 8%;
+    }
+
     .j_Schedule_width {
         max-width: 900px;
     }
@@ -478,6 +507,14 @@
     .j_login_img {
         width: 400px;
         height: 275px;
+    }
+
+    .j_sidebar_width {
+        width: 10%;
+    }
+
+    .j_contant_width {
+        width: 90%;
     }
 
     .j_Login_button {
@@ -550,11 +587,11 @@
     }
 
     .j_sidebar_width {
-        width: 15%;
+        width: 18%;
     }
 
     .j_contant_width {
-        width: 85%;
+        width: 82%;
         margin-top: 50px;
         justify-content: start;
     }

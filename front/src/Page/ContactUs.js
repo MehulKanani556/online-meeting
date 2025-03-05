@@ -4,8 +4,24 @@ import location from '../Image/Location.svg';
 import call from '../Image/Call.svg';
 import email from '../Image/Email.svg';
 import Footer from '../Component/Footer';
+import { ErrorMessage, Field, Form, Formik } from 'formik';
+import * as Yup from 'yup';
+import { createcontact } from '../Redux/Slice/contactus.slice';
+import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
 
 function ContactUs() {
+
+    const navigate = useNavigate()
+    const dispatch = useDispatch()
+
+    const contactSchema = Yup.object().shape({
+        firstname: Yup.string().required("First Name is required"),
+        lastname: Yup.string().required("Last Name is required"),
+        email: Yup.string().required("Email is required"),
+        phoneno: Yup.string().required("Phone No. is required"),
+        message: Yup.string().required("message is required"),
+    });
     return (
         <div>
 
@@ -27,35 +43,51 @@ function ContactUs() {
 
                     <div>
                         <div className="B_contact_form">
-                            <form>
-                                <div className="B_form_row gap-5 ">
-                                    <div className="B_form_group">
-                                        <label>First Name</label>
-                                        <input type="text" placeholder="Enter First Name" />
-                                    </div>
-                                    <div className="B_form_group">
-                                        <label>Last Name</label>
-                                        <input type="text" placeholder="Enter Last Name" />
-                                    </div>
-                                </div>
-                                <div className="B_form_row gap-5">
-                                    <div className="B_form_group ">
-                                        <label>Email</label>
-                                        <input type="email" placeholder="Enter Email" />
-                                    </div>
-                                    <div className="B_form_group">
-                                        <label>Phone No.</label>
-                                        <input type="tel" placeholder="Enter Phone No." />
-                                    </div>
-                                </div>
-                                <div className="B_form_group">
-                                    <label>Message</label>
-                                    <textarea placeholder="Enter Message"></textarea>
-                                </div>
-                                <div className='text-center B_contact_form_button'>
-                                    <button type="submit">Submit</button>
-                                </div>
-                            </form>
+                            <Formik
+                                initialValues={{
+                                    firstname: '', lastname: '', email: '', phoneno: '', message: ''
+                                }}
+                                validationSchema={contactSchema}
+                                onSubmit={(values) => {
+                                    dispatch(createcontact(values)).then((response) => {
+                                        if (response.payload._id) navigate('/contactus');
+                                    });
+                                }}
+                            >
+                                {({ values, errors, touched, handleChange, setFieldValue }) => (
+                                    <Form>
+                                        <div className="B_form_row gap-5 ">
+                                            <div className="B_form_group">
+                                                <label>First Name</label>
+                                                <Field name="firstname" type="text" placeholder="Enter First Name" value={values.firstname}
+                                                    onChange={handleChange} />
+                                                <ErrorMessage name="firstname" component="div" style={{ color: '#cd1425', fontSize: '14px', marginTop: '5px' }} />
+                                            </div>
+                                            <div className="B_form_group">
+                                                <label>Last Name</label>
+                                                <input type="text" placeholder="Enter Last Name" />
+                                            </div>
+                                        </div>
+                                        <div className="B_form_row gap-5">
+                                            <div className="B_form_group ">
+                                                <label>Email</label>
+                                                <input type="email" placeholder="Enter Email" />
+                                            </div>
+                                            <div className="B_form_group">
+                                                <label>Phone No.</label>
+                                                <input type="tel" placeholder="Enter Phone No." />
+                                            </div>
+                                        </div>
+                                        <div className="B_form_group">
+                                            <label>Message</label>
+                                            <textarea placeholder="Enter Message"></textarea>
+                                        </div>
+                                        <div className='text-center B_contact_form_button'>
+                                            <button type="submit">Submit</button>
+                                        </div>
+                                    </Form>
+                                )}
+                            </Formik>
                         </div>
                     </div>
                 </section>

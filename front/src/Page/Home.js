@@ -322,6 +322,26 @@ function Home() {
                     </button>
                   </div>
                 </div>
+
+                <div className="j_schedule_Repeat">
+                  <div className="mb-3 flex-fill me-2  j_select_fill">
+                    <label htmlFor="RepeatType" className="form-label text-white j_join_text">Ends</label>
+                    <select className="form-select j_select j_join_text" id="RepeatType">
+                      <option value="0">Select</option>
+                      <option value="1">Never</option>
+                      <option value="2">On</option>
+                      <option value="3">After</option>
+                    </select>
+                  </div>
+                  <div className="mb-3 flex-fill  j_select_fill">
+                    <label htmlFor="RepeatType" className="form-label text-white j_join_text"></label>
+                    <input type="date" className="form-control j_input j_join_text j_special_m" id="RepeatEvery" />
+                  </div>
+                </div>
+                <div className="modal-footer j_custom_footer border-0 p-0 pt-4 pb-3">
+                  <button type="button" className="btn btn-outline-light j_custom_button fw-semibold" data-bs-dismiss="modal">Cancel</button>
+                  <button type="button" className="btn btn-light j_custom_button fw-semibold">Done</button>
+                </div>
               </div>
             </div>
           </div>
