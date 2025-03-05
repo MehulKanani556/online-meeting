@@ -594,7 +594,7 @@ img {
 }
 
 .B_Meeting_head {
-  padding: 35px 50px;
+  padding: 35px 50px 30px;
   border-bottom: 1px solid #30363D;
 }
 
@@ -603,7 +603,7 @@ img {
   color: white;
   border: none;
   border-radius: 8px;
-  padding: 8px 16px;
+  padding: 9.5px 56px;
   border: 1px solid #bbb7b7;
   --bs-btn-bg: #080E14;
   --bs-btn-hover-color: #fff;
@@ -623,10 +623,15 @@ img {
 
 .B_dropdown {
   --bs-dropdown-bg: #121B26;
+  --bs-dropdown-min-width: 13rem;
   --bs-dropdown-link-hover-bg: #3a556f;
   --bs-dropdown-font-size: 14px;
   --bs-dropdown-item-padding-x: 22px;
   --bs-dropdown-item-padding-y: 7px;
+}
+
+.B_dropdown1 {
+  --bs-dropdown-min-width: 13rem;
 }
 
 .B_dropdown_item {
@@ -655,6 +660,80 @@ img {
 .B_metting_btn {
   padding: 10px 38px;
 }
+
+.B_contant_width {
+  width: 94%;
+}
+
+.dropdown-item.active,
+.dropdown-item:active {
+  background-color: #121B25;
+}
+
+.B_Meeting_video_icon img {
+  height: 95px;
+  width: 115px;
+}
+
+.B_Meeting_txt1 {
+  font-size: 17px;
+  margin-bottom: 5px;
+}
+
+.B_Meeting_video_icon {
+  margin-top: 15%;
+}
+
+.B_meeting_card {
+  box-shadow: 0 0 2px 0 rgb(113 111 111 / 50%);
+}
+
+.B_card_title {
+  font-size: 18px;
+}
+
+.B_upcoming_btn {
+  --bs-btn-color: #69B2F5;
+  --bs-btn-border-color: #69B2F5;
+  --bs-btn-hover-bg: #469ef0;
+  --bs-btn-hover-border-color: #69B2F5;
+  --bs-btn-active-bg: #69B2F5;
+  --bs-btn-active-border-color: #69B2F5;
+  --bs-btn-padding-x: 1rem;
+  --bs-btn-padding-y: 0.35rem;
+  --bs-btn-font-size: 13px;
+  border-radius: 4px;
+}
+
+.B_upcoming_btn1 {
+  --bs-btn-padding-x: 1rem;
+  --bs-btn-padding-y: 0.35rem;
+  --bs-btn-font-size: 13px;
+  border-radius: 4px;
+}
+
+.B_upcoming_btn2 {
+  --bs-btn-color: #c5c7c9;
+  --bs-btn-border-color: #b6b8ba;
+}
+
+.B_meetingALl_details span {
+  font-size: 14px;
+}
+
+.B_meetingALl_details_span {
+  width: 130px;
+}
+
+.hover-bg-secondary:hover {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.dropdown-item:active {
+  background-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+
 
 /* MiN MEDIA QUERY START.............. */
 
@@ -743,6 +822,27 @@ img {
   .B_contact_card {
     padding: 20px 16px 15px;
   }
+
+  .B_card_title {
+    font-size: 16px;
+  }
+
+  .B_upcoming_btn,
+  .B_upcoming_btn1 {
+    margin-right: 0px !important;
+
+  }
+
+  .B_upcoming_btn {
+    --bs-btn-padding-x: 0.80rem;
+    --bs-btn-padding-y: 0.30rem;
+  }
+
+  .B_meeting_card_section {
+    --bs-gutter-x: 1.5rem;
+    --bs-gutter-y: 1.5rem;
+  }
+
 }
 
 @media (max-width: 1024px) {
@@ -876,6 +976,37 @@ img {
     padding: 0px 0 60px 0;
   }
 
+  .B_Meeting_head {
+    padding: 28px 27px 24px;
+  }
+
+  .B_dropdown_btn1 {
+    padding: 8.5px 40px;
+  }
+
+  .B_metting_btn {
+    padding: 8px 10px;
+  }
+
+  .B_Meeting_search {
+    padding-right: 20px !important;
+  }
+
+  .B_contant_width {
+    width: 92%;
+  }
+
+  .B_dropdown {
+    --bs-dropdown-min-width: 11rem;
+  }
+
+  .B_Meeting_video_icon {
+    margin-top: 25%;
+  }
+
+  .B_Meeting_video_icon img {
+    height: 81px;
+  }
 
 
 }
@@ -1108,6 +1239,57 @@ img {
     width: 36px;
     height: 26px;
   }
+
+  .B_contant_width {
+    width: 90%;
+  }
+
+  .B_dropdown_btn1 {
+    font-size: 14px;
+  }
+
+  .B_dropdown_btn1 {
+    padding: 8.5px 11px;
+  }
+
+  .B_metting_btn {
+    font-size: 14px;
+  }
+
+  .B_Meeting_head {
+    flex-direction: column;
+
+  }
+
+  .B_Meeting_head_flex {
+    margin-bottom: 15px;
+    justify-content: center;
+  }
+
+  .B_Meeting_head_flex1 {
+    justify-content: center;
+  }
+
+  .B_Meeting_search {
+    padding-right: 4px !important;
+  }
+
+  .B_dropdown_btn1 {
+    padding: 8.5px 40px;
+  }
+
+  .B_dropdown_btn1 {
+    padding: 8.5px 57px;
+  }
+
+  .B_dropdown {
+    --bs-dropdown-min-width: 12rem;
+  }
+
+  .B_Meeting_video_icon {
+    margin-top: 30%;
+  }
+
 }
 
 @media (max-width: 425px) {
@@ -1384,6 +1566,43 @@ img {
     padding: 7px 14px;
   }
 
+  .B_contant_width {
+    width: 82%;
+  }
+
+  .B_dropdown_btn1 {
+    padding: 7.5px 35px;
+    font-size: 13px;
+  }
+
+  .B_metting_btn {
+    font-size: 13px;
+    text-wrap-mode: nowrap;
+    padding: 7px 10px;
+  }
+
+  .B_Meeting_head {
+    padding: 28px 8px 24px;
+  }
+
+  .B_Meeting_search {
+    border: none !important;
+    padding: 8px 15px;
+  }
+
+  .B_dropdown {
+    --bs-dropdown-min-width: 10rem;
+    --bs-dropdown-item-padding-x: 12px;
+  }
+
+  .B_Meeting_video_icon {
+    margin-top: 60%;
+  }
+
+  .B_Meeting_txt2 {
+    font-size: 14px;
+  }
+
 }
 
 @media (max-width: 375px) {
@@ -1522,6 +1741,54 @@ img {
     height: 21px;
   }
 
+  .B_contant_width {
+    width: 80%;
+  }
+
+  .B_Meeting_head_flex1 {
+    flex-direction: column;
+  }
+
+  .B_Meeting_search {
+    padding-right: 64px !important;
+  }
+
+  .B_metting_btn {
+    padding: 7px 35px;
+    --bs-btn-border-color: #c0c0c0;
+
+  }
+
+  .B_dropdown_btn1 {
+    padding: 7.5px 23px;
+  }
+
+  .B_dropdown {
+    --bs-dropdown-min-width: 9rem;
+  }
+
+  .B_meeting_card_section {
+    --bs-gutter-x: 0rem;
+  }
+
+  .B_card_title {
+    font-size: 14px;
+  }
+
+  .B_meeting_padding {
+    padding: 10px !important;
+  }
+
+  .B_meetingALl_details span {
+    font-size: 13px;
+  }
+
+  .B_upcoming_btn,
+  .B_upcoming_btn1 {
+    --bs-btn-padding-x: 0.6rem;
+    --bs-btn-padding-y: 0.20rem;
+  }
+
 }
 
 @media (max-width: 320px) {
@@ -1572,7 +1839,6 @@ img {
 
   .B_cardPrice_text {
     font-size: 13px;
-
   }
 
   .B_Ture_text {
@@ -1627,5 +1893,44 @@ img {
   .B_contact_card h4 {
     font-size: 18px;
   }
+
+  .B_Meeting_head_flex {
+    flex-direction: column;
+  }
+
+  .B_metting_btn {
+    padding: 6px 23px;
+  }
+
+  .B_dropdown_btn1 {
+    padding: 7.5px 77px;
+  }
+
+  .B_dropdown_btn2 {
+    padding: 7.5px 77px;
+  }
+
+  .B_dropdown {
+    --bs-dropdown-min-width: 15rem;
+  }
+
+  .B_Meeting_txt2 {
+    font-size: 13px;
+  }
+
+  .B_upcoming_btn,
+  .B_upcoming_btn1 {
+    --bs-btn-font-size: 12px;
+  }
+
+  .B_card_title {
+    font-size: 11.5px;
+  }
+
+  .B_meetingALl_details_span {
+    width: 108px;
+  }
+
+
 
 }

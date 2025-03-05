@@ -219,7 +219,7 @@
 }
 
 .j_Home_sidebar {
-    height: 100vh;
+    height: 93.4vh;
     background-color: #121B26;
     color: white;
     border-top: 3px solid #595E63;
@@ -457,6 +457,14 @@
     padding: 5px 75px;
 }
 
+@media (min-width: 1921px) {
+
+    .j_Home_sidebar {
+        height: 96vh;
+    }
+}
+
+
 @media (max-width: 1440px) {
     .j_sidebar_a img {
         height: 20px;
@@ -470,6 +478,11 @@
     .j_sidebar_a {
         font-size: 15px;
     }
+
+    .j_Home_sidebar {
+        height: 92.8vh;
+    }
+
 }
 
 @media (max-width: 1024px) {
@@ -635,6 +648,10 @@
 
     .j_schedule_footer {
         justify-content: space-between;
+    }
+
+    .j_Home_sidebar {
+        height: 100%;
     }
 }
 
