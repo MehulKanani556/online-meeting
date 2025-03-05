@@ -24,7 +24,6 @@ function SideBar() {
                             <img
                                 src={item === 'Home' ? home : item === 'Meeting' ? meeting : item === 'Schedule' ? Schedule : setting}
                                 alt={item.toLowerCase()}
-                                style={{ height: '28px', width: '28px' }}
                             />
                             {item}
                         </a>

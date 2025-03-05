@@ -46,6 +46,18 @@
     border-radius: 4px;
 }
 
+.j_select {
+    --bs-form-select-bg-img: url(../Image/j_down_home.svg);
+    background-color: #202F41;
+    width: 100%;
+    color: white;
+    padding: 10px;
+    margin-top: 5px;
+    margin-bottom: 10px;
+    border: none;
+    border-radius: 4px;
+}
+
 .j_input:focus {
     color: #BFBFBF;
     background-color: #202F41;
@@ -54,7 +66,20 @@
     box-shadow: none;
 }
 
+.j_select:focus {
+    color: #BFBFBF;
+    background-color: #202F41;
+    border: none;
+    outline: 0;
+    box-shadow: none;
+}
+
 .j_input::placeholder {
+    color: #BFBFBF;
+    font-size: 14px;
+}
+
+.j_select::placeholder {
     color: #BFBFBF;
     font-size: 14px;
 }
@@ -191,7 +216,7 @@
 
 .j_Home_sidebar {
     height: 100vh;
-    background-color: #202F41;
+    background-color: #121B26;
     color: white;
     border-top: 3px solid #595E63;
 }
@@ -200,6 +225,22 @@
     list-style-type: none;
     padding: 0;
     margin: 0;
+}
+
+.j_input:-webkit-autofill,
+.j_input:-webkit-autofill:hover,
+.j_input:-webkit-autofill:focus,
+.j_input:-webkit-autofill:active {
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: #fff;
+    transition: background-color 5000s ease-in-out 0s;
+    box-shadow: inset 0 0 20px 20px #202F41;
+}
+
+.j_sidebar_a img {
+    margin-bottom: 5px;
+    height: 28px;
+    width: 28px;
 }
 
 .j_Home_sidebar .j_sidebar_a {
@@ -214,11 +255,196 @@
 
 .j_home_connent_h4 {
     font-size: 28px;
-    margin-bottom: 0;
 }
 
 .j_home_cards {
+    border-radius: 4px;
+    width: 230px;
+    cursor: pointer;
+    padding: 25px 50px;
+    height: 100%;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
     background-color: #121B26;
+    text-align: center;
+}
+
+.j_contant_width {
+    flex-direction: column;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.j_modal_schedule {
+    background-color: #12161C;
+}
+
+.j_Schedule_width {
+    max-width: 1020px;
+    margin: 0 auto;
+}
+
+.j_modal_join {
+    background-color: #12161C;
+    padding: 10px 20px;
+}
+
+.j_modal_header {
+    margin: 0px 16px;
+    border-bottom: 1px solid #525558;
+}
+
+.j_join_text {
+    font-size: 14px;
+}
+
+.j_home_button {
+    padding: 5px 35px;
+}
+
+.j_schedule_btn {
+    background-color: #202F41;
+    border: none;
+    padding: 10px 12px;
+    margin: 10px 10px 0 0;
+    color: white;
+    font-size: 14px;
+    border-radius: 6px;
+}
+
+.j_schedule_btn:hover {
+    background-color: #202F41;
+    color: white;
+    border: none;
+}
+
+.j_join_button {
+    padding: 10px 80px;
+}
+
+.j_join_title {
+    font-size: 20px;
+}
+
+.j_schedule_border {
+    border-right: 1px solid #525558;
+}
+
+.j_schedule_selected_btn {
+    border: 2px solid white;
+}
+
+.j_schedule_selected_btn:hover {
+    border: 2px solid white;
+}
+
+.j_notification_bell {
+    height: 63px;
+    width: 85px;
+    margin-bottom: 30px;
+}
+
+.j_notification {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.j_schedule_DnT {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.j_schedule_footer {
+    justify-content: center;
+}
+
+.j_schedule_Repeat {
+    display: flex;
+}
+
+.j_select_fill {
+    width: 50%;
+}
+
+.j_custom_icons {
+    cursor: pointer;
+    position: absolute;
+    display: flex;
+    right: 15px;
+    top: 9px;
+    flex-direction: column;
+}
+
+.btn-check:checked+.j_schedule_btn,
+.j_schedule_btn.active,
+.j_schedule_btn.show,
+.j_schedule_btn:first-child:active,
+:not(.btn-check)+.j_schedule_btn:active {
+    color: white;
+    background-color: #202F41;
+    border: none;
+}
+
+.j_day_btn {
+    background-color: #202F41;
+    border: none;
+    padding: 10px 12px;
+    margin: 10px 10px 0 0;
+    color: white;
+    font-size: 14px;
+    border-radius: 50%;
+}
+
+.j_day_btn:hover {
+    background-color: #202F41;
+    color: white;
+    border: none;
+}
+
+.btn-check:checked+.j_day_btn,
+.j_day_btn.active,
+.j_day_btn.show,
+.j_day_btn:first-child:active,
+:not(.btn-check)+.j_day_btn:active {
+    color: white;
+    background-color: #202F41;
+    border: none;
+}
+
+.j_day_selected_btn {
+    border: 2px solid white;
+    border-radius: 50%;
+    color: white;
+    background-color: #202F41;
+}
+
+.j_day_selected_btn:hover {
+    color: white;
+    background-color: #202F41;
+    border: 2px solid white;
+    border-radius: 50%;
+}
+
+@media (max-width: 1440px) {
+    .j_sidebar_a img {
+        height: 20px;
+        width: 20px;
+    }
+
+    .j_Schedule_width {
+        margin: 40px auto;
+    }
+
+    .j_sidebar_a {
+        font-size: 15px;
+    }
 }
 
 @media (max-width: 1024px) {
@@ -233,6 +459,18 @@
 
     .j_nav_padding {
         padding: 10px 40px;
+    }
+
+    .j_home_connent_h4 {
+        font-size: 25px;
+    }
+
+    .j_home_cards {
+        width: 210px;
+    }
+
+    .j_Schedule_width {
+        max-width: 900px;
     }
 }
 
@@ -249,6 +487,30 @@
     .otp-input {
         height: 35px;
         width: 35px;
+    }
+
+    .j_text_sixze {
+        font-size: 13px;
+    }
+
+    .j_home_cards {
+        width: 180px;
+    }
+
+    .j_sidebar_a {
+        font-size: 14px;
+    }
+
+    .j_home_connent_h4 {
+        font-size: 22px;
+    }
+
+    .j_schedule_DnT {
+        display: block;
+    }
+
+    .j_Schedule_width {
+        max-width: 700px;
     }
 }
 
@@ -278,6 +540,65 @@
     .j_nav_btn {
         font-size: 13px;
     }
+
+    .j_flex_direction {
+        flex-direction: column;
+    }
+
+    .j_home_connent_h4 {
+        font-size: 18px;
+    }
+
+    .j_sidebar_width {
+        width: 15%;
+    }
+
+    .j_contant_width {
+        width: 85%;
+        margin-top: 50px;
+        justify-content: start;
+    }
+
+    .j_sidebar_a img {
+        height: 18px;
+        width: 18px;
+    }
+
+    .j_modal_join {
+        width: 350px !important;
+        margin: 0 auto;
+        padding: 10px;
+    }
+
+    .j_join_button {
+        padding: 8px 45px;
+    }
+
+    .j_join_title {
+        font-size: 16px;
+    }
+
+    .j_sidebar_a {
+        font-size: 12.5px;
+    }
+
+    .j_schedule_btn {
+        margin: 5px 5px 0 0;
+    }
+
+    .j_modal_schedule {
+        width: 400px !important;
+        margin: 0 auto;
+    }
+
+    .j_home_button {
+        padding: 5px 25px;
+        margin: 0;
+    }
+
+    .j_schedule_footer {
+        justify-content: space-between;
+    }
 }
 
 @media (max-width: 375px) {
@@ -288,6 +609,38 @@
 
     .signin-container {
         width: 350px;
+    }
+
+    .j_sidebar_width {
+        width: 20%;
+    }
+
+    .j_contant_width {
+        width: 80%;
+    }
+
+    .j_home_connent_h4 {
+        font-size: 14px;
+    }
+
+    .j_modal_join {
+        background-color: #12161C;
+        padding: 0px;
+        width: 300px !important;
+        margin: 0 auto;
+    }
+
+    .j_join_button {
+        padding: 8px 45px;
+    }
+
+    .j_modal_schedule {
+        width: 350px !important;
+        margin: 0 auto;
+    }
+
+    .j_home_button {
+        padding: 5px 15px;
     }
 }
 
@@ -316,5 +669,13 @@
 
     .j_nav_btn {
         font-size: 13px;
+    }
+
+    .j_home_connent_h4 {
+        font-size: 12.5px;
+    }
+
+    .j_home_button {
+        padding: 5px 10px;
     }
 }
