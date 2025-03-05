@@ -1,6 +1,7 @@
 const express = require('express');
 const { removeUser, updateUser, getUserById, getAllUsers, createNewUser } = require('../controller/user.controller');
 const { userLogin, googleLogin, forgotPassword, verifyOtp, changePassword } = require('../auth/auth');
+const { getAllcontact, getcontactById, updatecontact, removecontact, createNewcontact } = require('../controller/contactus.controller');
 const indexRoutes = express.Router()
 
 
@@ -19,5 +20,13 @@ indexRoutes.get('/allUsers', getAllUsers);
 indexRoutes.get('/getUserById/:id', getUserById);
 indexRoutes.put('/userUpdate/:id', updateUser);
 indexRoutes.delete('/deleteUser/:id', removeUser);
+
+// contact Routes 
+
+indexRoutes.post('/createcontact', createNewcontact);
+indexRoutes.get('/allcontact', getAllcontact);
+indexRoutes.get('/getcontactById/:id', getcontactById);
+indexRoutes.put('/contactUpdate/:id', updatecontact);
+indexRoutes.delete('/deletecontact/:id', removecontact);
 
 module.exports = indexRoutes

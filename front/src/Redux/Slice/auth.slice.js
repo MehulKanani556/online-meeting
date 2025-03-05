@@ -21,12 +21,10 @@ const initialState = {
 export const loginuser = createAsyncThunk(
     'auth/login',
     async (credentials, { rejectWithValue }) => {
-        // console.log(credentials);
         try {
             const response = await axios.post(`${BASE_URL}/userLogin`, credentials);
             sessionStorage.setItem('token', response.data.token);
             sessionStorage.setItem('userId', response.data.user._id);
-            // console.log(response.data)
             return response.data;
         } catch (error) {
             return handleErrors(error, null, rejectWithValue);
@@ -84,7 +82,7 @@ export const resetPassword = createAsyncThunk(
         try {
             const response = await axios.post(`${BASE_URL}/changePassword`, { email, newPassword });
             if (response.status === 200) {
-                return response.data; // Assuming the API returns a success message
+                return response.data;
             }
         } catch (error) {
             return handleErrors(error, null, rejectWithValue);
@@ -95,8 +93,6 @@ export const resetPassword = createAsyncThunk(
 export const googleLogin = createAsyncThunk(
     'auth/google-login',
     async ({ uid, name, email, photo }, { rejectWithValue }) => {
-        console.log(uid, name, email,);
-
         try {
             const response = await axios.post(`${BASE_URL}/google-login`, { uid, name, email, photo });
             sessionStorage.setItem('token', response.data.token);
