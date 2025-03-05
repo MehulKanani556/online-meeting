@@ -12,9 +12,9 @@ function ContactUs() {
             <section style={{ backgroundColor: "#060A11" }}>
                 <div className='B_container_new'>
 
-                {/* NavBar Section Start.............. */}
+                    {/* NavBar Section Start.............. */}
                     <NavBar />
-                {/* NavBar Section End.............. */}
+                    {/* NavBar Section End.............. */}
 
                 </div>
 
@@ -88,7 +88,7 @@ function ContactUs() {
                                     </div>
                                 </a>
                             </div>
-                            <div className="col-lg-4 col-md-6 col-12">
+                            <div className="col-lg-4 col-md-6 col-12 B_contact_card3">
                                 <a href="#" className='text-decoration-none'>
                                     <div className="B_contact_card  text-center text-white">
                                         <div className="B_icon3 mb-4 B_contact-icon">

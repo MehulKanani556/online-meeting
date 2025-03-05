@@ -11,6 +11,7 @@ import Pricing from './Page/Pricing';
 import Index from './Page/Index';
 import Payment from './Page/Payment';
 import ContactUs from './Page/ContactUs';
+import Meeting from './Page/Meeting';
 
 function App() {
   const { store, persistor } = configureStore();
@@ -24,6 +25,7 @@ function App() {
         <Route path="/pricing" element={<Pricing />} />
         <Route path="/payment" element={<Payment />} />
         <Route path="/contactus" element={<ContactUs />} />
+        <Route path="/meeting" element={<Meeting />} />
       </Routes>
     </Provider>
 

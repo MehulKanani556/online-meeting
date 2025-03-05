@@ -269,6 +269,7 @@ img {
   height: 38px;
   width: 38px;
 }
+
 .B_Cardicon1 {
   height: 33px;
   width: 38px;
@@ -581,19 +582,79 @@ img {
   --bs-gutter-x: 3.5rem;
   --bs-gutter-y: 0rem;
 }
-.B_footer_hover a:hover{
+
+.B_footer_hover a:hover {
   color: #0f82cf !important;
 }
 
-.B_contact-icon {
+.B_contact_card3:hover img {
+  transform: scale(0.9);
+  filter: brightness(0) saturate(100%) invert(46%) sepia(72%) saturate(2538%) hue-rotate(199deg) brightness(103%) contrast(101%);
   transition: transform 0.3s ease;
 }
 
-.B_contact-icon:hover {
-  transform: scale(0.9);
-  filter: brightness(0) saturate(100%) invert(46%) sepia(72%) saturate(2538%) hue-rotate(199deg) brightness(103%) contrast(101%); 
+.B_Meeting_head {
+  padding: 35px 50px;
+  border-bottom: 1px solid #30363D;
 }
 
+.B_dropdown_btn1 {
+  background-color: "#080E14";
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  border: 1px solid #bbb7b7;
+  --bs-btn-bg: #080E14;
+  --bs-btn-hover-color: #fff;
+  --bs-btn-hover-bg: #121B26;
+  --bs-btn-hover-border-color: #FFF;
+}
+
+.btn-check:checked+.btn,
+.btn.active,
+.btn.show,
+.btn:first-child:active,
+:not(.btn-check)+.btn:active {
+  color: var(--bs-btn-active-color);
+  background-color: #121B25;
+  border-color: var(--bs-btn-active-border-color);
+}
+
+.B_dropdown {
+  --bs-dropdown-bg: #121B26;
+  --bs-dropdown-link-hover-bg: #3a556f;
+  --bs-dropdown-font-size: 14px;
+  --bs-dropdown-item-padding-x: 22px;
+  --bs-dropdown-item-padding-y: 7px;
+}
+
+.B_dropdown_item {
+  color: white !important;
+}
+
+.B_Meeting_search::placeholder {
+  color: rgb(179, 174, 174);
+}
+
+.B_Meeting_search_icon {
+  top: 6px;
+  left: 10px;
+  font-size: 18px;
+}
+
+.B_Meeting_search {
+  border: none !important;
+  padding: 10px 15px;
+}
+
+.B_Meeting_search:focus {
+  box-shadow: none;
+}
+
+.B_metting_btn {
+  padding: 10px 38px;
+}
 
 /* MiN MEDIA QUERY START.............. */
 
