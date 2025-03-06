@@ -307,7 +307,7 @@
 }
 
 .j_home_button {
-    padding: 5px 35px;
+    padding: 7px 60px;
 }
 
 .j_schedule_btn {
@@ -674,6 +674,10 @@
 
     .j_Schedule_width {
         max-width: 700px;
+    }
+
+    .j_home_button {
+        padding: 6px 50px;
     }
 }
 

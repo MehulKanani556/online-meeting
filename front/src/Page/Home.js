@@ -107,24 +107,24 @@ function Home() {
               <div className="j_modal_header"></div>
               <div className="modal-body py-0">
                 <div className="row">
-                  <div className="col-8 ps-0 j_schedule_border">
+                  <div className="col-6 col-md-8 ps-0 j_schedule_border">
                     <form>
                       <div className="mb-3 pt-3">
                         <label htmlFor="meetingTitle" className="form-label text-white j_join_text">Title</label>
                         <input type="text" className="form-control j_input j_join_text" id="meetingTitle" placeholder="Enter title for meeting" />
                       </div>
-                      <div className="j_schedule_DnT">
+                      <div className="j_schedule_DnT B_schedule_DnT">
                         <div className="mb-3">
                           <label htmlFor="meetingDate" className="form-label text-white j_join_text">Date</label>
-                          <input type="date" className="form-control j_input j_join_text" id="meetingDate" />
+                          <input type="date" className="form-control j_input j_join_text B_schedule_input" id="meetingDate" />
                         </div>
                         <div className="mb-3">
                           <label htmlFor="startTime" className="form-label text-white j_join_text">Start Time</label>
-                          <input type="time" className="form-control j_input j_join_text" id="startTime" />
+                          <input type="time" className="form-control j_input j_join_text B_schedule_input" id="startTime" />
                         </div>
                         <div className="mb-3">
                           <label htmlFor="endTime" className="form-label text-white j_join_text">End Time</label>
-                          <input type="time" className="form-control j_input j_join_text" id="endTime" />
+                          <input type="time" className="form-control j_input j_join_text B_schedule_input" id="endTime" />
                         </div>
                       </div>
                       <div className="mb-3">
@@ -217,13 +217,13 @@ function Home() {
                         </select>
                       </div>
                       <div className="modal-footer j_schedule_footer border-0 p-0 pt-4 pb-3">
-                        <button type="button" className="btn btn-outline-light j_home_button fw-semibold" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" className="btn btn-outline-light j_home_button B_schedule_btn1 fw-semibold" data-bs-dismiss="modal">Cancel</button>
                         <button type="button" className="btn btn-light j_home_button fw-semibold">Schedule</button>
                       </div>
                     </form>
                   </div>
 
-                  <div className="col-4 pe-0">
+                  <div className="col-6 col-md-4 pe-0">
                     <div className="mb-3 pt-3">
                       <p className='mb-0 text-white'>Invitees (0)</p>
                       <div className="position-relative mt-1">
@@ -338,7 +338,7 @@ function Home() {
                     <input type="date" className="form-control j_input j_join_text j_special_m" id="RepeatEvery" />
                   </div>
                 </div>
-                <div className="modal-footer j_custom_footer border-0 p-0 pt-4 pb-3">
+                <div className="modal-footer j_custom_footer border-0 p-0 pt-4 pb-3 gap-0 gap-md-4">
                   <button type="button" className="btn btn-outline-light j_custom_button fw-semibold" data-bs-dismiss="modal">Cancel</button>
                   <button type="button" className="btn btn-light j_custom_button fw-semibold">Done</button>
                 </div>
