@@ -18,10 +18,13 @@ function ContactUs() {
     const contactSchema = Yup.object().shape({
         firstname: Yup.string().required("First Name is required"),
         lastname: Yup.string().required("Last Name is required"),
-        email: Yup.string().required("Email is required"),
-        phoneno: Yup.string().required("Phone No. is required"),
+        email: Yup.string().email("Invalid email").required("Email is required"),
+        phoneno: Yup.string()
+            .required("Phone No. is required")
+            .matches(/^\d{10}$/, "Phone No. must be exactly 10 digits"),
         message: Yup.string().required("message is required"),
     });
+
     return (
         <div>
 
@@ -48,9 +51,12 @@ function ContactUs() {
                                     firstname: '', lastname: '', email: '', phoneno: '', message: ''
                                 }}
                                 validationSchema={contactSchema}
-                                onSubmit={(values) => {
+                                onSubmit={(values, { resetForm }) => {
                                     dispatch(createcontact(values)).then((response) => {
-                                        if (response.payload._id) navigate('/contactus');
+                                        if (response.payload._id) {
+                                            resetForm();
+                                            navigate('/contactus');
+                                        }
                                     });
                                 }}
                             >
@@ -59,28 +65,38 @@ function ContactUs() {
                                         <div className="B_form_row gap-5 ">
                                             <div className="B_form_group">
                                                 <label>First Name</label>
-                                                <Field name="firstname" type="text" placeholder="Enter First Name" value={values.firstname}
-                                                    onChange={handleChange} />
+                                                <Field name="firstname" type="text" placeholder="Enter First Name" value={values.firstname} onChange={handleChange} />
                                                 <ErrorMessage name="firstname" component="div" style={{ color: '#cd1425', fontSize: '14px', marginTop: '5px' }} />
                                             </div>
                                             <div className="B_form_group">
                                                 <label>Last Name</label>
-                                                <input type="text" placeholder="Enter Last Name" />
+                                                <Field name="lastname" type="text" placeholder="Enter Last Name" value={values.lastname} onChange={handleChange} />
+                                                <ErrorMessage name="lastname" component="div" style={{ color: '#cd1425', fontSize: '14px', marginTop: '5px' }} />
                                             </div>
                                         </div>
                                         <div className="B_form_row gap-5">
                                             <div className="B_form_group ">
                                                 <label>Email</label>
-                                                <input type="email" placeholder="Enter Email" />
+                                                <Field name="email" type="email" placeholder="Enter Email" value={values.email} onChange={handleChange} />
+                                                <ErrorMessage name="email" component="div" style={{ color: '#cd1425', fontSize: '14px', marginTop: '5px' }} />
                                             </div>
                                             <div className="B_form_group">
                                                 <label>Phone No.</label>
-                                                <input type="tel" placeholder="Enter Phone No." />
+                                                <Field name="phoneno" type="tel" placeholder="Enter Phone No." value={values.phoneno} onChange={handleChange} />
+                                                <ErrorMessage name="phoneno" component="div" style={{ color: '#cd1425', fontSize: '14px', marginTop: '5px' }} />
                                             </div>
                                         </div>
                                         <div className="B_form_group">
                                             <label>Message</label>
-                                            <textarea placeholder="Enter Message"></textarea>
+                                            {/* <textarea name="message" placeholder="Enter Message" value={values.message} onChange={handleChange}></textarea> */}
+                                            <Field
+                                                as="textarea"
+                                                name="message"
+                                                placeholder="Enter Message"
+                                                value={values.message}
+                                                onChange={handleChange}
+                                            />
+                                            <ErrorMessage name="message" component="div" style={{ color: '#cd1425', fontSize: '14px', marginTop: '5px' }} />
                                         </div>
                                         <div className='text-center B_contact_form_button'>
                                             <button type="submit">Submit</button>

@@ -464,6 +464,119 @@
     }
 }
 
+.j_homenav_dropdown {
+    height: 40px;
+    width: 40px;
+    padding: 0;
+    border-radius: 50%;
+    text-transform: capitalize;
+    border: none;
+    background-color: #202F41;
+    color: white;
+}
+
+.j_homenav_dropdown:hover,
+.j_homenav_dropdown.show,
+.j_homenav_dropdown:first-child:active {
+    color: white;
+    background-color: #202F41;
+    border: none;
+}
+
+.j_drop_menu {
+    background-color: #121b26;
+}
+
+.j_drop_menu li a {
+    color: white;
+    font-size: 15px;
+}
+
+.j_drop_menu[data-bs-popper] {
+    left: -75px;
+}
+
+.j_drop_menu.active,
+.j_drop_menu:active {
+    color: var(--bs-dropdown-link-active-color);
+    text-decoration: none;
+    background-color: #121b26;
+}
+
+.j_drop_item:focus,
+.j_drop_item:hover {
+    color: white;
+    background-color: #060A11;
+}
+
+.j_my_profile {
+    display: flex;
+}
+
+.j_my_profile {
+    font-size: 15px;
+}
+
+.j_static_data ul,
+.j_dynamic_data ul {
+    padding: 0;
+}
+
+.j_profile {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.j_profile_icon {
+    display: flex;
+}
+
+.j_profile_icon .j_profile_short {
+    height: 50px;
+    width: 50px;
+    text-align: center;
+    background-color: #202F41;
+    border-radius: 50%;
+    font-size: 24px;
+    padding: 5px;
+    text-transform: capitalize;
+    color: white;
+}
+
+.j_profile_name {
+    margin-left: 15px;
+    font-size: 16px;
+}
+
+.j_profile_name span {
+    font-size: 14px;
+    color: #BFBFBF;
+}
+
+.j_profile_btn {
+    color: white;
+    border: 1px solid #fff;
+    padding: 5px 25px;
+}
+
+.j_profile_btn:hover {
+    color: white;
+    border: 1px solid #fff;
+    padding: 5px 25px;
+}
+
+.j_profile_btn img {
+    height: 16px;
+    width: 16px;
+}
+
+:not(.btn-check)+.j_profile_btn:active {
+    color: white;
+    background-color: transparent;
+    border: 1px solid #fff;
+}
 
 @media (max-width: 1440px) {
     .j_sidebar_a img {

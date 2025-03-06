@@ -16,10 +16,24 @@ import 'owl.carousel/dist/assets/owl.carousel.css';
 import 'owl.carousel/dist/assets/owl.theme.default.css';
 import NavBar from '../Component/NavBar'
 import Footer from '../Component/Footer'
+import { Link } from 'react-router-dom'
+import { useDispatch, useSelector } from 'react-redux'
+import { setauth } from '../Redux/Slice/auth.slice'
 
 
 function Index() {
 
+    const dispatch = useDispatch();
+    const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
+
+    useEffect(() => {
+        const token = sessionStorage.getItem('token');
+        if (token) {
+            dispatch(setauth(true));
+        } else {
+            dispatch(setauth(false));
+        }
+    }, [dispatch]);
 
     const options = {
         center: true,
@@ -297,11 +311,20 @@ function Index() {
                 <div className='Opacity_img d-flex flex-column justify-content-center align-items-center'>
                     <h2 style={{ color: 'white' }} className='B_opacity_head_text'>Ready to get started?</h2>
                     <div style={{ marginTop: '20px' }}>
-                        <button className="btn btn-light mx-3 B_opacity_button1 fw-semibold">Get Started</button>
-                        <button className="btn btn-outline-light mx-3 B_opacity_button fw-semibold">Plans & Pricing</button>
+
+                        {isAuthenticated ? (
+                            <Link to={'/home'}>
+                                <button className="btn btn-light mx-3 B_opacity_button1 fw-semibold">Get Started</button>
+                            </Link>
+                        ) : (
+                            <Link to={'/login'}>
+                                <button className="btn btn-light mx-3 B_opacity_button1 fw-semibold">Sign In</button>
+                            </Link>
+                        )}
+                        <button button className="btn btn-outline-light mx-3 B_opacity_button fw-semibold">Plans & Pricing</button>
                     </div>
                 </div>
-            </section>
+            </section >
 
             {/* Opacity Section End.............. */}
 
@@ -310,7 +333,7 @@ function Index() {
             <Footer />
 
             {/* Footer Section End.............. */}
-        </div>
+        </div >
     )
 }
 

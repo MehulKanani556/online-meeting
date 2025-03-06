@@ -1,6 +1,7 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import axios from "axios";
 import { BASE_URL } from "../../Utils/baseUrl";
+import { setAlert } from "./alert.slice";
 
 const initialStatecontacts = {
     allcontact: [],
@@ -12,12 +13,13 @@ const initialStatecontacts = {
 
 const handleErrors = (error, dispatch, rejectWithValue) => {
     const errorMessage = error.response?.data?.message || 'An error occurred';
+    dispatch(setAlert({ text: errorMessage, color: 'error' }));
     return rejectWithValue(error.response?.data || { message: errorMessage });
 };
 
 export const getAllcontact = createAsyncThunk(
     "contact/getAll",
-    async (_, { rejectWithValue }) => {
+    async (_, { dispatch, rejectWithValue }) => {
         try {
             const token = await sessionStorage.getItem("token");
             const response = await axios.get(`${BASE_URL}/allcontact`, {
@@ -25,10 +27,9 @@ export const getAllcontact = createAsyncThunk(
                     Authorization: `Bearer ${token}`,
                 },
             });
-
             return response.data.contact;
         } catch (error) {
-            return handleErrors(error, null, rejectWithValue);
+            return handleErrors(error, dispatch, rejectWithValue);
         }
     }
 );
@@ -43,6 +44,7 @@ export const createcontact = createAsyncThunk(
                     Authorization: `Bearer ${token}`,
                 },
             });
+            dispatch(setAlert({ text: response.data.message, color: 'success' }));
             dispatch(getAllcontact());
             return response.data.contact;
         } catch (error) {
@@ -62,6 +64,7 @@ export const deletecontact = createAsyncThunk(
                     Authorization: `Bearer ${token}`,
                 }
             });
+            dispatch(setAlert({ text: response.data.message, color: 'success' }));
             return id;
         } catch (error) {
             return handleErrors(error, dispatch, rejectWithValue);
@@ -79,6 +82,7 @@ export const updatecontact = createAsyncThunk(
                     Authorization: `Bearer ${token}`,
                 },
             });
+            dispatch(setAlert({ text: response.data.message, color: 'success' }));
             dispatch(getAllcontact());
             return response.data.contact;
         } catch (error) {
@@ -98,6 +102,7 @@ export const getcontactById = createAsyncThunk(
                     Authorization: `Bearer ${token}`,
                 }
             });
+            dispatch(setAlert({ text: response.data.message, color: 'success' }));
             dispatch(getAllcontact());
             return response.data.contact;
         } catch (error) {

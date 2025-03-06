@@ -45,7 +45,7 @@ exports.googleLogin = async (req, res) => {
 
         let token = await jwt.sign({ _id: checkUser._id }, process.env.SECRET_KEY, { expiresIn: "1D" })
         // checkUser.token = generateToken(checkUser._id);
-        return res.status(200).json({ message: 'Google Login successful...', success: true, user: checkUser, token: token });
+        return res.status(200).json({ message: 'Google Login successfully...', success: true, user: checkUser, token: token });
     } catch (error) {
         throw new Error(error);
     }
@@ -149,3 +149,18 @@ exports.changePassword = async (req, res) => {
         return res.status(500).json({ status: 500, message: error.message })
     }
 }
+
+exports.userLogout = async (req, res) => {
+    try {
+        const userlogout = await user.findByIdAndUpdate(req.params.id);
+    } catch (error) {
+        console.log("errr logouttt", error);
+    }
+
+    return res
+        .status(200)
+        .json({
+            success: true,
+            message: "User logged Out"
+        })
+};
