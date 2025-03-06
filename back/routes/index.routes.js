@@ -4,6 +4,8 @@ const { userLogin, googleLogin, forgotPassword, verifyOtp, changePassword, userL
 const { getAllcontact, getcontactById, updatecontact, removecontact, createNewcontact } = require('../controller/contactus.controller');
 const indexRoutes = express.Router()
 
+const upload = require("../helper/uplodes");
+
 
 // auth Routes
 
@@ -19,7 +21,7 @@ indexRoutes.post('/changePassword', changePassword)
 indexRoutes.post('/createUser', createNewUser);
 indexRoutes.get('/allUsers', getAllUsers);
 indexRoutes.get('/getUserById/:id', getUserById);
-indexRoutes.put('/userUpdate/:id', updateUser);
+indexRoutes.put('/userUpdate/:id', upload.single("photo"), updateUser);
 indexRoutes.delete('/deleteUser/:id', removeUser);
 
 // contact Routes 

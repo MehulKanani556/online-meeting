@@ -59,7 +59,7 @@
 }
 
 .j_input:focus {
-    color: #BFBFBF;
+    color: #fff;
     background-color: #202F41;
     border: none;
     outline: 0;
@@ -67,7 +67,7 @@
 }
 
 .j_select:focus {
-    color: #BFBFBF;
+    color: #fff;
     background-color: #202F41;
     border: none;
     outline: 0;
@@ -454,14 +454,7 @@
 }
 
 .j_custom_button {
-    padding: 5px 75px;
-}
-
-@media (min-width: 1921px) {
-
-    .j_Home_sidebar {
-        height: 96vh;
-    }
+    padding: 5px 60px;
 }
 
 .j_homenav_dropdown {
@@ -576,6 +569,58 @@
     color: white;
     background-color: transparent;
     border: 1px solid #fff;
+}
+
+.j_logout_p {
+    margin-bottom: 0;
+    font-size: 18px;
+}
+
+.j_change_short {
+    height: 70px;
+    cursor: pointer;
+    margin: 0 auto;
+    width: 70px;
+    background: #202F41;
+    border-radius: 50%;
+    color: white;
+    font-weight: 600;
+    text-align: center;
+    padding: 15px;
+    font-size: 25px;
+}
+
+.j_cameraa {
+    position: absolute;
+    left: 45px;
+    bottom: -5px;
+    height: 30px;
+    width: 30px;
+    border-radius: 50%;
+    background-color: #12161C;
+}
+
+.j_cameraa_img {
+    height: 12px;
+    width: 15px;
+}
+
+.j_Modal_backcolor>div>div {
+    background-color: #12161C;
+}
+
+.j_canvas_backcolor {
+    background-color: #12161C;
+}
+
+.j_modal_header_text {
+    font-size: 18px;
+}
+
+@media (min-width: 1921px) {
+    .j_Home_sidebar {
+        height: 96vh;
+    }
 }
 
 @media (max-width: 1440px) {

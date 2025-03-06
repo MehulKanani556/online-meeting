@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken');
 
 exports.createNewUser = async (req, res) => {
     try {
-        let { name, email, password } = req.body;
+        let { name, email, password, timeZone, language } = req.body;
 
         let chekUser = await user.findOne({ email: req.body.email });
 
@@ -19,6 +19,8 @@ exports.createNewUser = async (req, res) => {
             name,
             email,
             password: hashPassword,
+            timeZone,
+            language
         });
 
         let token = await jwt.sign(
@@ -76,13 +78,16 @@ exports.getUserById = async (req, res) => {
 exports.updateUser = async (req, res) => {
     try {
         let id = req.params.id
+        let { name, displayName, language, timeZone } = req.body
+        console.log(req.body, id);
+
         let userUpdateById = await user.findById(id);
 
         if (!userUpdateById) {
             return res.json({ status: 400, message: "User Not Found" })
         }
 
-        userUpdateById = await user.findByIdAndUpdate(id, { ...userData }, { new: true });
+        userUpdateById = await user.findByIdAndUpdate(id, { name, displayName, language, timeZone }, { new: true });
 
         return res.json({ status: 200, message: "User Updated SuccessFully", user: userUpdateById });
     }
