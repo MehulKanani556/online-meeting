@@ -14,9 +14,22 @@ const userSchema = mongoose.Schema({
         type: String,
         require: true
     },
+    photo: {
+        type: String,
+    },
     otp: {
         type: Number,
     },
+    displayName: {
+        type: String,
+        require: true
+    },
+    language: {
+        type: String,
+    },
+    timeZone: {
+        type: String,
+    }
 }, {
     timestamps: true,
     versionKey: false

@@ -73,13 +73,15 @@ export const deleteUser = createAsyncThunk(
 export const updateUser = createAsyncThunk(
     "users/updateUser",
     async ({ id, values }, { dispatch, rejectWithValue }) => {
+        console.log(id, values);
+
         const token = await sessionStorage.getItem("token");
         const formData = new FormData();
         Object.keys(values).forEach((key) => {
             formData.append(key, values[key]);
         });
         try {
-            const response = await axios.put(`${BASE_URL}/editUser/${id}`, formData, {
+            const response = await axios.put(`${BASE_URL}/userUpdate/${id}`, formData, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                     "Content-Type": "multipart/form-data",
