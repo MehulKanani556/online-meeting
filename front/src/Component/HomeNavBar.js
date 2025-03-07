@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import logo from '../Image/logo.svg'
 import bell from '../Image/j_bell.svg'
 import camera from '../Image/j_camera.svg'
@@ -7,12 +7,13 @@ import { IoClose, IoEye, IoEyeOff } from 'react-icons/io5'
 import { useDispatch, useSelector } from 'react-redux'
 import { logout, logoutUser, setauth } from '../Redux/Slice/auth.slice'
 import pencil from '../Image/j_profile_pencile.svg'
-import { getUserById, updateUser } from '../Redux/Slice/user.slice'
+import { getUserById, updateUser, removeUserProfilePic } from '../Redux/Slice/user.slice'
 import { Link } from 'react-router-dom'
 import { Formik, Form } from 'formik'
 import langs from 'langs';
 import moment from 'moment-timezone';
-import { Modal, Button, Offcanvas } from 'react-bootstrap';
+import { Modal, Button, Offcanvas, Dropdown } from 'react-bootstrap';
+import { IMAGE_URL } from '../Utils/baseUrl'
 
 function HomeNavBar() {
 
@@ -31,6 +32,9 @@ function HomeNavBar() {
     const [passwordShow, setpasswordShow] = useState(false);
     const [showcanvas, setshowcanvas] = useState(false);
     const [showProfilePicOptions, setshowProfilePicOptions] = useState(false);
+    const [uploadedFile, setUploadedFile] = useState(null);
+    const fileInputRef = useRef(null);
+    const IMG_URL = IMAGE_URL
 
     const handleprofileshow = () => setprofileShow(true)
     const handleprofileclose = () => setprofileShow(false)
@@ -71,31 +75,26 @@ function HomeNavBar() {
     }
 
     const handleEditUser = async (values) => {
-        console.log(values);
         try {
-            await dispatch(updateUser({ id: currUser._id, values }));
+            await dispatch(updateUser({ id: currUser._id, values, file: uploadedFile }));
         } catch (error) {
             console.log(error);
         }
     }
 
-    const handleEditClick = () => {
-        // setModalData({
-        //     name: currUser?.name || '',
-        //     displayName: currUser?.name || '',
-        //     email: currUser?.email || '',
-        //     language: currUser?.language || '',
-        //     timeZone: currUser?.timeZone || ''
-        // });
+    const handleEditprofile = async (values) => {
+        try {
+            await dispatch(updateUser({ id: currUser._id, file: uploadedFile, values }));
+        } catch (error) {
+            console.log(error);
+        }
+    }
 
-    };
-
-    const handleUploadMedia = () => {
-        // Implementation for uploading media
-    };
-
-    const handleRemovePic = () => {
-        // Implementation for removing the profile picture
+    const handleRemoveProfilePic = async () => {
+        if (currUser.photo) {
+            await dispatch(removeUserProfilePic(currUser._id));
+            setUploadedFile(null); // Clear the uploaded file state
+        }
     };
 
     return (
@@ -111,22 +110,28 @@ function HomeNavBar() {
                             <img src={bell} alt="Bell" style={{ height: '22px', width: '22px' }} />
                         </button>
                         {isAuthenticated ? (
-                            <div className="dropdown">
-                                <button className="btn btn-secondary j_homenav_dropdown" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
-                                    {currUser?.name?.charAt(0)}{currUser?.name?.split(' ')[1]?.charAt(0)}
-                                </button>
-                                <ul className="dropdown-menu j_drop_menu" aria-labelledby="dropdownMenuButton">
-                                    <li>
-                                        <a className="dropdown-item j_drop_item" href="#" onClick={(event) => { event.preventDefault(); handleprofileshow(); }}>My Profile</a>
-                                    </li>
-                                    <li>
-                                        <a className="dropdown-item j_drop_item" href="#" onClick={(event) => { event.preventDefault(); handlepasswordshow(); }}>Change Password</a>
-                                    </li>
-                                    <li>
-                                        <a className="dropdown-item j_drop_item" href="#" onClick={(event) => { event.preventDefault(); handlelogoutshow(); }}>Logout</a>
-                                    </li>
-                                </ul>
-                            </div>
+                            <Dropdown>
+                                <Dropdown.Toggle className="btn btn-secondary j_homenav_dropdown j_remove_icon" id="dropdown-basic">
+                                    {currUser?.photo ? (
+                                        // `${currUser?.photo}`
+                                        <img
+                                            src={`${IMG_URL}${currUser.photo}`}
+                                            alt="Profile"
+                                            className="object-fill w-full h-full"
+                                            style={{ width: '40px', height: '40px', borderRadius: '50%', padding: '0' }}
+                                        />
+                                    ) : (
+                                        `${currUser?.name?.charAt(0)}${currUser?.name?.split(' ')[1]?.charAt(0)}`
+                                    )}
+                                    {/* {currUser?.name?.charAt(0)}{currUser?.name?.split(' ')[1]?.charAt(0)} */}
+                                </Dropdown.Toggle>
+
+                                <Dropdown.Menu className="j_drop_menu" drop="down-centered">
+                                    <Dropdown.Item className="j_drop_item" onClick={(event) => { event.preventDefault(); handleprofileshow(); }}>My Profile</Dropdown.Item>
+                                    <Dropdown.Item className="j_drop_item" onClick={(event) => { event.preventDefault(); handlepasswordshow(); }}>Change Password</Dropdown.Item>
+                                    <Dropdown.Item className="j_drop_item" onClick={(event) => { event.preventDefault(); handlelogoutshow(); }}>Logout</Dropdown.Item>
+                                </Dropdown.Menu>
+                            </Dropdown>
                         ) : (
                             <Link to={"/login"}>
                                 <button className="btn btn-outline-light j_nav_btn">
@@ -148,8 +153,18 @@ function HomeNavBar() {
                 <Modal.Body>
                     <div className="j_profile">
                         <div className="j_profile_icon">
-                            <p className='m-0 j_profile_short'>
-                                {currUser?.name?.charAt(0)}{currUser?.name?.split(' ')[1]?.charAt(0)}
+                            <p className='j_profile_short' style={{ padding: currUser?.photo ? '0px' : '5px' }}>
+                                {currUser?.photo ? (
+                                    // `${currUser?.photo}`
+                                    <img
+                                        src={`${IMG_URL}${currUser.photo}`}
+                                        alt="Profile"
+                                        className="object-fill w-full h-full"
+                                        style={{ width: '50px', height: '50px', borderRadius: '50%', padding: '0' }}
+                                    />
+                                ) : (
+                                    `${currUser?.name?.charAt(0)}${currUser?.name?.split(' ')[1]?.charAt(0)}`
+                                )}
                             </p>
                             <div className="j_profile_name text-white">
                                 <p className='mb-0'>{currUser?.name}</p>
@@ -185,34 +200,30 @@ function HomeNavBar() {
                 </Modal.Header>
                 <div className="j_modal_header"></div>
                 <Modal.Body>
-                    <div className="j_change_short position-relative" onClick={handleProfilePicClick}>
-                        {currUser?.name?.charAt(0)}{currUser?.name?.split(' ')[1]?.charAt(0)}
+                    <div className="j_change_short position-relative" onClick={handleProfilePicClick} style={{ padding: currUser?.photo ? '0px' : '15px' }}>
+                        {/* {currUser?.name?.charAt(0)}{currUser?.name?.split(' ')[1]?.charAt(0)} */}
+                        {currUser?.photo ? (
+                            <img
+                                src={`${IMG_URL}${currUser.photo}`}
+                                alt="Profile"
+                                className="object-fill w-full h-full"
+                                style={{ width: '70px', height: '70px', borderRadius: '50%', padding: '0' }}
+                            />
+                        ) : (
+                            `${currUser?.name?.charAt(0)}${currUser?.name?.split(' ')[1]?.charAt(0)}`
+                        )}
                         <div className="j_cameraa d-flex justify-content-center align-items-center">
                             <img src={camera} alt="camera" className='j_cameraa_img' />
                         </div>
                     </div>
-                    {/* New Modal for Upload Media and Remove Pic */}
-                    <Modal show={showProfilePicOptions} onHide={handleCloseProfilePicOptions} className='j_Modal_backcolor' centered>
-                        <Modal.Header className='border-0 d-flex justify-content-between align-items-center'>
-                            <Modal.Title className='text-white j_modal_header_text'>Profile Picture Options</Modal.Title>
-                            <IoClose style={{ color: '#fff', fontSize: '22px', cursor: 'pointer' }} onClick={handleCloseProfilePicOptions} />
-                        </Modal.Header>
-                        <Modal.Body>
-                            <Button variant="outline-light" className="w-100" onClick={handleUploadMedia}>
-                                Upload Media
-                            </Button>
-                            <Button variant="outline-light" className="w-100 mt-2" onClick={handleRemovePic}>
-                                Remove Pic
-                            </Button>
-                        </Modal.Body>
-                    </Modal>
                     <Formik
                         initialValues={{
                             name: currUser?.name,
                             displayName: currUser?.displayName,
                             email: currUser?.email,
                             language: currUser?.language,
-                            timeZone: currUser?.timeZone
+                            timeZone: currUser?.timeZone,
+                            photo: currUser?.photo || null
                         }}
                         onSubmit={handleEditUser}
                     >
@@ -268,12 +279,89 @@ function HomeNavBar() {
                                             })}
                                         </select>
                                     </div>
-                                    <Modal.Footer className='border-0 justify-content-between'>
+                                    <Modal.Footer className='border-0 justify-content-center'>
                                         <Button variant="outline-light" className="btn outline-light j_custom_button fw-semibold" onClick={handlechangeprofileClose}>
                                             Cancel
                                         </Button>
                                         <Button className="btn btn-light j_custom_button fw-semibold" type="submit" onClick={() => { handlechangeprofileClose(); handleprofileclose(); }}>
                                             Update
+                                        </Button>
+                                    </Modal.Footer>
+                                </Form>
+                            )
+                        }}
+                    </Formik>
+                </Modal.Body>
+            </Modal>
+
+            {/*Upload Media and Remove Pic */}
+            <Modal show={showProfilePicOptions} onHide={handleCloseProfilePicOptions} className='j_Modal_backcolor' centered>
+                <Modal.Header className='border-0 d-flex justify-content-between align-items-center'>
+                    <Modal.Title className='text-white j_modal_header_text'>Profile Picture Options</Modal.Title>
+                    <IoClose style={{ color: '#fff', fontSize: '22px', cursor: 'pointer' }} onClick={handleCloseProfilePicOptions} />
+                </Modal.Header>
+                <Modal.Body>
+                    <Formik
+                        initialValues={{
+                            photo: currUser?.photo || null
+                        }}
+                        onSubmit={handleEditprofile}
+                    >
+                        {({ values, setFieldValue }) => {
+                            const handleUploadMedia = (event) => {
+                                const file = event.target.files[0];
+                                if (file) {
+                                    const fileURL = URL.createObjectURL(file);
+                                    setUploadedFile(file);
+                                    setFieldValue("photo", fileURL);
+                                }
+                            };
+
+                            return (
+                                <Form enctype="multipart/form-data">
+                                    {uploadedFile ? (
+                                        <div className="" style={{ textAlign: 'center', marginBottom: '10px' }}>
+                                            <img src={`${values.photo}`} alt="User Image" style={{ width: '50px', height: '50px', borderRadius: '50%', padding: '0' }} />
+                                        </div>
+                                    ) : (
+                                        <p className='j_profile_short' style={{ margin: '0 auto 10px', padding: currUser?.photo ? '0px' : '5px' }}>
+                                            {currUser?.photo ? (
+                                                <img
+                                                    src={`${IMG_URL}${currUser.photo}`}
+                                                    alt="Profile"
+                                                    className="object-fill w-full h-full"
+                                                    style={{ width: '50px', height: '50px', borderRadius: '50%', padding: '0' }}
+                                                />
+                                            ) : (
+                                                `${currUser?.name?.charAt(0)}${currUser?.name?.split(' ')[1]?.charAt(0)}`
+                                            )}
+                                        </p>
+                                    )}
+                                    <div className="j_image_Upload">
+                                        <input
+                                            type="file"
+                                            className="d-none"
+                                            id="fileUpload"
+                                            ref={fileInputRef}
+                                            onChange={handleUploadMedia}
+                                        />
+                                        <Button
+                                            variant="outline-light"
+                                            className="j_Upload_Btn"
+                                            onClick={() => fileInputRef.current.click()}
+                                        >
+                                            Upload Media
+                                        </Button>
+                                        <Button variant="outline-light" className="j_Upload_Btn" onClick={() => { handleRemoveProfilePic(); handleCloseProfilePicOptions(); handlechangeprofileClose(); handleprofileclose(); }}>
+                                            Remove Pic
+                                        </Button>
+                                    </div>
+                                    <Modal.Footer className='border-0 justify-content-center'>
+                                        <Button variant="outline-light" className="btn btn-outline-light j_custom_button fw-semibold" onClick={handleCloseProfilePicOptions}>
+                                            Cancel
+                                        </Button>
+                                        <Button className="btn btn-light j_custom_button fw-semibold" type="submit" onClick={() => { handleCloseProfilePicOptions(); handlechangeprofileClose(); handleprofileclose(); }}>
+                                            Submit
                                         </Button>
                                     </Modal.Footer>
                                 </Form>
@@ -321,7 +409,7 @@ function HomeNavBar() {
                         </div>
                     </form>
                 </Modal.Body>
-                <Modal.Footer className='border-0 justify-content-between'>
+                <Modal.Footer className='border-0 justify-content-center'>
                     <Button variant="outline-light" className="btn btn-outline-light j_custom_button fw-semibold" onClick={handlepasswordclose}>
                         Cancel
                     </Button>
@@ -358,7 +446,7 @@ function HomeNavBar() {
                 <Modal.Body>
                     <p className='j_logout_p text-white text-center'>Are you sure you want to logout from your account?</p>
                 </Modal.Body>
-                <Modal.Footer className='border-0 justify-content-between'>
+                <Modal.Footer className='border-0 justify-content-center'>
                     <Button variant="outline-light" className="btn btn-outline-light j_custom_button fw-semibold" onClick={handlelogoutclose}>
                         Cancel
                     </Button>
@@ -371,4 +459,4 @@ function HomeNavBar() {
     )
 }
 
-export default HomeNavBar
+export default HomeNavBar;

@@ -476,13 +476,30 @@
     border: none;
 }
 
+.j_homenav_dropdown:focus-visible {
+    color: white;
+    background-color: #202F41;
+    border: none;
+    outline: 0;
+    box-shadow: none;
+}
+
+.j_homenav_dropdown.show:focus-visible {
+    box-shadow: none;
+}
+
 .j_drop_menu {
+    transform: translate(28%, 45%) !important;
     background-color: #121b26;
 }
 
-.j_drop_menu li a {
+.j_drop_menu .j_drop_item {
     color: white;
     font-size: 15px;
+}
+
+.j_drop_item:active {
+    background-color: #121b26;
 }
 
 .j_drop_menu[data-bs-popper] {
@@ -524,9 +541,10 @@
 
 .j_profile_icon {
     display: flex;
+    align-items: center;
 }
 
-.j_profile_icon .j_profile_short {
+.j_profile_short {
     height: 50px;
     width: 50px;
     text-align: center;
@@ -536,6 +554,7 @@
     padding: 5px;
     text-transform: capitalize;
     color: white;
+    margin: 0;
 }
 
 .j_profile_name {
@@ -617,6 +636,20 @@
     font-size: 18px;
 }
 
+.j_remove_icon::after {
+    display: none;
+}
+
+.j_image_Upload {
+    display: flex;
+    justify-content: center;
+}
+
+.j_Upload_Btn {
+    margin: 2px;
+    padding: 5px 20px;
+}
+
 @media (min-width: 1921px) {
     .j_Home_sidebar {
         height: 96vh;
@@ -671,6 +704,10 @@
 
     .j_Schedule_width {
         max-width: 900px;
+    }
+
+    .j_drop_menu {
+        transform: translate(20%, 45%) !important;
     }
 }
 
@@ -815,6 +852,27 @@
     .j_Home_sidebar {
         height: 100%;
     }
+
+    .j_drop_menu {
+        transform: translate(10%, 45%) !important;
+    }
+
+    .j_profile_name {
+        margin-left: 12px;
+        font-size: 14px;
+    }
+
+    .j_profile_name span {
+        font-size: 13px;
+    }
+
+    .j_my_profile {
+        font-size: 14px;
+    }
+
+    .j_custom_button {
+        padding: 5px 45px;
+    }
 }
 
 @media (max-width: 375px) {
@@ -858,6 +916,18 @@
     .j_home_button {
         padding: 5px 15px;
     }
+
+    .j_custom_button {
+        padding: 5px 30px;
+    }
+
+    .j_profile_name {
+        margin-left: 5px;
+    }
+
+    .j_profile_btn {
+        padding: 5px 8px;
+    }
 }
 
 @media (max-width: 320px) {
@@ -893,5 +963,33 @@
 
     .j_home_button {
         padding: 5px 10px;
+    }
+
+    .j_custom_button {
+        padding: 5px 20px;
+    }
+
+    .j_profile_name span {
+        font-size: 12px;
+    }
+
+    .j_my_profile {
+        font-size: 12px;
+    }
+
+    .j_profile_name {
+        font-size: 12px;
+    }
+
+    .j_profile_btn {
+        margin-top: 10px;
+        padding: 5px 20px;
+        display: flex;
+        justify-self: end;
+        align-items: center;
+    }
+
+    .j_profile {
+        display: block;
     }
 }
