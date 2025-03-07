@@ -222,7 +222,7 @@
     height: 93.4vh;
     background-color: #121B26;
     color: white;
-    border-top: 3px solid #595E63;
+    border-top: 2px solid #595E63;
 }
 
 .j_Home_sidebar ul {
@@ -442,7 +442,8 @@
 }
 
 .j_custom_footer {
-    justify-content: space-between;
+    justify-content: center;
+    gap: 30px;
 }
 
 .j_input::-webkit-calendar-picker-indicator {
@@ -617,10 +618,18 @@
     font-size: 18px;
 }
 
+.j_custom_footer {
+    padding-top: 0px !important;
+}
+
+
+
 @media (min-width: 1921px) {
     .j_Home_sidebar {
         height: 96vh;
     }
+
+
 }
 
 @media (max-width: 1440px) {
@@ -672,226 +681,255 @@
     .j_Schedule_width {
         max-width: 900px;
     }
-}
 
-@media (max-width: 768px) {
-    .j_login_img {
-        width: 400px;
-        height: 275px;
+
+    @media (max-width: 768px) {
+        .j_login_img {
+            width: 400px;
+            height: 275px;
+        }
+
+        .j_sidebar_width {
+            width: 10%;
+        }
+
+        .j_contant_width {
+            width: 90%;
+        }
+
+        .j_Login_button {
+            margin: 20px 0 5px 0;
+        }
+
+        .otp-input {
+            height: 35px;
+            width: 35px;
+        }
+
+        .j_text_sixze {
+            font-size: 13px;
+        }
+
+        .j_home_cards {
+            width: 180px;
+        }
+
+        .j_sidebar_a {
+            font-size: 14px;
+        }
+
+        .j_home_connent_h4 {
+            font-size: 22px;
+        }
+
+        .j_schedule_DnT {
+            display: block;
+        }
+
+        .j_Schedule_width {
+            max-width: 700px;
+        }
+
+        .j_home_button {
+            padding: 6px 50px;
+        }
+
     }
 
-    .j_sidebar_width {
-        width: 10%;
+    @media (max-width: 425px) {
+        .j_col_pad {
+            padding: 0;
+            margin-bottom: 20px;
+        }
+
+        .j_col_pad2 {
+            padding: 0;
+        }
+
+        .j_login_center {
+            height: 100%
+        }
+
+        .j_col_img img {
+            margin: 20px 0;
+            height: 300px;
+        }
+
+        .j_nav_padding {
+            padding: 10px 20px;
+        }
+
+        .j_nav_btn {
+            font-size: 13px;
+        }
+
+        .j_flex_direction {
+            flex-direction: column;
+        }
+
+        .j_home_connent_h4 {
+            font-size: 18px;
+        }
+
+        .j_sidebar_width {
+            width: 18%;
+        }
+
+        .j_contant_width {
+            width: 82%;
+            margin-top: 50px;
+            justify-content: start;
+        }
+
+        .j_sidebar_a img {
+            height: 18px;
+            width: 18px;
+        }
+
+        .j_modal_join {
+            width: 350px !important;
+            margin: 0 auto;
+            padding: 10px;
+        }
+
+        .j_join_button {
+            padding: 8px 45px;
+        }
+
+        .j_join_title {
+            font-size: 16px;
+        }
+
+        .j_sidebar_a {
+            font-size: 12.5px;
+        }
+
+        .j_schedule_btn {
+            margin: 5px 5px 0 0;
+        }
+
+        .j_modal_schedule {
+            width: 400px !important;
+            margin: 0 auto;
+        }
+
+        .j_home_button {
+            padding: 5px 25px;
+            margin: 0;
+        }
+
+        .j_schedule_footer {
+            justify-content: space-between;
+        }
+
+        .j_custom_footer {
+            display: flex;
+            gap: 5px;
+            padding-top: 0px !important;
+        }
+
+        .J_Fill_bottom {
+            margin-bottom: 0px !important;
+        }
+
+        .j_Home_sidebar {
+            height: 100%;
+            min-height: 100vh;
+        }
+
+        .j_custom_footer {
+            flex-wrap: nowrap;
+        }
+
+        .j_custom_button {
+            padding: 5px 47px;
+        }
     }
 
-    .j_contant_width {
-        width: 90%;
+    @media (max-width: 375px) {
+        .j_col_img img {
+            height: 265px;
+            width: 340px;
+        }
+
+        .signin-container {
+            width: 350px;
+        }
+
+        .j_sidebar_width {
+            width: 20%;
+        }
+
+        .j_contant_width {
+            width: 80%;
+        }
+
+        .j_home_connent_h4 {
+            font-size: 14px;
+        }
+
+        .j_modal_join {
+            background-color: #12161C;
+            padding: 0px;
+            width: 300px !important;
+            margin: 0 auto;
+        }
+
+        .j_join_button {
+            padding: 8px 45px;
+        }
+
+        .j_modal_schedule {
+            width: 350px !important;
+            margin: 0 auto;
+        }
+
+        .j_home_button {
+            padding: 5px 15px;
+        }
+
+        .j_custom_button {
+            padding: 5px 40px;
+        }
     }
 
-    .j_Login_button {
-        margin: 20px 0 5px 0;
-    }
+    @media (max-width: 320px) {
+        .signin-container {
+            padding: 10px;
+        }
 
-    .otp-input {
-        height: 35px;
-        width: 35px;
-    }
+        .j_login_center {
+            height: 100%;
+        }
 
-    .j_text_sixze {
-        font-size: 13px;
-    }
+        .j_col_img img {
+            margin: 29px 0;
+            height: 225px;
+            width: 300px;
+        }
 
-    .j_home_cards {
-        width: 180px;
-    }
+        .signin-container h1 {
+            font-size: 20px !important;
+        }
 
-    .j_sidebar_a {
-        font-size: 14px;
-    }
+        .signin-container {
+            width: 300px;
+        }
 
-    .j_home_connent_h4 {
-        font-size: 22px;
-    }
+        .j_nav_btn {
+            font-size: 13px;
+        }
 
-    .j_schedule_DnT {
-        display: block;
-    }
+        .j_home_connent_h4 {
+            font-size: 12.5px;
+        }
 
-    .j_Schedule_width {
-        max-width: 700px;
-    }
+        .j_home_button {
+            padding: 5px 10px;
+        }
 
-    .j_home_button {
-        padding: 6px 50px;
-    }
-}
-
-@media (max-width: 425px) {
-    .j_col_pad {
-        padding: 0;
-        margin-bottom: 20px;
-    }
-
-    .j_col_pad2 {
-        padding: 0;
-    }
-
-    .j_login_center {
-        height: 100%
-    }
-
-    .j_col_img img {
-        margin: 20px 0;
-        height: 300px;
-    }
-
-    .j_nav_padding {
-        padding: 10px 20px;
-    }
-
-    .j_nav_btn {
-        font-size: 13px;
-    }
-
-    .j_flex_direction {
-        flex-direction: column;
-    }
-
-    .j_home_connent_h4 {
-        font-size: 18px;
-    }
-
-    .j_sidebar_width {
-        width: 18%;
-    }
-
-    .j_contant_width {
-        width: 82%;
-        margin-top: 50px;
-        justify-content: start;
-    }
-
-    .j_sidebar_a img {
-        height: 18px;
-        width: 18px;
-    }
-
-    .j_modal_join {
-        width: 350px !important;
-        margin: 0 auto;
-        padding: 10px;
-    }
-
-    .j_join_button {
-        padding: 8px 45px;
-    }
-
-    .j_join_title {
-        font-size: 16px;
-    }
-
-    .j_sidebar_a {
-        font-size: 12.5px;
-    }
-
-    .j_schedule_btn {
-        margin: 5px 5px 0 0;
-    }
-
-    .j_modal_schedule {
-        width: 400px !important;
-        margin: 0 auto;
-    }
-
-    .j_home_button {
-        padding: 5px 25px;
-        margin: 0;
-    }
-
-    .j_schedule_footer {
-        justify-content: space-between;
-    }
-
-    .j_Home_sidebar {
-        height: 100%;
-    }
-}
-
-@media (max-width: 375px) {
-    .j_col_img img {
-        height: 265px;
-        width: 340px;
-    }
-
-    .signin-container {
-        width: 350px;
-    }
-
-    .j_sidebar_width {
-        width: 20%;
-    }
-
-    .j_contant_width {
-        width: 80%;
-    }
-
-    .j_home_connent_h4 {
-        font-size: 14px;
-    }
-
-    .j_modal_join {
-        background-color: #12161C;
-        padding: 0px;
-        width: 300px !important;
-        margin: 0 auto;
-    }
-
-    .j_join_button {
-        padding: 8px 45px;
-    }
-
-    .j_modal_schedule {
-        width: 350px !important;
-        margin: 0 auto;
-    }
-
-    .j_home_button {
-        padding: 5px 15px;
-    }
-}
-
-@media (max-width: 320px) {
-    .signin-container {
-        padding: 10px;
-    }
-
-    .j_login_center {
-        height: 100%;
-    }
-
-    .j_col_img img {
-        margin: 29px 0;
-        height: 225px;
-        width: 300px;
-    }
-
-    .signin-container h1 {
-        font-size: 20px !important;
-    }
-
-    .signin-container {
-        width: 300px;
-    }
-
-    .j_nav_btn {
-        font-size: 13px;
-    }
-
-    .j_home_connent_h4 {
-        font-size: 12.5px;
-    }
-
-    .j_home_button {
-        padding: 5px 10px;
+        .j_custom_button {
+            padding: 4px 39 px;
+        }
     }
 }

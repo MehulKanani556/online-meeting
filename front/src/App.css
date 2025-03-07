@@ -737,25 +737,51 @@ img {
   background-color: #121B26;
   font-size: 14px;
 }
+
 .B_schedule_input {
   width: 185px !important;
 }
+
 .B_invite_people_text {
   font-size: 14px;
 }
-.B_meeting_title{
+
+.B_meeting_title {
   font-size: 14px;
 }
-.B_meeting_time_text{
+
+.B_meeting_time_text {
   font-size: 13.5px !important;
 }
-.B_meeting_time_text_div{
+
+.B_meeting_time_text_div {
   padding: 30px 15px !important;
 }
-.B_meeting_time_text_span{
-  font-size: 14px ;
+
+.B_meeting_time_text_span {
+  font-size: 14px;
 }
 
+.B_modal_content {
+  background-color: #12161C !important;
+  border-radius: 8px !important;
+}
+
+.B_cancle_model_title {
+  font-size: 18px !important;
+}
+
+.B_invite_people_modal {
+  max-width: 500px;
+}
+
+.B_Repeat_on_btn {
+  gap: 15px;
+}
+
+.B_meeting_time_text_div {
+  padding-bottom: 20px !important;
+}
 
 /* MiN MEDIA QUERY START.............. */
 
@@ -1036,10 +1062,6 @@ img {
 
   .B_cancle_model {
     padding: 12px 20px !important;
-  }
-
-  .B_cancle_model_title {
-    font-size: 19px !important;
   }
 
   .B_cancle_model_text {
@@ -1706,8 +1728,21 @@ img {
   .B_cancle_model_text {
     padding-top: 10px !important;
   }
-  .B_meeting_Date_text_span{
+
+  .B_meeting_Date_text_span {
     font-size: 13px;
+  }
+
+  .B_cancle_model_title {
+    font-size: 17px !important;
+  }
+
+  .B_cancle_model_text {
+    font-size: 16px !important;
+  }
+
+  .B_Repeat_on_btn {
+    gap: 8px;
   }
 }
 
@@ -1911,6 +1946,10 @@ img {
   .B_invite_people_text_flex {
     margin-bottom: 10px !important;
   }
+
+  .B_Repeat_on_btn {
+    gap: 6px;
+  }
 }
 
 @media (max-width: 320px) {
@@ -2068,11 +2107,13 @@ img {
   .B_invite_people_text_span {
     width: 78px !important;
   }
-  .B_meeting_details_flex{
+
+  .B_meeting_details_flex {
     flex-wrap: wrap;
   }
-  .B_meeting_host_img{
-  padding-right: 3px !important;
+
+  .B_meeting_host_img {
+    padding-right: 3px !important;
   }
 
 }
