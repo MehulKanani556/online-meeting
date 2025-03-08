@@ -783,6 +783,19 @@ img {
   padding-bottom: 20px !important;
 }
 
+.B_G_space {
+  --bs-gutter-y: 1.5rem;
+}
+
+.B_radio_input:checked {
+  background-color: #1f1d1d;
+  border-color: #fcfdfe;
+}
+
+.B_meeting_note_div p {
+  font-size: 18px;
+}
+
 /* MiN MEDIA QUERY START.............. */
 
 @media (min-width: 540px) {
@@ -889,6 +902,26 @@ img {
   .B_meeting_card_section {
     --bs-gutter-x: 1.5rem;
     --bs-gutter-y: 1.5rem;
+  }
+
+  .B_meeting_note_div p {
+    font-size: 16px;
+  }
+
+  .B_ROOM_DETAILS {
+    padding: 10px !important;
+  }
+
+  .B_ROOM_DETAILS span {
+    font-size: 14px !important;
+  }
+
+  .B_ROOM_DETAILS_span {
+    width: 85px !important;
+  }
+
+  .B_ROOM_DETAILS_label {
+    font-size: 14px;
   }
 
 }
@@ -1378,6 +1411,31 @@ img {
     padding: 15px 11px !important;
   }
 
+  .B_meeting_note_div1 {
+    margin-top: 10px !important;
+  }
+
+  .B_ROOM_DETAILS_span {
+    width: 120px !important;
+  }
+
+  .B_meeting_note_div {
+    padding: 30px 20px 30px 30px !important;
+
+  }
+  .B_meeting_note_div  p {
+    font-size: 14px;
+  }
+  .B_ROOM_DETAILS_btn{
+    padding: 5px 25px !important;
+  }
+  .B_perosnalMargin{
+    margin: 0px !important;
+  }
+
+  .B_top_margin {
+    margin-top: 20px !important;
+  }
 
 
 

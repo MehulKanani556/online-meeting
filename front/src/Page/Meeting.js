@@ -9,6 +9,7 @@ import MeetingCanlander from '../Image/MeeringCalander.svg'
 import MeetingUser from '../Image/MeetingUSer.svg'
 import MeetingMultiUser from '../Image/MeetingMultiUser.svg'
 import { Button, Modal, Offcanvas, Form } from 'react-bootstrap';
+import BEdit from '../Image/BEdit.svg'
 
 
 function Meeting() {
@@ -20,6 +21,7 @@ function Meeting() {
     const [billingCycle, setBillingCycle] = useState('Meeting Details');
     const [selectedDays, setSelectedDays] = useState([]);
     const [isSelectedMeetingCancelled, setIsSelectedMeetingCancelled] = useState(false);
+    const [securityType, setSecurityType] = useState('alwaysLocked');
 
     const toggleDay = (day) => {
         setSelectedDays(prev =>
@@ -49,26 +51,6 @@ function Meeting() {
         event.stopPropagation();
         setOpenDropdownId(openDropdownId === meetingId ? null : meetingId);
     };
-
-    // const handleEditClick = (e) => {
-    //     e.stopPropagation();
-    //     setOpenDropdownId(null);
-    //     const scheduleModal = new window.bootstrap.Modal(document.getElementById('ScheduleMeetingModal'));
-    //     scheduleModal.show();
-    // };
-
-    // const handleCancelClick = (e) => {
-    //     e.stopPropagation();
-    //     setOpenDropdownId(null);
-    //     const cancelModal = new window.bootstrap.Modal(document.getElementById('cancelMeetingModal'));
-    //     cancelModal.show();
-    // };
-
-    // const handleInvitePeopleClick = (e) => {
-    //     setOpenDropdownId(null);
-    //     const inviteModal = new window.bootstrap.Modal(document.getElementById('invitePeopleModal'));
-    //     inviteModal.show();
-    // };
 
     useEffect(() => {
         const handleClickOutside = () => {
@@ -179,6 +161,373 @@ function Meeting() {
                                     <h6 className="text-white m-0 B_card_title">Online Meeting</h6>
                                     <div>
                                         <button type="button" class="btn btn-outline-danger B_upcoming_btn1 me-2">Cancelled</button>
+                                        <HiOutlineDotsVertical className='text-white ' size={22} style={{ cursor: "pointer" }} />
+                                    </div>
+
+                                </div>
+                                <div style={{ borderTop: "1px solid #525252" }}></div>
+                                <div className="B_meetingALl_details p-3 B_meeting_padding" style={{ color: '#B3AEAE' }}>
+                                    <div className="d-flex  mb-2">
+                                        <span className='B_meetingALl_details_span'>Meeting Date</span>
+                                        <span className='text-white'>: 23-01-2025</span>
+                                    </div>
+                                    <div className="d-flex  mb-2">
+                                        <span className='B_meetingALl_details_span'>Meeting Time</span>
+                                        <span className='text-white'>: 11:00 AM</span>
+                                    </div>
+                                    <div className="d-flex ">
+                                        <span className='B_meetingALl_details_span'>Meeting Duration</span>
+                                        <span className='text-white'>: 0h 30m</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        else if (meetingType === "Upcoming Meetings" && meetingFilter === "All Meetings") {
+            return (
+                <div className='mx-4'>
+                    {/* Created By Me Section */}
+                    <h6 className="text-white mt-4 ms-4">Created By Me</h6>
+                    <div className="row g-5 B_meeting_card_section B_G_space mb-5">
+                        {/* Upcoming Meeting Card */}
+                        <div className=" col-xl-3 col-lg-4 col-md-6 col-12">
+                            <div className="B_meeting_card" style={{ backgroundColor: '#0A1119', borderRadius: '6px' }}>
+                                <div className="d-flex justify-content-between align-items-center  p-3 B_meeting_padding">
+                                    <h6 className="text-white m-0 B_card_title">Project Meeting</h6>
+                                    <div className="position-relative">
+                                        <HiOutlineDotsVertical
+                                            className='text-white'
+                                            size={22}
+                                            style={{ cursor: "pointer" }}
+                                            onClick={(e) => handleDotsClick('meeting1', e)}
+                                        />
+                                        {openDropdownId === 'meeting1' && (
+                                            <div className="position-absolute end-0 mt-2 py-2 B_boxEdit  rounded shadow-lg"
+                                                style={{ minWidth: '120px', zIndex: 1000 }}>
+                                                <button className="dropdown-item text-white px-3 py-1 hover-bg-secondary"
+                                                    style={{ backgroundColor: 'transparent', border: 'none', width: '100%', textAlign: 'left' }}>
+                                                    Start
+                                                </button>
+                                                <button
+                                                    className="dropdown-item text-white px-3 py-1 hover-bg-secondary"
+                                                    style={{ backgroundColor: 'transparent', border: 'none', width: '100%', textAlign: 'left' }}
+                                                    onClick={handleShowScheduleModel}
+                                                >
+                                                    Edit
+                                                </button>
+                                                <button
+                                                    className="dropdown-item text-white px-3 py-1 hover-bg-secondary"
+                                                    style={{ backgroundColor: 'transparent', border: 'none', width: '100%', textAlign: 'left' }}
+                                                    onClick={handleShowCancelModel}
+                                                >
+                                                    Cancel
+                                                </button>
+                                                <button className="dropdown-item text-white px-3 py-1 hover-bg-secondary"
+                                                    style={{ backgroundColor: 'transparent', border: 'none', width: '100%', textAlign: 'left' }}
+                                                    onClick={handleShowInviteModel}
+                                                >
+                                                    Invite People
+                                                </button>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                                <div style={{ borderTop: "1px solid #525252" }}></div>
+                                <div className="B_meetingALl_details p-3 B_meeting_padding" style={{ color: '#B3AEAE' }}>
+                                    <div className="d-flex  mb-2">
+                                        <span className='B_meetingALl_details_span'>Meeting Date</span>
+                                        <span className='text-white'>: 23-01-2025</span>
+                                    </div>
+                                    <div className="d-flex  mb-2">
+                                        <span className='B_meetingALl_details_span'>Meeting Time</span>
+                                        <span className='text-white'>: 11:00 AM</span>
+                                    </div>
+                                    <div className="d-flex ">
+                                        <span className='B_meetingALl_details_span'>Meeting Duration</span>
+                                        <span className='text-white'>: 0h 30m</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Completed Meeting Card */}
+                        <div className=" col-xl-3 col-lg-4 col-md-6 col-12">
+                            <div className="B_meeting_card " style={{ backgroundColor: '#0A1119', borderRadius: '6px' }}>
+                                <div className="d-flex justify-content-between align-items-center  p-3 B_meeting_padding ">
+                                    <h6 className="text-white m-0 B_card_title">Online Meeting</h6>
+                                    <div className="position-relative">
+                                        <HiOutlineDotsVertical
+                                            className='text-white'
+                                            size={22}
+                                            style={{ cursor: "pointer" }}
+                                            onClick={(e) => handleDotsClick('meeting2', e)}
+                                        />
+                                        {openDropdownId === 'meeting2' && (
+                                            <div className="position-absolute end-0 mt-2 py-2 B_boxEdit rounded shadow-lg"
+                                                style={{ minWidth: '120px', zIndex: 1000 }}>
+                                                <button className="dropdown-item text-white px-3 py-1 hover-bg-secondary"
+                                                    style={{ backgroundColor: 'transparent', border: 'none', width: '100%', textAlign: 'left' }}>
+                                                    Start
+                                                </button>
+                                                <button className="dropdown-item text-white px-3 py-1 hover-bg-secondary"
+                                                    style={{ backgroundColor: 'transparent', border: 'none', width: '100%', textAlign: 'left' }}
+                                                    onClick={handleShowScheduleModel}
+                                                >
+                                                    Edit
+                                                </button>
+                                                <button
+                                                    className="dropdown-item text-white px-3 py-1 hover-bg-secondary"
+                                                    style={{ backgroundColor: 'transparent', border: 'none', width: '100%', textAlign: 'left' }}
+                                                    onClick={handleShowCancelModel}
+                                                >
+                                                    Cancel
+                                                </button>
+                                                <button className="dropdown-item text-white px-3 py-1 hover-bg-secondary"
+                                                    style={{ backgroundColor: 'transparent', border: 'none', width: '100%', textAlign: 'left' }}
+                                                    onClick={handleShowInviteModel}
+                                                >
+                                                    Invite People
+                                                </button>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                                <div style={{ borderTop: "1px solid #525252" }}></div>
+                                <div className="B_meetingALl_details p-3 B_meeting_padding" style={{ color: '#B3AEAE' }}>
+                                    <div className="d-flex mb-2">
+                                        <span className='B_meetingALl_details_span'>Meeting Date</span>
+                                        <span className='text-white'>: 23-01-2025</span>
+                                    </div>
+                                    <div className="d-flex mb-2">
+                                        <span className='B_meetingALl_details_span'>Meeting Time</span>
+                                        <span className='text-white'>: 11:00 AM</span>
+                                    </div>
+                                    <div className="d-flex ">
+                                        <span className='B_meetingALl_details_span'>Meeting Duration</span>
+                                        <span className='text-white'>: 0h 30m</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Join Meeting Card */}
+                        <div className=" col-xl-3 col-lg-4 col-md-6 col-12">
+                            <div className="B_meeting_card " style={{ backgroundColor: '#0A1119', borderRadius: '6px' }}>
+                                <div className="d-flex justify-content-between align-items-center p-3 B_meeting_padding">
+                                    <h6 className="text-white m-0 B_card_title">Project Meeting</h6>
+                                    <div className="position-relative">
+                                        <HiOutlineDotsVertical
+                                            className='text-white'
+                                            size={22}
+                                            style={{ cursor: "pointer" }}
+                                            onClick={(e) => handleDotsClick('meeting3', e)}
+                                        />
+                                        {openDropdownId === 'meeting3' && (
+                                            <div className="position-absolute end-0 mt-2 py-2 B_boxEdit rounded shadow-lg"
+                                                style={{ minWidth: '120px', zIndex: 1000 }}>
+                                                <button className="dropdown-item text-white px-3 py-1 hover-bg-secondary"
+                                                    style={{ backgroundColor: 'transparent', border: 'none', width: '100%', textAlign: 'left' }}>
+                                                    Start
+                                                </button>
+                                                <button className="dropdown-item text-white px-3 py-1 hover-bg-secondary"
+                                                    style={{ backgroundColor: 'transparent', border: 'none', width: '100%', textAlign: 'left' }}
+                                                    onClick={handleShowScheduleModel}>
+                                                    Edit
+                                                </button>
+                                                <button
+                                                    className="dropdown-item text-white px-3 py-1 hover-bg-secondary"
+                                                    style={{ backgroundColor: 'transparent', border: 'none', width: '100%', textAlign: 'left' }}
+                                                    onClick={handleShowCancelModel}
+                                                >
+                                                    Cancel
+                                                </button>
+                                                <button className="dropdown-item text-white px-3 py-1 hover-bg-secondary"
+                                                    style={{ backgroundColor: 'transparent', border: 'none', width: '100%', textAlign: 'left' }}
+                                                    onClick={handleShowInviteModel}
+                                                >
+                                                    Invite People
+                                                </button>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                                <div style={{ borderTop: "1px solid #525252" }}></div>
+                                <div className="B_meetingALl_details p-3 B_meeting_padding" style={{ color: '#B3AEAE' }}>
+                                    <div className="d-flex  mb-2">
+                                        <span className='B_meetingALl_details_span'>Meeting Date</span>
+                                        <span className='text-white'>: 23-01-2025</span>
+                                    </div>
+                                    <div className="d-flex mb-2">
+                                        <span className='B_meetingALl_details_span'>Meeting Time</span>
+                                        <span className='text-white'>: 11:00 AM</span>
+                                    </div>
+                                    <div className="d-flex ">
+                                        <span className='B_meetingALl_details_span'>Meeting Duration</span>
+                                        <span className='text-white'>: 0h 30m</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Cancelled Meeting Card */}
+                        <div className=" col-xl-3 col-lg-4 col-md-6 col-12">
+                            <div className="B_meeting_card " style={{ backgroundColor: '#0A1119', borderRadius: '6px' }}>
+                                <div className="d-flex justify-content-between align-items-center p-3 B_meeting_padding">
+                                    <h6 className="text-white m-0 B_card_title">Online Meeting</h6>
+                                    <div className="position-relative">
+                                        <HiOutlineDotsVertical
+                                            className='text-white'
+                                            size={22}
+                                            style={{ cursor: "pointer" }}
+                                            onClick={(e) => handleDotsClick('meeting4', e)}
+                                        />
+                                        {openDropdownId === 'meeting4' && (
+                                            <div className="position-absolute end-0 mt-2 py-2 B_boxEdit rounded shadow-lg"
+                                                style={{ minWidth: '120px', zIndex: 1000 }}>
+                                                <button className="dropdown-item text-white px-3 py-1 hover-bg-secondary"
+                                                    style={{ backgroundColor: 'transparent', border: 'none', width: '100%', textAlign: 'left' }}>
+                                                    Start
+                                                </button>
+                                                <button className="dropdown-item text-white px-3 py-1 hover-bg-secondary"
+                                                    style={{ backgroundColor: 'transparent', border: 'none', width: '100%', textAlign: 'left' }}
+                                                    onClick={handleShowScheduleModel}>
+                                                    Edit
+                                                </button>
+                                                <button
+                                                    className="dropdown-item text-white px-3 py-1 hover-bg-secondary"
+                                                    style={{ backgroundColor: 'transparent', border: 'none', width: '100%', textAlign: 'left' }}
+                                                    onClick={handleShowCancelModel}
+                                                >
+                                                    Cancel
+                                                </button>
+                                                <button className="dropdown-item text-white px-3 py-1 hover-bg-secondary"
+                                                    style={{ backgroundColor: 'transparent', border: 'none', width: '100%', textAlign: 'left' }}
+                                                    onClick={handleShowInviteModel}
+                                                >
+                                                    Invite People
+                                                </button>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                </div>
+                                <div style={{ borderTop: "1px solid #525252" }}></div>
+                                <div className="B_meetingALl_details p-3 B_meeting_padding" style={{ color: '#B3AEAE' }}>
+                                    <div className="d-flex  mb-2">
+                                        <span className='B_meetingALl_details_span'>Meeting Date</span>
+                                        <span className='text-white'>: 23-01-2025</span>
+                                    </div>
+                                    <div className="d-flex  mb-2">
+                                        <span className='B_meetingALl_details_span'>Meeting Time</span>
+                                        <span className='text-white'>: 11:00 AM</span>
+                                    </div>
+                                    <div className="d-flex ">
+                                        <span className='B_meetingALl_details_span'>Meeting Duration</span>
+                                        <span className='text-white'>: 0h 30m</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Invited By Me Section */}
+                    <h6 className="text-white mb-4 ms-4">Invited By Me</h6>
+                    <div className="row g-5 B_meeting_card_section B_G_space">
+                        {/* Upcoming Meeting Card */}
+                        <div className=" col-xl-3 col-lg-4 col-md-6 col-12">
+                            <div className="B_meeting_card" style={{ backgroundColor: '#0A1119', borderRadius: '6px' }}>
+                                <div className="d-flex justify-content-between align-items-center  p-3 B_meeting_padding">
+                                    <h6 className="text-white m-0 B_card_title">Project Meeting</h6>
+                                    <div>
+                                        <button type="button" class="btn btn-outline-secondary B_upcoming_btn1 B_upcoming_btn2 me-2">Join</button>
+                                        <HiOutlineDotsVertical className='text-white ' size={22} style={{ cursor: "pointer" }} />
+                                    </div>
+                                </div>
+                                <div style={{ borderTop: "1px solid #525252" }}></div>
+                                <div className="B_meetingALl_details p-3 B_meeting_padding" style={{ color: '#B3AEAE' }}>
+                                    <div className="d-flex  mb-2">
+                                        <span className='B_meetingALl_details_span'>Meeting Date</span>
+                                        <span className='text-white'>: 23-01-2025</span>
+                                    </div>
+                                    <div className="d-flex  mb-2">
+                                        <span className='B_meetingALl_details_span'>Meeting Time</span>
+                                        <span className='text-white'>: 11:00 AM</span>
+                                    </div>
+                                    <div className="d-flex ">
+                                        <span className='B_meetingALl_details_span'>Meeting Duration</span>
+                                        <span className='text-white'>: 0h 30m</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Completed Meeting Card */}
+                        <div className=" col-xl-3 col-lg-4 col-md-6 col-12">
+                            <div className="B_meeting_card " style={{ backgroundColor: '#0A1119', borderRadius: '6px' }}>
+                                <div className="d-flex justify-content-between align-items-center  p-3 B_meeting_padding ">
+                                    <h6 className="text-white m-0 B_card_title">Online Meeting</h6>
+                                    <div>
+                                        <button type="button" class="btn btn-outline-secondary B_upcoming_btn1 B_upcoming_btn2 me-2">Join</button>
+                                        <HiOutlineDotsVertical className='text-white ' size={22} style={{ cursor: "pointer" }} />
+                                    </div>
+                                </div>
+                                <div style={{ borderTop: "1px solid #525252" }}></div>
+                                <div className="B_meetingALl_details p-3 B_meeting_padding" style={{ color: '#B3AEAE' }}>
+                                    <div className="d-flex mb-2">
+                                        <span className='B_meetingALl_details_span'>Meeting Date</span>
+                                        <span className='text-white'>: 23-01-2025</span>
+                                    </div>
+                                    <div className="d-flex mb-2">
+                                        <span className='B_meetingALl_details_span'>Meeting Time</span>
+                                        <span className='text-white'>: 11:00 AM</span>
+                                    </div>
+                                    <div className="d-flex ">
+                                        <span className='B_meetingALl_details_span'>Meeting Duration</span>
+                                        <span className='text-white'>: 0h 30m</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Join Meeting Card */}
+                        <div className=" col-xl-3 col-lg-4 col-md-6 col-12">
+                            <div className="B_meeting_card " style={{ backgroundColor: '#0A1119', borderRadius: '6px' }}>
+                                <div className="d-flex justify-content-between align-items-center p-3 B_meeting_padding">
+                                    <h6 className="text-white m-0 B_card_title">Project Meeting</h6>
+                                    <div>
+                                        <button type="button" class="btn btn-outline-secondary B_upcoming_btn1 B_upcoming_btn2 me-2">Join</button>
+                                        <HiOutlineDotsVertical className='text-white ' size={22} style={{ cursor: "pointer" }} />
+                                    </div>
+                                </div>
+                                <div style={{ borderTop: "1px solid #525252" }}></div>
+                                <div className="B_meetingALl_details p-3 B_meeting_padding" style={{ color: '#B3AEAE' }}>
+                                    <div className="d-flex  mb-2">
+                                        <span className='B_meetingALl_details_span'>Meeting Date</span>
+                                        <span className='text-white'>: 23-01-2025</span>
+                                    </div>
+                                    <div className="d-flex mb-2">
+                                        <span className='B_meetingALl_details_span'>Meeting Time</span>
+                                        <span className='text-white'>: 11:00 AM</span>
+                                    </div>
+                                    <div className="d-flex ">
+                                        <span className='B_meetingALl_details_span'>Meeting Duration</span>
+                                        <span className='text-white'>: 0h 30m</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Cancelled Meeting Card */}
+                        <div className=" col-xl-3 col-lg-4 col-md-6 col-12">
+                            <div className="B_meeting_card " style={{ backgroundColor: '#0A1119', borderRadius: '6px' }}>
+                                <div className="d-flex justify-content-between align-items-center p-3 B_meeting_padding">
+                                    <h6 className="text-white m-0 B_card_title">Online Meeting</h6>
+                                    <div>
+                                        <button type="button" class="btn btn-outline-secondary B_upcoming_btn1 B_upcoming_btn2 me-2">Join</button>
                                         <HiOutlineDotsVertical className='text-white ' size={22} style={{ cursor: "pointer" }} />
                                     </div>
 
@@ -576,7 +925,7 @@ function Meeting() {
             )
         }
 
-        else if (meetingType === "Past Meetings" && meetingFilter === "Created By Me") {
+        else if (meetingType === "Past Meetings" && meetingFilter === "Created By Me" || meetingFilter === "Invited By Me" || meetingFilter === "All Meetings") {
             return (
                 <div className='mx-4'>
                     <div className="row g-5 B_meeting_card_section">
@@ -670,7 +1019,111 @@ function Meeting() {
             );
 
             return null;
-        };
+        }
+
+        else if (meetingType === "Personal Room") {
+            return (
+                <div className="mx-4 B_perosnalMargin">
+                    <div className="row">
+                        {/* Room Details Section */}
+                        <div className="col-lg-5 col-12">
+                            <div className="mb-4 mt-5 B_top_margin">
+                                <h5 className="text-white mb-4">Room Details</h5>
+                                <div className='B_ROOM_DETAILS' style={{ borderRadius: '6px', padding: '20px' }}>
+                                    <div className="d-flex align-items-center mb-4">
+                                        <span className='B_ROOM_DETAILS_span' style={{ color: '#B3AEAE', width: '120px' }}>Name</span>
+                                        <span className="text-white">: John Kumar's Meeting Room</span>
+                                    </div>
+                                    <div className="d-flex align-items-center mb-4">
+                                        <span className='B_ROOM_DETAILS_span' style={{ color: '#B3AEAE', width: '120px' }}>Meeting ID</span>
+                                        <span className="text-white">: 16846118749463</span>
+                                    </div>
+                                    <div className="d-flex align-items-center mb-4">
+                                        <span className='B_ROOM_DETAILS_span' style={{ color: '#B3AEAE', width: '120px' }}>Invite Link</span>
+                                        <div className="d-flex align-items-center">
+                                            <span className="text-white">: https://googlemeet.123/57809</span>
+                                            <span className='ms-2'> <img src={BEdit} alt="" /> </span>
+                                            <button className="btn btn-link p-0 ms-2" style={{ color: '#fff' }}>
+                                                <i className="fas fa-copy"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div className="d-flex align-items-center mb-4">
+                                        <span className='B_ROOM_DETAILS_span' style={{ color: '#B3AEAE', width: '120px' }}>Security</span>
+                                        <div className="d-flex align-items-center gap-3">
+                                            <div className="form-check">
+                                                <input
+                                                    className="form-check-input B_radio_input"
+                                                    type="radio"
+                                                    style={{ cursor: "pointer" }}
+                                                    name="security"
+                                                    id="alwaysLocked"
+                                                    checked={securityType === 'alwaysLocked'}
+                                                    onChange={() => handleSecurityChange('alwaysLocked')}
+                                                />
+                                                <label className="form-check-label B_ROOM_DETAILS_label text-white" htmlFor="alwaysLocked">
+                                                    Always locked
+                                                </label>
+                                            </div>
+                                            <div className="form-check">
+                                                <input
+                                                    className="form-check-input B_radio_input"
+                                                    type="radio"
+                                                    name="security"
+                                                    id="passwordProtected"
+                                                    checked={securityType === 'passwordProtected'}
+                                                    onChange={() => handleSecurityChange('passwordProtected')}
+                                                />
+                                                <label className="form-check-label B_ROOM_DETAILS_label  text-white" htmlFor="passwordProtected">
+                                                    Password Protected
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="d-flex align-items-center">
+                                        <span className='B_ROOM_DETAILS_span' style={{ color: '#B3AEAE', width: '120px' }}>Password</span>
+                                        <div className="d-flex align-items-center">
+                                            <span className="text-white">: 5163YHV8ujui</span>
+                                            <span className='ms-2'> <img src={BEdit} alt="" /> </span>
+
+                                            <button className="btn btn-link p-0 ms-2" style={{ color: '#fff' }}>
+                                                <i className="fas fa-copy"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div className="mt-5">
+                                        <button className="btn btn-light fw-semibold B_ROOM_DETAILS_btn" style={{ padding: '8px 30px' }}>
+                                            Start Meeting
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Note Section */}
+                        <div className="col-lg-7 col-12">
+                            <div className="mb-4 mt-5 B_meeting_note_div1">
+                                <div className='B_meeting_note_div' style={{ backgroundColor: '#0A1119', borderRadius: '6px', padding: '30px 50px 30px 30px' }}>
+                                    <h5 className="text-white mb-4 ">Note:</h5>
+                                    <p style={{ color: '#d3d3d3', marginBottom: '15px' }}>
+                                        Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's stan Lorem Ipsum is simply dummy text of the printing and typesetting industry.
+                                    </p>
+                                    <p style={{ color: '#d3d3d3', marginBottom: '15px' }}>
+                                        Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's stan Lorem Ipsum is simply.
+                                    </p>
+                                    <p style={{ color: '#d3d3d3', marginBottom: '15px' }}>
+                                        Lorem Ipsum is simply dummy text of the printing and typesetting industry.
+                                    </p>
+                                    <p style={{ color: '#d3d3d3', marginBottom: '0' }}>
+                                        Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's stan Lorem Ipsum is simply.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
     }
 
 
@@ -705,6 +1158,10 @@ function Meeting() {
     const handleCloseScheduleCustomModel = () => setScheduleCustomModel(false);
     const handleShowScheduleCustomModel = () => setScheduleCustomModel(true);
 
+    const handleSecurityChange = (type) => {
+        setSecurityType(type);
+    };
+
     return (
         <div>
             {/* .......................NAVBAR START ....................... */}
@@ -727,22 +1184,38 @@ function Meeting() {
                                         {meetingType}
                                     </button>
                                     <ul className="dropdown-menu B_dropdown" style={{ cursor: "pointer" }}>
-                                        <li><a className="dropdown-item B_dropdown_item" onClick={() => setMeetingType("All Meetings")}>All Meetings</a></li>
-                                        <li><a className="dropdown-item B_dropdown_item" onClick={() => setMeetingType("Upcoming Meetings")}>Upcoming Meetings</a></li>
-                                        <li><a className="dropdown-item B_dropdown_item" onClick={() => setMeetingType("Past Meetings")}>Past Meetings</a></li>
-                                        <li><a className="dropdown-item B_dropdown_item" onClick={() => setMeetingType("Personal Room")}>Personal Room</a></li>
+                                        <li><a className="dropdown-item B_dropdown_item" onClick={() => {
+                                            setMeetingType("All Meetings");
+                                            setMeetingFilter("All Meetings");
+                                        }}>All Meetings</a></li>
+                                        <li><a className="dropdown-item B_dropdown_item" onClick={() => {
+                                            setMeetingType("Upcoming Meetings");
+                                            setMeetingFilter("All Meetings");
+                                        }}>Upcoming Meetings</a></li>
+                                        <li><a className="dropdown-item B_dropdown_item" onClick={() => {
+                                            setMeetingType("Past Meetings");
+                                            setMeetingFilter("All Meetings");
+                                        }}>Past Meetings</a></li>
+                                        <li><a className="dropdown-item B_dropdown_item" onClick={() => {
+                                            setMeetingType("Personal Room");
+                                            setMeetingFilter("");  // Clear the second dropdown value
+                                        }}>Personal Room</a></li>
                                     </ul>
                                 </div>
-                                <div className="dropdown">
-                                    <button className="btn btn-secondary dropdown-toggle B_dropdown_btn1 B_dropdown_btn2" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                        {meetingFilter}
-                                    </button>
-                                    <ul className="dropdown-menu B_dropdown B_dropdown1" style={{ cursor: "pointer" }}>
-                                        <li><a className="dropdown-item B_dropdown_item" onClick={() => setMeetingFilter("All Meetings")}>All Meetings</a></li>
-                                        <li><a className="dropdown-item B_dropdown_item" onClick={() => setMeetingFilter("Created By Me")}>Created By Me</a></li>
-                                        <li><a className="dropdown-item B_dropdown_item" onClick={() => setMeetingFilter("Invited By Me")}>Invited By Me</a></li>
-                                    </ul>
-                                </div>
+
+                                {/* Second Dropdown - Only show if not Personal Room */}
+                                {meetingType !== "Personal Room" && (
+                                    <div className="dropdown">
+                                        <button className="btn btn-secondary dropdown-toggle B_dropdown_btn1 B_dropdown_btn2" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                            {meetingFilter}
+                                        </button>
+                                        <ul className="dropdown-menu B_dropdown B_dropdown1" style={{ cursor: "pointer" }}>
+                                            <li><a className="dropdown-item B_dropdown_item" onClick={() => setMeetingFilter("All Meetings")}>All Meetings</a></li>
+                                            <li><a className="dropdown-item B_dropdown_item" onClick={() => setMeetingFilter("Created By Me")}>Created By Me</a></li>
+                                            <li><a className="dropdown-item B_dropdown_item" onClick={() => setMeetingFilter("Invited By Me")}>Invited By Me</a></li>
+                                        </ul>
+                                    </div>
+                                )}
                             </div>
 
                             <div className="d-flex gap-4 align-items-center B_Meeting_head_flex1">
@@ -770,7 +1243,7 @@ function Meeting() {
                         </div> */}
 
                         {/* .......................MEETING CARDS START ....................... */}
-                        {renderMeetingCards()}    
+                        {renderMeetingCards()}
                         {/* .......................MEETING CARDS END ....................... */}
 
                         {/* .......................MODEL START ....................... */}
@@ -1086,6 +1559,7 @@ function Meeting() {
                                     <div className="d-flex align-items-center mb-3 B_invite_people_text_flex">
                                         <span className='B_invite_people_text_span' style={{ color: '#B3AEAE', width: '120px' }}>Password</span>
                                         <span className="text-white B_invite_people_text">: fverf54cf</span>
+
                                     </div>
                                 </div>
                                 <div className="d-flex justify-content-center gap-4 mt-4">
