@@ -1,17 +1,27 @@
 import React, { useState } from 'react'
+import { Button, Modal } from 'react-bootstrap'
+import { IoClose, IoSearch } from 'react-icons/io5'
+import { FaAngleUp, FaAngleDown } from "react-icons/fa6";
+import { Form } from 'formik'
 import HomeNavBar from '../Component/HomeNavBar'
 import SideBar from '../Component/SideBar'
 import Schedule from '../Image/j_Schedule.svg'
 import meeting from '../Image/j_meeting.svg'
 import plus from '../Image/j_plus.svg'
-import { IoClose, IoSearch } from 'react-icons/io5'
-import { FaAngleUp, FaAngleDown } from "react-icons/fa6";
 
 function Home() {
   const [activeItem, setActiveItem] = useState('New Meeting')
   const [selectedReminders, setSelectedReminders] = useState([])
   const [RepeatEvery, setRepeatEvery] = useState(1)
   const [selectedDays, setSelectedDays] = useState([]);
+
+  const [ScheduleModal, setScheduleModal] = useState(false)
+  const [customModal, setcustomModal] = useState(false)
+
+  const handleScheduleclose = () => setScheduleModal(false)
+  const handleScheduleshow = () => setScheduleModal(true)
+  const handlecustomclose = () => setcustomModal(false)
+  const handlecustomshow = () => setcustomModal(true)
 
   const toggleDay = (day) => {
     setSelectedDays(prev =>
@@ -65,8 +75,11 @@ function Home() {
                 </div>
               </div>
               <div className="col-4 g-5 ">
-                <div className="j_home_cards" type="button" data-bs-toggle="modal" data-bs-target="#ScheduleMeetingModal"
-                  onClick={() => setActiveItem('Schedule Meeting')}
+                <div className="j_home_cards" type="button"
+                  onClick={() => {
+                    setActiveItem('Schedule Meeting');
+                    handleScheduleshow(); // This function opens the modal
+                  }}
                   style={{
                     border: activeItem === 'Schedule Meeting' ? '2px solid #bfbfbf' : 'none',
                   }}>
@@ -96,256 +109,463 @@ function Home() {
           </div>
         </div>
 
-        {/* ============================ Schedule Meeting Modal ============================ */}
-        <div className="modal fade" id="ScheduleMeetingModal" tabIndex={-1} aria-labelledby="ScheduleMeetingModalLabel" aria-hidden="true">
-          <div className="modal-dialog j_Schedule_width modal-lg modal-dialog-centered">
-            <div className="modal-content j_modal_schedule">
-              <div className="modal-header border-0 d-flex justify-content-between align-items-center">
-                <h1 className="modal-title j_join_title text-white" id="ScheduleMeetingModalLabel">Schedule Meeting</h1>
-                <IoClose style={{ color: '#fff', fontSize: '22px' }} type="button" data-bs-dismiss="modal" aria-label="Close" />
-              </div>
-              <div className="j_modal_header"></div>
-              <div className="modal-body py-0">
-                <div className="row">
-                  <div className="col-6 col-md-8 ps-0 j_schedule_border">
-                    <form>
-                      <div className="mb-3 pt-3">
-                        <label htmlFor="meetingTitle" className="form-label text-white j_join_text">Title</label>
-                        <input type="text" className="form-control j_input j_join_text" id="meetingTitle" placeholder="Enter title for meeting" />
-                      </div>
-                      <div className="j_schedule_DnT B_schedule_DnT">
-                        <div className="mb-3">
-                          <label htmlFor="meetingDate" className="form-label text-white j_join_text">Date</label>
-                          <input type="date" className="form-control j_input j_join_text B_schedule_input" id="meetingDate" />
-                        </div>
-                        <div className="mb-3">
-                          <label htmlFor="startTime" className="form-label text-white j_join_text">Start Time</label>
-                          <input type="time" className="form-control j_input j_join_text B_schedule_input" id="startTime" />
-                        </div>
-                        <div className="mb-3">
-                          <label htmlFor="endTime" className="form-label text-white j_join_text">End Time</label>
-                          <input type="time" className="form-control j_input j_join_text B_schedule_input" id="endTime" />
-                        </div>
-                      </div>
-                      <div className="mb-3">
-                        <label htmlFor="meetingLink" className="form-label text-white j_join_text">Meeting Link</label>
-                        <select className="form-select j_select j_join_text" id="meetingLink">
-                          <option value="0">Select</option>
-                          <option value="1">Generate a one time meeting link</option>
-                          <option value="2">Use my personal room link</option>
-                        </select>
-                      </div>
-                      <div className="mb-3">
-                        <label htmlFor="description" className="form-label text-white j_join_text">Description</label>
-                        <textarea className="form-control j_input j_join_text" id="description" rows="3" placeholder="Enter a description for meeting"></textarea>
-                      </div>
-                      <div className="mb-3">
-                        <label className="form-label text-white j_join_text">Reminder</label>
-                        <div>
-                          <button
-                            type="button"
-                            className={`btn j_schedule_btn ${selectedReminders.includes('5 min before') ? 'j_schedule_selected_btn' : ''}`}
-                            onClick={() => toggleReminder('5 min before')}
-                          >
-                            5 min before
-                          </button>
-                          <button
-                            type="button"
-                            className={`btn j_schedule_btn ${selectedReminders.includes('10 min before') ? 'j_schedule_selected_btn' : ''}`}
-                            onClick={() => toggleReminder('10 min before')}
-                          >
-                            10 min before
-                          </button>
-                          <button
-                            type="button"
-                            className={`btn j_schedule_btn ${selectedReminders.includes('15 min before') ? 'j_schedule_selected_btn' : ''}`}
-                            onClick={() => toggleReminder('15 min before')}
-                          >
-                            15 min before
-                          </button>
-                          <button
-                            type="button"
-                            className={`btn j_schedule_btn ${selectedReminders.includes('30 min before') ? 'j_schedule_selected_btn' : ''}`}
-                            onClick={() => toggleReminder('30 min before')}
-                          >
-                            30 min before
-                          </button>
-                          <button
-                            type="button"
-                            className={`btn j_schedule_btn ${selectedReminders.includes('1 hr before') ? 'j_schedule_selected_btn' : ''}`}
-                            onClick={() => toggleReminder('1 hr before')}
-                          >
-                            1 hr before
-                          </button>
-                          <button
-                            type="button"
-                            className={`btn j_schedule_btn ${selectedReminders.includes('2 hr before') ? 'j_schedule_selected_btn' : ''}`}
-                            onClick={() => toggleReminder('2 hr before')}
-                          >
-                            2 hr before
-                          </button>
-                          <button
-                            type="button"
-                            className={`btn j_schedule_btn ${selectedReminders.includes('1 day before') ? 'j_schedule_selected_btn' : ''}`}
-                            onClick={() => toggleReminder('1 day before')}
-                          >
-                            1 day before
-                          </button>
-                          <button
-                            type="button"
-                            className={`btn j_schedule_btn ${selectedReminders.includes('2 days before') ? 'j_schedule_selected_btn' : ''}`}
-                            onClick={() => toggleReminder('2 days before')}
-                          >
-                            2 days before
-                          </button>
-                        </div>
-                      </div>
-                      <div className="mb-3">
-                        <label htmlFor="recurringMeetings" className="form-label text-white j_join_text">Recurring Meetings</label>
-                        <select className="form-select j_select j_join_text" id="recurringMeetings" onChange={(e) => {
-                          if (e.target.value === "custom") {
-                            const customModal = new window.bootstrap.Modal(document.getElementById('customModal'));
-                            customModal.show();
-                          }
-                        }}>
-                          <option value="0">select</option>
-                          <option value="1">Does not repeat</option>
-                          <option value="2">Daily</option>
-                          <option value="3">Weekly on Monday</option>
-                          <option value="4">Monthly on 3 February</option>
-                          <option value="custom">Custom</option>
-                        </select>
-                      </div>
-                      <div className="modal-footer j_schedule_footer border-0 p-0 pt-4 pb-3">
-                        <button type="button" className="btn btn-outline-light j_home_button B_schedule_btn1 fw-semibold" data-bs-dismiss="modal">Cancel</button>
-                        <button type="button" className="btn btn-light j_home_button fw-semibold">Schedule</button>
-                      </div>
-                    </form>
+        {/* ============================ Schedule Meeting Modal ============================  */}
+        <Modal
+          show={ScheduleModal}
+          onHide={handleScheduleclose}
+          size="lg"
+          centered
+          contentClassName="j_modal_schedule "
+          dialogClassName="j_Schedule_width"
+        >
+          <Modal.Header className="border-0 d-flex justify-content-between align-items-center">
+            <Modal.Title className="j_join_title text-white">Schedule Meeting</Modal.Title>
+            <IoClose
+              style={{ color: '#fff', fontSize: '22px', cursor: 'pointer' }}
+              onClick={handleScheduleclose}
+            />
+          </Modal.Header>
+          <div className="j_modal_header"></div>
+          <Modal.Body className="py-0">
+            {/* <div className="row">
+              <div className="col-6 col-md-8 ps-0 j_schedule_border">
+                <form>
+                  <div className="mb-3 pt-3">
+                    <label htmlFor="meetingTitle" className="form-label text-white j_join_text">Title</label>
+                    <input type="text" className="form-control j_input j_join_text" id="meetingTitle" placeholder="Enter title for meeting" />
                   </div>
-
-                  <div className="col-6 col-md-4 pe-0">
-                    <div className="mb-3 pt-3">
-                      <p className='mb-0 text-white'>Invitees (0)</p>
-                      <div className="position-relative mt-1">
-                        <IoSearch className=' position-absolute' style={{ top: "50%", transform: "translateY(-50%)", left: "4px", fontSize: "15px", color: "rgba(255, 255, 255, 0.7)" }} />
-                        <input
-                          type="search"
-                          className="form-control text-white j_input ps-4 j_join_text"
-                          placeholder="Add people by name or email..."
-                          style={{ borderRadius: '5px', border: 'none', backgroundColor: "#202F41" }}
-                        />
-                      </div>
+                  <div className="j_schedule_DnT B_schedule_DnT">
+                    <div className="mb-3">
+                      <label htmlFor="meetingDate" className="form-label text-white j_join_text">Date</label>
+                      <input type="date" className="form-control j_input j_join_text B_schedule_input" id="meetingDate" />
                     </div>
+                    <div className="mb-3">
+                      <label htmlFor="startTime" className="form-label text-white j_join_text">Start Time</label>
+                      <input type="time" className="form-control j_input j_join_text B_schedule_input" id="startTime" />
+                    </div>
+                    <div className="mb-3">
+                      <label htmlFor="endTime" className="form-label text-white j_join_text">End Time</label>
+                      <input type="time" className="form-control j_input j_join_text B_schedule_input" id="endTime" />
+                    </div>
+                  </div>
+                  <div className="mb-3">
+                    <label htmlFor="meetingLink" className="form-label text-white j_join_text">Meeting Link</label>
+                    <Form.Select className="j_select j_join_text" id="meetingLink">
+                      <option value="0">Select</option>
+                      <option value="1">Generate a one time meeting link</option>
+                      <option value="2">Use my personal room link</option>
+                    </Form.Select>
+                  </div>
+                  <div className="mb-3">
+                    <label htmlFor="description" className="form-label text-white j_join_text">Description</label>
+                    <Form.Control
+                      as="textarea"
+                      rows={3}
+                      className="j_input j_join_text"
+                      placeholder="Enter a description for meeting"
+                    />
+                  </div>
+                  <div className="mb-3">
+                    <label className="form-label text-white j_join_text">Reminder</label>
+                    <div>
+                      {['5 min before', '10 min before', '15 min before', '30 min before',
+                        '1 hr before', '2 hr before', '1 day before', '2 days before'].map((reminder) => (
+                          <Button
+                            key={reminder}
+                            type="button"
+                            className={`j_schedule_btn ${selectedReminders.includes(reminder) ? 'j_schedule_selected_btn' : ''}`}
+                            onClick={() => toggleReminder(reminder)}
+                          >
+                            {reminder}
+                          </Button>
+                        ))}
+                    </div>
+                  </div>
+                  <div className="mb-3">
+                    <label htmlFor="recurringMeetings" className="form-label text-white j_join_text">Recurring Meetings</label>
+                    <Form.Select
+                      className="j_select j_join_text"
+                      onChange={(e) => {
+                        if (e.target.value === "custom") {
+                          handleScheduleclose();
+                          handlecustomshow();
+                        }
+                      }}
+                    >
+                      <option value="0">select</option>
+                      <option value="1">Does not repeat</option>
+                      <option value="2">Daily</option>
+                      <option value="3">Weekly on Monday</option>
+                      <option value="4">Monthly on 3 February</option>
+                      <option value="custom">Custom</option>
+                    </Form.Select>
+                  </div>
+                  <Modal.Footer className="j_schedule_footer border-0 p-0 pt-4 pb-3 gap-0 gap-md-4">
+                    <Button variant="outline-light" className="j_home_button B_schedule_btn1 fw-semibold" onClick={handleScheduleclose}>
+                      Cancel
+                    </Button>
+                    <Button variant="light" className="j_home_button fw-semibold">
+                      Schedule
+                    </Button>
+                  </Modal.Footer>
+                </form>
+              </div>
+
+              <div className="col-6 col-md-4 pe-0">
+                <div className="mb-3 pt-3">
+                  <p className='mb-0 text-white'>Invitees (0)</p>
+                  <div className="position-relative mt-1">
+                    <IoSearch className='position-absolute' style={{ top: "50%", transform: "translateY(-50%)", left: "4px", fontSize: "15px", color: "rgba(255, 255, 255, 0.7)" }} />
+                    <Form.Control
+                      type="search"
+                      className="text-white j_input ps-4 j_join_text"
+                      placeholder="Add people by name or email..."
+                      style={{ borderRadius: '5px', border: 'none', backgroundColor: "#202F41" }}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div> */}
+            <div className="row">
+              <div className="col-6 col-md-8 ps-0 j_schedule_border">
+                <form>
+                  <div className="mb-3 pt-3">
+                    <label htmlFor="meetingTitle" className="form-label text-white j_join_text">Title</label>
+                    <input type="text" className="form-control j_input j_join_text" id="meetingTitle" placeholder="Enter title for meeting" />
+                  </div>
+                  <div className="j_schedule_DnT B_schedule_DnT">
+                    <div className="mb-3">
+                      <label htmlFor="meetingDate" className="form-label text-white j_join_text">Date</label>
+                      <input type="date" className="form-control j_input j_join_text B_schedule_input" id="meetingDate" />
+                    </div>
+                    <div className="mb-3">
+                      <label htmlFor="startTime" className="form-label text-white j_join_text">Start Time</label>
+                      <input type="time" className="form-control j_input j_join_text B_schedule_input" id="startTime" />
+                    </div>
+                    <div className="mb-3">
+                      <label htmlFor="endTime" className="form-label text-white j_join_text">End Time</label>
+                      <input type="time" className="form-control j_input j_join_text B_schedule_input" id="endTime" />
+                    </div>
+                  </div>
+                  <div className="mb-3">
+                    <label htmlFor="meetingLink" className="form-label text-white j_join_text">Meeting Link</label>
+                    <select className="form-select j_select j_join_text" id="meetingLink">
+                      <option value="0">Select</option>
+                      <option value="1">Generate a one time meeting link</option>
+                      <option value="2">Use my personal room link</option>
+                    </select>
+                  </div>
+                  <div className="mb-3">
+                    <label htmlFor="description" className="form-label text-white j_join_text">Description</label>
+                    <textarea className="form-control j_input j_join_text" id="description" rows="3" placeholder="Enter a description for meeting"></textarea>
+                  </div>
+                  <div className="mb-3">
+                    <label className="form-label text-white j_join_text">Reminder</label>
+                    <div>
+                      <button
+                        type="button"
+                        className={`btn j_schedule_btn ${selectedReminders.includes('5 min before') ? 'j_schedule_selected_btn' : ''}`}
+                        onClick={() => toggleReminder('5 min before')}
+                      >
+                        5 min before
+                      </button>
+                      <button
+                        type="button"
+                        className={`btn j_schedule_btn ${selectedReminders.includes('10 min before') ? 'j_schedule_selected_btn' : ''}`}
+                        onClick={() => toggleReminder('10 min before')}
+                      >
+                        10 min before
+                      </button>
+                      <button
+                        type="button"
+                        className={`btn j_schedule_btn ${selectedReminders.includes('15 min before') ? 'j_schedule_selected_btn' : ''}`}
+                        onClick={() => toggleReminder('15 min before')}
+                      >
+                        15 min before
+                      </button>
+                      <button
+                        type="button"
+                        className={`btn j_schedule_btn ${selectedReminders.includes('30 min before') ? 'j_schedule_selected_btn' : ''}`}
+                        onClick={() => toggleReminder('30 min before')}
+                      >
+                        30 min before
+                      </button>
+                      <button
+                        type="button"
+                        className={`btn j_schedule_btn ${selectedReminders.includes('1 hr before') ? 'j_schedule_selected_btn' : ''}`}
+                        onClick={() => toggleReminder('1 hr before')}
+                      >
+                        1 hr before
+                      </button>
+                      <button
+                        type="button"
+                        className={`btn j_schedule_btn ${selectedReminders.includes('2 hr before') ? 'j_schedule_selected_btn' : ''}`}
+                        onClick={() => toggleReminder('2 hr before')}
+                      >
+                        2 hr before
+                      </button>
+                      <button
+                        type="button"
+                        className={`btn j_schedule_btn ${selectedReminders.includes('1 day before') ? 'j_schedule_selected_btn' : ''}`}
+                        onClick={() => toggleReminder('1 day before')}
+                      >
+                        1 day before
+                      </button>
+                      <button
+                        type="button"
+                        className={`btn j_schedule_btn ${selectedReminders.includes('2 days before') ? 'j_schedule_selected_btn' : ''}`}
+                        onClick={() => toggleReminder('2 days before')}
+                      >
+                        2 days before
+                      </button>
+                    </div>
+                  </div>
+                  <div className="mb-3">
+                    <label htmlFor="recurringMeetings" className="form-label text-white j_join_text">Recurring Meetings</label>
+                    <select className="form-select j_select j_join_text" id="recurringMeetings"
+                      onChange={(e) => {
+                        if (e.target.value === "custom") {
+                          handleScheduleclose();
+                          handlecustomshow();
+                        }
+                      }}>
+                      <option value="0">select</option>
+                      <option value="1">Does not repeat</option>
+                      <option value="2">Daily</option>
+                      <option value="3">Weekly on Monday</option>
+                      <option value="4">Monthly on 3 February</option>
+                      <option value="custom">Custom</option>
+                    </select>
+                  </div>
+                  <div className="modal-footer j_schedule_footer border-0 p-0 pt-4 pb-3">
+                    <button type="button" className="btn btn-outline-light j_home_button B_schedule_btn1 fw-semibold" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" className="btn btn-light j_home_button fw-semibold">Schedule</button>
+                  </div>
+                </form>
+              </div>
+
+              <div className="col-6 col-md-4 pe-0">
+                <div className="mb-3 pt-3">
+                  <p className='mb-0 text-white'>Invitees (0)</p>
+                  <div className="position-relative mt-1">
+                    <IoSearch className=' position-absolute' style={{ top: "50%", transform: "translateY(-50%)", left: "4px", fontSize: "15px", color: "rgba(255, 255, 255, 0.7)" }} />
+                    <input
+                      type="search"
+                      className="form-control text-white j_input ps-4 j_join_text"
+                      placeholder="Add people by name or email..."
+                      style={{ borderRadius: '5px', border: 'none', backgroundColor: "#202F41" }}
+                    />
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-        </div>
+          </Modal.Body>
+        </Modal>
 
-        {/* ============================ Schedule Meeting custom Modal ============================ */}
-        <div className="modal fade" id="customModal" tabIndex={-1} aria-labelledby="customModalLabel" aria-hidden="true" >
-          <div className="modal-dialog modal-dialog-centered">
-            <div className="modal-content j_modal_join">
-              <div className="modal-header border-0 d-flex justify-content-between align-items-center">
-                <h1 className="modal-title text-white j_join_title" id="customModalLabel">Custom Recurrence</h1>
-                <IoClose style={{ color: '#fff', fontSize: '22px' }} type="button" data-bs-dismiss="modal" aria-label="Close" />
+        {/* ============================ Schedule Meeting custom Modal ============================  */}
+        <Modal
+          show={customModal}
+          onHide={handlecustomclose}
+          centered
+          contentClassName="j_modal_join"
+        >
+          <Modal.Header className="border-0 d-flex justify-content-between align-items-center">
+            <Modal.Title className="text-white j_join_title">Custom Recurrence</Modal.Title>
+            <IoClose
+              style={{ color: '#fff', fontSize: '22px', cursor: 'pointer' }}
+              onClick={handlecustomclose}
+            />
+          </Modal.Header>
+          <div className="j_modal_header"></div>
+          <Modal.Body>
+            {/* <div className="j_schedule_Repeat">
+              <div className="mb-3 flex-fill me-2 j_select_fill J_Fill_bottom">
+                <Form.Label className="text-white j_join_text">Repeat Type</Form.Label>
+                <Form.Select className="j_select j_join_text">
+                  <option value="0">Select</option>
+                  <option value="1">Daily</option>
+                  <option value="2">Weekly</option>
+                  <option value="3">Monthly</option>
+                  <option value="4">Yearly</option>
+                </Form.Select>
               </div>
-              <div className="j_modal_header"></div>
-              <div className="modal-body">
-                <div className="j_schedule_Repeat">
-                  <div className="mb-3 flex-fill me-2  j_select_fill">
-                    <label htmlFor="RepeatType" className="form-label text-white j_join_text">Repeat Type</label>
-                    <select className="form-select j_select j_join_text" id="RepeatType">
-                      <option value="0">Select</option>
-                      <option value="1">Daily</option>
-                      <option value="2">Weekly</option>
-                      <option value="3">Monthly</option>
-                      <option value="4">Yearly</option>
-                    </select>
+              <div className="mb-3 flex-fill j_select_fill J_Fill_bottom">
+                <Form.Label className="text-white j_join_text">Repeat Every</Form.Label>
+                <div className='position-relative'>
+                  <Form.Control
+                    type="text"
+                    className="j_input j_join_text"
+                    value={RepeatEvery}
+                    onChange={(e) => setRepeatEvery(Number(e.target.value) || 1)}
+                  />
+                  <div className="j_custom_icons">
+                    <FaAngleUp
+                      style={{ color: 'white', fontSize: '12px', cursor: 'pointer' }}
+                      onClick={handleIncrement}
+                    />
+                    <FaAngleDown
+                      style={{ color: 'white', fontSize: '12px', cursor: 'pointer' }}
+                      onClick={handleDecrement}
+                    />
                   </div>
-                  <div className="mb-3 flex-fill  j_select_fill">
-                    <label htmlFor="RepeatEvery" className="form-label text-white j_join_text">Repeat Every</label>
-                    <div className='position-relative'>
-                      <input type="text" className="form-control j_input j_join_text" id="RepeatEvery" onChange={(e) => setRepeatEvery(Number(e.target.value) || 1)} value={RepeatEvery} />
-                      <div className="j_custom_icons">
-                        <FaAngleUp style={{ color: 'white', fontSize: '12px' }} onClick={() => handleIncrement()} />
-                        <FaAngleDown style={{ color: 'white', fontSize: '12px' }} onClick={() => handleDecrement()} />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div className="mb-3">
-                  <label className="form-label text-white j_join_text">Repeat On</label>
-                  <div className="d-flex">
-                    <button
-                      className={`btn ${selectedDays.includes('Sunday') ? 'j_day_selected_btn' : 'j_day_btn'} me-1`}
-                      onClick={() => toggleDay('Sunday')}
-                    >
-                      S
-                    </button>
-                    <button
-                      className={`btn ${selectedDays.includes('Monday') ? 'j_day_selected_btn' : 'j_day_btn'} me-1`}
-                      onClick={() => toggleDay('Monday')}
-                    >
-                      M
-                    </button>
-                    <button
-                      className={`btn ${selectedDays.includes('Tuesday') ? 'j_day_selected_btn' : 'j_day_btn'} me-1`}
-                      onClick={() => toggleDay('Tuesday')}
-                    >
-                      T
-                    </button>
-                    <button
-                      className={`btn ${selectedDays.includes('Wednesday') ? 'j_day_selected_btn' : 'j_day_btn'} me-1`}
-                      onClick={() => toggleDay('Wednesday')}
-                    >
-                      W
-                    </button>
-                    <button
-                      className={`btn ${selectedDays.includes('Thursday') ? 'j_day_selected_btn' : 'j_day_btn'} me-1`}
-                      onClick={() => toggleDay('Thursday')}
-                    >
-                      T
-                    </button>
-                    <button
-                      className={`btn ${selectedDays.includes('Friday') ? 'j_day_selected_btn' : 'j_day_btn'} me-1`}
-                      onClick={() => toggleDay('Friday')}
-                    >
-                      F
-                    </button>
-                    <button
-                      className={`btn ${selectedDays.includes('Saturday') ? 'j_day_selected_btn' : 'j_day_btn'} me-1`}
-                      onClick={() => toggleDay('Saturday')}
-                    >
-                      S
-                    </button>
-                  </div>
-                </div>
-
-                <div className="j_schedule_Repeat">
-                  <div className="mb-3 flex-fill me-2  j_select_fill">
-                    <label htmlFor="RepeatType" className="form-label text-white j_join_text">Ends</label>
-                    <select className="form-select j_select j_join_text" id="RepeatType">
-                      <option value="0">Select</option>
-                      <option value="1">Never</option>
-                      <option value="2">On</option>
-                      <option value="3">After</option>
-                    </select>
-                  </div>
-                  <div className="mb-3 flex-fill  j_select_fill">
-                    <label htmlFor="RepeatType" className="form-label text-white j_join_text"></label>
-                    <input type="date" className="form-control j_input j_join_text j_special_m" id="RepeatEvery" />
-                  </div>
-                </div>
-                <div className="modal-footer j_custom_footer border-0 p-0 pt-4 pb-3 gap-0 gap-md-4">
-                  <button type="button" className="btn btn-outline-light j_custom_button fw-semibold" data-bs-dismiss="modal">Cancel</button>
-                  <button type="button" className="btn btn-light j_custom_button fw-semibold">Done</button>
                 </div>
               </div>
             </div>
-          </div>
-        </div>
+
+            <div className="mb-3">
+              <Form.Label className="text-white j_join_text">Repeat On</Form.Label>
+              <div className="d-flex B_Repeat_on_btn">
+                {['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'].map((day) => (
+                  <Button
+                    key={day}
+                    className={`${selectedDays.includes(day) ? 'j_day_selected_btn' : 'j_day_btn'} me-1`}
+                    onClick={() => toggleDay(day)}
+                  >
+                    {day[0]}
+                  </Button>
+                ))}
+              </div>
+            </div>
+
+            <div className="j_schedule_Repeat">
+              <div className="mb-3 flex-fill me-2 j_select_fill J_Fill_bottom">
+                <Form.Label className="text-white j_join_text">Ends</Form.Label>
+                <Form.Select className="j_select j_join_text">
+                  <option value="0">Select</option>
+                  <option value="1">Never</option>
+                  <option value="2">On</option>
+                  <option value="3">After</option>
+                </Form.Select>
+              </div>
+              <div className="mb-3 flex-fill j_select_fill J_Fill_bottom">
+                <Form.Label className="text-white j_join_text"></Form.Label>
+                <Form.Control
+                  type="date"
+                  className="j_input j_join_text j_special_m"
+                />
+              </div>
+            </div> */}
+            <div className="j_schedule_Repeat">
+              <div className="mb-3 flex-fill me-2  j_select_fill">
+                <label htmlFor="RepeatType" className="form-label text-white j_join_text">Repeat Type</label>
+                <select className="form-select j_select j_join_text" id="RepeatType">
+                  <option value="0">Select</option>
+                  <option value="1">Daily</option>
+                  <option value="2">Weekly</option>
+                  <option value="3">Monthly</option>
+                  <option value="4">Yearly</option>
+                </select>
+              </div>
+              <div className="mb-3 flex-fill  j_select_fill">
+                <label htmlFor="RepeatEvery" className="form-label text-white j_join_text">Repeat Every</label>
+                <div className='position-relative'>
+                  <input type="text" className="form-control j_input j_join_text" id="RepeatEvery" onChange={(e) => setRepeatEvery(Number(e.target.value) || 1)} value={RepeatEvery} />
+                  <div className="j_custom_icons">
+                    <FaAngleUp style={{ color: 'white', fontSize: '12px' }} onClick={() => handleIncrement()} />
+                    <FaAngleDown style={{ color: 'white', fontSize: '12px' }} onClick={() => handleDecrement()} />
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="mb-3">
+              <label className="form-label text-white j_join_text">Repeat On</label>
+              <div className="d-flex">
+                <button
+                  className={`btn ${selectedDays.includes('Sunday') ? 'j_day_selected_btn' : 'j_day_btn'} me-1`}
+                  onClick={() => toggleDay('Sunday')}
+                >
+                  S
+                </button>
+                <button
+                  className={`btn ${selectedDays.includes('Monday') ? 'j_day_selected_btn' : 'j_day_btn'} me-1`}
+                  onClick={() => toggleDay('Monday')}
+                >
+                  M
+                </button>
+                <button
+                  className={`btn ${selectedDays.includes('Tuesday') ? 'j_day_selected_btn' : 'j_day_btn'} me-1`}
+                  onClick={() => toggleDay('Tuesday')}
+                >
+                  T
+                </button>
+                <button
+                  className={`btn ${selectedDays.includes('Wednesday') ? 'j_day_selected_btn' : 'j_day_btn'} me-1`}
+                  onClick={() => toggleDay('Wednesday')}
+                >
+                  W
+                </button>
+                <button
+                  className={`btn ${selectedDays.includes('Thursday') ? 'j_day_selected_btn' : 'j_day_btn'} me-1`}
+                  onClick={() => toggleDay('Thursday')}
+                >
+                  T
+                </button>
+                <button
+                  className={`btn ${selectedDays.includes('Friday') ? 'j_day_selected_btn' : 'j_day_btn'} me-1`}
+                  onClick={() => toggleDay('Friday')}
+                >
+                  F
+                </button>
+                <button
+                  className={`btn ${selectedDays.includes('Saturday') ? 'j_day_selected_btn' : 'j_day_btn'} me-1`}
+                  onClick={() => toggleDay('Saturday')}
+                >
+                  S
+                </button>
+              </div>
+            </div>
+
+            <div className="j_schedule_Repeat">
+              <div className="mb-3 flex-fill me-2  j_select_fill">
+                <label htmlFor="RepeatType" className="form-label text-white j_join_text">Ends</label>
+                <select className="form-select j_select j_join_text" id="RepeatType">
+                  <option value="0">Select</option>
+                  <option value="1">Never</option>
+                  <option value="2">On</option>
+                  <option value="3">After</option>
+                </select>
+              </div>
+              <div className="mb-3 flex-fill  j_select_fill">
+                <label htmlFor="RepeatType" className="form-label text-white j_join_text"></label>
+                <input type="date" className="form-control j_input j_join_text j_special_m" id="RepeatEvery" />
+              </div>
+            </div>
+            {/* <div className="modal-footer j_custom_footer border-0 p-0 pt-4 pb-3 gap-0 gap-md-4">
+              <button type="button" className="btn btn-outline-light j_custom_button fw-semibold" data-bs-dismiss="modal">Cancel</button>
+              <button type="button" className="btn btn-light j_custom_button fw-semibold">Done</button>
+            </div> */}
+            <Modal.Footer className="j_custom_footer border-0 p-0 pt-4 pb-3">
+              <Button
+                variant="outline-light"
+                className="j_custom_button fw-semibold"
+                onClick={handlecustomclose}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="light"
+                className="j_custom_button fw-semibold"
+              >
+                Done
+              </Button>
+            </Modal.Footer>
+          </Modal.Body>
+          {/* <Modal.Footer className="j_custom_footer border-0 p-0 pt-4 pb-3">
+            <Button
+              variant="outline-light"
+              className="j_custom_button fw-semibold"
+              onClick={handlecustomclose}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="light"
+              className="j_custom_button fw-semibold"
+            >
+              Done
+            </Button>
+          </Modal.Footer> */}
+        </Modal>
 
         {/* ============================ join Meeting Modal ============================ */}
         <div className="modal fade" id="joinMeetingModal" tabIndex={-1} aria-labelledby="joinMeetingModalLabel" aria-hidden="true" >

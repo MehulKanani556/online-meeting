@@ -72,14 +72,20 @@ export const deleteUser = createAsyncThunk(
 
 export const updateUser = createAsyncThunk(
     "users/updateUser",
-    async ({ id, values }, { dispatch, rejectWithValue }) => {
-        console.log(id, values);
-
+    async ({ id, values, file }, { dispatch, rejectWithValue }) => {
+        console.log(values, file);
         const token = await sessionStorage.getItem("token");
         const formData = new FormData();
+
         Object.keys(values).forEach((key) => {
             formData.append(key, values[key]);
         });
+
+        if (file) {
+            formData.append('photo', file);
+            console.log('Appended file to formData:', file);
+        }
+
         try {
             const response = await axios.put(`${BASE_URL}/userUpdate/${id}`, formData, {
                 headers: {
@@ -95,6 +101,23 @@ export const updateUser = createAsyncThunk(
     }
 );
 
+export const removeUserProfilePic = createAsyncThunk(
+    'users/removeProfilePic',
+    async (id, { dispatch, rejectWithValue }) => {
+        try {
+            const token = await sessionStorage.getItem("token");
+            const response = await axios.put(`${BASE_URL}/removeProfilePic/${id}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                }
+            });
+            dispatch(setAlert({ text: response.data.message, color: 'success' }));
+            return response.data; // Return any necessary data
+        } catch (error) {
+            return handleErrors(error, dispatch, rejectWithValue);
+        }
+    }
+);
 
 export const getUserById = createAsyncThunk(
     'users/getUserById',
@@ -107,7 +130,7 @@ export const getUserById = createAsyncThunk(
                 }
             });
             // dispatch(setAlert({ text: response.data.message, color: 'success' }));
-            dispatch(getAllUsers());
+            // dispatch(getAllUsers());
             return response.data.user;
         } catch (error) {
             return handleErrors(error, dispatch, rejectWithValue);
@@ -179,6 +202,23 @@ const usersSlice = createSlice({
                 state.message = action.payload?.message || 'User updated successfully';
             })
             .addCase(updateUser.rejected, (state, action) => {
+                state.loading = false;
+                state.success = false;
+                state.message = action.payload?.message || 'Failed to update user';
+            })
+            .addCase(removeUserProfilePic.pending, (state) => {
+                state.loading = true;
+                state.message = 'Editing user...';
+            })
+            .addCase(removeUserProfilePic.fulfilled, (state, action) => {
+                state.loading = false;
+                state.success = true;
+                state.allusers = state.allusers.map(user =>
+                    user._id === action.payload._id ? action.payload : user
+                );
+                state.message = action.payload?.message || 'User updated successfully';
+            })
+            .addCase(removeUserProfilePic.rejected, (state, action) => {
                 state.loading = false;
                 state.success = false;
                 state.message = action.payload?.message || 'Failed to update user';

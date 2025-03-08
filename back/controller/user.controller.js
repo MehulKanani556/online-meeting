@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken');
 
 exports.createNewUser = async (req, res) => {
     try {
-        let { name, email, password, timeZone, language } = req.body;
+        let { name, email, password, timeZone, language, photo } = req.body;
 
         let chekUser = await user.findOne({ email: req.body.email });
 
@@ -77,21 +77,29 @@ exports.getUserById = async (req, res) => {
 
 exports.updateUser = async (req, res) => {
     try {
-        let id = req.params.id
-        let { name, displayName, language, timeZone } = req.body
-        console.log(req.body, id);
+        let id = req.params.id;
+        let userData = req.body;
+        const filePath = req.file ? req.file.path : null;
+        console.log("filePath", filePath);
+        console.log("Request body:", req.body);
+        console.log("Uploaded file:", req.file);
 
         let userUpdateById = await user.findById(id);
 
         if (!userUpdateById) {
-            return res.json({ status: 400, message: "User Not Found" })
+            return res.json({ status: 400, message: "User Not Found" });
         }
 
-        userUpdateById = await user.findByIdAndUpdate(id, { name, displayName, language, timeZone }, { new: true });
+        const updateData = { ...userData };
+        if (filePath) {
+            updateData.photo = filePath;
+        }
+        console.log("updateData", updateData);
 
-        return res.json({ status: 200, message: "User Updated SuccessFully", user: userUpdateById });
-    }
-    catch (error) {
+        userUpdateById = await user.findByIdAndUpdate(id, updateData, { new: true });
+
+        return res.json({ status: 200, message: "User Updated Successfully", user: userUpdateById });
+    } catch (error) {
         console.log(error);
         res.json({ status: 500, message: error.message });
     }
@@ -116,3 +124,24 @@ exports.removeUser = async (req, res) => {
         console.log(error);
     }
 }
+
+exports.removeUserProfilePic = async (req, res) => {
+    try {
+        let id = req.params.id;
+
+        let userUpdateById = await user.findById(id);
+
+        if (!userUpdateById) {
+            return res.json({ status: 400, message: "User Not Found" });
+        }
+
+        // Remove the photo field
+        userUpdateById.photo = null;
+        await userUpdateById.save();
+
+        return res.json({ status: 200, message: "Profile picture removed successfully" });
+    } catch (error) {
+        res.json({ status: 500, message: error.message });
+        console.log(error);
+    }
+};

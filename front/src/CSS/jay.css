@@ -477,13 +477,30 @@
     border: none;
 }
 
+.j_homenav_dropdown:focus-visible {
+    color: white;
+    background-color: #202F41;
+    border: none;
+    outline: 0;
+    box-shadow: none;
+}
+
+.j_homenav_dropdown.show:focus-visible {
+    box-shadow: none;
+}
+
 .j_drop_menu {
+    transform: translate(28%, 45%) !important;
     background-color: #121b26;
 }
 
-.j_drop_menu li a {
+.j_drop_menu .j_drop_item {
     color: white;
     font-size: 15px;
+}
+
+.j_drop_item:active {
+    background-color: #121b26;
 }
 
 .j_drop_menu[data-bs-popper] {
@@ -525,9 +542,10 @@
 
 .j_profile_icon {
     display: flex;
+    align-items: center;
 }
 
-.j_profile_icon .j_profile_short {
+.j_profile_short {
     height: 50px;
     width: 50px;
     text-align: center;
@@ -537,6 +555,7 @@
     padding: 5px;
     text-transform: capitalize;
     color: white;
+    margin: 0;
 }
 
 .j_profile_name {
@@ -623,6 +642,19 @@
 }
 
 
+.j_remove_icon::after {
+    display: none;
+}
+
+.j_image_Upload {
+    display: flex;
+    justify-content: center;
+}
+
+.j_Upload_Btn {
+    margin: 2px;
+    padding: 5px 20px;
+}
 
 @media (min-width: 1921px) {
     .j_Home_sidebar {
@@ -681,6 +713,11 @@
     .j_Schedule_width {
         max-width: 900px;
     }
+
+    .j_drop_menu {
+        transform: translate(20%, 45%) !important;
+    }
+}
 
 
     @media (max-width: 768px) {
@@ -928,8 +965,241 @@
             padding: 5px 10px;
         }
 
-        .j_custom_button {
-            padding: 4px 39 px;
-        }
+        /* .j_custom_button {
+            padding: 4px 39px;
+        } */
+    .j_home_button {
+        padding: 6px 50px;
+    }
+}
+
+@media (max-width: 425px) {
+    .j_col_pad {
+        padding: 0;
+        margin-bottom: 20px;
+    }
+
+    .j_col_pad2 {
+        padding: 0;
+    }
+
+    .j_login_center {
+        height: 100%
+    }
+
+    .j_col_img img {
+        margin: 20px 0;
+        height: 300px;
+    }
+
+    .j_nav_padding {
+        padding: 10px 20px;
+    }
+
+    .j_nav_btn {
+        font-size: 13px;
+    }
+
+    .j_flex_direction {
+        flex-direction: column;
+    }
+
+    .j_home_connent_h4 {
+        font-size: 18px;
+    }
+
+    .j_sidebar_width {
+        width: 18%;
+    }
+
+    .j_contant_width {
+        width: 82%;
+        margin-top: 50px;
+        justify-content: start;
+    }
+
+    .j_sidebar_a img {
+        height: 18px;
+        width: 18px;
+    }
+
+    .j_modal_join {
+        width: 350px !important;
+        margin: 0 auto;
+        padding: 10px;
+    }
+
+    .j_join_button {
+        padding: 8px 45px;
+    }
+
+    .j_join_title {
+        font-size: 16px;
+    }
+
+    .j_sidebar_a {
+        font-size: 12.5px;
+    }
+
+    .j_schedule_btn {
+        margin: 5px 5px 0 0;
+    }
+
+    .j_modal_schedule {
+        width: 400px !important;
+        margin: 0 auto;
+    }
+
+    .j_home_button {
+        padding: 5px 25px;
+        margin: 0;
+    }
+
+    .j_schedule_footer {
+        justify-content: space-between;
+    }
+
+    .j_Home_sidebar {
+        height: 100%;
+    }
+
+    .j_drop_menu {
+        transform: translate(10%, 45%) !important;
+    }
+
+    .j_profile_name {
+        margin-left: 12px;
+        font-size: 14px;
+    }
+
+    .j_profile_name span {
+        font-size: 13px;
+    }
+
+    .j_my_profile {
+        font-size: 14px;
+    }
+
+    .j_custom_button {
+        padding: 5px 45px;
+    }
+}
+
+@media (max-width: 375px) {
+    .j_col_img img {
+        height: 265px;
+        width: 340px;
+    }
+
+    .signin-container {
+        width: 350px;
+    }
+
+    .j_sidebar_width {
+        width: 20%;
+    }
+
+    .j_contant_width {
+        width: 80%;
+    }
+
+    .j_home_connent_h4 {
+        font-size: 14px;
+    }
+
+    .j_modal_join {
+        background-color: #12161C;
+        padding: 0px;
+        width: 300px !important;
+        margin: 0 auto;
+    }
+
+    .j_join_button {
+        padding: 8px 45px;
+    }
+
+    .j_modal_schedule {
+        width: 350px !important;
+        margin: 0 auto;
+    }
+
+    .j_home_button {
+        padding: 5px 15px;
+    }
+
+    .j_custom_button {
+        padding: 5px 30px;
+    }
+
+    .j_profile_name {
+        margin-left: 5px;
+    }
+
+    .j_profile_btn {
+        padding: 5px 8px;
+    }
+}
+
+@media (max-width: 320px) {
+    .signin-container {
+        padding: 10px;
+    }
+
+    .j_login_center {
+        height: 100%;
+    }
+
+    .j_col_img img {
+        margin: 29px 0;
+        height: 225px;
+        width: 300px;
+    }
+
+    .signin-container h1 {
+        font-size: 20px !important;
+    }
+
+    .signin-container {
+        width: 300px;
+    }
+
+    .j_nav_btn {
+        font-size: 13px;
+    }
+
+    .j_home_connent_h4 {
+        font-size: 12.5px;
+    }
+
+    .j_home_button {
+        padding: 5px 10px;
+    }
+
+    .j_custom_button {
+        padding: 5px 20px;
+    }
+
+    .j_profile_name span {
+        font-size: 12px;
+    }
+
+    .j_my_profile {
+        font-size: 12px;
+    }
+
+    .j_profile_name {
+        font-size: 12px;
+    }
+
+    .j_profile_btn {
+        margin-top: 10px;
+        padding: 5px 20px;
+        display: flex;
+        justify-self: end;
+        align-items: center;
+    }
+
+    .j_profile {
+        display: block;
     }
 }
