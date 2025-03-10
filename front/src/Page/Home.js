@@ -17,11 +17,14 @@ function Home() {
 
   const [ScheduleModal, setScheduleModal] = useState(false)
   const [customModal, setcustomModal] = useState(false)
+  const [joinModal, setjoinModal] = useState(false)
 
   const handleScheduleclose = () => setScheduleModal(false)
   const handleScheduleshow = () => setScheduleModal(true)
   const handlecustomclose = () => setcustomModal(false)
   const handlecustomshow = () => setcustomModal(true)
+  const handlejoinclose = () => setjoinModal(false)
+  const handlejoinshow = () => setjoinModal(true)
 
   const toggleDay = (day) => {
     setSelectedDays(prev =>
@@ -92,8 +95,8 @@ function Home() {
                 </div>
               </div>
               <div className="col-4 g-5 ">
-                <div className="j_home_cards" type="button" data-bs-toggle="modal" data-bs-target="#joinMeetingModal"
-                  onClick={() => setActiveItem('Join Meeting')}
+                <div className="j_home_cards" type="button"
+                  onClick={() => { setActiveItem('Join Meeting'); handlejoinshow() }}
                   style={{
                     border: activeItem === 'Join Meeting' ? '2px solid #bfbfbf' : 'none',
                   }}>
@@ -568,37 +571,56 @@ function Home() {
         </Modal>
 
         {/* ============================ join Meeting Modal ============================ */}
-        <div className="modal fade" id="joinMeetingModal" tabIndex={-1} aria-labelledby="joinMeetingModalLabel" aria-hidden="true" >
-          <div className="modal-dialog modal-dialog-centered">
-            <div className="modal-content j_modal_join">
-              <div className="modal-header border-0 d-flex justify-content-between align-items-center">
-                <h1 className="modal-title text-white j_join_title" id="joinMeetingModalLabel">Join Meeting</h1>
-                <IoClose style={{ color: '#fff', fontSize: '22px' }} type="button" data-bs-dismiss="modal" aria-label="Close" />
+        <Modal
+          show={joinModal}
+          onHide={handlejoinclose}
+          centered
+          contentClassName="j_modal_join"
+        >
+          <Modal.Header className="border-0 d-flex justify-content-between align-items-center">
+            <Modal.Title className="text-white j_join_title">Join Meeting</Modal.Title>
+            <IoClose
+              style={{ color: '#fff', fontSize: '22px', cursor: 'pointer' }}
+              onClick={handlejoinclose}
+            />
+          </Modal.Header>
+          <div className="j_modal_header"></div>
+          <Modal.Body>
+            <form>
+              <div className="mb-3">
+                <label htmlFor="meetingTitle" className="form-label text-white j_join_text">Meeting ID or Personal Link</label>
+                <input type="text" className="form-control j_input" id="meetingTitle" placeholder="Enter meeting ID " />
               </div>
-              <div className="j_modal_header"></div>
-              <div className="modal-body">
-                <form>
-                  <div className="mb-3">
-                    <label htmlFor="meetingTitle" className="form-label text-white j_join_text">Meeting ID or Personal Link</label>
-                    <input type="text" className="form-control j_input" id="meetingTitle" placeholder="Enter meeting ID " />
-                  </div>
-                  <div className="mb-3">
-                    <label htmlFor="meetingTitle" className="form-label text-white j_join_text">Password</label>
-                    <input type="text" className="form-control j_input" id="meetingTitle" placeholder="Enter password " />
-                  </div>
-                  <div className="mb-3">
-                    <label htmlFor="meetingTitle" className="form-label text-white j_join_text">Name</label>
-                    <input type="text" className="form-control j_input" id="meetingTitle" placeholder="Enter Name " />
-                  </div>
-                  <div className="modal-footer border-0 justify-content-between p-0 pt-4">
-                    <button type="button" className="btn btn-outline-light j_join_button m-0" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" className="btn btn-light j_join_button m-0">Join</button>
-                  </div>
-                </form>
+              <div className="mb-3">
+                <label htmlFor="meetingTitle" className="form-label text-white j_join_text">Password</label>
+                <input type="text" className="form-control j_input" id="meetingTitle" placeholder="Enter password " />
               </div>
-            </div>
-          </div>
-        </div>
+              <div className="mb-3">
+                <label htmlFor="meetingTitle" className="form-label text-white j_join_text">Name</label>
+                <input type="text" className="form-control j_input" id="meetingTitle" placeholder="Enter Name " />
+              </div>
+              {/* <div className="modal-footer border-0 justify-content-between p-0 pt-4">
+                <button type="button" className="btn btn-outline-light j_join_button m-0" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" className="btn btn-light j_join_button m-0">Join</button>
+              </div> */}
+            </form>
+            <Modal.Footer className="border-0 p-0 pt-4 justify-content-center">
+              <Button
+                variant="outline-light"
+                className="btn btn-outline-light j_join_button m-1"
+                onClick={handlejoinclose}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="light"
+                className="btn btn-light j_join_button m-1"
+              >
+                Join
+              </Button>
+            </Modal.Footer>
+          </Modal.Body>
+        </Modal>
 
       </section >
     </div >

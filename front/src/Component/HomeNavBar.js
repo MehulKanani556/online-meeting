@@ -7,9 +7,9 @@ import { IoClose, IoEye, IoEyeOff } from 'react-icons/io5'
 import { useDispatch, useSelector } from 'react-redux'
 import { logout, logoutUser, setauth } from '../Redux/Slice/auth.slice'
 import pencil from '../Image/j_profile_pencile.svg'
-import { getUserById, updateUser, removeUserProfilePic } from '../Redux/Slice/user.slice'
-import { Link } from 'react-router-dom'
-import { Formik, Form } from 'formik'
+import { getUserById, updateUser, removeUserProfilePic, resetPassword } from '../Redux/Slice/user.slice'
+import { Link, useNavigate } from 'react-router-dom'
+import { Formik, Form, Field, ErrorMessage } from 'formik'
 import langs from 'langs';
 import moment from 'moment-timezone';
 import { Modal, Button, Offcanvas, Dropdown } from 'react-bootstrap';
@@ -18,6 +18,7 @@ import { IMAGE_URL } from '../Utils/baseUrl'
 function HomeNavBar() {
 
     const dispatch = useDispatch();
+    const navigate = useNavigate();
     const languages = langs.all();
     const timeZoneOptions = moment.tz.names();
     const userId = sessionStorage.getItem('userId')
@@ -67,6 +68,7 @@ function HomeNavBar() {
             if (userId) {
                 await dispatch(logoutUser(userId));
             }
+            navigate("/")
             sessionStorage.removeItem("userId");
             sessionStorage.removeItem("token");
         } catch (error) {
@@ -77,6 +79,7 @@ function HomeNavBar() {
     const handleEditUser = async (values) => {
         try {
             await dispatch(updateUser({ id: currUser._id, values, file: uploadedFile }));
+            dispatch(getUserById(currUser._id));
         } catch (error) {
             console.log(error);
         }
@@ -85,6 +88,7 @@ function HomeNavBar() {
     const handleEditprofile = async (values) => {
         try {
             await dispatch(updateUser({ id: currUser._id, file: uploadedFile, values }));
+            dispatch(getUserById(currUser._id));
         } catch (error) {
             console.log(error);
         }
@@ -93,17 +97,25 @@ function HomeNavBar() {
     const handleRemoveProfilePic = async () => {
         if (currUser.photo) {
             await dispatch(removeUserProfilePic(currUser._id));
-            setUploadedFile(null); // Clear the uploaded file state
+            setUploadedFile(null);
+            dispatch(getUserById(currUser._id));
         }
+    };
+
+    const handleSubmit = (values, { setSubmitting }) => {
+        const { oldPassword, newPassword } = values;
+        dispatch(resetPassword({ email: currUser.email, oldPassword, newPassword }));
+        setSubmitting(false);
+        handlepasswordclose();
     };
 
     return (
         <div>
             <nav className="navbar navbar-expand-lg j_nav_padding" style={{ backgroundColor: '#121B26' }} >
                 <div className="container-fluid p-0">
-                    <a className="navbar-brand text-white" href="#">
+                    <Link className="navbar-brand text-white" to={"/home"}>
                         <img src={logo} style={{ height: "30px", width: "35 px" }} alt="" />
-                    </a>
+                    </Link>
 
                     <div className="d-flex align-items-center">
                         <button className="btn border-0" type="button" onClick={handleshowcanvas}>
@@ -113,7 +125,6 @@ function HomeNavBar() {
                             <Dropdown>
                                 <Dropdown.Toggle className="btn btn-secondary j_homenav_dropdown j_remove_icon" id="dropdown-basic">
                                     {currUser?.photo ? (
-                                        // `${currUser?.photo}`
                                         <img
                                             src={`${IMG_URL}${currUser.photo}`}
                                             alt="Profile"
@@ -121,9 +132,8 @@ function HomeNavBar() {
                                             style={{ width: '40px', height: '40px', borderRadius: '50%', padding: '0' }}
                                         />
                                     ) : (
-                                        `${currUser?.name?.charAt(0)}${currUser?.name?.split(' ')[1]?.charAt(0)}`
+                                        `${currUser?.name?.charAt(0)}${currUser?.name?.split(' ')[1] ? currUser.name.split(' ')[1].charAt(0) : ''}`
                                     )}
-                                    {/* {currUser?.name?.charAt(0)}{currUser?.name?.split(' ')[1]?.charAt(0)} */}
                                 </Dropdown.Toggle>
 
                                 <Dropdown.Menu className="j_drop_menu" drop="down-centered">
@@ -155,7 +165,6 @@ function HomeNavBar() {
                         <div className="j_profile_icon">
                             <p className='j_profile_short' style={{ padding: currUser?.photo ? '0px' : '5px' }}>
                                 {currUser?.photo ? (
-                                    // `${currUser?.photo}`
                                     <img
                                         src={`${IMG_URL}${currUser.photo}`}
                                         alt="Profile"
@@ -163,7 +172,8 @@ function HomeNavBar() {
                                         style={{ width: '50px', height: '50px', borderRadius: '50%', padding: '0' }}
                                     />
                                 ) : (
-                                    `${currUser?.name?.charAt(0)}${currUser?.name?.split(' ')[1]?.charAt(0)}`
+                                    // `${currUser?.name?.charAt(0)}${currUser?.name?.split(' ')[1]?.charAt(0)}`
+                                    `${currUser?.name?.charAt(0)}${currUser?.name?.split(' ')[1] ? currUser.name.split(' ')[1].charAt(0) : ''}`
                                 )}
                             </p>
                             <div className="j_profile_name text-white">
@@ -201,8 +211,8 @@ function HomeNavBar() {
                 <div className="j_modal_header"></div>
                 <Modal.Body>
                     <div className="j_change_short position-relative" onClick={handleProfilePicClick} style={{ padding: currUser?.photo ? '0px' : '15px' }}>
-                        {/* {currUser?.name?.charAt(0)}{currUser?.name?.split(' ')[1]?.charAt(0)} */}
-                        {currUser?.photo ? (
+
+                        {/* {currUser?.name?.charAt(0)}{currUser?.name?.split(' ')[1]?.charAt(0)} */}                      {currUser?.photo ? (
                             <img
                                 src={`${IMG_URL}${currUser.photo}`}
                                 alt="Profile"
@@ -210,7 +220,8 @@ function HomeNavBar() {
                                 style={{ width: '70px', height: '70px', borderRadius: '50%', padding: '0' }}
                             />
                         ) : (
-                            `${currUser?.name?.charAt(0)}${currUser?.name?.split(' ')[1]?.charAt(0)}`
+                            `${currUser?.name?.charAt(0)}${currUser?.name?.split(' ')[1] ? currUser.name.split(' ')[1].charAt(0) : ''}`
+                            // `${currUser?.name?.charAt(0)}${currUser?.name?.split(' ')[1]?.charAt(0)}`
                         )}
                         <div className="j_cameraa d-flex justify-content-center align-items-center">
                             <img src={camera} alt="camera" className='j_cameraa_img' />
@@ -333,7 +344,8 @@ function HomeNavBar() {
                                                     style={{ width: '50px', height: '50px', borderRadius: '50%', padding: '0' }}
                                                 />
                                             ) : (
-                                                `${currUser?.name?.charAt(0)}${currUser?.name?.split(' ')[1]?.charAt(0)}`
+                                                // `${currUser?.name?.charAt(0)}${currUser?.name?.split(' ')[1]?.charAt(0)}`
+                                                `${currUser?.name?.charAt(0)}${currUser?.name?.split(' ')[1] ? currUser.name.split(' ')[1].charAt(0) : ''}`
                                             )}
                                         </p>
                                     )}
@@ -379,44 +391,69 @@ function HomeNavBar() {
                 </Modal.Header>
                 <div className="j_modal_header"></div>
                 <Modal.Body>
-                    <form>
-                        <div className="mb-3">
-                            <label htmlFor="OldPassword" className="form-label text-white">Old Password</label>
-                            <div className="position-relative">
-                                <input type={showPass ? "text" : "password"} className="form-control j_input" id="OldPassword" name="OldPassword" placeholder='Old Password' />
-                                <div onClick={() => setShowPass(!showPass)} style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', cursor: 'pointer' }}>
-                                    {showPass ? <IoEye color='white' /> : <IoEyeOff color='white' />}
+                    <Formik
+                        initialValues={{ oldPassword: '', newPassword: '', confirmNewPassword: '' }}
+                        validate={values => {
+                            const errors = {};
+                            if (!values.oldPassword) {
+                                errors.oldPassword = 'Required';
+                            }
+                            if (!values.newPassword) {
+                                errors.newPassword = 'Required';
+                            } else if (values.newPassword !== values.confirmNewPassword) {
+                                errors.confirmNewPassword = 'Password and Confirm Password not match';
+                            }
+                            return errors;
+                        }}
+                        onSubmit={handleSubmit}
+                    >
+                        {({ isSubmitting, handleChange, handleBlur }) => (
+                            <Form>
+                                <div className="mb-3">
+                                    <label htmlFor="oldPassword" className="form-label text-white">Old Password</label>
+                                    <div className="position-relative">
+                                        {/* <input type={showPass ? "text" : "password"} className="form-control j_input" id="OldPassword" name="OldPassword" placeholder='Old Password' value={oldPassword} onChange={(e) => setOldPassword(e.target.value)} /> */}
+                                        <Field type={showPass ? "text" : "password"} className="form-control j_input" id="oldPassword" name="oldPassword" placeholder='Old Password' />
+                                        <div onClick={() => setShowPass(!showPass)} style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', cursor: 'pointer' }}>
+                                            {showPass ? <IoEye color='white' /> : <IoEyeOff color='white' />}
+                                        </div>
+                                    </div>
+                                    <ErrorMessage name="oldPassword" component="div" style={{ color: '#cd1425' }} />
                                 </div>
-                            </div>
-                        </div>
-                        <div className="mb-3">
-                            <label htmlFor="NewPassword" className="form-label text-white">New Password</label>
-                            <div className="position-relative">
-                                <input type={showNewPass ? "text" : "password"} className="form-control j_input" id="NewPassword" name="NewPassword" placeholder='New Password' />
-                                <div onClick={() => setShowNewPass(!showNewPass)} style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', cursor: 'pointer' }}>
-                                    {showNewPass ? <IoEye color='white' /> : <IoEyeOff color='white' />}
+                                <div className="mb-3">
+                                    <label htmlFor="newPassword" className="form-label text-white">New Password</label>
+                                    <div className="position-relative">
+                                        <Field type={showNewPass ? "text" : "password"} className="form-control j_input" id="newPassword" name="newPassword" placeholder='New Password' />
+                                        {/* <input type={showNewPass ? "text" : "password"} className="form-control j_input" id="NewPassword" name="NewPassword" placeholder='New Password' value={newPassword} onChange={(e) => setNewPassword(e.target.value)} /> */}
+                                        <div onClick={() => setShowNewPass(!showNewPass)} style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', cursor: 'pointer' }}>
+                                            {showNewPass ? <IoEye color='white' /> : <IoEyeOff color='white' />}
+                                        </div>
+                                    </div>
+                                    <ErrorMessage name="newPassword" component="div" style={{ color: '#cd1425' }} />
                                 </div>
-                            </div>
-                        </div>
-                        <div className="mb-3">
-                            <label htmlFor="CNPassword" className="form-label text-white">Confirm New Password</label>
-                            <div className="position-relative">
-                                <input type={showNewconPass ? "text" : "password"} className="form-control j_input" id="CNPassword" name="CNPassword" placeholder='Confirm New Password' />
-                                <div onClick={() => setShowNewconPass(!showNewconPass)} style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', cursor: 'pointer' }}>
-                                    {showNewconPass ? <IoEye color='white' /> : <IoEyeOff color='white' />}
+                                <div className="mb-3">
+                                    <label htmlFor="confirmNewPassword" className="form-label text-white">Confirm New Password</label>
+                                    <div className="position-relative">
+                                        <Field type={showNewconPass ? "text" : "password"} className="form-control j_input" id="confirmNewPassword" name="confirmNewPassword" placeholder='Confirm New Password' />
+                                        {/* <input type={showNewconPass ? "text" : "password"} className="form-control j_input" id="CNPassword" name="CNPassword" placeholder='Confirm New Password' value={confirmNewPassword} onChange={(e) => setConfirmNewPassword(e.target.value)} /> */}
+                                        <div onClick={() => setShowNewconPass(!showNewconPass)} style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', cursor: 'pointer' }}>
+                                            {showNewconPass ? <IoEye color='white' /> : <IoEyeOff color='white' />}
+                                        </div>
+                                    </div>
+                                    <ErrorMessage name="confirmNewPassword" component="div" style={{ color: '#cd1425' }} />
                                 </div>
-                            </div>
-                        </div>
-                    </form>
+                                <Modal.Footer className='border-0 justify-content-center'>
+                                    <Button variant="outline-light" className="btn btn-outline-light j_custom_button fw-semibold" onClick={handlepasswordclose}>
+                                        Cancel
+                                    </Button>
+                                    <Button className="btn btn-light j_custom_button fw-semibold" type="submit" disabled={isSubmitting}>
+                                        Change Password
+                                    </Button>
+                                </Modal.Footer>
+                            </Form>
+                        )}
+                    </Formik>
                 </Modal.Body>
-                <Modal.Footer className='border-0 justify-content-center'>
-                    <Button variant="outline-light" className="btn btn-outline-light j_custom_button fw-semibold" onClick={handlepasswordclose}>
-                        Cancel
-                    </Button>
-                    <Button className="btn btn-light j_custom_button fw-semibold" type="submit" onClick={() => { handlepasswordclose() }}>
-                        Change Password
-                    </Button>
-                </Modal.Footer>
             </Modal>
 
             {/* =========================== Notification =========================== */}

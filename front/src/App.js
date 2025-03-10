@@ -14,6 +14,8 @@ import ContactUs from './Page/ContactUs';
 import Meeting from './Page/Meeting';
 import Alert from './Page/Alert';
 import { SnackbarProvider } from 'notistack';
+import Setting from './Page/Setting';
+import Schedule from './Page/Schedule';
 
 function App() {
   const { store, persistor } = configureStore();
@@ -30,6 +32,8 @@ function App() {
           <Route path="/payment" element={<Payment />} />
           <Route path="/contactus" element={<ContactUs />} />
           <Route path="/meeting" element={<Meeting />} />
+          <Route path="/setting" element={<Setting />} />
+          <Route path="/schedule" element={<Schedule />} />
         </Routes>
       </Provider>
     </SnackbarProvider>

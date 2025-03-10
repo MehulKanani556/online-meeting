@@ -93,6 +93,8 @@ exports.updateUser = async (req, res) => {
         const updateData = { ...userData };
         if (filePath) {
             updateData.photo = filePath;
+        } else if (updateData.photo === "null") {
+            updateData.photo = null;
         }
         console.log("updateData", updateData);
 
@@ -142,6 +144,31 @@ exports.removeUserProfilePic = async (req, res) => {
         return res.json({ status: 200, message: "Profile picture removed successfully" });
     } catch (error) {
         res.json({ status: 500, message: error.message });
+        console.log(error);
+    }
+};
+
+exports.resetPassword = async (req, res) => {
+    try {
+        const { email, oldPassword, newPassword } = req.body;
+
+        const users = await user.findOne({ email });
+        if (!users) {
+            return res.status(400).json({ message: "User Not Found" });
+        }
+
+        const isMatch = await bcrypt.compare(oldPassword, users.password);
+        if (!isMatch) {
+            return res.status(400).json({ message: "Old password is incorrect" });
+        }
+
+        const salt = await bcrypt.genSalt(10);
+        users.password = await bcrypt.hash(newPassword, salt);
+        await users.save();
+
+        return res.status(200).json({ message: "Password updated successfully" });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
         console.log(error);
     }
 };

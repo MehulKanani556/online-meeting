@@ -1,5 +1,5 @@
 const express = require('express');
-const { removeUser, updateUser, getUserById, getAllUsers, createNewUser, removeUserProfilePic } = require('../controller/user.controller');
+const { removeUser, updateUser, getUserById, getAllUsers, createNewUser, removeUserProfilePic, resetPassword } = require('../controller/user.controller');
 const { userLogin, googleLogin, forgotPassword, verifyOtp, changePassword, userLogout } = require('../auth/auth');
 const { getAllcontact, getcontactById, updatecontact, removecontact, createNewcontact } = require('../controller/contactus.controller');
 const indexRoutes = express.Router()
@@ -24,6 +24,7 @@ indexRoutes.get('/getUserById/:id', getUserById);
 indexRoutes.put('/userUpdate/:id', upload.single("photo"), updateUser);
 indexRoutes.delete('/deleteUser/:id', removeUser);
 indexRoutes.put('/removeProfilePic/:id', removeUserProfilePic);
+indexRoutes.put('/resetPassword', resetPassword);
 
 // contact Routes 
 
