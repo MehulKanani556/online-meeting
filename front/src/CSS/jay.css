@@ -220,6 +220,7 @@
 
 .j_Home_sidebar {
     height: 93.4vh;
+    min-height: 100%;
     background-color: #121B26;
     color: white;
     border-top: 2px solid #595E63;
@@ -661,10 +662,12 @@
     background-color: #0A1119;
     padding: 30px;
     width: 600px;
-    height: 600px;
+    /* height: 100%; */
+    height: auto;
+    min-height: 500px;
 }
 
-.j_margin_setting{
+.j_margin_setting {
     margin: 15px 0;
 }
 
@@ -698,12 +701,208 @@
     box-shadow: none;
 }
 
+.j_home_nav_logo {
+    height: 30px;
+}
+
+.j_setting_button {
+    min-width: 100px;
+    padding: 8px 48px;
+}
+
+.j_profile_nav_Home {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    padding: 0
+}
+
+/* ====================================== start calendar ======================================== */
+
+/* =================== month calendar start =================== */
+
+.j_calender {
+    height: 100%;
+    width: 100%;
+    margin-left: 25px;
+}
+
+.rbc-calendar {
+    background-color: #060A11 !important;
+    color: #ffffff !important;
+}
+
+.rbc-selected {
+    background-color: #0056b3 !important;
+}
+
+.rbc-day-slot {
+    background-color: #1a1a1a !important;
+}
+
+.rbc-month-view {
+    border: none !important;
+}
+
+.rbc-header {
+    align-items: center !important;
+    background-color: #141E2A !important;
+    color: #ffffff !important;
+    display: flex !important;
+    justify-content: center !important;
+    padding: 10px !important;
+}
+
+.rbc-row-bg {
+    right: 0px !important;
+}
+
+.rbc-header .rbc-toolbar {
+    flex: 1 !important;
+}
+
+.rbc-event {
+    background-color: #1B2838 !important;
+    color: #ffffff !important;
+    border-radius: 4px !important;
+    padding: 5px !important;
+}
+
+.rbc-event:hover {
+    background-color: #141E2A !important;
+}
+
+.rbc-day-slot {
+    background-color: #141E2A !important;
+}
+
+.rbc-month-view {
+    border: none !important;
+}
+
+.rbc-day-bg {
+    background-color: #0A1119 !important;
+}
+
+.rbc-today {
+    background-color: #141E2A !important;
+}
+
+.rbc-day-bg+.rbc-day-bg {
+    border: none !important;
+}
+
+.rbc-header {
+    border-bottom: 1px solid #353C45 !important;
+}
+
+.rbc-header+.rbc-header {
+    border-left: 1px solid #353C45 !important;
+}
+
+.rbc-month-row+.rbc-month-row {
+    border-top: 1px solid #353C45 !important;
+}
+
+.rbc-toolbar {
+    margin: 10px 0 !important;
+}
+
+.rbc-toolbar button:focus {
+    color: #fff !important;
+}
+
+.rbc-toolbar .j_LR_rbc_btn {
+    display: flex !important;
+}
+
+.j_rbc_toolbar {
+    justify-content: space-between !important;
+}
+
+.rbc-toolbar .j_LR_rbc_btn button {
+    color: #fff !important;
+    display: inline-block;
+    margin: 0;
+    text-align: center;
+    vertical-align: middle;
+    background: none;
+    background-image: none;
+    border: none !important;
+    padding: 0 !important;
+    border-radius: 4px;
+    line-height: normal;
+    white-space: nowrap;
+}
+
+.rbc-toolbar .j_LR_rbc_btn button:hover {
+    background-color: transparent !important;
+}
+
+.rbc-toolbar .j_LR_rbc_btn button:focus {
+    background-color: transparent !important;
+}
+
+.rbc-toolbar .j_btn_rbc_group {
+    background-color: #121B26 !important;
+    padding: 5px !important;
+    border-radius: 4px !important;
+}
+
+.rbc-toolbar .j_btn_rbc_group button:hover {
+    background-color: #2C343D !important;
+}
+
+/* =================== month calendar end =================== */
+
+/* =================== Week calendar start =================== */
+
+.rbc-time-view {
+    border-radius: 4px !important;
+    border: 1px solid #121B26 !important;
+}
+
+.rbc-time-content {
+    border-top: 1px solid #2E343A !important;
+}
+
+.rbc-time-content>*+*>* {
+    border-left: 1px solid #2E343A !important;
+}
+
+.rbc-timeslot-group {
+    border-bottom: 1px solid #2E343A !important;
+}
+
+.rbc-time-header-content {
+    border-left: 1px solid #2E343A !important;
+}
+
+.rbc-day-slot .rbc-time-slot {
+    /* border-top: 1px solid #2E343A !important; */
+    border: none !important;
+}
+
+.rbc-current-time-indicator {
+    background-color: white !important;
+    left: 30px !important;
+    right: 30px !important;
+}
+
+.rbc-time-view .rbc-time-gutter {
+    text-align: center !important;
+}
+
+/* =================== Week calendar end =================== */
+
+
+/* ============================================== end calendar ================================================== */
+
 @media (min-width: 1921px) {
     .j_Home_sidebar {
         height: 96vh;
+        min-height: 100%;
     }
-
-
 }
 
 @media (max-width: 1440px) {
@@ -762,6 +961,10 @@
 }
 
 @media (max-width: 768px) {
+    .j_home_nav_logo {
+        height: 25px;
+    }
+
     .j_login_img {
         width: 400px;
         height: 275px;
@@ -812,9 +1015,18 @@
         padding: 6px 50px;
     }
 
+    .j_Home_sidebar {
+        height: 100%;
+        min-height: 100vh;
+    }
+
 }
 
 @media (max-width: 425px) {
+    .j_drop_menu {
+        transform: translate(10%, 45%) !important;
+    }
+
     .j_col_pad {
         padding: 0;
         margin-bottom: 20px;
@@ -910,17 +1122,42 @@
         margin-bottom: 0px !important;
     }
 
-    .j_Home_sidebar {
-        height: 100%;
-        min-height: 100vh;
-    }
-
     .j_custom_footer {
         flex-wrap: nowrap;
     }
 
     .j_custom_button {
         padding: 5px 47px;
+    }
+
+    .j_setting {
+        padding: 15px;
+        width: 315px;
+    }
+
+    .j_setting_button {
+        min-width: 75px;
+        padding: 8px 18px;
+        font-size: 14px;
+    }
+
+    .j_general_settings h5 {
+        font-size: 14px;
+    }
+
+    .j_general_settings p {
+        font-size: 13px;
+    }
+
+    .j_homenav_dropdown,
+    .j_profile_nav_Home {
+        height: 35px;
+        width: 35px;
+    }
+
+    .j_input,
+    .j_select {
+        font-size: 12px;
     }
 }
 
@@ -976,6 +1213,29 @@
 
     .j_profile_btn {
         padding: 5px 8px;
+    }
+
+    .j_logout_p {
+        margin-bottom: 0;
+        font-size: 15px;
+    }
+
+    .j_setting {
+        width: 280px;
+    }
+
+    .j_setting_button {
+        min-width: 70px;
+        padding: 8px 15px;
+        font-size: 13px;
+    }
+
+    .j_general_settings h5 {
+        font-size: 13px;
+    }
+
+    .j_general_settings p {
+        font-size: 12px;
     }
 }
 
@@ -1040,5 +1300,24 @@
 
     .j_profile {
         display: block;
+    }
+
+    .j_setting {
+        padding: 10px;
+        width: 230px;
+    }
+
+    .j_setting_button {
+        min-width: 60px;
+        padding: 8px 10px;
+        font-size: 12px;
+    }
+
+    .j_general_settings h5 {
+        font-size: 12px;
+    }
+
+    .j_general_settings p {
+        font-size: 11px;
     }
 }
