@@ -11,17 +11,16 @@ import Footer from '../Component/Footer';
 function HelpCenter() {
     const [activeFAQ, setActiveFAQ] = useState('account');
 
-    const handleCardClick = (section) => {
-        setActiveFAQ(section);
-    };
-
+    
     const getIconStyle = (section) => {
         if (activeFAQ === section) {
             return {
                 filter: 'brightness(0) saturate(100%) invert(46%) sepia(45%) saturate(2695%) hue-rotate(199deg) brightness(93%) contrast(89%)',
             };
         }
-        
+    };
+    const handleCardClick = (section) => {
+        setActiveFAQ(section);
     };
 
     const getTextStyle = (section) => {

@@ -256,13 +256,12 @@ img {
 
 .B_card_space {
   margin: 0 -20px;
-  /* Negative margin to counteract padding */
+
 }
 
 .B_card_space1 {
   padding: 0 30px;
   margin-bottom: 50px;
-  /* Increase padding between columns */
 }
 
 .B_Cardicon {
@@ -415,7 +414,6 @@ img {
   transition: all 0.3s ease;
 }
 
-
 .B_pay_withPay {
   background-color: transparent;
   color: #FFFFFF;
@@ -489,7 +487,6 @@ img {
   color: #fff;
   outline: none;
 }
-
 
 .B_form_group input:-webkit-autofill,
 .B_form_group input:-webkit-autofill:hover,
@@ -1423,13 +1420,16 @@ img {
     padding: 30px 20px 30px 30px !important;
 
   }
-  .B_meeting_note_div  p {
+
+  .B_meeting_note_div p {
     font-size: 14px;
   }
-  .B_ROOM_DETAILS_btn{
+
+  .B_ROOM_DETAILS_btn {
     padding: 5px 25px !important;
   }
-  .B_perosnalMargin{
+
+  .B_perosnalMargin {
     margin: 0px !important;
   }
 
@@ -1802,6 +1802,43 @@ img {
   .B_Repeat_on_btn {
     gap: 8px;
   }
+
+  .B_ROOM_DETAILS span {
+    font-size: 12.5px !important;
+  }
+
+  .B_ROOM_DETAILS_span {
+    width: 80px !important;
+  }
+
+  .B_meeting_note_div {
+    padding: 17px 12px 12px 15px !important;
+  }
+
+  .B_meeting_note_div p {
+    font-size: 13.5px;
+  }
+
+  .B_ROOM_DETAILS_label {
+    font-size: 12.5px;
+  }
+
+  .B_ROOM_DETAILS_btn {
+    padding: 4px 15px !important;
+  }
+
+  .B_ROOM_DETAILS_btn {
+    margin-top: 0px !important;
+  }
+
+  .B_invite_link_Column {
+    flex-direction: column;
+    align-items: flex-start !important;
+  }
+
+  .B_Link_input {
+    width: 95px !important;
+  }
 }
 
 @media (max-width: 375px) {
@@ -2008,6 +2045,27 @@ img {
   .B_Repeat_on_btn {
     gap: 6px;
   }
+
+  .B_ROOM_DETAILS_span {
+    width: 77px !important;
+  }
+
+  .B_ROOM_DETAILS span {
+    font-size: 12px !important;
+  }
+
+  .B_col_form {
+    padding: 0;
+  }
+
+  .B_ROOM_DETAILS_label {
+    font-size: 12px;
+  }
+
+  .B_Link_input {
+    width: 80px !important;
+  }
+
 }
 
 @media (max-width: 320px) {
@@ -2174,4 +2232,17 @@ img {
     padding-right: 3px !important;
   }
 
+  .B_ROOM_DETAILS_span {
+    width: 65px !important;
+  }
+
+  .B_meeting_note_div p {
+    font-size: 13px;
+  }
+  .B_Link_input {
+    width: 44px !important;
+  }
+  .B_password_input {
+    width: 106px !important;
+  }
 }

@@ -3,8 +3,8 @@ import HomeNavBar from '../Component/HomeNavBar';
 import SideBar from '../Component/SideBar';
 import { IoSearchSharp } from 'react-icons/io5';
 import { HiOutlineDotsVertical } from "react-icons/hi";
-import { IoClose, IoSearch } from 'react-icons/io5'
-import { FaAngleUp, FaAngleDown } from "react-icons/fa6";
+import { IoClose, IoSearch, IoCheckmark } from 'react-icons/io5'
+import { FaAngleUp, FaAngleDown, FaDiceSix, FaDiceTwo } from "react-icons/fa6";
 import MeetingCanlander from '../Image/MeeringCalander.svg'
 import MeetingUser from '../Image/MeetingUSer.svg'
 import MeetingMultiUser from '../Image/MeetingMultiUser.svg'
@@ -13,15 +13,75 @@ import BEdit from '../Image/BEdit.svg'
 
 
 function Meeting() {
-    const [meetingType, setMeetingType] = useState("All Meetings");
-    const [meetingFilter, setMeetingFilter] = useState("All Meetings");
-    const [openDropdownId, setOpenDropdownId] = useState(null);
+    const [isSelectedMeetingCancelled, setIsSelectedMeetingCancelled] = useState(false);
     const [selectedReminders, setSelectedReminders] = useState([])
+    const [openDropdownId, setOpenDropdownId] = useState(null);
+    const [selectedDays, setSelectedDays] = useState([]);
     const [RepeatEvery, setRepeatEvery] = useState(1)
     const [billingCycle, setBillingCycle] = useState('Meeting Details');
-    const [selectedDays, setSelectedDays] = useState([]);
-    const [isSelectedMeetingCancelled, setIsSelectedMeetingCancelled] = useState(false);
+    const [meetingFilter, setMeetingFilter] = useState("All Meetings");
     const [securityType, setSecurityType] = useState('alwaysLocked');
+    const [meetingType, setMeetingType] = useState("All Meetings");
+
+    // Add new state for editing
+    const [isEditingLink, setIsEditingLink] = useState(false);
+    const [linkNumber, setLinkNumber] = useState('57809');
+    const [linkError, setLinkError] = useState('');
+    const [isLinkRotating, setIsLinkRotating] = useState(false);
+
+    // Add link generation function
+    const generateLinkNumber = () => {
+        let number = '';
+        for (let i = 0; i < 5; i++) {
+            number += Math.floor(Math.random() * 10);
+        }
+        return number;
+    };
+
+    // Add handler for dice click
+    const handleLinkDiceClick = () => {
+        setIsLinkRotating(true);
+        setTimeout(() => {
+            setIsLinkRotating(false);
+            setLinkNumber(generateLinkNumber());
+        }, 1000);
+    };
+
+    const validateLink = (value) => {
+        if (value.length < 5) {
+            setLinkError('Number must be minimum 5 characters');
+            return false;
+        }
+        if (value.length > 5) {
+            setLinkError('Number must be maximum 5 characters');
+            return false;
+        }
+
+        // Check if the value contains only numbers
+        if (!/^\d+$/.test(value)) {
+            setLinkError('Please enter numbers only');
+            return false;
+        }
+
+        setLinkError('');
+        return true;
+    };
+
+    // Update handleLinkChange handler
+    const handleLinkChange = (e) => {
+        const newValue = e.target.value;
+        setLinkNumber(newValue);
+        validateLink(newValue);
+    };
+
+    // Update the handler for saving the link edit
+    const handleLinkEdit = (e) => {
+        if (e.key === 'Enter') {
+            if (validateLink(linkNumber)) {
+                setIsEditingLink(false);
+            }
+        }
+    };
 
     const toggleDay = (day) => {
         setSelectedDays(prev =>
@@ -77,7 +137,41 @@ function Meeting() {
                                     <h6 className="text-white m-0 B_card_title">Project Meeting</h6>
                                     <div>
                                         <button type="button" class="btn btn-outline-primary B_upcoming_btn me-2">Upcoming</button>
-                                        <HiOutlineDotsVertical className='text-white ' size={22} style={{ cursor: "pointer" }} />
+                                        <HiOutlineDotsVertical
+                                            className='text-white'
+                                            size={22}
+                                            style={{ cursor: "pointer" }}
+                                            onClick={(e) => handleDotsClick('meeting1', e)}
+                                        />
+                                        {openDropdownId === 'meeting1' && (
+                                            <div className="position-absolute  mt-2 py-2 B_boxEdit  rounded shadow-lg"
+                                                style={{ minWidth: '120px', zIndex: 1000 }}>
+                                                <button className="dropdown-item text-white px-3 py-1 hover-bg-secondary"
+                                                    style={{ backgroundColor: 'transparent', border: 'none', width: '100%', textAlign: 'left' }}>
+                                                    Start
+                                                </button>
+                                                <button
+                                                    className="dropdown-item text-white px-3 py-1 hover-bg-secondary"
+                                                    style={{ backgroundColor: 'transparent', border: 'none', width: '100%', textAlign: 'left' }}
+                                                    onClick={handleShowScheduleModel}
+                                                >
+                                                    Edit
+                                                </button>
+                                                <button
+                                                    className="dropdown-item text-white px-3 py-1 hover-bg-secondary"
+                                                    style={{ backgroundColor: 'transparent', border: 'none', width: '100%', textAlign: 'left' }}
+                                                    onClick={handleShowCancelModel}
+                                                >
+                                                    Cancel
+                                                </button>
+                                                <button className="dropdown-item text-white px-3 py-1 hover-bg-secondary"
+                                                    style={{ backgroundColor: 'transparent', border: 'none', width: '100%', textAlign: 'left' }}
+                                                    onClick={handleShowInviteModel}
+                                                >
+                                                    Invite People
+                                                </button>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                                 <div style={{ borderTop: "1px solid #525252" }}></div>
@@ -105,7 +199,6 @@ function Meeting() {
                                     <h6 className="text-white m-0 B_card_title">Online Meeting</h6>
                                     <div>
                                         <button type="button" class="btn btn-outline-success B_upcoming_btn1 me-2">Completed</button>
-                                        <HiOutlineDotsVertical className='text-white ' size={22} style={{ cursor: "pointer" }} />
                                     </div>
                                 </div>
                                 <div style={{ borderTop: "1px solid #525252" }}></div>
@@ -133,7 +226,6 @@ function Meeting() {
                                     <h6 className="text-white m-0 B_card_title">Project Meeting</h6>
                                     <div>
                                         <button type="button" class="btn btn-outline-secondary B_upcoming_btn1 B_upcoming_btn2 me-2">Join</button>
-                                        <HiOutlineDotsVertical className='text-white ' size={22} style={{ cursor: "pointer" }} />
                                     </div>
                                 </div>
                                 <div style={{ borderTop: "1px solid #525252" }}></div>
@@ -161,7 +253,6 @@ function Meeting() {
                                     <h6 className="text-white m-0 B_card_title">Online Meeting</h6>
                                     <div>
                                         <button type="button" class="btn btn-outline-danger B_upcoming_btn1 me-2">Cancelled</button>
-                                        <HiOutlineDotsVertical className='text-white ' size={22} style={{ cursor: "pointer" }} />
                                     </div>
 
                                 </div>
@@ -444,7 +535,6 @@ function Meeting() {
                                     <h6 className="text-white m-0 B_card_title">Project Meeting</h6>
                                     <div>
                                         <button type="button" class="btn btn-outline-secondary B_upcoming_btn1 B_upcoming_btn2 me-2">Join</button>
-                                        <HiOutlineDotsVertical className='text-white ' size={22} style={{ cursor: "pointer" }} />
                                     </div>
                                 </div>
                                 <div style={{ borderTop: "1px solid #525252" }}></div>
@@ -472,7 +562,6 @@ function Meeting() {
                                     <h6 className="text-white m-0 B_card_title">Online Meeting</h6>
                                     <div>
                                         <button type="button" class="btn btn-outline-secondary B_upcoming_btn1 B_upcoming_btn2 me-2">Join</button>
-                                        <HiOutlineDotsVertical className='text-white ' size={22} style={{ cursor: "pointer" }} />
                                     </div>
                                 </div>
                                 <div style={{ borderTop: "1px solid #525252" }}></div>
@@ -500,7 +589,6 @@ function Meeting() {
                                     <h6 className="text-white m-0 B_card_title">Project Meeting</h6>
                                     <div>
                                         <button type="button" class="btn btn-outline-secondary B_upcoming_btn1 B_upcoming_btn2 me-2">Join</button>
-                                        <HiOutlineDotsVertical className='text-white ' size={22} style={{ cursor: "pointer" }} />
                                     </div>
                                 </div>
                                 <div style={{ borderTop: "1px solid #525252" }}></div>
@@ -528,7 +616,6 @@ function Meeting() {
                                     <h6 className="text-white m-0 B_card_title">Online Meeting</h6>
                                     <div>
                                         <button type="button" class="btn btn-outline-secondary B_upcoming_btn1 B_upcoming_btn2 me-2">Join</button>
-                                        <HiOutlineDotsVertical className='text-white ' size={22} style={{ cursor: "pointer" }} />
                                     </div>
 
                                 </div>
@@ -815,7 +902,6 @@ function Meeting() {
                                     <h6 className="text-white m-0 B_card_title">Project Meeting</h6>
                                     <div>
                                         <button type="button" class="btn btn-outline-secondary B_upcoming_btn1 B_upcoming_btn2 me-2">Join</button>
-                                        <HiOutlineDotsVertical className='text-white ' size={22} style={{ cursor: "pointer" }} />
                                     </div>
                                 </div>
                                 <div style={{ borderTop: "1px solid #525252" }}></div>
@@ -843,7 +929,6 @@ function Meeting() {
                                     <h6 className="text-white m-0 B_card_title">Online Meeting</h6>
                                     <div>
                                         <button type="button" class="btn btn-outline-secondary B_upcoming_btn1 B_upcoming_btn2 me-2">Join</button>
-                                        <HiOutlineDotsVertical className='text-white ' size={22} style={{ cursor: "pointer" }} />
                                     </div>
                                 </div>
                                 <div style={{ borderTop: "1px solid #525252" }}></div>
@@ -871,7 +956,6 @@ function Meeting() {
                                     <h6 className="text-white m-0 B_card_title">Project Meeting</h6>
                                     <div>
                                         <button type="button" class="btn btn-outline-secondary B_upcoming_btn1 B_upcoming_btn2 me-2">Join</button>
-                                        <HiOutlineDotsVertical className='text-white ' size={22} style={{ cursor: "pointer" }} />
                                     </div>
                                 </div>
                                 <div style={{ borderTop: "1px solid #525252" }}></div>
@@ -899,7 +983,6 @@ function Meeting() {
                                     <h6 className="text-white m-0 B_card_title">Online Meeting</h6>
                                     <div>
                                         <button type="button" class="btn btn-outline-secondary B_upcoming_btn1 B_upcoming_btn2 me-2">Join</button>
-                                        <HiOutlineDotsVertical className='text-white ' size={22} style={{ cursor: "pointer" }} />
                                     </div>
 
                                 </div>
@@ -986,7 +1069,6 @@ function Meeting() {
                             </div>
                         </div>
 
-
                         {/* Completed Meeting Card */}
                         <div className=" col-xl-3 col-lg-4 col-md-6 col-12" onClick={() => handleShowOffcanvasModel('completed')}>
                             <div className="B_meeting_card " style={{ backgroundColor: '#0A1119', borderRadius: '6px', cursor: "pointer" }}>
@@ -1014,6 +1096,7 @@ function Meeting() {
                                 </div>
                             </div>
                         </div>
+
                     </div>
                 </div>
             );
@@ -1026,7 +1109,7 @@ function Meeting() {
                 <div className="mx-4 B_perosnalMargin">
                     <div className="row">
                         {/* Room Details Section */}
-                        <div className="col-lg-5 col-12">
+                        <div className="col-lg-5 col-12 B_col_form">
                             <div className="mb-4 mt-5 B_top_margin">
                                 <h5 className="text-white mb-4">Room Details</h5>
                                 <div className='B_ROOM_DETAILS' style={{ borderRadius: '6px', padding: '20px' }}>
@@ -1038,14 +1121,91 @@ function Meeting() {
                                         <span className='B_ROOM_DETAILS_span' style={{ color: '#B3AEAE', width: '120px' }}>Meeting ID</span>
                                         <span className="text-white">: 16846118749463</span>
                                     </div>
-                                    <div className="d-flex align-items-center mb-4">
+                                    <div className="d-flex align-items-center mb-4 B_invite_link_Column">
                                         <span className='B_ROOM_DETAILS_span' style={{ color: '#B3AEAE', width: '120px' }}>Invite Link</span>
-                                        <div className="d-flex align-items-center">
-                                            <span className="text-white">: https://googlemeet.123/57809</span>
-                                            <span className='ms-2'> <img src={BEdit} alt="" /> </span>
-                                            <button className="btn btn-link p-0 ms-2" style={{ color: '#fff' }}>
-                                                <i className="fas fa-copy"></i>
-                                            </button>
+                                        <div className="d-flex flex-column">
+                                            <div className="d-flex align-items-center">
+                                                <span className="text-white">: https://googlemeet.123/
+                                                    {isEditingLink ? (
+                                                        <input
+                                                            type="text"
+                                                            value={linkNumber}
+                                                            onChange={handleLinkChange}
+                                                            onKeyDown={handleLinkEdit}
+                                                            className='B_Link_input'
+                                                            autoFocus
+                                                            style={{
+                                                                background: 'transparent',
+                                                                border: '1px solid #474e58',
+                                                                color: 'white',
+                                                                width: '120px',
+                                                                borderRadius: '4px',
+                                                                padding: '2px 5px'
+                                                            }}
+                                                        />
+                                                    ) : (
+                                                        <span>{linkNumber}</span>
+                                                    )}
+                                                </span>
+                                                {isEditingLink ? (
+                                                    <>
+                                                        <button
+                                                            className="btn btn-link p-0 ms-2"
+                                                            style={{ color: '#fff' }}
+                                                            onClick={() => {
+                                                                if (validateLink(linkNumber)) {
+                                                                    setIsEditingLink(false);
+                                                                }
+                                                            }}
+                                                        >
+                                                            <IoCheckmark size={18} />
+                                                        </button>
+                                                        <button
+                                                            className="btn btn-link p-0 ms-2"
+                                                            style={{ color: '#fff' }}
+                                                            onClick={() => {
+                                                                setLinkNumber('57809');
+                                                                setLinkError('');
+                                                                setIsEditingLink(false);
+                                                            }}
+                                                        >
+                                                            <IoClose size={18} />
+                                                        </button>
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <span
+                                                            className='ms-2'
+                                                            style={{ cursor: 'pointer' }}
+                                                            onClick={() => setIsEditingLink(true)}
+                                                        >
+                                                            <img src={BEdit} alt="Edit" />
+                                                        </span>
+                                                        <span
+                                                            className='ms-2'
+                                                            style={{
+                                                                color: '#fff',
+                                                                cursor: 'pointer',
+                                                                display: 'inline-block',
+                                                                transform: isLinkRotating ? 'rotate(60deg)' : 'rotate(0deg)',
+                                                                transition: 'transform 0.5s ease',
+                                                                transformOrigin: 'center center'
+                                                            }}
+                                                            onClick={handleLinkDiceClick}
+                                                        >
+                                                            <FaDiceTwo size={18} />
+                                                        </span>
+                                                        <button className="btn btn-link p-0 ms-2" style={{ color: '#fff' }}>
+                                                            <i className="fas fa-copy"></i>
+                                                        </button>
+                                                    </>
+                                                )}
+                                            </div>
+                                            {isEditingLink && linkError && (
+                                                <small style={{ color: '#dc3545', fontSize: '12px', marginTop: '4px' }}>
+                                                    {linkError}
+                                                </small>
+                                            )}
                                         </div>
                                     </div>
                                     <div className="d-flex align-items-center mb-4">
@@ -1082,13 +1242,90 @@ function Meeting() {
                                     </div>
                                     <div className="d-flex align-items-center">
                                         <span className='B_ROOM_DETAILS_span' style={{ color: '#B3AEAE', width: '120px' }}>Password</span>
-                                        <div className="d-flex align-items-center">
-                                            <span className="text-white">: 5163YHV8ujui</span>
-                                            <span className='ms-2'> <img src={BEdit} alt="" /> </span>
-
-                                            <button className="btn btn-link p-0 ms-2" style={{ color: '#fff' }}>
-                                                <i className="fas fa-copy"></i>
-                                            </button>
+                                        <div className="d-flex flex-column">
+                                            <div className="d-flex align-items-center">
+                                                <span className="text-white">: {
+                                                    isEditingPassword ? (
+                                                        <input
+                                                            type="text"
+                                                            value={password}
+                                                            onChange={handlePasswordChange}
+                                                            onKeyDown={handlePasswordEdit}
+                                                            className='B_password_input'
+                                                            autoFocus
+                                                            style={{
+                                                                background: 'transparent',
+                                                                border: '1px solid #474e58',
+                                                                color: 'white',
+                                                                width: '120px',
+                                                                borderRadius: '4px',
+                                                                padding: '2px 5px'
+                                                            }}
+                                                        />
+                                                    ) : (
+                                                        <span>{password}</span>
+                                                    )
+                                                }</span>
+                                                {isEditingPassword ? (
+                                                    <>
+                                                        <button
+                                                            className="btn btn-link p-0 ms-2"
+                                                            style={{ color: '#fff' }}
+                                                            onClick={() => {
+                                                                if (validatePassword(password)) {
+                                                                    setIsEditingPassword(false);
+                                                                }
+                                                            }}
+                                                        >
+                                                            <IoCheckmark size={18} />
+                                                        </button>
+                                                        <button
+                                                            className="btn btn-link p-0 ms-2"
+                                                            style={{ color: '#fff' }}
+                                                            onClick={() => {
+                                                                setPassword('5163YHV8ujui');
+                                                                setPasswordError('');
+                                                                setIsEditingPassword(false);
+                                                            }}
+                                                        >
+                                                            <IoClose size={18} />
+                                                        </button>
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <span
+                                                            className='ms-2'
+                                                            style={{ cursor: 'pointer' }}
+                                                            onClick={() => setIsEditingPassword(true)}
+                                                        >
+                                                            <img src={BEdit} alt="Edit" />
+                                                        </span>
+                                                        <span
+                                                            className='ms-2'
+                                                            style={{
+                                                                cursor: 'pointer',
+                                                                color: '#fff',
+                                                                display: 'inline-block',
+                                                                transform: isRotating ? 'rotate3d(1, 1, 1, 360deg)' : 'rotate3d(1, 1, 1, 0deg)',
+                                                                transition: 'transform 1s cubic-bezier(0.68, -0.55, 0.265, 1.55)',
+                                                                transformStyle: 'preserve-3d',
+                                                                perspective: '1000px'
+                                                            }}
+                                                            onClick={handleDiceClick}
+                                                        >
+                                                            <FaDiceSix size={18} />
+                                                        </span>
+                                                        <button className="btn btn-link p-0 ms-2" style={{ color: '#fff' }}>
+                                                            <i className="fas fa-copy"></i>
+                                                        </button>
+                                                    </>
+                                                )}
+                                            </div>
+                                            {isEditingPassword && passwordError && (
+                                                <small style={{ color: '#dc3545', fontSize: '12px', marginTop: '4px' }}>
+                                                    {passwordError}
+                                                </small>
+                                            )}
                                         </div>
                                     </div>
                                     <div className="mt-5">
@@ -1139,27 +1376,102 @@ function Meeting() {
     const handleCloseInviteModel = () => setInviteModel(false);
     const handleShowInviteModel = () => setInviteModel(true);
 
+    const [ScheduleModel, setScheduleModel] = useState(false);
+    const handleCloseScheduleModel = () => setScheduleModel(false);
+    const handleShowScheduleModel = () => setScheduleModel(true);
+    const handleShowScheduleModel1 = () => setScheduleModel(true);
+
+    const [ScheduleCustomModel, setScheduleCustomModel] = useState(false);
+    const handleCloseScheduleCustomModel = () => setScheduleCustomModel(false);
+    const handleShowScheduleCustomModel = () => setScheduleCustomModel(true);
+
     const [OffcanvasModel, setOffcanvasModel] = useState(false);
     const handleCloseOffcanvasModel = () => {
         setOffcanvasModel(false);
         setBillingCycle('Meeting Details');
     };
+
     const handleShowOffcanvasModel = (meetingStatus) => {
         setIsSelectedMeetingCancelled(meetingStatus === 'cancelled');
         setBillingCycle('Meeting Details');
         setOffcanvasModel(true);
     };
 
-    const [ScheduleModel, setScheduleModel] = useState(false);
-    const handleCloseScheduleModel = () => setScheduleModel(false);
-    const handleShowScheduleModel = () => setScheduleModel(true);
-
-    const [ScheduleCustomModel, setScheduleCustomModel] = useState(false);
-    const handleCloseScheduleCustomModel = () => setScheduleCustomModel(false);
-    const handleShowScheduleCustomModel = () => setScheduleCustomModel(true);
 
     const handleSecurityChange = (type) => {
         setSecurityType(type);
+    };
+
+    const [isEditingPassword, setIsEditingPassword] = useState(false);
+    const [password, setPassword] = useState('5163YHV8ujui');
+    const [passwordError, setPasswordError] = useState('');
+
+    const validatePassword = (value) => {
+        if (value.length < 12) {
+            setPasswordError('Password must be minimum 12 characters');
+            return false;
+        }
+        if (value.length > 12) {
+            setPasswordError('Password must be maximum 12 characters');
+            return false;
+        }
+        const hasUpperCase = /[A-Z]/.test(value);
+        const hasLowerCase = /[a-z]/.test(value);
+        const hasNumber = /[0-9]/.test(value);
+
+        if (!hasUpperCase || !hasLowerCase || !hasNumber) {
+            setPasswordError('Password must contain uppercase, lowercase and numbers');
+            return false;
+        }
+
+        setPasswordError('');
+        return true;
+    };
+
+    const handlePasswordChange = (e) => {
+        const newValue = e.target.value;
+        setPassword(newValue);
+        validatePassword(newValue);
+    };
+
+    const handlePasswordEdit = (e) => {
+        if (e.key === 'Enter') {
+            if (validatePassword(password)) {
+                setIsEditingPassword(false);
+            }
+        }
+    };
+
+    const [isRotating, setIsRotating] = useState(false);
+
+    const generatePassword = () => {
+        const uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        const lowercase = 'abcdefghijklmnopqrstuvwxyz';
+        const numbers = '0123456789';
+        const length = 12;
+
+        let chars = uppercase + lowercase + numbers;
+        let password = '';
+
+        password += uppercase[Math.floor(Math.random() * uppercase.length)];
+        password += lowercase[Math.floor(Math.random() * lowercase.length)];
+        password += numbers[Math.floor(Math.random() * numbers.length)];
+     
+        for (let i = password.length; i < length; i++) {
+            password += chars[Math.floor(Math.random() * chars.length)];
+        }
+
+        password = password.split('').sort(() => Math.random() - 0.5).join('');
+
+        return password;
+    };
+
+    const handleDiceClick = () => {
+        setIsRotating(true);
+        setTimeout(() => {
+            setIsRotating(false);
+            setPassword(generatePassword());
+        }, 1000);
     };
 
     return (
@@ -1198,7 +1510,7 @@ function Meeting() {
                                         }}>Past Meetings</a></li>
                                         <li><a className="dropdown-item B_dropdown_item" onClick={() => {
                                             setMeetingType("Personal Room");
-                                            setMeetingFilter("");  // Clear the second dropdown value
+                                            setMeetingFilter("");  
                                         }}>Personal Room</a></li>
                                     </ul>
                                 </div>
@@ -1230,7 +1542,7 @@ function Meeting() {
                                 </div>
 
                                 <div className='d-flex gap-4'>
-                                    <button className="btn btn-outline-light B_metting_btn">Schedule</button>
+                                    <button className="btn btn-outline-light B_metting_btn" onClick={handleShowScheduleModel1}>Schedule</button>
                                     <button className="btn btn-outline-light B_metting_btn">Meet Now</button>
                                 </div>
                             </div>
@@ -1633,7 +1945,7 @@ function Meeting() {
                                     </div>
                                 </div>
                                 <IoClose
-                                    style={{ color: '#fff', fontSize: '22px' }}
+                                    style={{ color: '#fff', fontSize: '22px', cursor: 'pointer' }}
                                     className='text-end ms-auto mb-5'
                                     onClick={handleCloseOffcanvasModel}
                                 />
