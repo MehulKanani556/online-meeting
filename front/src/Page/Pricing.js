@@ -1,10 +1,11 @@
 import React, { useState } from 'react'
-import NavBar from '../Component/NavBar';
-import check_icon from '../Image/True.svg';
-import Footer from '../Component/Footer';
 import { Link } from 'react-router-dom';
+import NavBar from '../Component/NavBar';
+import Footer from '../Component/Footer';
+import check_icon from '../Image/True.svg';
 
 function Pricing() {
+
     const [billingCycle, setBillingCycle] = useState('yearly');
 
     return (
@@ -30,7 +31,7 @@ function Pricing() {
 
                     <section className='B_pricing_section'>
                         <div className='d-flex justify-content-center'>
-                            <div className='d-flex' style={{ backgroundColor: '#101924', padding: '4px', borderRadius: '8px' }}>
+                            <div className='d-flex' style={{ backgroundColor: '#101924', padding: '6px', borderRadius: '8px' }}>
                                 <button
                                     type="button"
                                     className="B_pricing_button border-0 rounded"

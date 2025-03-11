@@ -4,16 +4,22 @@ import SideBar from '../Component/SideBar';
 import { IoSearchSharp } from 'react-icons/io5';
 import { HiOutlineDotsVertical } from "react-icons/hi";
 import { IoClose, IoSearch, IoCheckmark } from 'react-icons/io5'
-import { FaAngleUp, FaAngleDown, FaDiceSix, FaDiceTwo } from "react-icons/fa6";
+import { FaAngleUp, FaAngleDown, FaDiceSix, FaDiceTwo, FaRegStar, FaStar } from "react-icons/fa6";
 import MeetingCanlander from '../Image/MeeringCalander.svg'
 import MeetingUser from '../Image/MeetingUSer.svg'
 import MeetingMultiUser from '../Image/MeetingMultiUser.svg'
+import MeetingAudio from '../Image/B_Audioo.svg'
+import MeetingVideo from '../Image/B_Videoo.svg'
+import MeetingConnection from '../Image/B_shearing.svg'
 import { Button, Modal, Offcanvas, Form } from 'react-bootstrap';
 import BEdit from '../Image/BEdit.svg'
+import { Link } from 'react-router-dom';
 
 
 function Meeting() {
     const [isSelectedMeetingCancelled, setIsSelectedMeetingCancelled] = useState(false);
+    const [isEditingLink, setIsEditingLink] = useState(false);
+    const [isLinkRotating, setIsLinkRotating] = useState(false);
     const [selectedReminders, setSelectedReminders] = useState([])
     const [openDropdownId, setOpenDropdownId] = useState(null);
     const [selectedDays, setSelectedDays] = useState([]);
@@ -22,29 +28,25 @@ function Meeting() {
     const [meetingFilter, setMeetingFilter] = useState("All Meetings");
     const [securityType, setSecurityType] = useState('alwaysLocked');
     const [meetingType, setMeetingType] = useState("All Meetings");
-
-    // Add new state for editing
-    const [isEditingLink, setIsEditingLink] = useState(false);
     const [linkNumber, setLinkNumber] = useState('57809');
     const [linkError, setLinkError] = useState('');
-    const [isLinkRotating, setIsLinkRotating] = useState(false);
+    const [rating, setRating] = useState(0);
 
-    // Add link generation function
-    const generateLinkNumber = () => {
-        let number = '';
-        for (let i = 0; i < 5; i++) {
-            number += Math.floor(Math.random() * 10);
-        }
-        return number;
-    };
 
-    // Add handler for dice click
     const handleLinkDiceClick = () => {
         setIsLinkRotating(true);
         setTimeout(() => {
             setIsLinkRotating(false);
             setLinkNumber(generateLinkNumber());
         }, 1000);
+    };
+
+    const generateLinkNumber = () => {
+        let number = '';
+        for (let i = 0; i < 5; i++) {
+            number += Math.floor(Math.random() * 10);
+        }
+        return number;
     };
 
     const validateLink = (value) => {
@@ -57,7 +59,6 @@ function Meeting() {
             return false;
         }
 
-        // Check if the value contains only numbers
         if (!/^\d+$/.test(value)) {
             setLinkError('Please enter numbers only');
             return false;
@@ -67,14 +68,13 @@ function Meeting() {
         return true;
     };
 
-    // Update handleLinkChange handler
+
     const handleLinkChange = (e) => {
         const newValue = e.target.value;
         setLinkNumber(newValue);
         validateLink(newValue);
     };
 
-    // Update the handler for saving the link edit
     const handleLinkEdit = (e) => {
         if (e.key === 'Enter') {
             if (validateLink(linkNumber)) {
@@ -99,6 +99,11 @@ function Meeting() {
         )
     }
 
+    const handleDotsClick = (meetingId, event) => {
+        event.stopPropagation();
+        setOpenDropdownId(openDropdownId === meetingId ? null : meetingId);
+    };
+
     const handleIncrement = () => {
         setRepeatEvery(prev => prev + 1);
     }
@@ -107,10 +112,6 @@ function Meeting() {
         setRepeatEvery(prev => Math.max(prev - 1, 1));
     }
 
-    const handleDotsClick = (meetingId, event) => {
-        event.stopPropagation();
-        setOpenDropdownId(openDropdownId === meetingId ? null : meetingId);
-    };
 
     useEffect(() => {
         const handleClickOutside = () => {
@@ -695,7 +696,7 @@ function Meeting() {
                                         <span className='B_meetingALl_details_span'>Meeting Date</span>
                                         <span className='text-white'>: 23-01-2025</span>
                                     </div>
-                                    <div className="d-flex  mb-2">
+                                    <div className="d-flex mb-2">
                                         <span className='B_meetingALl_details_span'>Meeting Time</span>
                                         <span className='text-white'>: 11:00 AM</span>
                                     </div>
@@ -818,7 +819,7 @@ function Meeting() {
                                         <span className='B_meetingALl_details_span'>Meeting Time</span>
                                         <span className='text-white'>: 11:00 AM</span>
                                     </div>
-                                    <div className="d-flex ">
+                                    <div className="d-flex">
                                         <span className='B_meetingALl_details_span'>Meeting Duration</span>
                                         <span className='text-white'>: 0h 30m</span>
                                     </div>
@@ -1364,18 +1365,6 @@ function Meeting() {
     }
 
 
-    const [CancelModel, setCancelModel] = useState(false);
-    const handleCloseCancelModel = () => setCancelModel(false);
-    const handleShowCancelModel = () => setCancelModel(true);
-
-    const [DeleteModel, setDeleteModel] = useState(false);
-    const handleCloseDeleteModel = () => setDeleteModel(false);
-    const handleShowDeleteModel = () => setDeleteModel(true);
-
-    const [InviteModel, setInviteModel] = useState(false);
-    const handleCloseInviteModel = () => setInviteModel(false);
-    const handleShowInviteModel = () => setInviteModel(true);
-
     const [ScheduleModel, setScheduleModel] = useState(false);
     const handleCloseScheduleModel = () => setScheduleModel(false);
     const handleShowScheduleModel = () => setScheduleModel(true);
@@ -1384,6 +1373,25 @@ function Meeting() {
     const [ScheduleCustomModel, setScheduleCustomModel] = useState(false);
     const handleCloseScheduleCustomModel = () => setScheduleCustomModel(false);
     const handleShowScheduleCustomModel = () => setScheduleCustomModel(true);
+
+    const [CancelModel, setCancelModel] = useState(false);
+    const handleCloseCancelModel = () => setCancelModel(false);
+    const handleShowCancelModel = () => setCancelModel(true);
+
+    const [InviteModel, setInviteModel] = useState(false);
+    const handleCloseInviteModel = () => setInviteModel(false);
+    const handleShowInviteModel = () => setInviteModel(true);
+
+    const [DeleteModel, setDeleteModel] = useState(false);
+    const handleCloseDeleteModel = () => setDeleteModel(false);
+    const handleShowDeleteModel = () => setDeleteModel(true);
+
+    const [ReviewModel, setReviewModel] = useState(false);
+
+    const handleCloseReviewModel = () => setReviewModel(false);
+    const handleShowReviewModel = () => setReviewModel(true);
+
+
 
     const [OffcanvasModel, setOffcanvasModel] = useState(false);
     const handleCloseOffcanvasModel = () => {
@@ -1456,7 +1464,7 @@ function Meeting() {
         password += uppercase[Math.floor(Math.random() * uppercase.length)];
         password += lowercase[Math.floor(Math.random() * lowercase.length)];
         password += numbers[Math.floor(Math.random() * numbers.length)];
-     
+
         for (let i = password.length; i < length; i++) {
             password += chars[Math.floor(Math.random() * chars.length)];
         }
@@ -1472,6 +1480,12 @@ function Meeting() {
             setIsRotating(false);
             setPassword(generatePassword());
         }, 1000);
+    };
+
+    const [activeButton, setActiveButton] = useState('audio');
+
+    const handleButtonClick = (button) => {
+        setActiveButton(button);
     };
 
     return (
@@ -1510,12 +1524,11 @@ function Meeting() {
                                         }}>Past Meetings</a></li>
                                         <li><a className="dropdown-item B_dropdown_item" onClick={() => {
                                             setMeetingType("Personal Room");
-                                            setMeetingFilter("");  
+                                            setMeetingFilter("");
                                         }}>Personal Room</a></li>
                                     </ul>
                                 </div>
 
-                                {/* Second Dropdown - Only show if not Personal Room */}
                                 {meetingType !== "Personal Room" && (
                                     <div className="dropdown">
                                         <button className="btn btn-secondary dropdown-toggle B_dropdown_btn1 B_dropdown_btn2" type="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -1880,8 +1893,8 @@ function Meeting() {
                                         className="B_invite_people_btn"
                                         onClick={handleCloseInviteModel}
                                         style={{
-                                            padding: '8px 60px',
-                                            fontSize: '14px'
+                                            fontSize: '14px',
+                                            padding: '8px 60px'
                                         }}
                                     >
                                         Cancel
@@ -1921,8 +1934,8 @@ function Meeting() {
                                             className="B_pricing_button border-0 rounded"
                                             style={{
                                                 minWidth: '100px',
-                                                backgroundColor: billingCycle === 'Meeting Details' ? '#2A323B' : 'transparent',
-                                                color: billingCycle === 'Meeting Details' ? '#ffffff' : '#87898B'
+                                                color: billingCycle === 'Meeting Details' ? '#ffffff' : '#87898B',
+                                                backgroundColor: billingCycle === 'Meeting Details' ? '#2A323B' : 'transparent'
                                             }}
                                             onClick={() => setBillingCycle('Meeting Details')}
                                         >
@@ -1933,8 +1946,8 @@ function Meeting() {
                                             className="B_pricing_button border-0 rounded"
                                             style={{
                                                 minWidth: '100px',
-                                                backgroundColor: billingCycle === 'Chat' ? '#2A323B' : 'transparent',
                                                 color: isSelectedMeetingCancelled ? '#4A4A4A' : (billingCycle === 'Chat' ? '#ffffff' : '#87898B'),
+                                                backgroundColor: billingCycle === 'Chat' ? '#2A323B' : 'transparent',
                                                 cursor: isSelectedMeetingCancelled ? 'not-allowed' : 'pointer'
                                             }}
                                             onClick={() => !isSelectedMeetingCancelled && setBillingCycle('Chat')}
@@ -1980,7 +1993,7 @@ function Meeting() {
                                             </div>
 
                                             <div className="mb-4">
-                                                <h5 className="text-white mb-3 B_meeting_title">Host & Participants</h5>
+                                                <h5 className="text-white B_meeting_title mb-3">Host & Participants</h5>
                                                 <div className="d-flex align-items-center">
                                                     <div style={{ paddingRight: '10px' }} className='B_meeting_host_img'>
                                                         <img src={MeetingUser} alt="" />
@@ -2208,6 +2221,156 @@ function Meeting() {
                         </Modal>
 
                         {/* .......................MODEL END ....................... */}
+
+                        {/* Review Meeting Model */}
+
+                        <Button variant="primary" onClick={handleShowReviewModel}>
+                            Launch demo modal
+                        </Button>
+
+                        <Modal centered show={ReviewModel} onHide={handleCloseReviewModel} className='B_review_model'>
+                            <Modal.Header className=' border-0 B_review_model_header' >
+                                <Modal.Title className='B_review_model_title my-1'>How was your meeting experience?</Modal.Title>
+                            </Modal.Header>
+                            <div className='j_modal_header'>
+
+                            </div>
+                            <Modal.Body className='B_review_model_body'>
+                                <div className='mt-3'>
+                                    Help us improve - share your thoughts
+                                </div>
+                                <div>
+                                    {/* Star Rating Component */}
+                                    {[1, 2, 3, 4, 5].map((star) => (
+                                        <FaStar
+                                            key={star}
+                                            className={star <= rating ? 'B_yellow_star' : 'B_grey_star'}
+                                            onClick={() => setRating(star)}
+                                            style={{ cursor: 'pointer', marginRight: '20px', fontSize: '20px', marginTop: '20px' }}
+                                        />
+                                    ))}
+                                </div>
+
+                                <div className='B_review_model_text'>
+                                    What aspect of session gives you trouble?
+                                </div>
+                                <div className='d-flex gap-5 B_gapDiv justify-content-center'>
+                                    <a
+                                        className='B_review_model_Box text-decoration-none'
+                                        href='#'
+                                        onClick={() => handleButtonClick('audio')}
+                                        style={{
+                                            color: activeButton === 'audio' ? 'white' : '#BFBFBF',
+                                            border: activeButton === 'audio' ? '1px solid #BFBFBF' : '2px solid transparent',
+                                            padding: '10px',
+                                            borderRadius: '5px'
+                                        }}
+                                    >
+                                        <img
+                                            src={MeetingAudio}
+                                            alt=""
+                                            style={{
+                                                filter: activeButton === 'audio' ? 'none' : 'grayscale(100%)',
+                                                transition: 'filter 0.3s ease'
+                                            }}
+                                        />
+                                        <p className='B_Box_Textt' style={{ color: activeButton === 'audio' ? 'white' : '#BFBFBF' }}>Audio</p>
+                                    </a>
+                                    <a
+                                        className='B_review_model_Box text-decoration-none'
+                                        href='#'
+                                        onClick={() => handleButtonClick('video')}
+                                        style={{
+                                            color: activeButton === 'video' ? 'white' : '#BFBFBF',
+                                            border: activeButton === 'video' ? '1px solid #BFBFBF' : '2px solid transparent',
+                                            padding: '10px',
+                                            borderRadius: '5px'
+                                        }}
+                                    >
+                                        <img
+                                            src={MeetingVideo}
+                                            alt=""
+                                            style={{
+                                                filter: activeButton === 'video' ? 'none' : 'grayscale(100%)',
+                                                transition: 'filter 0.3s ease'
+                                            }}
+                                        />
+                                        <p className='B_Box_Textt' style={{ color: activeButton === 'video' ? 'white' : '#BFBFBF' }}>Video</p>
+                                    </a>
+                                    <a
+                                        className='B_review_model_Box text-decoration-none'
+                                        href='#'
+                                        onClick={() => handleButtonClick('connection')}
+                                        style={{
+                                            color: activeButton === 'connection' ? 'white' : '#BFBFBF',
+                                            border: activeButton === 'connection' ? '1px solid #BFBFBF' : '2px solid transparent',
+                                            padding: '10px',
+                                            borderRadius: '5px'
+                                        }}
+                                    >
+                                        <img
+                                            src={MeetingConnection}
+                                            className='B_review_model_Box_img'
+                                            alt=""
+                                            style={{
+                                                filter: activeButton === 'connection' ? 'none' : 'grayscale(100%)',
+                                                transition: 'filter 0.3s ease'
+                                            }}
+                                        />
+                                        <p className='B_Box_Textt' style={{ color: activeButton === 'connection' ? 'white' : '#BFBFBF' }}>Screen Sharing</p>
+                                    </a>
+
+                                </div>
+                                <div className='mt-5 B_textAreaa' style={{ textAlign: "left" }}>
+                                    <p className='B_addtional_text'>Additional Comments</p>
+                                    <textarea
+                                        className='B_text_Area'
+                                        placeholder="Enter additional comments"
+                                        style={{
+                                            width: '100%',
+                                            height: '100px',
+                                            borderRadius: '4px',
+                                            border: '1px solid #2d394b',
+                                            backgroundColor: '#202F41',
+                                            color: '#BFBFBF',
+                                            padding: '10px',
+                                            resize: 'none'
+                                        }}
+                                    />
+                                </div>
+                                <div className=' BB_margin_home gap-5' style={{ display: 'flex', justifyContent: 'center', marginTop: '40px', marginBottom: "20px" }}>
+                                    <Link to={'/home'}>
+                                        <button className='B_hover_bttn'
+                                        // onClick={() => {/* Add your back to home logic here */ }}
+                                        >
+                                            Back To Home
+                                        </button>
+                                    </Link>
+
+                                    <button
+                                        className='B_lastbtn'
+                                        style={{
+                                            backgroundColor: '#FFFFFF',
+                                            border: 'none',
+                                            color: '#000',
+                                            padding: '8px 20px',
+                                            borderRadius: '6px',
+                                            cursor: 'pointer',
+                                            transition: 'background-color 0.3s ease',
+                                            width: '170px',
+                                            textAlign: 'center'
+                                        }}
+                                        // onClick={() => {/* Add your submit logic here */ }}
+                                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f0f0f0'}
+                                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#FFFFFF'}
+                                    >
+                                        Submit
+                                    </button>
+                                </div>
+
+                            </Modal.Body>
+
+                        </Modal>
                     </div>
 
                 </div>

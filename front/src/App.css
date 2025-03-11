@@ -131,7 +131,6 @@ img {
   transform: scale(0.8);
 }
 
-
 .star {
   font-size: 24px;
   margin: 0 4px;
@@ -256,7 +255,6 @@ img {
 
 .B_card_space {
   margin: 0 -20px;
-
 }
 
 .B_card_space1 {
@@ -600,7 +598,7 @@ img {
   color: white;
   border: none;
   border-radius: 8px;
-  padding: 9.5px 56px;
+  padding: 9.5px 25px;
   border: 1px solid #bbb7b7;
   --bs-btn-bg: #080E14;
   --bs-btn-hover-color: #fff;
@@ -793,6 +791,83 @@ img {
   font-size: 18px;
 }
 
+.B_review_model .modal-content {
+  background-color: #0C131C !important;
+  color: #fff !important;
+  width: 600px;
+}
+
+.B_review_model_header {
+  justify-content: center !important;
+}
+
+.B_review_model_title {
+  font-size: 17px;
+  font-weight: 400 !important;
+}
+
+.B_review_model_body {
+  text-align: center !important;
+}
+
+.B_yellow_star {
+  color: gold;
+}
+
+.B_grey_star {
+  color: lightgrey;
+}
+
+.B_review_model_text {
+  margin: 30px 0;
+  font-size: 18px;
+}
+
+.B_review_model_Box {
+  background-color: #121B26;
+  padding: 10px 15px;
+  height: 75px;
+  width: 150px;
+}
+
+.B_review_model_Box img {
+  width: 25px;
+  height: 25px;
+}
+
+.B_review_model_Box_img {
+  height: 16px !important;
+  width: 18px !important;
+}
+
+.B_addtional_text {
+  font-size: 14px;
+}
+
+.B_hover_bttn:hover {
+  background-color: white;
+  color: #000000;
+
+}
+
+.B_hover_bttn {
+  background-color: transparent;
+  border: 1px solid #BFBFBF;
+  color: #BFBFBF;
+  padding: 8px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  width: 170px;
+  text-align: center;
+}
+
+.B_text_Area:focus-visible {
+  outline: none !important;
+}
+
+  
+
 /* MiN MEDIA QUERY START.............. */
 
 @media (min-width: 540px) {
@@ -843,7 +918,6 @@ img {
     width: 100%;
   }
 
-
   .B_feature-icon {
     font-size: 40px;
   }
@@ -888,7 +962,6 @@ img {
   .B_upcoming_btn,
   .B_upcoming_btn1 {
     margin-right: 0px !important;
-
   }
 
   .B_upcoming_btn {
@@ -913,12 +986,12 @@ img {
     font-size: 14px !important;
   }
 
-  .B_ROOM_DETAILS_span {
-    width: 85px !important;
-  }
-
   .B_ROOM_DETAILS_label {
     font-size: 14px;
+  }
+
+  .B_ROOM_DETAILS_span {
+    width: 85px !important;
   }
 
 }
@@ -944,7 +1017,6 @@ img {
 
   .star {
     font-size: 20px;
-
   }
 
   .stars {
@@ -1059,7 +1131,7 @@ img {
   }
 
   .B_dropdown_btn1 {
-    padding: 8.5px 24px;
+    padding: 8px 12px;
   }
 
   .B_metting_btn {
@@ -1102,6 +1174,9 @@ img {
     min-width: 160px !important;
   }
 
+  .B_dropdown_btn1 {
+    font-size: 15px;
+  }
 
 }
 
@@ -1373,7 +1448,7 @@ img {
   }
 
   .B_dropdown_btn1 {
-    padding: 8.5px 57px;
+    padding: 8.5px 44px;
   }
 
   .B_dropdown {
@@ -1437,7 +1512,9 @@ img {
     margin-top: 20px !important;
   }
 
-
+  .B_review_model .modal-content {
+    width: 530px;
+  }
 
 }
 
@@ -1831,14 +1908,49 @@ img {
     margin-top: 0px !important;
   }
 
+  .B_Link_input {
+    width: 95px !important;
+  }
+
   .B_invite_link_Column {
     flex-direction: column;
     align-items: flex-start !important;
   }
 
-  .B_Link_input {
-    width: 95px !important;
+  .B_review_model .modal-content {
+    width: 385px;
+    margin: auto;
   }
+
+  .B_review_model_title {
+    font-size: 15px;
+  }
+
+  .B_gapDiv {
+    gap: 20px !important;
+  }
+
+  .B_review_model_body div {
+    font-size: 15px;
+  }
+
+  .B_Box_Textt {
+    font-size: 12px;
+    padding-top: 10px;
+  }
+
+  .B_textAreaa {
+    margin-top: 30px !important;
+  }
+
+  .B_hover_bttn {
+    width: 139px;
+  }
+
+  .B_lastbtn {
+    width: 139px !important;
+  }
+
 }
 
 @media (max-width: 375px) {
@@ -2066,6 +2178,22 @@ img {
     width: 80px !important;
   }
 
+  .B_review_model .modal-content {
+    width: 355px;
+  }
+
+  .B_gapDiv {
+    gap: 6px !important;
+  }
+
+  .B_text_Area {
+    height: 75px !important;
+  }
+
+  .BB_margin_home {
+    margin-top: 20px !important;
+  }
+
 }
 
 @media (max-width: 320px) {
@@ -2239,10 +2367,36 @@ img {
   .B_meeting_note_div p {
     font-size: 13px;
   }
+
+  .B_password_input {
+    width: 106px !important;
+  }
+
   .B_Link_input {
     width: 44px !important;
   }
-  .B_password_input {
-    width: 106px !important;
+
+  .B_review_model .modal-content {
+    width: 295px;
+  }
+
+  .B_gapDiv {
+    flex-direction: column;
+    justify-self: anchor-center;
+    gap: 10px !important;
+  }
+
+  .B_review_model_Box {
+    width: 210px;
+  }
+
+  .B_hover_bttn,
+  .B_lastbtn {
+    font-size: 12px;
+    padding: 0;
+  }
+
+  .B_review_model_body div {
+    font-size: 13px;
   }
 }

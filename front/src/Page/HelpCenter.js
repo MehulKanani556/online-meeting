@@ -1,12 +1,12 @@
 import React, { useState } from 'react'
 import NavBar from '../Component/NavBar';
-import { IoSearch } from "react-icons/io5";
+import Footer from '../Component/Footer';
 import image1 from '../Image/Account.svg';
 import image2 from '../Image/Audio.svg';
 import image3 from '../Image/Screen2.svg';
 import image4 from '../Image/Schedule2.svg';
 import image5 from '../Image/Setting.svg';
-import Footer from '../Component/Footer';
+import { IoSearch } from "react-icons/io5";
 
 function HelpCenter() {
     const [activeFAQ, setActiveFAQ] = useState('account');
@@ -19,6 +19,7 @@ function HelpCenter() {
             };
         }
     };
+
     const handleCardClick = (section) => {
         setActiveFAQ(section);
     };
