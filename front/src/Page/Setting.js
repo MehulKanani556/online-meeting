@@ -18,9 +18,8 @@ function Setting() {
                                 <div className='d-flex' style={{ backgroundColor: '#101924', padding: '4px', borderRadius: '8px' }}>
                                     <button
                                         type="button"
-                                        className="B_pricing_button border-0 rounded"
+                                        className="j_setting_button border-0 rounded"
                                         style={{
-                                            minWidth: '100px',
                                             backgroundColor: settingformat === 'general' ? '#2A323B' : 'transparent',
                                             color: settingformat === 'general' ? '#ffffff' : '#87898B'
                                         }}
@@ -30,9 +29,8 @@ function Setting() {
                                     </button>
                                     <button
                                         type="button"
-                                        className="B_pricing_button border-0 rounded"
+                                        className="j_setting_button border-0 rounded"
                                         style={{
-                                            minWidth: '100px',
                                             backgroundColor: settingformat === 'meeting' ? '#2A323B' : 'transparent',
                                             color: settingformat === 'meeting' ? '#ffffff' : '#87898B'
                                         }}
@@ -42,9 +40,8 @@ function Setting() {
                                     </button>
                                     <button
                                         type="button"
-                                        className="B_pricing_button border-0 rounded"
+                                        className="j_setting_button border-0 rounded"
                                         style={{
-                                            minWidth: '100px',
                                             backgroundColor: settingformat === 'recording' ? '#2A323B' : 'transparent',
                                             color: settingformat === 'recording' ? '#ffffff' : '#87898B'
                                         }}

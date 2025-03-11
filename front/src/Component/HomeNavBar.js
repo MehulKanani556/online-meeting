@@ -114,7 +114,7 @@ function HomeNavBar() {
             <nav className="navbar navbar-expand-lg j_nav_padding" style={{ backgroundColor: '#121B26' }} >
                 <div className="container-fluid p-0">
                     <Link className="navbar-brand text-white" to={"/home"}>
-                        <img src={logo} style={{ height: "30px", width: "35 px" }} alt="" />
+                        <img src={logo} style={{ width: "35 px" }} className='j_home_nav_logo' alt="j_home_nav_logo" />
                     </Link>
 
                     <div className="d-flex align-items-center">
@@ -128,8 +128,7 @@ function HomeNavBar() {
                                         <img
                                             src={`${IMG_URL}${currUser.photo}`}
                                             alt="Profile"
-                                            className="object-fill w-full h-full"
-                                            style={{ width: '40px', height: '40px', borderRadius: '50%', padding: '0' }}
+                                            className="object-fill w-full h-full j_profile_nav_Home"
                                         />
                                     ) : (
                                         `${currUser?.name?.charAt(0)}${currUser?.name?.split(' ')[1] ? currUser.name.split(' ')[1].charAt(0) : ''}`
