@@ -717,6 +717,43 @@
     padding: 0
 }
 
+.j_day_btn:focus-visible {
+    color: #fff;
+    background-color: #202f41;
+    border: none;
+    outline: 0;
+    box-shadow: none;
+}
+
+.j_day_selected_btn:focus-visible {
+    color: #fff;
+    background-color: #202f41;
+    border: 1px solid #fff;
+    outline: 0;
+    box-shadow: none;
+}
+
+.j_schedule_btn:focus-visible {
+    color: #fff;
+    background-color: #202f41;
+    border: none;
+    outline: 0;
+    box-shadow: none;
+}
+
+.j_schedule_selected_btn:focus-visible {
+    color: #fff;
+    background-color: #202f41;
+    border: none;
+    outline: 1px solid #fff;
+    box-shadow: none;
+}
+
+.j_day_selected_btn:active {
+    color: white !important;
+    background-color: #202F41 !;
+}
+
 /* ====================================== start calendar ======================================== */
 
 /* =================== month calendar start =================== */
@@ -724,7 +761,7 @@
 .j_calender {
     height: 100%;
     width: 100%;
-    margin-left: 25px;
+    margin-left: 50px;
 }
 
 .rbc-calendar {
@@ -769,7 +806,7 @@
 }
 
 .rbc-event:hover {
-    background-color: #141E2A !important;
+    background-color: #1B2838 !important;
 }
 
 .rbc-day-slot {
@@ -809,6 +846,7 @@
 }
 
 .rbc-toolbar button:focus {
+    background-color: #2C343D !important;
     color: #fff !important;
 }
 
@@ -844,6 +882,7 @@
 }
 
 .rbc-toolbar .j_btn_rbc_group {
+    margin-left: 0 !important;
     background-color: #121B26 !important;
     padding: 5px !important;
     border-radius: 4px !important;
@@ -851,6 +890,56 @@
 
 .rbc-toolbar .j_btn_rbc_group button:hover {
     background-color: #2C343D !important;
+}
+
+.j_schedule_buttons button {
+    padding: 8px 15px !important;
+    color: white !important;
+    border-radius: 6px !important;
+    font-weight: 600 !important;
+    margin-left: 10px !important;
+}
+
+.j_schedule_buttons button:hover {
+    color: #000 !important;
+    cursor: pointer;
+    background-color: #fff !important;
+    border-color: #fff !important;
+}
+
+.j_schedule_buttons button:active {
+    color: #000 !important;
+    box-shadow: none !important;
+    cursor: pointer;
+    background-color: #fff !important;
+    border-color: #fff !important;
+}
+
+.j_schedule_buttons button:focus {
+    color: #000 !important;
+    cursor: pointer;
+    background-color: #fff !important;
+    border-color: #fff !important;
+}
+
+.j_btn_rbc_group button {
+    outline: none !important;
+}
+
+
+.rbc-day-slot .rbc-event,
+.rbc-day-slot .rbc-background-event {
+    border: none !important;
+}
+
+.rbc-event:focus,
+.rbc-day-slot .rbc-background-event:focus {
+    outline: none !important;
+}
+
+.rbc-event:focus-visible,
+.rbc-day-slot .rbc-background-event:focus-visible {
+    outline: none !important;
 }
 
 /* =================== month calendar end =================== */
@@ -889,8 +978,31 @@
     right: 30px !important;
 }
 
+.rbc-current-time-indicator::before,
+.rbc-current-time-indicator::after {
+    content: '';
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    background-color: white;
+    border-radius: 50%;
+    top: -3px;
+}
+
+.rbc-current-time-indicator::before {
+    left: -3px;
+}
+
+.rbc-current-time-indicator::after {
+    right: -3px;
+}
+
 .rbc-time-view .rbc-time-gutter {
     text-align: center !important;
+}
+
+.j_LR_rbc_btn button:focus-visible {
+    outline: none !important;
 }
 
 /* =================== Week calendar end =================== */
@@ -921,6 +1033,10 @@
 
     .j_Home_sidebar {
         height: 92.8vh;
+    }
+
+    .j_calender {
+        margin-left: 35px;
     }
 
 }
@@ -957,6 +1073,11 @@
 
     .j_drop_menu {
         transform: translate(20%, 45%) !important;
+    }
+
+    .j_calender {
+        margin-left: 0;
+        width: 96%;
     }
 }
 
@@ -1020,6 +1141,14 @@
         min-height: 100vh;
     }
 
+    .rbc-event .rbc-event-content {
+        font-size: 14px;
+    }
+
+    .j_schedule_buttons button {
+        padding: 8px !important;
+        font-size: 14px !important;
+    }
 }
 
 @media (max-width: 425px) {
@@ -1159,6 +1288,36 @@
     .j_select {
         font-size: 12px;
     }
+
+    .rbc-event .rbc-event-content {
+        font-size: 13px;
+    }
+
+    .j_btn_rbc_group {
+        margin: 10px 0 !important;
+    }
+
+    .rbc-date-cell button {
+        font-size: 13px;
+    }
+
+    .rbc-toolbar .j_btn_rbc_group button {
+        font-size: 13px;
+    }
+
+    .rbc-label {
+        font-size: 12px;
+        padding: 0 3px !important;
+    }
+
+    .rbc-button-link {
+        font-size: 10px;
+    }
+
+    .j_schedule_buttons button {
+        padding: 8px !important;
+        font-size: 13px !important;
+    }
 }
 
 @media (max-width: 375px) {
@@ -1236,6 +1395,18 @@
 
     .j_general_settings p {
         font-size: 12px;
+    }
+
+    .j_toolbar_label {
+        font-size: 13px;
+    }
+
+    .rbc-toolbar .j_LR_rbc_btn {
+        align-items: baseline !important;
+    }
+
+    .rbc-header {
+        font-size: 12px !important;
     }
 }
 
@@ -1319,5 +1490,9 @@
 
     .j_general_settings p {
         font-size: 11px;
+    }
+
+    .j_btn_rbc_group button {
+        padding: 5px 15px !important;
     }
 }

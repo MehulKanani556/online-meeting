@@ -341,7 +341,7 @@ function Home() {
                     </select>
                   </div>
                   <div className="modal-footer j_schedule_footer border-0 p-0 pt-4 pb-3">
-                    <button type="button" className="btn btn-outline-light j_home_button B_schedule_btn1 fw-semibold" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" className="btn btn-outline-light j_home_button B_schedule_btn1 fw-semibold" onClick={handleScheduleclose}>Cancel</button>
                     <button type="button" className="btn btn-light j_home_button fw-semibold">Schedule</button>
                   </div>
                 </form>
@@ -541,7 +541,7 @@ function Home() {
               <Button
                 variant="outline-light"
                 className="j_custom_button fw-semibold"
-                onClick={handlecustomclose}
+                onClick={() => { handlecustomclose(); handleScheduleshow() }}
               >
                 Cancel
               </Button>
