@@ -42,9 +42,9 @@ function NavBar() {
         <div>
             <nav className="navbar navbar-expand-lg py-4" >
                 <div className="container-fluid ">
-                    <a className="navbar-brand text-white" href="#">
+                    <Link className="navbar-brand text-white" to={"/"}>
                         <img src={logo} style={{ height: "30px", width: "35 px" }} alt="" />
-                    </a>
+                    </Link>
 
                     <button className="navbar-toggler text-white " style={{ boxShadow: "0 0 3px 1px white" }} type="button" data-bs-toggle="collapse" data-bs-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
                         {/* <span className="navbar-toggler-icon " style={{ backgroundColor: 'white', height: '25px', width: '25px' }}></span> */}

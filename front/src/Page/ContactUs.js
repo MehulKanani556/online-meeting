@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import NavBar from '../Component/NavBar';
 import location from '../Image/Location.svg';
 import call from '../Image/Call.svg';
@@ -14,6 +14,10 @@ function ContactUs() {
 
     const navigate = useNavigate()
     const dispatch = useDispatch()
+
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, []);
 
     const contactSchema = Yup.object().shape({
         firstname: Yup.string().required("First Name is required"),
@@ -41,7 +45,7 @@ function ContactUs() {
                 <section className='B_Get_In_Touch'>
                     <div className='text-white text-center B_Get_SEC_text'>
                         <h3 className='B_GetHead_text'>Get in touch with us</h3>
-                        <p className='B_GetText mt-3' style={{ color: "#ababac" }}>Need help or have questions? Contact us - we’re here to assist you with <br /> your online meetings!</p>
+                        <p className='B_GetText mt-3' style={{ color: "#ababac" }}>Need help or have questions? Contact us - we're here to assist you with <br /> your online meetings!</p>
                     </div>
 
                     <div>

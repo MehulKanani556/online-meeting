@@ -4,7 +4,7 @@ import SideBar from '../Component/SideBar';
 import { IoSearchSharp } from 'react-icons/io5';
 import { HiOutlineDotsVertical } from "react-icons/hi";
 import { IoClose, IoSearch, IoCheckmark } from 'react-icons/io5'
-import { FaAngleUp, FaAngleDown, FaDiceSix, FaDiceTwo, FaRegStar, FaStar } from "react-icons/fa6";
+import { FaAngleUp, FaAngleDown, FaDiceSix, FaDiceTwo, FaStar } from "react-icons/fa6";
 import MeetingCanlander from '../Image/MeeringCalander.svg'
 import MeetingUser from '../Image/MeetingUSer.svg'
 import MeetingMultiUser from '../Image/MeetingMultiUser.svg'
@@ -18,17 +18,22 @@ import { Link } from 'react-router-dom';
 
 function Meeting() {
     const [isSelectedMeetingCancelled, setIsSelectedMeetingCancelled] = useState(false);
-    const [isEditingLink, setIsEditingLink] = useState(false);
+    const [isEditingPassword, setIsEditingPassword] = useState(false);
     const [isLinkRotating, setIsLinkRotating] = useState(false);
+    const [isEditingLink, setIsEditingLink] = useState(false);
+    const [linkCopied, setLinkCopied] = useState(false)
     const [selectedReminders, setSelectedReminders] = useState([])
     const [openDropdownId, setOpenDropdownId] = useState(null);
     const [selectedDays, setSelectedDays] = useState([]);
     const [RepeatEvery, setRepeatEvery] = useState(1)
+    const [RepeatEvery1, setRepeatEvery1] = useState(1)
     const [billingCycle, setBillingCycle] = useState('Meeting Details');
     const [meetingFilter, setMeetingFilter] = useState("All Meetings");
     const [securityType, setSecurityType] = useState('alwaysLocked');
     const [meetingType, setMeetingType] = useState("All Meetings");
+    const [password, setPassword] = useState('5163YHV8ujui');
     const [linkNumber, setLinkNumber] = useState('57809');
+    const [passwordError, setPasswordError] = useState('');
     const [linkError, setLinkError] = useState('');
     const [rating, setRating] = useState(0);
 
@@ -84,11 +89,13 @@ function Meeting() {
     };
 
     const toggleDay = (day) => {
-        setSelectedDays(prev =>
-            prev.includes(day)
-                ? prev.filter(d => d !== day)
-                : [...prev, day]
-        );
+        setSelectedDays((prevSelectedDays) => {
+            if (prevSelectedDays.includes(day)) {
+                return prevSelectedDays.filter((d) => d !== day);
+            } else {
+                return [...prevSelectedDays, day];
+            }
+        });
     };
 
     const toggleReminder = (reminder) => {
@@ -110,6 +117,13 @@ function Meeting() {
 
     const handleDecrement = () => {
         setRepeatEvery(prev => Math.max(prev - 1, 1));
+    }
+    const handleIncrement1 = () => {
+        setRepeatEvery1(prev => prev + 1);
+    }
+
+    const handleDecrement1 = () => {
+        setRepeatEvery1(prev => Math.max(prev - 1, 1));
     }
 
 
@@ -259,11 +273,11 @@ function Meeting() {
                                 </div>
                                 <div style={{ borderTop: "1px solid #525252" }}></div>
                                 <div className="B_meetingALl_details p-3 B_meeting_padding" style={{ color: '#B3AEAE' }}>
-                                    <div className="d-flex  mb-2">
+                                    <div className="d-flex mb-2">
                                         <span className='B_meetingALl_details_span'>Meeting Date</span>
                                         <span className='text-white'>: 23-01-2025</span>
                                     </div>
-                                    <div className="d-flex  mb-2">
+                                    <div className="d-flex mb-2">
                                         <span className='B_meetingALl_details_span'>Meeting Time</span>
                                         <span className='text-white'>: 11:00 AM</span>
                                     </div>
@@ -544,7 +558,7 @@ function Meeting() {
                                         <span className='B_meetingALl_details_span'>Meeting Date</span>
                                         <span className='text-white'>: 23-01-2025</span>
                                     </div>
-                                    <div className="d-flex  mb-2">
+                                    <div className="d-flex mb-2">
                                         <span className='B_meetingALl_details_span'>Meeting Time</span>
                                         <span className='text-white'>: 11:00 AM</span>
                                     </div>
@@ -911,7 +925,7 @@ function Meeting() {
                                         <span className='B_meetingALl_details_span'>Meeting Date</span>
                                         <span className='text-white'>: 23-01-2025</span>
                                     </div>
-                                    <div className="d-flex  mb-2">
+                                    <div className="d-flex mb-2">
                                         <span className='B_meetingALl_details_span'>Meeting Time</span>
                                         <span className='text-white'>: 11:00 AM</span>
                                     </div>
@@ -1196,9 +1210,7 @@ function Meeting() {
                                                         >
                                                             <FaDiceTwo size={18} />
                                                         </span>
-                                                        <button className="btn btn-link p-0 ms-2" style={{ color: '#fff' }}>
-                                                            <i className="fas fa-copy"></i>
-                                                        </button>
+
                                                     </>
                                                 )}
                                             </div>
@@ -1316,9 +1328,16 @@ function Meeting() {
                                                         >
                                                             <FaDiceSix size={18} />
                                                         </span>
-                                                        <button className="btn btn-link p-0 ms-2" style={{ color: '#fff' }}>
-                                                            <i className="fas fa-copy"></i>
-                                                        </button>
+                                                        <div className="d-flex flex-column align-items-center"> {/* Container for button and message */}
+                                                            <button className="btn btn-link p-0 ms-2" style={{ color: '#fff' }}>
+                                                                <i className="fas fa-copy"></i>
+                                                            </button>
+                                                            {linkCopied && ( // Conditionally render the copied message
+                                                                <div className="text-success mt-2">
+                                                                    Link is copied!
+                                                                </div>
+                                                            )}
+                                                        </div>
                                                     </>
                                                 )}
                                             </div>
@@ -1387,11 +1406,8 @@ function Meeting() {
     const handleShowDeleteModel = () => setDeleteModel(true);
 
     const [ReviewModel, setReviewModel] = useState(false);
-
     const handleCloseReviewModel = () => setReviewModel(false);
     const handleShowReviewModel = () => setReviewModel(true);
-
-
 
     const [OffcanvasModel, setOffcanvasModel] = useState(false);
     const handleCloseOffcanvasModel = () => {
@@ -1409,10 +1425,6 @@ function Meeting() {
     const handleSecurityChange = (type) => {
         setSecurityType(type);
     };
-
-    const [isEditingPassword, setIsEditingPassword] = useState(false);
-    const [password, setPassword] = useState('5163YHV8ujui');
-    const [passwordError, setPasswordError] = useState('');
 
     const validatePassword = (value) => {
         if (value.length < 12) {
@@ -1487,6 +1499,11 @@ function Meeting() {
     const handleButtonClick = (button) => {
         setActiveButton(button);
     };
+
+    // /////////////////////////// MODEL CHANGE ...................
+
+    const [repeatType, setRepeatType] = useState('0');
+    const [endsSelection, setEndsSelection] = useState('0'); // Add this line
 
     return (
         <div>
@@ -1714,7 +1731,14 @@ function Meeting() {
                                 <div className="j_schedule_Repeat">
                                     <div className="mb-3 flex-fill me-2 j_select_fill J_Fill_bottom">
                                         <Form.Label className="text-white j_join_text">Repeat Type</Form.Label>
-                                        <Form.Select className="j_select j_join_text">
+                                        <Form.Select
+                                            className="j_select j_join_text"
+                                            onChange={(e) => {
+                                                setRepeatType(e.target.value);
+                                                setEndsSelection('0');
+                                                setSelectedDays([]);
+                                            }}
+                                        >
                                             <option value="0">Select</option>
                                             <option value="1">Daily</option>
                                             <option value="2">Weekly</option>
@@ -1745,38 +1769,88 @@ function Meeting() {
                                     </div>
                                 </div>
 
-                                <div className="mb-3">
-                                    <Form.Label className="text-white j_join_text">Repeat On</Form.Label>
-                                    <div className="d-flex B_Repeat_on_btn">
-                                        {['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'].map((day) => (
-                                            <Button
-                                                key={day}
-                                                className={`${selectedDays.includes(day) ? 'j_day_selected_btn' : 'j_day_btn'} me-1`}
-                                                onClick={() => toggleDay(day)}
-                                            >
-                                                {day[0]}
-                                            </Button>
-                                        ))}
+                                {repeatType === '2' && (
+                                    <div className="mb-3">
+                                        <Form.Label className="text-white j_join_text">Repeat On</Form.Label>
+                                        <div className="d-flex B_Repeat_on_btn">
+                                            {['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'].map((day) => (
+                                                <Button
+                                                    key={day}
+                                                    className={`${selectedDays.includes(day) ? 'j_day_selected_btn' : 'j_day_btn'} me-1`}
+                                                    onClick={() => toggleDay(day)}
+                                                >
+                                                    {day[0]}
+                                                </Button>
+                                            ))}
+                                        </div>
                                     </div>
-                                </div>
+                                )}
+
+                                {repeatType === '3' && (
+                                    <div className="mb-3 flex-fill me-2 j_select_fill J_Fill_bottom">
+                                        <Form.Label className="text-white j_join_text">Every</Form.Label>
+                                        <Form.Select
+                                            className="j_select j_join_text"
+
+                                        >
+                                            <option value="0">Select</option>
+                                            <option value="1">Monthly on first monday</option>
+                                            <option value="2">Monthly on first day</option>
+
+                                        </Form.Select>
+                                    </div>
+                                )}
+
 
                                 <div className="j_schedule_Repeat">
                                     <div className="mb-3 flex-fill me-2 j_select_fill J_Fill_bottom">
                                         <Form.Label className="text-white j_join_text">Ends</Form.Label>
-                                        <Form.Select className="j_select j_join_text">
+                                        <Form.Select className="j_select j_join_text" value={endsSelection} onChange={(e) => setEndsSelection(e.target.value)}>
                                             <option value="0">Select</option>
                                             <option value="1">Never</option>
-                                            <option value="2">On</option>
+                                            {/* Conditionally render the "On" option */}
+                                            {repeatType !== '1' && <option value="2">On</option>}
                                             <option value="3">After</option>
                                         </Form.Select>
                                     </div>
-                                    <div className="mb-3 flex-fill j_select_fill J_Fill_bottom">
-                                        <Form.Label className="text-white j_join_text"></Form.Label>
-                                        <Form.Control
-                                            type="date"
-                                            className="j_input j_join_text j_special_m"
-                                        />
-                                    </div>
+
+
+                                    {endsSelection == "0" || endsSelection == "2" ? (
+                                        <div className="mb-3 j_select_fill J_Fill_bottom">
+                                            <Form.Label className="text-white j_join_text"></Form.Label>
+                                            <Form.Control
+                                                type="date"
+                                                className="j_input j_join_text j_special_m"
+                                            />
+                                        </div>
+                                    ) : null}
+
+                                    {
+                                        endsSelection == "3" && (
+                                            <div className="mb-3 flex-fill j_select_fill J_Fill_bottom">
+                                                <Form.Label className="text-white j_join_text">Repeat Every</Form.Label>
+                                                <div className='position-relative'>
+                                                    <Form.Control
+                                                        type="text"
+                                                        className="j_input j_join_text"
+                                                        value={RepeatEvery1}
+                                                        onChange={(e) => setRepeatEvery1(Number(e.target.value) || 1)}
+                                                    />
+                                                    <div className="j_custom_icons">
+                                                        <FaAngleUp
+                                                            style={{ color: 'white', fontSize: '12px', cursor: 'pointer' }}
+                                                            onClick={handleIncrement1}
+                                                        />
+                                                        <FaAngleDown
+                                                            style={{ color: 'white', fontSize: '12px', cursor: 'pointer' }}
+                                                            onClick={handleDecrement1}
+                                                        />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )
+                                    }
+
                                 </div>
                             </Modal.Body>
                             <Modal.Footer className="j_custom_footer border-0 p-0 pt-4 pb-3">
@@ -1899,18 +1973,38 @@ function Meeting() {
                                     >
                                         Cancel
                                     </Button>
-                                    <Button
-                                        variant="light"
-                                        className="B_invite_people_btn1"
-                                        style={{
-                                            padding: '8px 58px',
-                                            fontSize: '14px',
-                                            color: '#000000'
-                                        }}
-                                    >
-                                        Copy Link
-                                    </Button>
+                                    <div className="d-flex flex-column align-items-center">
+                                        <Button
+                                            variant="light"
+                                            className="B_invite_people_btn1"
+                                            onClick={() => {
+
+                                                navigator.clipboard.writeText("https://googlemeet.123/57809")
+                                                    .then(() => {
+                                                        setLinkCopied(true);
+                                                        setTimeout(() => setLinkCopied(false), 2000);
+                                                    })
+                                                    .catch(err => {
+                                                        console.error("Failed to copy: ", err);
+                                                    });
+                                            }}
+                                            style={{
+                                                padding: '8px 58px',
+                                                fontSize: '14px',
+                                                color: '#000000'
+                                            }}
+                                        >
+                                            Copy Link
+                                        </Button>
+
+                                    </div>
+
                                 </div>
+                                {linkCopied && (
+                                    <div className="text-success text-end pe-5 me-4  mt-2" style={{ marginTop: '8px', paddingLeft: "40px" }}>
+                                        Link is copied!
+                                    </div>
+                                )}
                             </Modal.Body>
                         </Modal>
 
@@ -2341,7 +2435,6 @@ function Meeting() {
                                 <div className=' BB_margin_home gap-5' style={{ display: 'flex', justifyContent: 'center', marginTop: '40px', marginBottom: "20px" }}>
                                     <Link to={'/home'}>
                                         <button className='B_hover_bttn'
-                                        // onClick={() => {/* Add your back to home logic here */ }}
                                         >
                                             Back To Home
                                         </button>
@@ -2360,23 +2453,17 @@ function Meeting() {
                                             width: '170px',
                                             textAlign: 'center'
                                         }}
-                                        // onClick={() => {/* Add your submit logic here */ }}
                                         onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f0f0f0'}
                                         onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#FFFFFF'}
                                     >
                                         Submit
                                     </button>
                                 </div>
-
                             </Modal.Body>
-
                         </Modal>
                     </div>
-
                 </div>
             </section>
-
-
         </div>
     )
 }
