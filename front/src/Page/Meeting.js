@@ -14,6 +14,10 @@ import MeetingConnection from '../Image/B_shearing.svg'
 import { Button, Modal, Offcanvas, Form } from 'react-bootstrap';
 import BEdit from '../Image/BEdit.svg'
 import { Link } from 'react-router-dom';
+import * as Yup from 'yup';
+import { Formik } from 'formik';
+import { createreview } from '../Redux/Slice/reviews.slice';
+import { useDispatch } from 'react-redux';
 
 
 function Meeting() {
@@ -30,8 +34,9 @@ function Meeting() {
     const [meetingType, setMeetingType] = useState("All Meetings");
     const [linkNumber, setLinkNumber] = useState('57809');
     const [linkError, setLinkError] = useState('');
-    const [rating, setRating] = useState(0);
-
+    const [repeatType, setRepeatType] = useState('0');
+    const [endsSelection, setEndsSelection] = useState('0');
+    const [RepeatEvery1, setRepeatEvery1] = useState(1)
 
     const handleLinkDiceClick = () => {
         setIsLinkRotating(true);
@@ -84,11 +89,13 @@ function Meeting() {
     };
 
     const toggleDay = (day) => {
-        setSelectedDays(prev =>
-            prev.includes(day)
-                ? prev.filter(d => d !== day)
-                : [...prev, day]
-        );
+        setSelectedDays((prevSelectedDays) => {
+            if (prevSelectedDays.includes(day)) {
+                return prevSelectedDays.filter((d) => d !== day);
+            } else {
+                return [...prevSelectedDays, day];
+            }
+        });
     };
 
     const toggleReminder = (reminder) => {
@@ -110,6 +117,14 @@ function Meeting() {
 
     const handleDecrement = () => {
         setRepeatEvery(prev => Math.max(prev - 1, 1));
+    }
+
+    const handleIncrement1 = () => {
+        setRepeatEvery1(prev => prev + 1);
+    }
+
+    const handleDecrement1 = () => {
+        setRepeatEvery1(prev => Math.max(prev - 1, 1));
     }
 
 
@@ -1364,7 +1379,6 @@ function Meeting() {
         }
     }
 
-
     const [ScheduleModel, setScheduleModel] = useState(false);
     const handleCloseScheduleModel = () => setScheduleModel(false);
     const handleShowScheduleModel = () => setScheduleModel(true);
@@ -1482,11 +1496,58 @@ function Meeting() {
         }, 1000);
     };
 
-    const [activeButton, setActiveButton] = useState('audio');
+    const [activeButton, setActiveButton] = useState([]);
+    const [rating, setRating] = useState(0);
+    const dispatch = useDispatch()
+
+    // const reviewSchema = Yup.object().shape({
+    //     rating: Yup.string().required("rating is required"),
+    //     comments: Yup.string().required("comments is required"),
+    // });
+
+    // const handleButtonClick = (button) => {
+    //     setActiveButton(button);
+    // };
+
+    const handleRating = (value) => {
+        // setRating(value);
+        if (value === rating) {
+            setRating(rating - 1);
+        } else {
+            setRating(value);
+        }
+    };
+
+    // const handleRating = (star) => {
+    //     if (star === rating) {
+    //         // If clicking the last filled star, decrease rating by 1
+    //         setRating(rating - 1);
+    //     } else {
+    //         // Otherwise set to clicked star value
+    //         setRating(star);
+    //     }
+    // }
+
 
     const handleButtonClick = (button) => {
-        setActiveButton(button);
+        setActiveButton((prev) => {
+            if (prev.includes(button)) {
+                return prev.filter((b) => b !== button);
+            } else {
+                return [...prev, button];
+            }
+        });
     };
+
+    // const handleButtonClick = (button) => {
+    //     setActiveButton((prev) => {
+    //         if (prev.includes(button)) {
+    //             return prev.filter((b) => b !== button); // Deselect if already selected
+    //         } else {
+    //             return [...prev, button]; // Select if not already selected
+    //         }
+    //     });
+    // };
 
     return (
         <div>
@@ -1714,7 +1775,14 @@ function Meeting() {
                                 <div className="j_schedule_Repeat">
                                     <div className="mb-3 flex-fill me-2 j_select_fill J_Fill_bottom">
                                         <Form.Label className="text-white j_join_text">Repeat Type</Form.Label>
-                                        <Form.Select className="j_select j_join_text">
+                                        <Form.Select
+                                            className="j_select j_join_text"
+                                            onChange={(e) => {
+                                                setRepeatType(e.target.value);
+                                                setEndsSelection('0');
+                                                setSelectedDays([]);
+                                            }}
+                                        >
                                             <option value="0">Select</option>
                                             <option value="1">Daily</option>
                                             <option value="2">Weekly</option>
@@ -1745,38 +1813,84 @@ function Meeting() {
                                     </div>
                                 </div>
 
-                                <div className="mb-3">
-                                    <Form.Label className="text-white j_join_text">Repeat On</Form.Label>
-                                    <div className="d-flex B_Repeat_on_btn">
-                                        {['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'].map((day) => (
-                                            <Button
-                                                key={day}
-                                                className={`${selectedDays.includes(day) ? 'j_day_selected_btn' : 'j_day_btn'} me-1`}
-                                                onClick={() => toggleDay(day)}
-                                            >
-                                                {day[0]}
-                                            </Button>
-                                        ))}
+                                {repeatType === '2' && (
+                                    <div className="mb-3">
+                                        <Form.Label className="text-white j_join_text">Repeat On</Form.Label>
+                                        <div className="d-flex B_Repeat_on_btn">
+                                            {['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'].map((day) => (
+                                                <Button
+                                                    key={day}
+                                                    className={`${selectedDays.includes(day) ? 'j_day_selected_btn' : 'j_day_btn'} me-1`}
+                                                    onClick={() => toggleDay(day)}
+                                                >
+                                                    {day[0]}
+                                                </Button>
+                                            ))}
+                                        </div>
                                     </div>
-                                </div>
+                                )}
+
+                                {repeatType === '3' && (
+                                    <div className="mb-3">
+                                        <Form.Label className="text-white j_join_text">Every</Form.Label>
+                                        <Form.Select
+                                            className="j_select j_join_text"
+                                        >
+                                            <option value="0">Select</option>
+                                            <option value="1">Monthly on first monday</option>
+                                            <option value="2">Monthly on first day</option>
+                                        </Form.Select>
+                                    </div>
+                                )}
+
 
                                 <div className="j_schedule_Repeat">
                                     <div className="mb-3 flex-fill me-2 j_select_fill J_Fill_bottom">
                                         <Form.Label className="text-white j_join_text">Ends</Form.Label>
-                                        <Form.Select className="j_select j_join_text">
+                                        <Form.Select className="j_select j_join_text" value={endsSelection} onChange={(e) => setEndsSelection(e.target.value)}>
                                             <option value="0">Select</option>
                                             <option value="1">Never</option>
-                                            <option value="2">On</option>
+                                            {repeatType !== '1' && <option value="2">On</option>}
                                             <option value="3">After</option>
                                         </Form.Select>
                                     </div>
-                                    <div className="mb-3 flex-fill j_select_fill J_Fill_bottom">
-                                        <Form.Label className="text-white j_join_text"></Form.Label>
-                                        <Form.Control
-                                            type="date"
-                                            className="j_input j_join_text j_special_m"
-                                        />
-                                    </div>
+
+
+                                    {endsSelection == "0" || endsSelection == "2" ? (
+                                        <div className="mb-3 j_select_fill J_Fill_bottom">
+                                            <Form.Label className="text-white j_join_text"></Form.Label>
+                                            <Form.Control
+                                                type="date"
+                                                className="j_input j_join_text j_special_m"
+                                            />
+                                        </div>
+                                    ) : null}
+
+                                    {
+                                        endsSelection == "3" && (
+                                            <div className="mb-3 flex-fill j_select_fill J_Fill_bottom">
+                                                <Form.Label className="text-white j_join_text">Repeat Every</Form.Label>
+                                                <div className='position-relative'>
+                                                    <Form.Control
+                                                        type="text"
+                                                        className="j_input j_join_text"
+                                                        value={RepeatEvery1}
+                                                        onChange={(e) => setRepeatEvery1(Number(e.target.value) || 1)}
+                                                    />
+                                                    <div className="j_custom_icons">
+                                                        <FaAngleUp
+                                                            style={{ color: 'white', fontSize: '12px', cursor: 'pointer' }}
+                                                            onClick={handleIncrement1}
+                                                        />
+                                                        <FaAngleDown
+                                                            style={{ color: 'white', fontSize: '12px', cursor: 'pointer' }}
+                                                            onClick={handleDecrement1}
+                                                        />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )
+                                    }
                                 </div>
                             </Modal.Body>
                             <Modal.Footer className="j_custom_footer border-0 p-0 pt-4 pb-3">
@@ -2233,140 +2347,184 @@ function Meeting() {
                                 <Modal.Title className='B_review_model_title my-1'>How was your meeting experience?</Modal.Title>
                             </Modal.Header>
                             <div className='j_modal_header'>
-
                             </div>
                             <Modal.Body className='B_review_model_body'>
-                                <div className='mt-3'>
-                                    Help us improve - share your thoughts
-                                </div>
-                                <div>
-                                    {/* Star Rating Component */}
-                                    {[1, 2, 3, 4, 5].map((star) => (
-                                        <FaStar
-                                            key={star}
-                                            className={star <= rating ? 'B_yellow_star' : 'B_grey_star'}
-                                            onClick={() => setRating(star)}
-                                            style={{ cursor: 'pointer', marginRight: '20px', fontSize: '20px', marginTop: '20px' }}
-                                        />
-                                    ))}
-                                </div>
 
-                                <div className='B_review_model_text'>
-                                    What aspect of session gives you trouble?
-                                </div>
-                                <div className='d-flex gap-5 B_gapDiv justify-content-center'>
-                                    <a
-                                        className='B_review_model_Box text-decoration-none'
-                                        href='#'
-                                        onClick={() => handleButtonClick('audio')}
-                                        style={{
-                                            color: activeButton === 'audio' ? 'white' : '#BFBFBF',
-                                            border: activeButton === 'audio' ? '1px solid #BFBFBF' : '2px solid transparent',
-                                            padding: '10px',
-                                            borderRadius: '5px'
-                                        }}
-                                    >
-                                        <img
-                                            src={MeetingAudio}
-                                            alt=""
-                                            style={{
-                                                filter: activeButton === 'audio' ? 'none' : 'grayscale(100%)',
-                                                transition: 'filter 0.3s ease'
-                                            }}
-                                        />
-                                        <p className='B_Box_Textt' style={{ color: activeButton === 'audio' ? 'white' : '#BFBFBF' }}>Audio</p>
-                                    </a>
-                                    <a
-                                        className='B_review_model_Box text-decoration-none'
-                                        href='#'
-                                        onClick={() => handleButtonClick('video')}
-                                        style={{
-                                            color: activeButton === 'video' ? 'white' : '#BFBFBF',
-                                            border: activeButton === 'video' ? '1px solid #BFBFBF' : '2px solid transparent',
-                                            padding: '10px',
-                                            borderRadius: '5px'
-                                        }}
-                                    >
-                                        <img
-                                            src={MeetingVideo}
-                                            alt=""
-                                            style={{
-                                                filter: activeButton === 'video' ? 'none' : 'grayscale(100%)',
-                                                transition: 'filter 0.3s ease'
-                                            }}
-                                        />
-                                        <p className='B_Box_Textt' style={{ color: activeButton === 'video' ? 'white' : '#BFBFBF' }}>Video</p>
-                                    </a>
-                                    <a
-                                        className='B_review_model_Box text-decoration-none'
-                                        href='#'
-                                        onClick={() => handleButtonClick('connection')}
-                                        style={{
-                                            color: activeButton === 'connection' ? 'white' : '#BFBFBF',
-                                            border: activeButton === 'connection' ? '1px solid #BFBFBF' : '2px solid transparent',
-                                            padding: '10px',
-                                            borderRadius: '5px'
-                                        }}
-                                    >
-                                        <img
-                                            src={MeetingConnection}
-                                            className='B_review_model_Box_img'
-                                            alt=""
-                                            style={{
-                                                filter: activeButton === 'connection' ? 'none' : 'grayscale(100%)',
-                                                transition: 'filter 0.3s ease'
-                                            }}
-                                        />
-                                        <p className='B_Box_Textt' style={{ color: activeButton === 'connection' ? 'white' : '#BFBFBF' }}>Screen Sharing</p>
-                                    </a>
+                                <Formik
+                                    initialValues={{
+                                        rating: 0,
+                                        trouble: [],
+                                        comments: ''
+                                    }}
+                                    validationSchema={Yup.object().shape({
+                                        rating: Yup.number().min(1, 'Please select a rating').required('Rating is required'),
+                                        comments: Yup.string().required('Comments are required')
+                                    })}
+                                    onSubmit={(values, { resetForm }) => {
+                                        const troubleArray = activeButton.map(item => ({ [item]: item }));
+                                        const reviewData = {
+                                            rating: rating,
+                                            trouble: troubleArray,
+                                            comments: values.comments
+                                        };
+                                        dispatch(createreview(reviewData)).then((response) => {
+                                            if (response.payload?._id) {
+                                                resetForm();
+                                                setRating(0);
+                                                // navigate('/home');
+                                                setActiveButton([]);
+                                                handleCloseReviewModel();
+                                            }
+                                        });
+                                    }}
+                                >
+                                    {({ values, errors, touched, handleChange, handleSubmit, setFieldValue }) => (
+                                        <form onSubmit={handleSubmit}>
+                                            <div className='mt-3'>
+                                                Help us improve - share your thoughts
+                                            </div>
+                                            <div>
+                                                {[1, 2, 3, 4, 5].map((star) => (
+                                                    <FaStar
+                                                        key={star}
+                                                        className={star <= rating ? 'B_yellow_star' : 'B_grey_star'}
+                                                        onClick={() => {
+                                                            handleRating(star);
+                                                            setFieldValue('rating', star);
+                                                        }}
+                                                        style={{ cursor: 'pointer', marginRight: '20px', fontSize: '20px', marginTop: '20px' }}
+                                                    />
+                                                ))}
+                                            </div>
+                                            {errors.rating && touched.rating && (
+                                                <div className="mt-2" style={{ color: '#cd1425' }}>{errors.rating}</div>
+                                            )}
 
-                                </div>
-                                <div className='mt-5 B_textAreaa' style={{ textAlign: "left" }}>
-                                    <p className='B_addtional_text'>Additional Comments</p>
-                                    <textarea
-                                        className='B_text_Area'
-                                        placeholder="Enter additional comments"
-                                        style={{
-                                            width: '100%',
-                                            height: '100px',
-                                            borderRadius: '4px',
-                                            border: '1px solid #2d394b',
-                                            backgroundColor: '#202F41',
-                                            color: '#BFBFBF',
-                                            padding: '10px',
-                                            resize: 'none'
-                                        }}
-                                    />
-                                </div>
-                                <div className=' BB_margin_home gap-5' style={{ display: 'flex', justifyContent: 'center', marginTop: '40px', marginBottom: "20px" }}>
-                                    <Link to={'/home'}>
-                                        <button className='B_hover_bttn'
-                                        // onClick={() => {/* Add your back to home logic here */ }}
-                                        >
-                                            Back To Home
-                                        </button>
-                                    </Link>
+                                            <div className='B_review_model_text'>
+                                                What aspect of session gives you trouble?
+                                            </div>
+                                            <div className='d-flex gap-5 B_gapDiv justify-content-center'>
+                                                <div
+                                                    className='B_review_model_Box text-decoration-none'
+                                                    onClick={() => handleButtonClick('audio')}
+                                                    style={{
+                                                        cursor: 'pointer',
+                                                        color: 'white',
+                                                        border: activeButton.includes('audio') ? '1px solid #BFBFBF' : '2px solid transparent',
+                                                        padding: '10px',
+                                                        borderRadius: '5px'
+                                                    }}
+                                                >
+                                                    <img
+                                                        src={MeetingAudio}
+                                                        alt=""
+                                                        style={{
+                                                            opacity: activeButton.includes('audio') ? 1 : 0.5,
+                                                            color: 'white'
+                                                        }}
+                                                    />
+                                                    <p className='B_Box_Textt' style={{ color: activeButton.includes('audio') ? 'white' : '#BFBFBF' }}>Audio</p>
+                                                </div>
+                                                <div
+                                                    className='B_review_model_Box text-decoration-none'
+                                                    onClick={() => handleButtonClick('video')}
+                                                    style={{
+                                                        cursor: 'pointer',
+                                                        color: 'white',
+                                                        border: activeButton.includes('video') ? '1px solid #BFBFBF' : '2px solid transparent',
+                                                        padding: '10px',
+                                                        borderRadius: '5px'
+                                                    }}
+                                                >
+                                                    <img
+                                                        src={MeetingVideo}
+                                                        alt=""
+                                                        style={{
+                                                            opacity: activeButton.includes('video') ? 1 : 0.5,
+                                                            color: 'white'
+                                                        }}
+                                                    />
+                                                    <p className='B_Box_Textt' style={{ color: activeButton.includes('video') ? 'white' : '#BFBFBF' }}>Video</p>
+                                                </div>
+                                                <div
+                                                    className='B_review_model_Box text-decoration-none'
+                                                    onClick={() => handleButtonClick('connection')}
+                                                    style={{
+                                                        cursor: 'pointer',
+                                                        color: 'white',
+                                                        border: activeButton.includes('connection') ? '1px solid #BFBFBF' : '2px solid transparent',
+                                                        padding: '10px',
+                                                        borderRadius: '5px'
+                                                    }}
+                                                >
+                                                    <img
+                                                        src={MeetingConnection}
+                                                        className='B_review_model_Box_img'
+                                                        alt=""
+                                                        style={{
+                                                            opacity: activeButton.includes('connection') ? 1 : 0.5,
+                                                            color: 'white'
+                                                        }}
+                                                    />
+                                                    <p className='B_Box_Textt' style={{ color: activeButton.includes('connection') ? 'white' : '#BFBFBF' }}>Screen Sharing</p>
+                                                </div>
 
-                                    <button
-                                        className='B_lastbtn'
-                                        style={{
-                                            backgroundColor: '#FFFFFF',
-                                            border: 'none',
-                                            color: '#000',
-                                            padding: '8px 20px',
-                                            borderRadius: '6px',
-                                            cursor: 'pointer',
-                                            transition: 'background-color 0.3s ease',
-                                            width: '170px',
-                                            textAlign: 'center'
-                                        }}
-                                        // onClick={() => {/* Add your submit logic here */ }}
-                                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f0f0f0'}
-                                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#FFFFFF'}
-                                    >
-                                        Submit
-                                    </button>
-                                </div>
+                                            </div>
+                                            <div className='mt-5 B_textAreaa' style={{ textAlign: "left" }}>
+                                                <p className='B_addtional_text'>Additional Comments</p>
+                                                <textarea
+                                                    name="comments"
+                                                    value={values.comments}
+                                                    onChange={handleChange}
+                                                    className='B_text_Area'
+                                                    placeholder="Enter additional comments"
+                                                    style={{
+                                                        width: '100%',
+                                                        height: '100px',
+                                                        borderRadius: '4px',
+                                                        border: '1px solid #2d394b',
+                                                        backgroundColor: '#202F41',
+                                                        color: '#BFBFBF',
+                                                        padding: '10px',
+                                                        resize: 'none'
+                                                    }}
+                                                />
+                                                {errors.comments && touched.comments && (
+                                                    <div className="" style={{ color: '#cd1425' }}>{errors.comments}</div>
+                                                )}
+                                            </div>
+                                            <div className=' BB_margin_home gap-5' style={{ display: 'flex', justifyContent: 'center', marginTop: '40px', marginBottom: "20px" }}>
+                                                <Link to={'/home'}>
+                                                    <button className='B_hover_bttn'
+                                                    >
+                                                        Back To Home
+                                                    </button>
+                                                </Link>
+
+                                                <button
+                                                    type="submit"
+                                                    className='B_lastbtn'
+                                                    style={{
+                                                        backgroundColor: '#FFFFFF',
+                                                        border: 'none',
+                                                        color: '#000',
+                                                        padding: '8px 20px',
+                                                        borderRadius: '6px',
+                                                        cursor: 'pointer',
+                                                        transition: 'background-color 0.3s ease',
+                                                        width: '170px',
+                                                        textAlign: 'center'
+                                                    }}
+                                                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f0f0f0'}
+                                                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#FFFFFF'}
+                                                >
+                                                    Submit
+                                                </button>
+                                            </div>
+                                        </form>
+                                    )}
+                                </Formik>
+
 
                             </Modal.Body>
 

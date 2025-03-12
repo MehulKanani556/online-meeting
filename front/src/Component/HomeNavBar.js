@@ -143,7 +143,7 @@ function HomeNavBar() {
                             </Dropdown>
                         ) : (
                             <Link to={"/login"}>
-                                <button className="btn btn-outline-light j_nav_btn">
+                                <button className="btn btn-outline-light j_nav_btn fw-semibold">
                                     Log In
                                 </button>
                             </Link>

@@ -3,9 +3,9 @@ import axios from "axios";
 import { BASE_URL } from "../../Utils/baseUrl";
 import { setAlert } from "./alert.slice";
 
-const initialStatecontacts = {
-    allcontact: [],
-    currcontact: null,
+const initialStateschedule = {
+    allschedule: [],
+    currschedule: null,
     success: false,
     message: '',
     loading: false,
@@ -17,49 +17,49 @@ const handleErrors = (error, dispatch, rejectWithValue) => {
     return rejectWithValue(error.response?.data || { message: errorMessage });
 };
 
-export const getAllcontact = createAsyncThunk(
-    "contact/getAll",
+export const getAllschedule = createAsyncThunk(
+    "schedules/getAll",
     async (_, { dispatch, rejectWithValue }) => {
         try {
             const token = await sessionStorage.getItem("token");
-            const response = await axios.get(`${BASE_URL}/allcontact`, {
+            const response = await axios.get(`${BASE_URL}/allschedules`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
             });
-            return response.data.contact;
+            return response.data.schedules;
         } catch (error) {
             return handleErrors(error, dispatch, rejectWithValue);
         }
     }
 );
 
-export const createcontact = createAsyncThunk(
-    'contact/add',
+export const createschedule = createAsyncThunk(
+    'schedules/add',
     async (data, { dispatch, rejectWithValue }) => {
         try {
             const token = await sessionStorage.getItem("token");
-            const response = await axios.post(BASE_URL + '/createcontact', data, {
+            const response = await axios.post(BASE_URL + '/createschedule', data, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
             });
             dispatch(setAlert({ text: response.data.message, color: 'success' }));
-            dispatch(getAllcontact());
-            return response.data.contact;
+            dispatch(getAllschedule());
+            return response.data.schedules;
         } catch (error) {
             return handleErrors(error, dispatch, rejectWithValue);
         }
     }
 );
 
-export const deletecontact = createAsyncThunk(
-    'contact/delete',
+export const deleteschedule = createAsyncThunk(
+    'schedules/delete',
     async (id, { dispatch, rejectWithValue }) => {
         console.log(id);
         try {
             const token = await sessionStorage.getItem("token");
-            const response = await axios.delete(`${BASE_URL}/deletecontact/${id}`, {
+            const response = await axios.delete(`${BASE_URL}/deleteschedules/${id}`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 }
@@ -72,128 +72,127 @@ export const deletecontact = createAsyncThunk(
     }
 );
 
-export const updatecontact = createAsyncThunk(
-    'contact/update',
+export const updateschedule = createAsyncThunk(
+    'schedules/update',
     async (data, { dispatch, rejectWithValue }) => {
         try {
             const token = await sessionStorage.getItem("token");
-            const response = await axios.put(BASE_URL + '/contactUpdate', data, {
+            const response = await axios.put(BASE_URL + '/schedulesUpdate', data, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
             });
             dispatch(setAlert({ text: response.data.message, color: 'success' }));
-            dispatch(getAllcontact());
-            return response.data.contact;
+            dispatch(getAllschedule());
+            return response.data.schedules;
         } catch (error) {
             return handleErrors(error, dispatch, rejectWithValue);
         }
     }
 );
 
-
-export const getcontactById = createAsyncThunk(
-    'contants/getcontactById',
+export const getscheduleById = createAsyncThunk(
+    'schedules/schedulesById',
     async (id, { dispatch, rejectWithValue }) => {
         try {
             const token = await sessionStorage.getItem("token");
-            const response = await axios.get(`${BASE_URL}/getcontactById/${id}`, {
+            const response = await axios.get(`${BASE_URL}/getschedulesById/${id}`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 }
             });
             dispatch(setAlert({ text: response.data.message, color: 'success' }));
-            dispatch(getAllcontact());
-            return response.data.contact;
+            dispatch(getAllschedule());
+            return response.data.schedules;
         } catch (error) {
             return handleErrors(error, dispatch, rejectWithValue);
         }
     }
 );
 
-const contactsSlice = createSlice({
-    name: 'contacts',
-    initialState: initialStatecontacts,
+const scheduleSlice = createSlice({
+    name: 'schedules',
+    initialState: initialStateschedule,
     reducers: {},
     extraReducers: (builder) => {
         builder
-            .addCase(getAllcontact.pending, (state) => {
+            .addCase(getAllschedule.pending, (state) => {
                 state.loading = true;
-                state.message = 'Fetching contact...';
+                state.message = 'Fetching schedule...';
             })
-            .addCase(getAllcontact.fulfilled, (state, action) => {
+            .addCase(getAllschedule.fulfilled, (state, action) => {
                 state.loading = false;
                 state.success = true;
-                state.message = 'contact fetched successfully';
-                state.allcontact = Array.isArray(action.payload) ? action.payload : [];
+                state.message = 'schedule fetched successfully';
+                state.allschedule = Array.isArray(action.payload) ? action.payload : [];
             })
-            .addCase(getAllcontact.rejected, (state, action) => {
+            .addCase(getAllschedule.rejected, (state, action) => {
                 state.loading = false;
                 state.success = false;
-                state.message = action.payload?.message || 'Failed to fetch contact';
+                state.message = action.payload?.message || 'Failed to fetch schedule';
             })
-            .addCase(createcontact.pending, (state) => {
+            .addCase(createschedule.pending, (state) => {
                 state.loading = true;
-                state.message = 'Adding contact...';
+                state.message = 'Adding schedule...';
             })
-            .addCase(createcontact.fulfilled, (state, action) => {
+            .addCase(createschedule.fulfilled, (state, action) => {
                 state.loading = false;
                 state.success = true;
-                state.allcontact.push(action.payload);
-                state.message = action.payload?.message || 'contact added successfully';
+                state.allschedule.push(action.payload);
+                state.message = action.payload?.message || 'schedule added successfully';
             })
-            .addCase(createcontact.rejected, (state, action) => {
+            .addCase(createschedule.rejected, (state, action) => {
                 state.loading = false;
                 state.success = false;
-                state.message = action.payload?.message || 'Failed to add contact';
+                state.message = action.payload?.message || 'Failed to add schedule';
             })
-            .addCase(deletecontact.pending, (state) => {
+            .addCase(deleteschedule.pending, (state) => {
                 state.loading = true;
-                state.message = 'Deleting contact...';
+                state.message = 'Deleting schedule...';
             })
-            .addCase(deletecontact.fulfilled, (state, action) => {
+            .addCase(deleteschedule.fulfilled, (state, action) => {
                 state.loading = false;
                 state.success = true;
-                state.allcontact = state.allcontact.filter((con) => con._id !== action.payload);
-                state.message = action.payload?.message || 'contact deleted successfully';
+                state.allschedule = state.allschedule.filter((con) => con._id !== action.payload);
+                state.message = action.payload?.message || 'schedule deleted successfully';
             })
-            .addCase(deletecontact.rejected, (state, action) => {
+            .addCase(deleteschedule.rejected, (state, action) => {
                 state.loading = false;
                 state.success = false;
-                state.message = action.payload?.message || 'Failed to delete contact';
+                state.message = action.payload?.message || 'Failed to delete schedule';
             })
-            .addCase(updatecontact.pending, (state) => {
+            .addCase(updateschedule.pending, (state) => {
                 state.loading = true;
-                state.message = 'Editing contact...';
+                state.message = 'Editing schedule...';
             })
-            .addCase(updatecontact.fulfilled, (state, action) => {
+            .addCase(updateschedule.fulfilled, (state, action) => {
                 state.loading = false;
                 state.success = true;
-                state.allcontact = state.allcontact.map(contact =>
-                    contact._id === action.payload._id ? action.payload : contact
+                state.allschedule = state.allschedule.map(schedule =>
+                    schedule._id === action.payload._id ? action.payload : schedule
                 );
-                state.message = action.payload?.message || 'contact updated successfully';
+                state.message = action.payload?.message || 'schedule updated successfully';
             })
-            .addCase(updatecontact.rejected, (state, action) => {
+            .addCase(updateschedule.rejected, (state, action) => {
                 state.loading = false;
                 state.success = false;
-                state.message = action.payload?.message || 'Failed to update contact';
+                state.message = action.payload?.message || 'Failed to update schedule';
             })
-            .addCase(getcontactById.pending, (state) => {
+            .addCase(getscheduleById.pending, (state) => {
                 state.loading = true;
-                state.message = 'Getting contact...';
+                state.message = 'Getting schedule...';
             })
-            .addCase(getcontactById.fulfilled, (state, action) => {
+            .addCase(getscheduleById.fulfilled, (state, action) => {
                 state.loading = false;
                 state.success = true;
-                state.currcontact = action.payload;
+                state.currschedule = action.payload;
             })
-            .addCase(getcontactById.rejected, (state, action) => {
+            .addCase(getscheduleById.rejected, (state, action) => {
                 state.loading = false;
                 state.success = false;
-                state.message = action.payload?.message || 'Failed to get contact';
+                state.message = action.payload?.message || 'Failed to get schedule';
             })
     }
 });
 
-export default contactsSlice.reducer;
+export default scheduleSlice.reducer;

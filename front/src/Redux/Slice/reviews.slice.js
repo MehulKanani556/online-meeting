@@ -3,9 +3,9 @@ import axios from "axios";
 import { BASE_URL } from "../../Utils/baseUrl";
 import { setAlert } from "./alert.slice";
 
-const initialStatecontacts = {
-    allcontact: [],
-    currcontact: null,
+const initialStateReviews = {
+    allreview: [],
+    currreview: null,
     success: false,
     message: '',
     loading: false,
@@ -17,49 +17,49 @@ const handleErrors = (error, dispatch, rejectWithValue) => {
     return rejectWithValue(error.response?.data || { message: errorMessage });
 };
 
-export const getAllcontact = createAsyncThunk(
-    "contact/getAll",
+export const getAllreview = createAsyncThunk(
+    "reviews/getAll",
     async (_, { dispatch, rejectWithValue }) => {
         try {
             const token = await sessionStorage.getItem("token");
-            const response = await axios.get(`${BASE_URL}/allcontact`, {
+            const response = await axios.get(`${BASE_URL}/allreviews`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
             });
-            return response.data.contact;
+            return response.data.reviews;
         } catch (error) {
             return handleErrors(error, dispatch, rejectWithValue);
         }
     }
 );
 
-export const createcontact = createAsyncThunk(
-    'contact/add',
+export const createreview = createAsyncThunk(
+    'reviews/add',
     async (data, { dispatch, rejectWithValue }) => {
         try {
             const token = await sessionStorage.getItem("token");
-            const response = await axios.post(BASE_URL + '/createcontact', data, {
+            const response = await axios.post(BASE_URL + '/createreviews', data, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
             });
             dispatch(setAlert({ text: response.data.message, color: 'success' }));
-            dispatch(getAllcontact());
-            return response.data.contact;
+            dispatch(getAllreview());
+            return response.data.reviews;
         } catch (error) {
             return handleErrors(error, dispatch, rejectWithValue);
         }
     }
 );
 
-export const deletecontact = createAsyncThunk(
-    'contact/delete',
+export const deletereview = createAsyncThunk(
+    'reviews/delete',
     async (id, { dispatch, rejectWithValue }) => {
         console.log(id);
         try {
             const token = await sessionStorage.getItem("token");
-            const response = await axios.delete(`${BASE_URL}/deletecontact/${id}`, {
+            const response = await axios.delete(`${BASE_URL}/deletereviews/${id}`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 }
@@ -72,19 +72,19 @@ export const deletecontact = createAsyncThunk(
     }
 );
 
-export const updatecontact = createAsyncThunk(
-    'contact/update',
+export const updatereview = createAsyncThunk(
+    'reviews/update',
     async (data, { dispatch, rejectWithValue }) => {
         try {
             const token = await sessionStorage.getItem("token");
-            const response = await axios.put(BASE_URL + '/contactUpdate', data, {
+            const response = await axios.put(BASE_URL + '/reviewsUpdate', data, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
             });
             dispatch(setAlert({ text: response.data.message, color: 'success' }));
-            dispatch(getAllcontact());
-            return response.data.contact;
+            dispatch(getAllreview());
+            return response.data.reviews;
         } catch (error) {
             return handleErrors(error, dispatch, rejectWithValue);
         }
@@ -92,108 +92,108 @@ export const updatecontact = createAsyncThunk(
 );
 
 
-export const getcontactById = createAsyncThunk(
-    'contants/getcontactById',
+export const getreviewById = createAsyncThunk(
+    'reviews/reviewsById',
     async (id, { dispatch, rejectWithValue }) => {
         try {
             const token = await sessionStorage.getItem("token");
-            const response = await axios.get(`${BASE_URL}/getcontactById/${id}`, {
+            const response = await axios.get(`${BASE_URL}/getreviewsById/${id}`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 }
             });
             dispatch(setAlert({ text: response.data.message, color: 'success' }));
-            dispatch(getAllcontact());
-            return response.data.contact;
+            dispatch(getAllreview());
+            return response.data.reviews;
         } catch (error) {
             return handleErrors(error, dispatch, rejectWithValue);
         }
     }
 );
 
-const contactsSlice = createSlice({
-    name: 'contacts',
-    initialState: initialStatecontacts,
+const reviewSlice = createSlice({
+    name: 'reviews',
+    initialState: initialStateReviews,
     reducers: {},
     extraReducers: (builder) => {
         builder
-            .addCase(getAllcontact.pending, (state) => {
+            .addCase(getAllreview.pending, (state) => {
                 state.loading = true;
-                state.message = 'Fetching contact...';
+                state.message = 'Fetching review...';
             })
-            .addCase(getAllcontact.fulfilled, (state, action) => {
+            .addCase(getAllreview.fulfilled, (state, action) => {
                 state.loading = false;
                 state.success = true;
-                state.message = 'contact fetched successfully';
-                state.allcontact = Array.isArray(action.payload) ? action.payload : [];
+                state.message = 'review fetched successfully';
+                state.allreview = Array.isArray(action.payload) ? action.payload : [];
             })
-            .addCase(getAllcontact.rejected, (state, action) => {
+            .addCase(getAllreview.rejected, (state, action) => {
                 state.loading = false;
                 state.success = false;
-                state.message = action.payload?.message || 'Failed to fetch contact';
+                state.message = action.payload?.message || 'Failed to fetch review';
             })
-            .addCase(createcontact.pending, (state) => {
+            .addCase(createreview.pending, (state) => {
                 state.loading = true;
-                state.message = 'Adding contact...';
+                state.message = 'Adding review...';
             })
-            .addCase(createcontact.fulfilled, (state, action) => {
+            .addCase(createreview.fulfilled, (state, action) => {
                 state.loading = false;
                 state.success = true;
-                state.allcontact.push(action.payload);
-                state.message = action.payload?.message || 'contact added successfully';
+                state.allreview.push(action.payload);
+                state.message = action.payload?.message || 'review added successfully';
             })
-            .addCase(createcontact.rejected, (state, action) => {
+            .addCase(createreview.rejected, (state, action) => {
                 state.loading = false;
                 state.success = false;
-                state.message = action.payload?.message || 'Failed to add contact';
+                state.message = action.payload?.message || 'Failed to add review';
             })
-            .addCase(deletecontact.pending, (state) => {
+            .addCase(deletereview.pending, (state) => {
                 state.loading = true;
-                state.message = 'Deleting contact...';
+                state.message = 'Deleting review...';
             })
-            .addCase(deletecontact.fulfilled, (state, action) => {
+            .addCase(deletereview.fulfilled, (state, action) => {
                 state.loading = false;
                 state.success = true;
-                state.allcontact = state.allcontact.filter((con) => con._id !== action.payload);
-                state.message = action.payload?.message || 'contact deleted successfully';
+                state.allreview = state.allreview.filter((con) => con._id !== action.payload);
+                state.message = action.payload?.message || 'review deleted successfully';
             })
-            .addCase(deletecontact.rejected, (state, action) => {
+            .addCase(deletereview.rejected, (state, action) => {
                 state.loading = false;
                 state.success = false;
-                state.message = action.payload?.message || 'Failed to delete contact';
+                state.message = action.payload?.message || 'Failed to delete review';
             })
-            .addCase(updatecontact.pending, (state) => {
+            .addCase(updatereview.pending, (state) => {
                 state.loading = true;
-                state.message = 'Editing contact...';
+                state.message = 'Editing review...';
             })
-            .addCase(updatecontact.fulfilled, (state, action) => {
+            .addCase(updatereview.fulfilled, (state, action) => {
                 state.loading = false;
                 state.success = true;
-                state.allcontact = state.allcontact.map(contact =>
-                    contact._id === action.payload._id ? action.payload : contact
+                state.allreview = state.allreview.map(review =>
+                    review._id === action.payload._id ? action.payload : review
                 );
-                state.message = action.payload?.message || 'contact updated successfully';
+                state.message = action.payload?.message || 'review updated successfully';
             })
-            .addCase(updatecontact.rejected, (state, action) => {
+            .addCase(updatereview.rejected, (state, action) => {
                 state.loading = false;
                 state.success = false;
-                state.message = action.payload?.message || 'Failed to update contact';
+                state.message = action.payload?.message || 'Failed to update review';
             })
-            .addCase(getcontactById.pending, (state) => {
+            .addCase(getreviewById.pending, (state) => {
                 state.loading = true;
-                state.message = 'Getting contact...';
+                state.message = 'Getting review...';
             })
-            .addCase(getcontactById.fulfilled, (state, action) => {
+            .addCase(getreviewById.fulfilled, (state, action) => {
                 state.loading = false;
                 state.success = true;
-                state.currcontact = action.payload;
+                state.currreview = action.payload;
             })
-            .addCase(getcontactById.rejected, (state, action) => {
+            .addCase(getreviewById.rejected, (state, action) => {
                 state.loading = false;
                 state.success = false;
-                state.message = action.payload?.message || 'Failed to get contact';
+                state.message = action.payload?.message || 'Failed to get review';
             })
     }
 });
 
-export default contactsSlice.reducer;
+export default reviewSlice.reducer;

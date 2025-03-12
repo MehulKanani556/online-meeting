@@ -1,11 +1,11 @@
 const express = require('express');
+const indexRoutes = express.Router()
+const upload = require("../helper/uplodes");
 const { removeUser, updateUser, getUserById, getAllUsers, createNewUser, removeUserProfilePic, resetPassword } = require('../controller/user.controller');
 const { userLogin, googleLogin, forgotPassword, verifyOtp, changePassword, userLogout } = require('../auth/auth');
 const { getAllcontact, getcontactById, updatecontact, removecontact, createNewcontact } = require('../controller/contactus.controller');
-const indexRoutes = express.Router()
-
-const upload = require("../helper/uplodes");
-
+const { createNewreviews, getAllreviews, getreviewsById, updatereviews, removereviews } = require('../controller/review.controller');
+const { createNewschedule, getAllschedule, getscheduleById, updateschedule, removeschedule } = require('../controller/schedule.controller');
 
 // auth Routes
 
@@ -33,5 +33,21 @@ indexRoutes.get('/allcontact', getAllcontact);
 indexRoutes.get('/getcontactById/:id', getcontactById);
 indexRoutes.put('/contactUpdate/:id', updatecontact);
 indexRoutes.delete('/deletecontact/:id', removecontact);
+
+// reviews Routes 
+
+indexRoutes.post('/createreviews', createNewreviews);
+indexRoutes.get('/allreviews', getAllreviews);
+indexRoutes.get('/getreviewsById/:id', getreviewsById);
+indexRoutes.put('/reviewsUpdate/:id', updatereviews);
+indexRoutes.delete('/deletereviews/:id', removereviews);
+
+// schedule Routes 
+
+indexRoutes.post('/createschedule', createNewschedule);
+indexRoutes.get('/allschedules', getAllschedule);
+indexRoutes.get('/getscheduleById/:id', getscheduleById);
+indexRoutes.put('/scheduleUpdate/:id', updateschedule);
+indexRoutes.delete('/deleteschedule/:id', removeschedule);
 
 module.exports = indexRoutes

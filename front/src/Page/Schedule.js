@@ -389,7 +389,7 @@ function Schedule() {
                         </div>
                         <div className="mb-3">
                             <label className="form-label text-white j_join_text">Repeat On</label>
-                            <div className="d-flex">
+                            <div className="d-flex B_Repeat_on_btn">
                                 <button
                                     className={`btn ${selectedDays.includes('Sunday') ? 'j_day_selected_btn' : 'j_day_btn'} me-1`}
                                     onClick={() => toggleDay('Sunday')}

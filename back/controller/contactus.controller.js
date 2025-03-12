@@ -61,6 +61,7 @@ exports.getcontactById = async (req, res) => {
 exports.updatecontact = async (req, res) => {
     try {
         let id = req.params.id
+        let contactData = req.body;
         let contactUpdateById = await contact.findById(id);
 
         if (!contactUpdateById) {

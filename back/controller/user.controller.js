@@ -80,9 +80,6 @@ exports.updateUser = async (req, res) => {
         let id = req.params.id;
         let userData = req.body;
         const filePath = req.file ? req.file.path : null;
-        console.log("filePath", filePath);
-        console.log("Request body:", req.body);
-        console.log("Uploaded file:", req.file);
 
         let userUpdateById = await user.findById(id);
 
