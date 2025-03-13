@@ -866,7 +866,7 @@ img {
   outline: none !important;
 }
 
-  
+
 
 /* MiN MEDIA QUERY START.............. */
 
@@ -1568,6 +1568,10 @@ img {
     font-size: 14px;
   }
 
+  .B_feature-card {
+    text-align: center;
+  }
+
   .B_box_head {
     font-size: 20px;
   }
@@ -2198,7 +2202,7 @@ img {
 
 @media (max-width: 320px) {
   .B_Main_section {
-    padding: 20px 0;
+    padding: 20px 0 50px 0;
   }
 
   .B_Head_text {

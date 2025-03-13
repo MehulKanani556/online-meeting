@@ -20,6 +20,7 @@ function ContactUs() {
     }, []);
 
     const contactSchema = Yup.object().shape({
+
         firstname: Yup.string().required("First Name is required"),
         lastname: Yup.string().required("Last Name is required"),
         email: Yup.string().email("Invalid email").required("Email is required"),
@@ -28,6 +29,7 @@ function ContactUs() {
             .matches(/^\d{10}$/, "Phone No. must be exactly 10 digits"),
         message: Yup.string().required("message is required"),
     });
+
 
     return (
         <div>
@@ -50,6 +52,7 @@ function ContactUs() {
 
                     <div>
                         <div className="B_contact_form">
+                            
                             <Formik
                                 initialValues={{
                                     firstname: '', lastname: '', email: '', phoneno: '', message: ''
@@ -91,8 +94,9 @@ function ContactUs() {
                                             </div>
                                         </div>
                                         <div className="B_form_group">
+
                                             <label>Message</label>
-                                            {/* <textarea name="message" placeholder="Enter Message" value={values.message} onChange={handleChange}></textarea> */}
+
                                             <Field
                                                 as="textarea"
                                                 name="message"

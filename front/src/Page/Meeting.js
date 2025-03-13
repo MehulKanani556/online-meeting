@@ -18,6 +18,7 @@ import * as Yup from 'yup';
 import { Formik } from 'formik';
 import { createreview } from '../Redux/Slice/reviews.slice';
 import { useDispatch } from 'react-redux';
+import { createschedule } from '../Redux/Slice/schedule.slice';
 
 
 function Meeting() {
@@ -25,12 +26,13 @@ function Meeting() {
     const [isEditingPassword, setIsEditingPassword] = useState(false);
     const [isLinkRotating, setIsLinkRotating] = useState(false);
     const [isEditingLink, setIsEditingLink] = useState(false);
-    const [linkCopied, setLinkCopied] = useState(false)
-    const [selectedReminders, setSelectedReminders] = useState([])
+    const [linkCopied, setLinkCopied] = useState(false);
+    const [isRotating, setIsRotating] = useState(false);
+    const [selectedReminders, setSelectedReminders] = useState([]);
     const [openDropdownId, setOpenDropdownId] = useState(null);
     const [selectedDays, setSelectedDays] = useState([]);
-    const [RepeatEvery, setRepeatEvery] = useState(1)
-    const [RepeatEvery1, setRepeatEvery1] = useState(1)
+    const [RepeatEvery, setRepeatEvery] = useState(1);
+    const [RepeatEvery1, setRepeatEvery1] = useState(1);
     const [billingCycle, setBillingCycle] = useState('Meeting Details');
     const [meetingFilter, setMeetingFilter] = useState("All Meetings");
     const [securityType, setSecurityType] = useState('alwaysLocked');
@@ -122,6 +124,7 @@ function Meeting() {
     const handleDecrement = () => {
         setRepeatEvery(prev => Math.max(prev - 1, 1));
     }
+
     const handleIncrement1 = () => {
         setRepeatEvery1(prev => prev + 1);
     }
@@ -143,6 +146,7 @@ function Meeting() {
     }, []);
 
     const renderMeetingCards = () => {
+
         if (meetingType === "All Meetings" && meetingFilter === "All Meetings") {
             return (
                 <div className='mx-4'>
@@ -1465,7 +1469,6 @@ function Meeting() {
         }
     };
 
-    const [isRotating, setIsRotating] = useState(false);
 
     const generatePassword = () => {
         const uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -1499,7 +1502,7 @@ function Meeting() {
 
     const [activeButton, setActiveButton] = useState([]);
     const [rating, setRating] = useState(0);
-    const dispatch = useDispatch()
+    const dispatch = useDispatch();
 
     // const reviewSchema = Yup.object().shape({
     //     rating: Yup.string().required("rating is required"),
@@ -1549,6 +1552,86 @@ function Meeting() {
     //         }
     //     });
     // };
+
+
+    const scheduleSchema = Yup.object().shape({
+        title: Yup.string().required('Title is required'),
+
+        date: Yup.date()
+            .required('Date is required'),
+
+        startTime: Yup.string()
+            .required('Start time is required'),
+
+        endTime: Yup.string()
+            .required('End time is required')
+            .test('is-greater', 'End time should be after start time', function (value) {
+                const { startTime } = this.parent;
+                if (!startTime || !value) return true;
+                return value > startTime;
+            }),
+
+        meetingLink: Yup.string()
+            .required('Meeting link is required'),
+
+        description: Yup.string()
+            .required('Description is required'),
+
+        reminder: Yup.array()
+            .of(Yup.string()
+                .oneOf([
+                    '5 min before',
+                    '10 min before',
+                    '15 min before',
+                    '30 min before',
+                    '1 hr before',
+                    '2 hr before',
+                    '1 day before',
+                    '2 days before'
+                ], 'Please select a valid reminder option')
+            )
+            .min(1, 'Please select at least one reminder'),
+
+        recurringMeeting: Yup.string()
+            .oneOf(['DoesNotRepeat', 'daily', 'weekly', 'monthly', 'custom'], 'Please select a valid recurring option')
+            .required('Please select recurring meeting option'),
+
+        customRecurrence: Yup.object().when('recurringMeeting', {
+            is: 'custom',
+            then: () => Yup.object({
+                repeatType: Yup.string()
+                    .required('Repeat type is required')
+                    .oneOf(['daily', 'weekly', 'monthly', 'yearly'], 'Please select a valid repeat type'),
+
+                repeatEvery: Yup.number()
+                    .required('Repeat frequency is required')
+                    .min(1, 'Must be at least 1'),
+
+                repeatOn: Yup.array()
+                    .of(Yup.string()
+                        .oneOf(['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']))
+                    .when('repeatType', {
+                        is: 'weekly',
+                        then: () => Yup.array().min(1, 'Please select at least one day')
+                    }),
+
+                ends: Yup.string()
+                    .required('Please select when the recurring meeting ends')
+                    .oneOf(['never', 'on', 'after'], 'Invalid end option'),
+
+                endDate: Yup.date().when('ends', {
+                    is: 'on',
+                    then: () => Yup.date()
+                        .required('End date is required')
+                        .min(Yup.ref('date'), 'End date must be after start date')
+                })
+            }),
+            otherwise: () => Yup.object().nullable()
+        }),
+
+        invitees: Yup.array()
+            .of(Yup.string().email('Invalid email').required('Email is required'))
+    });
 
     return (
         <div>
@@ -1652,112 +1735,250 @@ function Meeting() {
                                     onClick={handleCloseScheduleModel}
                                 />
                             </Modal.Header>
-                            <div className="j_modal_header"></div>
-                            <Modal.Body className="py-0">
-                                <div className="row">
-                                    <div className="col-6 col-md-8 ps-0 j_schedule_border">
-                                        <form>
-                                            <div className="mb-3 pt-3">
-                                                <label htmlFor="meetingTitle" className="form-label text-white j_join_text">Title</label>
-                                                <input type="text" className="form-control j_input j_join_text" id="meetingTitle" placeholder="Enter title for meeting" />
-                                            </div>
-                                            <div className="j_schedule_DnT B_schedule_DnT">
-                                                <div className="mb-3">
-                                                    <label htmlFor="meetingDate" className="form-label text-white j_join_text">Date</label>
-                                                    <input type="date" className="form-control j_input j_join_text B_schedule_input" id="meetingDate" />
-                                                </div>
-                                                <div className="mb-3">
-                                                    <label htmlFor="startTime" className="form-label text-white j_join_text">Start Time</label>
-                                                    <input type="time" className="form-control j_input j_join_text B_schedule_input" id="startTime" />
-                                                </div>
-                                                <div className="mb-3">
-                                                    <label htmlFor="endTime" className="form-label text-white j_join_text">End Time</label>
-                                                    <input type="time" className="form-control j_input j_join_text B_schedule_input" id="endTime" />
-                                                </div>
-                                            </div>
-                                            <div className="mb-3">
-                                                <label htmlFor="meetingLink" className="form-label text-white j_join_text">Meeting Link</label>
-                                                <Form.Select className="j_select j_join_text" id="meetingLink">
-                                                    <option value="0">Select</option>
-                                                    <option value="1">Generate a one time meeting link</option>
-                                                    <option value="2">Use my personal room link</option>
-                                                </Form.Select>
-                                            </div>
-                                            <div className="mb-3">
-                                                <label htmlFor="description" className="form-label text-white j_join_text">Description</label>
-                                                <Form.Control
-                                                    as="textarea"
-                                                    rows={3}
-                                                    className="j_input j_join_text"
-                                                    placeholder="Enter a description for meeting"
-                                                />
-                                            </div>
-                                            <div className="mb-3">
-                                                <label className="form-label text-white j_join_text">Reminder</label>
-                                                <div>
-                                                    {['5 min before', '10 min before', '15 min before', '30 min before',
-                                                        '1 hr before', '2 hr before', '1 day before', '2 days before'].map((reminder) => (
-                                                            <Button
-                                                                key={reminder}
-                                                                type="button"
-                                                                className={`j_schedule_btn ${selectedReminders.includes(reminder) ? 'j_schedule_selected_btn' : ''}`}
-                                                                onClick={() => toggleReminder(reminder)}
-                                                            >
-                                                                {reminder}
-                                                            </Button>
-                                                        ))}
-                                                </div>
-                                            </div>
-                                            <div className="mb-3">
-                                                <label htmlFor="recurringMeetings" className="form-label text-white j_join_text">Recurring Meetings</label>
-                                                <Form.Select
-                                                    className="j_select j_join_text"
-                                                    onChange={(e) => {
-                                                        if (e.target.value === "custom") {
-                                                            handleCloseScheduleModel();
-                                                            handleShowScheduleCustomModel();
-                                                        }
-                                                    }}
-                                                >
-                                                    <option value="0">select</option>
-                                                    <option value="1">Does not repeat</option>
-                                                    <option value="2">Daily</option>
-                                                    <option value="3">Weekly on Monday</option>
-                                                    <option value="4">Monthly on 3 February</option>
-                                                    <option value="custom">Custom</option>
-                                                </Form.Select>
-                                            </div>
-                                            <Modal.Footer className="j_schedule_footer border-0 p-0 pt-4 pb-3 gap-0 gap-md-4">
-                                                <Button variant="outline-light" className="j_home_button B_schedule_btn1 fw-semibold" onClick={handleCloseScheduleModel}>
-                                                    Cancel
-                                                </Button>
-                                                <Button variant="light" className="j_home_button fw-semibold">
-                                                    Schedule
-                                                </Button>
-                                            </Modal.Footer>
-                                        </form>
-                                    </div>
 
-                                    <div className="col-6 col-md-4 pe-0">
-                                        <div className="mb-3 pt-3">
-                                            <p className='mb-0 text-white'>Invitees (0)</p>
-                                            <div className="position-relative mt-1">
-                                                <IoSearch className='position-absolute' style={{ top: "50%", transform: "translateY(-50%)", left: "4px", fontSize: "15px", color: "rgba(255, 255, 255, 0.7)" }} />
-                                                <Form.Control
-                                                    type="search"
-                                                    className="text-white j_input ps-4 j_join_text"
-                                                    placeholder="Add people by name or email..."
-                                                    style={{ borderRadius: '5px', border: 'none', backgroundColor: "#202F41" }}
-                                                />
+                            <div className="j_modal_header"></div>
+
+                            <Modal.Body className="py-0">
+
+                                <Formik
+                                    initialValues={{
+                                        title: '',
+                                        date: '',
+                                        startTime: '',
+                                        endTime: '',
+                                        meetingLink: '',
+                                        description: '',
+                                        reminder: [],
+                                        recurringMeeting: '',
+                                        customRecurrence: {
+                                            repeatType: '',
+                                            repeatEvery: 1,
+                                            repeatOn: [],
+                                            ends: '',
+                                            endDate: ''
+                                        },
+                                        invitees: []
+                                    }}
+                                    validationSchema={scheduleSchema}
+                                    onSubmit={(values, { resetForm }) => {
+                                        dispatch(createschedule(values)).then((response) => {
+                                            if (response.payload?._id) {
+                                                resetForm();
+                                                handleCloseScheduleModel();
+                                            }
+                                        });
+                                    }}
+                                >
+
+                                    {({ values, errors, touched, handleSubmit, handleChange, setFieldValue }) => (
+
+                                        <form onSubmit={handleSubmit}>
+                                            <div className="row">
+                                                <div className="col-6 col-md-8 ps-0 j_schedule_border">
+                                                    <div className="mb-3 pt-3">
+                                                        <label htmlFor="title" className="form-label text-white j_join_text">Title</label>
+                                                        <input
+                                                            type="text"
+                                                            className="form-control j_input j_join_text"
+                                                            id="title"
+                                                            name="title"
+                                                            value={values.title}
+                                                            onChange={handleChange}
+                                                            placeholder="Enter title for meeting"
+                                                        />
+                                                        {touched.title && errors.title && <div className="text-danger">{errors.title}</div>}
+                                                    </div>
+
+                                                    <div className="j_schedule_DnT B_schedule_DnT">
+                                                        <div className="mb-3">
+                                                            <label htmlFor="date" className="form-label text-white j_join_text">Date</label>
+                                                            <input
+                                                                type="date"
+                                                                className="form-control j_input j_join_text B_schedule_input"
+                                                                id="date"
+                                                                name="date"
+                                                                value={values.date}
+                                                                onChange={handleChange}
+                                                            />
+                                                            {touched.date && errors.date && <div className="text-danger">{errors.date}</div>}
+                                                        </div>
+
+                                                        <div className="mb-3">
+                                                            <label htmlFor="startTime" className="form-label text-white j_join_text">Start Time</label>
+                                                            <input
+                                                                type="time"
+                                                                className="form-control j_input j_join_text B_schedule_input"
+                                                                id="startTime"
+                                                                name="startTime"
+                                                                value={values.startTime}
+                                                                onChange={handleChange}
+                                                            />
+                                                            {touched.startTime && errors.startTime && <div className="text-danger">{errors.startTime}</div>}
+                                                        </div>
+
+                                                        <div className="mb-3">
+                                                            <label htmlFor="endTime" className="form-label text-white j_join_text">End Time</label>
+                                                            <input
+                                                                type="time"
+                                                                className="form-control j_input j_join_text B_schedule_input"
+                                                                id="endTime"
+                                                                name="endTime"
+                                                                value={values.endTime}
+                                                                onChange={handleChange}
+                                                            />
+                                                            {touched.endTime && errors.endTime && <div className="text-danger">{errors.endTime}</div>}
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="mb-3">
+                                                        <label htmlFor="meetingLink" className="form-label text-white j_join_text">Meeting Link</label>
+                                                        <select
+                                                            className="form-select j_select j_join_text"
+                                                            id="meetingLink"
+                                                            name="meetingLink"
+                                                            value={values.meetingLink}
+                                                            onChange={handleChange}
+                                                        >
+                                                            <option value="">Select</option>
+                                                            <option value="GenerateaOneTimeMeetingLink">Generate a one time meeting link</option>
+                                                            <option value="UseMyPersonalRoomLink">Use my personal room link</option>
+                                                        </select>
+                                                        {touched.meetingLink && errors.meetingLink && <div className="text-danger">{errors.meetingLink}</div>}
+                                                    </div>
+
+                                                    <div className="mb-3">
+                                                        <label htmlFor="description" className="form-label text-white j_join_text">Description</label>
+                                                        <textarea
+                                                            className="form-control j_input j_join_text"
+                                                            id="description"
+                                                            name="description"
+                                                            rows="3"
+                                                            value={values.description}
+                                                            onChange={handleChange}
+                                                            placeholder="Enter a description for meeting"
+                                                        />
+                                                        {touched.description && errors.description && <div className="text-danger">{errors.description}</div>}
+                                                    </div>
+
+                                                    <div className="mb-3">
+                                                        <label className="form-label text-white j_join_text">Reminder</label>
+                                                        <div>
+                                                            {['5 min before', '10 min before', '15 min before', '30 min before',
+                                                                '1 hr before', '2 hr before', '1 day before', '2 days before'].map((reminder) => (
+                                                                    <button
+                                                                        key={reminder}
+                                                                        type="button"
+                                                                        className={`btn j_schedule_btn ${values.reminder.includes(reminder) ? 'j_schedule_selected_btn' : ''}`}
+                                                                        onClick={() => {
+                                                                            const newReminders = values.reminder.includes(reminder)
+                                                                                ? values.reminder.filter(r => r !== reminder)
+                                                                                : [...values.reminder, reminder];
+                                                                            setFieldValue('reminder', newReminders);
+                                                                        }}
+                                                                    >
+                                                                        {reminder}
+                                                                    </button>
+                                                                ))}
+                                                        </div>
+                                                        {touched.reminder && errors.reminder && <div className="text-danger">{errors.reminder}</div>}
+                                                    </div>
+
+                                                    <div className="mb-3">
+                                                        <label htmlFor="recurringMeeting" className="form-label text-white j_join_text">Recurring Meetings</label>
+                                                        <select
+                                                            className="form-select j_select j_join_text"
+                                                            id="recurringMeeting"
+                                                            name="recurringMeeting"
+                                                            value={values.recurringMeeting}
+                                                            onChange={(e) => {
+                                                                handleChange(e);
+                                                                if (e.target.value === "custom") {
+                                                                    handleCloseScheduleModel();
+                                                                    handleShowScheduleCustomModel();
+                                                                }
+                                                            }}
+                                                        >
+                                                            <option value="">select</option>
+                                                            <option value="DoesNotRepeat">Does not repeat</option>
+                                                            <option value="daily">Daily</option>
+                                                            <option value="weekly">Weekly on Monday</option>
+                                                            <option value="monthly">Monthly on 3 February</option>
+                                                            <option value="custom">Custom</option>
+                                                        </select>
+                                                        {touched.recurringMeeting && errors.recurringMeeting &&
+                                                            <div className="text-danger">{errors.recurringMeeting}</div>}
+                                                    </div>
+
+                                                    <div className="modal-footer j_schedule_footer border-0 p-0 pt-4 pb-3">
+                                                        <button
+                                                            type="button"
+                                                            className="btn btn-outline-light j_home_button B_schedule_btn1 fw-semibold"
+                                                            onClick={handleCloseScheduleModel}
+                                                        >
+                                                            Cancel
+                                                        </button>
+                                                        <button type="submit" className="btn btn-light j_home_button fw-semibold">
+                                                            Schedule
+                                                        </button>
+                                                    </div>
+                                                </div>
+
+                                                <div className="col-6 col-md-4 pe-0">
+                                                    <div className="mb-3 pt-3">
+                                                        <p className='mb-0 text-white'>Invitees (0)</p>
+                                                        <div className="position-relative mt-1">
+                                                            <IoSearch className='position-absolute' style={{ top: "50%", transform: "translateY(-50%)", left: "4px", fontSize: "15px", color: "rgba(255, 255, 255, 0.7)" }} />
+                                                            <input
+                                                                type="search"
+                                                                name="invitees"
+                                                                className="form-control text-white j_input ps-4 j_join_text"
+                                                                placeholder="Add people by name or email..."
+                                                                style={{ borderRadius: '5px', border: 'none', backgroundColor: "#202F41" }}
+                                                                onKeyPress={(e) => {
+                                                                    if (e.key === 'Enter') {
+                                                                        e.preventDefault();
+                                                                        const email = e.target.value.trim();
+                                                                        if (email) {
+                                                                            setFieldValue('invitees', [...values.invitees, email]);
+                                                                            e.target.value = '';
+                                                                        }
+                                                                    }
+                                                                }}
+                                                            />
+                                                        </div>
+                                                        {values.invitees.length > 0 && (
+                                                            <div className="mt-2">
+                                                                {values.invitees.map((email, index) => (
+                                                                    <div key={index} className="d-flex align-items-center mb-1">
+                                                                        <span className="text-white">{email}</span>
+                                                                        <button
+                                                                            type="button"
+                                                                            className="btn btn-link text-danger p-0 ms-2"
+                                                                            onClick={() => {
+                                                                                const newInvitees = values.invitees.filter((_, i) => i !== index);
+                                                                                setFieldValue('invitees', newInvitees);
+                                                                            }}
+                                                                        >
+                                                                            ×
+                                                                        </button>
+                                                                    </div>
+                                                                ))}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </div>
                                             </div>
-                                        </div>
-                                    </div>
-                                </div>
+                                        </form>
+
+                                    )}
+
+
+                                </Formik>
                             </Modal.Body>
                         </Modal>
 
                         {/* ============================ Schedule Meeting custom Modal ============================ */}
-
+                        {/* 
                         <Modal
                             show={ScheduleCustomModel}
                             onHide={handleCloseScheduleCustomModel}
@@ -1870,13 +2091,13 @@ function Meeting() {
                                     {
                                         endsSelection == "3" && (
                                             <div className="mb-3 flex-fill j_select_fill J_Fill_bottom">
-                                                <Form.Label className="text-white j_join_text">Repeat Every</Form.Label>
+                                                <Form.Label className=" text-white j_join_text"></Form.Label>
                                                 <div className='position-relative'>
                                                     <Form.Control
                                                         type="text"
                                                         className="j_input j_join_text"
-                                                        value={RepeatEvery1}
-                                                        onChange={(e) => setRepeatEvery1(Number(e.target.value) || 1)}
+                                                        value={`${RepeatEvery1} Recurrence`} // Update to show the recurrence text
+                                                        readOnly // Make it read-only to prevent direct editing
                                                     />
                                                     <div className="j_custom_icons">
                                                         <FaAngleUp
@@ -1909,6 +2130,195 @@ function Meeting() {
                                     Done
                                 </Button>
                             </Modal.Footer>
+                        </Modal> */}
+
+
+                        <Modal
+                            show={ScheduleCustomModel}
+                            onHide={handleCloseScheduleCustomModel}
+                            centered
+                            contentClassName="j_modal_join"
+                        >
+                            <Modal.Header className="border-0 d-flex justify-content-between align-items-center">
+                                <Modal.Title className="text-white j_join_title">Custom Recurrence</Modal.Title>
+                                <IoClose
+                                    style={{ color: '#fff', fontSize: '22px', cursor: 'pointer' }}
+                                    onClick={handleCloseScheduleCustomModel}
+                                />
+                            </Modal.Header>
+                            <div className="j_modal_header"></div>
+                            <Modal.Body>
+
+                                <div className="j_schedule_Repeat">
+                                    <div className="mb-3 flex-fill me-2  j_select_fill">
+                                        <label htmlFor="RepeatType" className="form-label text-white j_join_text">Repeat Type</label>
+                                        <select
+                                            className="form-select j_select j_join_text"
+                                            id="RepeatType"
+                                            onChange={(e) => {
+                                                setRepeatType(e.target.value);
+                                                setEndsSelection("0");
+                                                setSelectedDays([]);
+                                            }} >
+                                            <option value="0">Select</option>
+                                            <option value="1">Daily</option>
+                                            <option value="2">Weekly</option>
+                                            <option value="3">Monthly</option>
+                                            <option value="4">Yearly</option>
+                                        </select>
+                                    </div>
+                                    <div className="mb-3 flex-fill  j_select_fill">
+                                        <label htmlFor="RepeatEvery" className="form-label text-white j_join_text">Repeat Every</label>
+                                        <div className='position-relative'>
+                                            <input
+                                                type="text"
+                                                className="form-control j_input j_join_text"
+                                                id="RepeatEvery"
+                                                onChange={(e) => setRepeatEvery(Number(e.target.value) || 1)}
+                                                value={RepeatEvery}
+                                            />
+                                            <div className="j_custom_icons">
+                                                <FaAngleUp
+                                                    style={{ color: 'white', fontSize: '12px' }}
+                                                    onClick={() => handleIncrement()}
+                                                />
+                                                <FaAngleDown
+                                                    style={{ color: 'white', fontSize: '12px' }}
+                                                    onClick={() => handleDecrement()}
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {repeatType === '2' && (
+                                    <div className="mb-3">
+                                        <label className="form-label text-white j_join_text">Repeat On</label>
+                                        <div className="d-flex B_Repeat_on_btn">
+                                            <button
+                                                className={`btn ${selectedDays.includes('Sunday') ? 'j_day_selected_btn' : 'j_day_btn'} me-1`}
+                                                onClick={() => toggleDay('Sunday')}
+                                            >
+                                                S
+                                            </button>
+                                            <button
+                                                className={`btn ${selectedDays.includes('Monday') ? 'j_day_selected_btn' : 'j_day_btn'} me-1`}
+                                                onClick={() => toggleDay('Monday')}
+                                            >
+                                                M
+                                            </button>
+                                            <button
+                                                className={`btn ${selectedDays.includes('Tuesday') ? 'j_day_selected_btn' : 'j_day_btn'} me-1`}
+                                                onClick={() => toggleDay('Tuesday')}
+                                            >
+                                                T
+                                            </button>
+                                            <button
+                                                className={`btn ${selectedDays.includes('Wednesday') ? 'j_day_selected_btn' : 'j_day_btn'} me-1`}
+                                                onClick={() => toggleDay('Wednesday')}
+                                            >
+                                                W
+                                            </button>
+                                            <button
+                                                className={`btn ${selectedDays.includes('Thursday') ? 'j_day_selected_btn' : 'j_day_btn'} me-1`}
+                                                onClick={() => toggleDay('Thursday')}
+                                            >
+                                                T
+                                            </button>
+                                            <button
+                                                className={`btn ${selectedDays.includes('Friday') ? 'j_day_selected_btn' : 'j_day_btn'} me-1`}
+                                                onClick={() => toggleDay('Friday')}
+                                            >
+                                                F
+                                            </button>
+                                            <button
+                                                className={`btn ${selectedDays.includes('Saturday') ? 'j_day_selected_btn' : 'j_day_btn'} me-1`}
+                                                onClick={() => toggleDay('Saturday')}
+                                            >
+                                                S
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {repeatType === '3' && (
+                                    <div className="mb-3">
+                                        <label className="text-white j_join_text">Every</label>
+                                        <select
+                                            className="j_select j_join_text"
+                                        >
+                                            <option value="0">Select</option>
+                                            <option value="1">Monthly on first monday</option>
+                                            <option value="2">Monthly on first day</option>
+                                        </select>
+                                    </div>
+                                )}
+
+                                <div className="j_schedule_Repeat">
+                                    <div className="mb-3 flex-fill me-2  j_select_fill">
+                                        <label htmlFor="RepeatType1" className="form-label text-white j_join_text">Ends</label>
+                                        <select
+                                            className="form-select j_select j_join_text"
+                                            id="RepeatType1"
+                                            value={endsSelection}
+                                            onChange={(e) => setEndsSelection(e.target.value)}
+                                        >
+                                            <option value="0">Select</option>
+                                            <option value="1">Never</option>
+                                            {repeatType !== '1' && <option value="2">On</option>}
+                                            <option value="3">After</option>
+                                        </select>
+                                    </div>
+
+                                    {(endsSelection == "0" || endsSelection == "2") && (
+                                        <div className="mb-3 flex-fill  j_select_fill">
+                                            <label htmlFor="RepeatType1" className="form-label text-white j_join_text"></label>
+                                            <input type="date" className="form-control j_input j_join_text j_special_m" id="RepeatEvery1" />
+                                        </div>
+                                    )}
+
+                                    {endsSelection == "3" && (
+                                        <div className="mb-3 flex-fill j_select_fill J_Fill_bottom">
+                                            <label className="form-label text-white j_join_text"></label>
+                                            <div className='position-relative'>
+                                                <input
+                                                    type="text"
+                                                    className="form-control j_input j_join_text j_special_m"
+                                                    value={`${RepeatEvery1} Recurrence`}
+                                                    readOnly
+                                                />
+                                                <div className="j_custom_icons">
+                                                    <FaAngleUp
+                                                        style={{ color: 'white', fontSize: '12px', cursor: 'pointer' }}
+                                                        onClick={handleIncrement1}
+                                                    />
+                                                    <FaAngleDown
+                                                        style={{ color: 'white', fontSize: '12px', cursor: 'pointer' }}
+                                                        onClick={handleDecrement1}
+                                                    />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+
+
+                                <Modal.Footer className="j_custom_footer border-0 p-0 pt-4 pb-3">
+                                    <Button
+                                        variant="outline-light"
+                                        className="j_custom_button fw-semibold"
+                                        onClick={() => { handleCloseScheduleCustomModel(); handleShowScheduleModel() }}
+                                    >
+                                        Cancel
+                                    </Button>
+                                    <Button
+                                        variant="light"
+                                        className="j_custom_button fw-semibold"
+                                    >
+                                        Done
+                                    </Button>
+                                </Modal.Footer>
+                            </Modal.Body>
+
                         </Modal>
 
                         {/* ============================ Cancel Meeting Modal ============================ */}
@@ -2545,52 +2955,6 @@ function Meeting() {
                                         </form>
                                     )}
                                 </Formik>
-
-
-                                <div className='mt-5 B_textAreaa' style={{ textAlign: "left" }}>
-                                    <p className='B_addtional_text'>Additional Comments</p>
-                                    <textarea
-                                        className='B_text_Area'
-                                        placeholder="Enter additional comments"
-                                        style={{
-                                            width: '100%',
-                                            height: '100px',
-                                            borderRadius: '4px',
-                                            border: '1px solid #2d394b',
-                                            backgroundColor: '#202F41',
-                                            color: '#BFBFBF',
-                                            padding: '10px',
-                                            resize: 'none'
-                                        }}
-                                    />
-                                </div>
-                                <div className=' BB_margin_home gap-5' style={{ display: 'flex', justifyContent: 'center', marginTop: '40px', marginBottom: "20px" }}>
-                                    <Link to={'/home'}>
-                                        <button className='B_hover_bttn'
-                                        >
-                                            Back To Home
-                                        </button>
-                                    </Link>
-
-                                    <button
-                                        className='B_lastbtn'
-                                        style={{
-                                            backgroundColor: '#FFFFFF',
-                                            border: 'none',
-                                            color: '#000',
-                                            padding: '8px 20px',
-                                            borderRadius: '6px',
-                                            cursor: 'pointer',
-                                            transition: 'background-color 0.3s ease',
-                                            width: '170px',
-                                            textAlign: 'center'
-                                        }}
-                                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f0f0f0'}
-                                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#FFFFFF'}
-                                    >
-                                        Submit
-                                    </button>
-                                </div>
                             </Modal.Body>
                         </Modal>
                     </div>
