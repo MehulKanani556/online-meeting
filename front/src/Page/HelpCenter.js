@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import NavBar from '../Component/NavBar';
 import Footer from '../Component/Footer';
 import image1 from '../Image/Account.svg';
@@ -11,7 +11,11 @@ import { IoSearch } from "react-icons/io5";
 function HelpCenter() {
     const [activeFAQ, setActiveFAQ] = useState('account');
 
-    
+    useEffect(() => {
+
+        window.scrollTo(0, 0);
+    }, []);
+
     const getIconStyle = (section) => {
         if (activeFAQ === section) {
             return {
@@ -26,9 +30,9 @@ function HelpCenter() {
 
     const getTextStyle = (section) => {
         if (activeFAQ === section) {
-            return { color: '#FFFFFF', cursor: 'pointer' }; 
+            return { color: '#FFFFFF', cursor: 'pointer' };
         }
-        return { color: '#87898B', cursor: 'pointer' }; 
+        return { color: '#87898B', cursor: 'pointer' };
     };
 
     return (
@@ -67,10 +71,10 @@ function HelpCenter() {
                             >
                                 <div className=" B_box_div text-center" style={getTextStyle('account')}>
                                     <div>
-                                        <img 
-                                            src={image1} 
-                                            className='B_Cardicon' 
-                                            alt="" 
+                                        <img
+                                            src={image1}
+                                            className='B_Cardicon'
+                                            alt=""
                                             style={getIconStyle('account')}
                                         />
                                     </div>
@@ -86,10 +90,10 @@ function HelpCenter() {
                             >
                                 <div className=" B_box_div text-center" style={getTextStyle('audio')}>
                                     <div>
-                                        <img 
-                                            src={image2} 
-                                            className='B_Cardicon' 
-                                            alt="" 
+                                        <img
+                                            src={image2}
+                                            className='B_Cardicon'
+                                            alt=""
                                             style={getIconStyle('audio')}
                                         />
                                     </div>
@@ -105,10 +109,10 @@ function HelpCenter() {
                             >
                                 <div className=" B_box_div text-center" style={getTextStyle('screen')}>
                                     <div>
-                                        <img 
-                                            src={image3} 
-                                            className='B_Cardicon B_Cardicon1' 
-                                            alt="" 
+                                        <img
+                                            src={image3}
+                                            className='B_Cardicon B_Cardicon1'
+                                            alt=""
                                             style={getIconStyle('screen')}
                                         />
                                     </div>
@@ -124,10 +128,10 @@ function HelpCenter() {
                             >
                                 <div className=" B_box_div text-center">
                                     <div>
-                                        <img 
-                                            src={image4} 
-                                            className='B_Cardicon' 
-                                            alt="" 
+                                        <img
+                                            src={image4}
+                                            className='B_Cardicon'
+                                            alt=""
                                             style={getIconStyle('schedule')}
                                         />
                                     </div>
@@ -146,10 +150,10 @@ function HelpCenter() {
                             >
                                 <div className=" B_box_div text-center">
                                     <div>
-                                        <img 
-                                            src={image5} 
-                                            className='B_Cardicon' 
-                                            alt="" 
+                                        <img
+                                            src={image5}
+                                            className='B_Cardicon'
+                                            alt=""
                                             style={getIconStyle('others')}
                                         />
                                     </div>
@@ -242,7 +246,7 @@ function HelpCenter() {
                                 </div>
                             </div>
                         )}
-                   
+
 
                         {/*  FAQ 2 Section Start .............. */}
                         {activeFAQ === 'audio' && (
@@ -336,7 +340,7 @@ function HelpCenter() {
                             </div>
                         )}
 
-           
+
                         {/*  FAQ 4 Section Start .............. */}
                         {activeFAQ === 'schedule' && (
                             <div className="accordion" id="accordionExample2">
@@ -406,11 +410,11 @@ function HelpCenter() {
                                 </div>
                             </div>
                         )}
-                 
+
 
                     </section>
                     {/*  FAQ  Section End.............. */}
-                    
+
 
                     {/* Footer Section Start.............. */}
                     <div className='B_Footer_section1'>

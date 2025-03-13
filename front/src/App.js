@@ -24,16 +24,16 @@ function App() {
       <Provider store={store}>
         <Alert />
         <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/home" element={<Home />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/" element={<Index />} />
           <Route path="/helpcenter" element={<HelpCenter />} />
           <Route path="/pricing" element={<Pricing />} />
           <Route path="/payment" element={<Payment />} />
           <Route path="/contactus" element={<ContactUs />} />
+          <Route path="/home" element={<Home />} />
           <Route path="/meeting" element={<Meeting />} />
-          <Route path="/setting" element={<Setting />} />
           <Route path="/schedule" element={<Schedule />} />
+          <Route path="/setting" element={<Setting />} />
         </Routes>
       </Provider>
     </SnackbarProvider>

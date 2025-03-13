@@ -1,10 +1,14 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom';
 import NavBar from '../Component/NavBar';
 import Footer from '../Component/Footer';
 import check_icon from '../Image/True.svg';
 
 function Pricing() {
+    
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, []);
 
     const [billingCycle, setBillingCycle] = useState('yearly');
 

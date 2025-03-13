@@ -130,10 +130,12 @@ function Index() {
                                     Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's stan
                                 </p>
                                 <div className='B_Btn_center'>
-                                    <button className="btn btn-light B_Button_text" >
-                                        See how it works
-                                        <span style={{ marginLeft: "8px", }}><BsArrowRight /></span>
-                                    </button>
+                                    <Link to={'/home'}>
+                                        <button className="btn btn-light B_Button_text" >
+                                            See how it works
+                                            <span style={{ marginLeft: "8px", }}><BsArrowRight /></span>
+                                        </button>
+                                    </Link>
                                 </div>
                             </div>
                             <div className='col-md-6 col-12'>
@@ -321,7 +323,10 @@ function Index() {
                                 <button className="btn btn-light mx-3 B_opacity_button1 fw-semibold">Sign In</button>
                             </Link>
                         )}
-                        <button button className="btn btn-outline-light mx-3 B_opacity_button fw-semibold">Plans & Pricing</button>
+                        <Link to={"/pricing"}>
+                            <button button className="btn btn-outline-light mx-3 B_opacity_button fw-semibold">Plans & Pricing</button>
+
+                        </Link>
                     </div>
                 </div>
             </section >

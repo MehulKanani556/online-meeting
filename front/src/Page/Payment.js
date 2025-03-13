@@ -1,8 +1,13 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import NavBar from '../Component/NavBar';
 import Footer from '../Component/Footer';
 
 function Payment() {
+
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, []);
+
     return (
         <div>
 
@@ -120,7 +125,7 @@ function Payment() {
                                         </div>
 
                                         <div className="text-center">
-                                        
+
                                             <button type="button" class="btn btn-light B_pay">Pay $94.50</button>
 
                                             <div className="OR-login text-white">
@@ -128,7 +133,7 @@ function Payment() {
                                                 <span>OR</span>
                                                 <div className="j_border_center_right"></div>
                                             </div>
-                        
+
                                             <button type="button" class="btn btn-outline-light B_pay_withPay"> Pay with PayPal</button>
                                         </div>
 

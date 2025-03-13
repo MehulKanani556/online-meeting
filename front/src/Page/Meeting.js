@@ -4,7 +4,7 @@ import SideBar from '../Component/SideBar';
 import { IoSearchSharp } from 'react-icons/io5';
 import { HiOutlineDotsVertical } from "react-icons/hi";
 import { IoClose, IoSearch, IoCheckmark } from 'react-icons/io5'
-import { FaAngleUp, FaAngleDown, FaDiceSix, FaDiceTwo, FaRegStar, FaStar } from "react-icons/fa6";
+import { FaAngleUp, FaAngleDown, FaDiceSix, FaDiceTwo, FaStar } from "react-icons/fa6";
 import MeetingCanlander from '../Image/MeeringCalander.svg'
 import MeetingUser from '../Image/MeetingUSer.svg'
 import MeetingMultiUser from '../Image/MeetingMultiUser.svg'
@@ -22,17 +22,22 @@ import { useDispatch } from 'react-redux';
 
 function Meeting() {
     const [isSelectedMeetingCancelled, setIsSelectedMeetingCancelled] = useState(false);
-    const [isEditingLink, setIsEditingLink] = useState(false);
+    const [isEditingPassword, setIsEditingPassword] = useState(false);
     const [isLinkRotating, setIsLinkRotating] = useState(false);
+    const [isEditingLink, setIsEditingLink] = useState(false);
+    const [linkCopied, setLinkCopied] = useState(false)
     const [selectedReminders, setSelectedReminders] = useState([])
     const [openDropdownId, setOpenDropdownId] = useState(null);
     const [selectedDays, setSelectedDays] = useState([]);
     const [RepeatEvery, setRepeatEvery] = useState(1)
+    const [RepeatEvery1, setRepeatEvery1] = useState(1)
     const [billingCycle, setBillingCycle] = useState('Meeting Details');
     const [meetingFilter, setMeetingFilter] = useState("All Meetings");
     const [securityType, setSecurityType] = useState('alwaysLocked');
     const [meetingType, setMeetingType] = useState("All Meetings");
+    const [password, setPassword] = useState('5163YHV8ujui');
     const [linkNumber, setLinkNumber] = useState('57809');
+    const [passwordError, setPasswordError] = useState('');
     const [linkError, setLinkError] = useState('');
     const [repeatType, setRepeatType] = useState('0');
     const [endsSelection, setEndsSelection] = useState('0');
@@ -117,6 +122,13 @@ function Meeting() {
 
     const handleDecrement = () => {
         setRepeatEvery(prev => Math.max(prev - 1, 1));
+    }
+    const handleIncrement1 = () => {
+        setRepeatEvery1(prev => prev + 1);
+    }
+
+    const handleDecrement1 = () => {
+        setRepeatEvery1(prev => Math.max(prev - 1, 1));
     }
 
     const handleIncrement1 = () => {
@@ -274,11 +286,11 @@ function Meeting() {
                                 </div>
                                 <div style={{ borderTop: "1px solid #525252" }}></div>
                                 <div className="B_meetingALl_details p-3 B_meeting_padding" style={{ color: '#B3AEAE' }}>
-                                    <div className="d-flex  mb-2">
+                                    <div className="d-flex mb-2">
                                         <span className='B_meetingALl_details_span'>Meeting Date</span>
                                         <span className='text-white'>: 23-01-2025</span>
                                     </div>
-                                    <div className="d-flex  mb-2">
+                                    <div className="d-flex mb-2">
                                         <span className='B_meetingALl_details_span'>Meeting Time</span>
                                         <span className='text-white'>: 11:00 AM</span>
                                     </div>
@@ -559,7 +571,7 @@ function Meeting() {
                                         <span className='B_meetingALl_details_span'>Meeting Date</span>
                                         <span className='text-white'>: 23-01-2025</span>
                                     </div>
-                                    <div className="d-flex  mb-2">
+                                    <div className="d-flex mb-2">
                                         <span className='B_meetingALl_details_span'>Meeting Time</span>
                                         <span className='text-white'>: 11:00 AM</span>
                                     </div>
@@ -926,7 +938,7 @@ function Meeting() {
                                         <span className='B_meetingALl_details_span'>Meeting Date</span>
                                         <span className='text-white'>: 23-01-2025</span>
                                     </div>
-                                    <div className="d-flex  mb-2">
+                                    <div className="d-flex mb-2">
                                         <span className='B_meetingALl_details_span'>Meeting Time</span>
                                         <span className='text-white'>: 11:00 AM</span>
                                     </div>
@@ -1211,9 +1223,7 @@ function Meeting() {
                                                         >
                                                             <FaDiceTwo size={18} />
                                                         </span>
-                                                        <button className="btn btn-link p-0 ms-2" style={{ color: '#fff' }}>
-                                                            <i className="fas fa-copy"></i>
-                                                        </button>
+
                                                     </>
                                                 )}
                                             </div>
@@ -1331,9 +1341,16 @@ function Meeting() {
                                                         >
                                                             <FaDiceSix size={18} />
                                                         </span>
-                                                        <button className="btn btn-link p-0 ms-2" style={{ color: '#fff' }}>
-                                                            <i className="fas fa-copy"></i>
-                                                        </button>
+                                                        <div className="d-flex flex-column align-items-center"> {/* Container for button and message */}
+                                                            <button className="btn btn-link p-0 ms-2" style={{ color: '#fff' }}>
+                                                                <i className="fas fa-copy"></i>
+                                                            </button>
+                                                            {linkCopied && ( // Conditionally render the copied message
+                                                                <div className="text-success mt-2">
+                                                                    Link is copied!
+                                                                </div>
+                                                            )}
+                                                        </div>
                                                     </>
                                                 )}
                                             </div>
@@ -1401,11 +1418,8 @@ function Meeting() {
     const handleShowDeleteModel = () => setDeleteModel(true);
 
     const [ReviewModel, setReviewModel] = useState(false);
-
     const handleCloseReviewModel = () => setReviewModel(false);
     const handleShowReviewModel = () => setReviewModel(true);
-
-
 
     const [OffcanvasModel, setOffcanvasModel] = useState(false);
     const handleCloseOffcanvasModel = () => {
@@ -1423,10 +1437,6 @@ function Meeting() {
     const handleSecurityChange = (type) => {
         setSecurityType(type);
     };
-
-    const [isEditingPassword, setIsEditingPassword] = useState(false);
-    const [password, setPassword] = useState('5163YHV8ujui');
-    const [passwordError, setPasswordError] = useState('');
 
     const validatePassword = (value) => {
         if (value.length < 12) {
@@ -2013,18 +2023,38 @@ function Meeting() {
                                     >
                                         Cancel
                                     </Button>
-                                    <Button
-                                        variant="light"
-                                        className="B_invite_people_btn1"
-                                        style={{
-                                            padding: '8px 58px',
-                                            fontSize: '14px',
-                                            color: '#000000'
-                                        }}
-                                    >
-                                        Copy Link
-                                    </Button>
+                                    <div className="d-flex flex-column align-items-center">
+                                        <Button
+                                            variant="light"
+                                            className="B_invite_people_btn1"
+                                            onClick={() => {
+
+                                                navigator.clipboard.writeText("https://googlemeet.123/57809")
+                                                    .then(() => {
+                                                        setLinkCopied(true);
+                                                        setTimeout(() => setLinkCopied(false), 2000);
+                                                    })
+                                                    .catch(err => {
+                                                        console.error("Failed to copy: ", err);
+                                                    });
+                                            }}
+                                            style={{
+                                                padding: '8px 58px',
+                                                fontSize: '14px',
+                                                color: '#000000'
+                                            }}
+                                        >
+                                            Copy Link
+                                        </Button>
+
+                                    </div>
+
                                 </div>
+                                {linkCopied && (
+                                    <div className="text-success text-end pe-5 me-4  mt-2" style={{ marginTop: '8px', paddingLeft: "40px" }}>
+                                        Link is copied!
+                                    </div>
+                                )}
                             </Modal.Body>
                         </Modal>
 
@@ -2526,15 +2556,56 @@ function Meeting() {
                                 </Formik>
 
 
-                            </Modal.Body>
+                                </div>
+                                <div className='mt-5 B_textAreaa' style={{ textAlign: "left" }}>
+                                    <p className='B_addtional_text'>Additional Comments</p>
+                                    <textarea
+                                        className='B_text_Area'
+                                        placeholder="Enter additional comments"
+                                        style={{
+                                            width: '100%',
+                                            height: '100px',
+                                            borderRadius: '4px',
+                                            border: '1px solid #2d394b',
+                                            backgroundColor: '#202F41',
+                                            color: '#BFBFBF',
+                                            padding: '10px',
+                                            resize: 'none'
+                                        }}
+                                    />
+                                </div>
+                                <div className=' BB_margin_home gap-5' style={{ display: 'flex', justifyContent: 'center', marginTop: '40px', marginBottom: "20px" }}>
+                                    <Link to={'/home'}>
+                                        <button className='B_hover_bttn'
+                                        >
+                                            Back To Home
+                                        </button>
+                                    </Link>
 
+                                    <button
+                                        className='B_lastbtn'
+                                        style={{
+                                            backgroundColor: '#FFFFFF',
+                                            border: 'none',
+                                            color: '#000',
+                                            padding: '8px 20px',
+                                            borderRadius: '6px',
+                                            cursor: 'pointer',
+                                            transition: 'background-color 0.3s ease',
+                                            width: '170px',
+                                            textAlign: 'center'
+                                        }}
+                                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f0f0f0'}
+                                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#FFFFFF'}
+                                    >
+                                        Submit
+                                    </button>
+                                </div>
+                            </Modal.Body>
                         </Modal>
                     </div>
-
                 </div>
             </section>
-
-
         </div>
     )
 }
