@@ -41,7 +41,6 @@ function Meeting() {
     const [linkError, setLinkError] = useState('');
     const [repeatType, setRepeatType] = useState('0');
     const [endsSelection, setEndsSelection] = useState('0');
-    const [RepeatEvery1, setRepeatEvery1] = useState(1)
 
     const handleLinkDiceClick = () => {
         setIsLinkRotating(true);
@@ -123,14 +122,6 @@ function Meeting() {
     const handleDecrement = () => {
         setRepeatEvery(prev => Math.max(prev - 1, 1));
     }
-    const handleIncrement1 = () => {
-        setRepeatEvery1(prev => prev + 1);
-    }
-
-    const handleDecrement1 = () => {
-        setRepeatEvery1(prev => Math.max(prev - 1, 1));
-    }
-
     const handleIncrement1 = () => {
         setRepeatEvery1(prev => prev + 1);
     }
@@ -2556,7 +2547,6 @@ function Meeting() {
                                 </Formik>
 
 
-                                </div>
                                 <div className='mt-5 B_textAreaa' style={{ textAlign: "left" }}>
                                     <p className='B_addtional_text'>Additional Comments</p>
                                     <textarea
