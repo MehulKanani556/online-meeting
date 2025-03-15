@@ -27,8 +27,8 @@ export const getAllUsers = createAsyncThunk(
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
-            });
-            return response.data.users;
+            });            
+            return response.data.user;
         } catch (error) {
             return handleErrors(error, dispatch, rejectWithValue);
         }
