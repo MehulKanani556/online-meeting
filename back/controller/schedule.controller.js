@@ -1,35 +1,25 @@
-// const schedule = require('../models/schedule.modal');
-
-// exports.createNewschedule = async (req, res) => {
-//     try {
-//         let { title, date, startTime, endTime, meetingLink, description, reminder, recurringMeeting, customRecurrence, invitees } = req.body;
-
-//         let chekschedule = await schedule.create({
-//             title,
-//             date,
-//             startTime,
-//             endTime,
-//             meetingLink,
-//             description,
-//             reminder,
-//             recurringMeeting,
-//             invitees
-//         });
-
-//         return res.json({ status: 200, message: "schedule Created Successfully", schedules: chekschedule });
-
-//     } catch (error) {
-//         res.json({ status: 500, message: error.message });
-//         console.log(error);
-//     }
-// };
 const schedule = require('../models/schedule.modal');
+const crypto = require('crypto');
+const nodemailer = require('nodemailer');
+const { Server } = require('socket.io');
+
+const transporter = nodemailer.createTransport({
+    service: 'Gmail',
+    auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
+    }
+});
+
+// Initialize socket.io
+const io = new Server(/* your server instance here */);
 
 exports.createNewschedule = async (req, res) => {
     try {
         let {
             title,
             date,
+            userId,
             startTime,
             endTime,
             meetingLink,
@@ -37,12 +27,13 @@ exports.createNewschedule = async (req, res) => {
             reminder,
             recurringMeeting,
             customRecurrence,
-            invitees
+            invitees,
         } = req.body;
 
         let scheduleData = {
             title,
             date,
+            userId,
             startTime,
             endTime,
             meetingLink,
@@ -51,6 +42,45 @@ exports.createNewschedule = async (req, res) => {
             recurringMeeting,
             invitees
         };
+
+        if (meetingLink === "GenerateaOneTimeMeetingLink") {
+            const uniqueId = crypto.randomBytes(10).toString('hex');
+            scheduleData.meetingLink = `http://localhost:3000/${uniqueId}`;
+        }
+
+        // Add email sending functionality
+        if (invitees && invitees.length > 0) {
+            const emailPromises = invitees.map(invitee => {
+                const mailOptions = {
+                    from: process.env.EMAIL_USER,
+                    to: invitee,
+                    subject: `Meeting Invitation: ${title}`,
+                    html: `
+                        <h2>You've been invited to: ${title}</h2>
+                        <p><strong>Date:</strong> ${date}</p>
+                        <p><strong>Time:</strong> ${startTime} - ${endTime}</p>
+                        <p><strong>Description:</strong> ${description}</p>
+                        <p><strong>Meeting Link:</strong> <a href="${scheduleData.meetingLink}">${scheduleData.meetingLink}</a></p>
+                    `
+                };
+                return transporter.sendMail(mailOptions);
+            });
+
+            try {
+                await Promise.all(emailPromises);
+            } catch (emailError) {
+                console.log('Error sending emails:', emailError);
+            }
+
+            // Emit reminders to invitees using socket.io
+            reminder.forEach(rem => {
+                invitees.forEach(invitee => {
+                    io.to(invitee).emit('reminder', {
+                        message: `Reminder: ${rem} before the meeting "${title}" on ${date} at ${startTime}.`
+                    });
+                });
+            });
+        }
 
         if (recurringMeeting === 'custom' && customRecurrence) {
             scheduleData.customRecurrence = {

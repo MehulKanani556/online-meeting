@@ -12,8 +12,15 @@ import * as Yup from 'yup';
 import plus from '../Image/j_plus.svg'
 import { createschedule, getAllschedule } from '../Redux/Slice/schedule.slice';
 import { useDispatch, useSelector } from 'react-redux';
-import { getAllUsers, getUserById } from '../Redux/Slice/user.slice';
+import { getAllUsers } from '../Redux/Slice/user.slice';
 import { IMAGE_URL } from '../Utils/baseUrl';
+import io from 'socket.io-client';
+
+const socket = io('http://localhost:4000');
+
+socket.on('connect', () => {
+  console.log('Socket connected');
+});
 
 function Home() {
   const dispatch = useDispatch()
@@ -30,6 +37,9 @@ function Home() {
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef(null);
   const searchInputRef = useRef(null);
+  const [reminders, setReminders] = useState([]);
+  console.log("reminders", reminders);
+
 
   const handleScheduleclose = () => setScheduleModal(false)
   const handleScheduleshow = () => setScheduleModal(true)
@@ -40,14 +50,29 @@ function Home() {
 
   const IMG_URL = IMAGE_URL
   const userId = sessionStorage.getItem('userId')
+  const gettoken = sessionStorage.getItem('token')
   const allusers = useSelector((state) => state.user.allusers);
   const allschedule = useSelector((state) => state.schedule.allschedule);
-  console.log(allschedule);
+  console.log("allschedule", allschedule);
 
   useEffect(() => {
-    dispatch(getAllschedule())
-    dispatch(getAllUsers())
-  }, [])
+    dispatch(getAllschedule());
+    dispatch(getAllUsers());
+
+    socket.on('reminder', (data) => {
+      console.log("reminder data", data);
+      setReminders(prev => {
+        console.log("Previous reminders:", prev);
+        const newReminders = [...prev, data.message];
+        console.log("Updated reminders:", newReminders);
+        return newReminders;
+      });
+    });
+
+    return () => {
+      socket.off('reminder');
+    };
+  }, [dispatch]);
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -204,6 +229,10 @@ function Home() {
               <div className="col-4 g-5 ">
                 <div className="j_home_cards" type="button"
                   onClick={() => {
+                    if (!gettoken || !userId) {
+                      alert('Please login to schedule a meeting');
+                      return;
+                    }
                     setActiveItem('Schedule Meeting');
                     handleScheduleshow();
                   }}
@@ -233,6 +262,19 @@ function Home() {
                 </div>
               </div>
             </div>
+
+            <div className="reminders-container mt-4">
+              <h5 className="text-white">Reminders</h5>
+              {reminders.length > 0 ? (
+                reminders.map((reminder, index) => (
+                  <div key={index} className="reminder-item text-white">
+                    {reminder}
+                  </div>
+                ))
+              ) : (
+                <div className="text-white">No reminders yet.</div>
+              )}
+            </div>
           </div>
         </div>
 
@@ -256,6 +298,7 @@ function Home() {
           <Modal.Body className="py-0">
             <Formik
               initialValues={{
+                userId: userId,
                 title: '',
                 date: '',
                 startTime: '',
@@ -275,6 +318,10 @@ function Home() {
               }}
               validationSchema={scheduleSchema}
               onSubmit={(values, { resetForm }) => {
+                if (!gettoken || !userId) {
+                  alert('Please login to create a schedule');
+                  return;
+                }
                 dispatch(createschedule(values)).then((response) => {
                   if (response.payload?._id) {
                     resetForm();
@@ -438,7 +485,6 @@ function Home() {
                     <div className="col-6 col-md-4 pe-0">
                       <div className="mb-3 pt-3">
                         <p className='mb-0 text-white'>
-                          {/* Invitees (0) */}
                           Invitees ({values.invitees.length + (userId ? 1 : 0)})
                         </p>
                         <div className="position-relative mt-1">
@@ -852,10 +898,6 @@ function Home() {
                 <label htmlFor="meetingTitle" className="form-label text-white j_join_text">Name</label>
                 <input type="text" className="form-control j_input" id="meetingTitle" placeholder="Enter Name " />
               </div>
-              {/* <div className="modal-footer border-0 justify-content-between p-0 pt-4">
-                <button type="button" className="btn btn-outline-light j_join_button m-0" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" className="btn btn-light j_join_button m-0">Join</button>
-              </div> */}
             </form>
             <Modal.Footer className="border-0 p-0 pt-4 justify-content-center">
               <Button

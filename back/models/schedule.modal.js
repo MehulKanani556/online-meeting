@@ -1,6 +1,10 @@
 const mongoose = require('mongoose')
 
 const scheduleSchema = mongoose.Schema({
+    userId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+    },
     title: {
         type: String,
     },
@@ -15,7 +19,6 @@ const scheduleSchema = mongoose.Schema({
     },
     meetingLink: {
         type: String,
-        enum: ['GenerateaOneTimeMeetingLink', 'UseMyPersonalRoomLink']
     },
     description: {
         type: String
