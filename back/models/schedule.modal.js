@@ -53,7 +53,13 @@ const scheduleSchema = mongoose.Schema({
         }
     },
     invitees: [{
-        type: String
+        email: {
+            type: String
+        },
+        userId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User',
+        }
     }]
 }, {
     timestamps: true,

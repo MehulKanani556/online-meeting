@@ -1,7 +1,6 @@
 const schedule = require('../models/schedule.modal');
 const crypto = require('crypto');
 const nodemailer = require('nodemailer');
-const { Server } = require('socket.io');
 
 const transporter = nodemailer.createTransport({
     service: 'Gmail',
@@ -10,9 +9,6 @@ const transporter = nodemailer.createTransport({
         pass: process.env.EMAIL_PASS
     }
 });
-
-// Initialize socket.io
-const io = new Server(/* your server instance here */);
 
 exports.createNewschedule = async (req, res) => {
     try {
@@ -53,7 +49,7 @@ exports.createNewschedule = async (req, res) => {
             const emailPromises = invitees.map(invitee => {
                 const mailOptions = {
                     from: process.env.EMAIL_USER,
-                    to: invitee,
+                    to: invitee.email,
                     subject: `Meeting Invitation: ${title}`,
                     html: `
                         <h2>You've been invited to: ${title}</h2>
@@ -71,15 +67,6 @@ exports.createNewschedule = async (req, res) => {
             } catch (emailError) {
                 console.log('Error sending emails:', emailError);
             }
-
-            // Emit reminders to invitees using socket.io
-            reminder.forEach(rem => {
-                invitees.forEach(invitee => {
-                    io.to(invitee).emit('reminder', {
-                        message: `Reminder: ${rem} before the meeting "${title}" on ${date} at ${startTime}.`
-                    });
-                });
-            });
         }
 
         if (recurringMeeting === 'custom' && customRecurrence) {

@@ -754,6 +754,14 @@
     background-color: #202F41 !;
 }
 
+.j_margin_end {
+    margin-right: 4px;
+}
+
+.j_margin_start {
+    margin-left: 4px;
+}
+
 /* ====================================== start calendar ======================================== */
 
 /* =================== month calendar start =================== */

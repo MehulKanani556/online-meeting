@@ -14,13 +14,8 @@ import { createschedule, getAllschedule } from '../Redux/Slice/schedule.slice';
 import { useDispatch, useSelector } from 'react-redux';
 import { getAllUsers } from '../Redux/Slice/user.slice';
 import { IMAGE_URL } from '../Utils/baseUrl';
-import io from 'socket.io-client';
+import { useSocket } from '../Hooks/useSocket';
 
-const socket = io('http://localhost:4000');
-
-socket.on('connect', () => {
-  console.log('Socket connected');
-});
 
 function Home() {
   const dispatch = useDispatch()
@@ -37,9 +32,6 @@ function Home() {
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef(null);
   const searchInputRef = useRef(null);
-  const [reminders, setReminders] = useState([]);
-  console.log("reminders", reminders);
-
 
   const handleScheduleclose = () => setScheduleModal(false)
   const handleScheduleshow = () => setScheduleModal(true)
@@ -53,25 +45,16 @@ function Home() {
   const gettoken = sessionStorage.getItem('token')
   const allusers = useSelector((state) => state.user.allusers);
   const allschedule = useSelector((state) => state.schedule.allschedule);
-  console.log("allschedule", allschedule);
+  // console.log("allschedule", allschedule);
+
+  const {
+    socket,
+    reminders
+  } = useSocket(userId, allusers);
 
   useEffect(() => {
     dispatch(getAllschedule());
     dispatch(getAllUsers());
-
-    socket.on('reminder', (data) => {
-      console.log("reminder data", data);
-      setReminders(prev => {
-        console.log("Previous reminders:", prev);
-        const newReminders = [...prev, data.message];
-        console.log("Updated reminders:", newReminders);
-        return newReminders;
-      });
-    });
-
-    return () => {
-      socket.off('reminder');
-    };
   }, [dispatch]);
 
   useEffect(() => {
@@ -266,13 +249,13 @@ function Home() {
             <div className="reminders-container mt-4">
               <h5 className="text-white">Reminders</h5>
               {reminders.length > 0 ? (
-                reminders.map((reminder, index) => (
-                  <div key={index} className="reminder-item text-white">
-                    {reminder}
-                  </div>
-                ))
+                <ul>
+                  {reminders.map((reminder, index) => (
+                    <li key={index} className="text-white">{reminder}</li>
+                  ))}
+                </ul>
               ) : (
-                <div className="text-white">No reminders yet.</div>
+                <p className="text-white">No reminders available.</p>
               )}
             </div>
           </div>
@@ -587,7 +570,7 @@ function Home() {
                               .filter(user => user._id === userId)
                               .map(user => (
                                 <div key={user._id} className="d-flex align-items-center mb-1">
-                                  <div className="me-2">
+                                  <div className="j_margin_end">
                                     {user.photo ? (
                                       <img
                                         src={`${IMG_URL}${user.photo}`}
@@ -609,7 +592,7 @@ function Home() {
                                       </div>
                                     )}
                                   </div>
-                                  <div className="ms-2">
+                                  <div className="j_margin_start">
                                     <span className="text-white" style={{ fontSize: '14px' }}>{user.email}</span>
                                     <p className="mb-0" style={{ fontSize: '13px', color: '#BFBFBF' }}>Host</p>
                                   </div>
@@ -619,7 +602,7 @@ function Home() {
                             {values.invitees.map((invitee, index) => (
                               <div key={index} className="d-flex justify-content-between align-items-center mb-2">
                                 <div className="d-flex justify-content-between align-items-center">
-                                  <div className="me-2">
+                                  <div className="j_margin_end">
                                     {invitee.photo ? (
                                       <img
                                         src={`${IMG_URL}${invitee.photo}`}
@@ -641,7 +624,7 @@ function Home() {
                                       </div>
                                     )}
                                   </div>
-                                  <div className="ms-2">
+                                  <div className="j_margin_start">
                                     <span className="text-white" style={{ fontSize: '14px' }}>{invitee.email}</span>
                                   </div>
                                 </div>
