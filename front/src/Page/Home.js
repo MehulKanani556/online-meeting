@@ -332,8 +332,8 @@ function Home() {
             >
               {({ values, errors, touched, handleSubmit, handleChange, setFieldValue }) => (
                 <form onSubmit={handleSubmit}>
-                  <div className="row">
-                    <div className="col-6 col-md-8 ps-0 j_schedule_border">
+                  <div className="row B_flex_reverse">
+                    <div className="col-12 col-lg-8 ps-0 j_schedule_border">
                       <div className="mb-3 pt-3">
                         <label htmlFor="title" className="form-label text-white j_join_text">Title</label>
                         <input
@@ -482,7 +482,7 @@ function Home() {
                       </div>
                     </div>
 
-                    <div className="col-6 col-md-4 pe-0">
+                    <div className="col-12 col-lg-4 pe-0 B_paddingStart">
                       <div className="mb-3 pt-3">
                         <p className='mb-0 text-white'>
                           Invitees ({values.invitees.length + (userId ? 1 : 0)})
@@ -511,7 +511,7 @@ function Home() {
                         {showDropdown && (
                           <div
                             ref={dropdownRef}
-                            className="position-absolute mt-1"
+                            className="position-absolute mt-1 B_suggestion"
                             style={{
                               backgroundColor: "#202F41",
                               borderRadius: '5px',
@@ -610,7 +610,7 @@ function Home() {
                                     )}
                                   </div>
                                   <div className="ms-2">
-                                    <span className="text-white" style={{ fontSize: '14px' }}>{user.email}</span>
+                                    <span className="text-white" style={{ fontSize: '13.5px' }}>{user.email}</span>
                                     <p className="mb-0" style={{ fontSize: '13px', color: '#BFBFBF' }}>Host</p>
                                   </div>
                                 </div>
