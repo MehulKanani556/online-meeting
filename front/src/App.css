@@ -867,7 +867,6 @@ img {
 }
 
 
-
 /* MiN MEDIA QUERY START.............. */
 
 @media (min-width: 540px) {
@@ -1516,6 +1515,26 @@ img {
     width: 530px;
   }
 
+  .B_flex_reverse {
+    flex-direction: column-reverse;
+  }
+
+  .j_schedule_border {
+    border: none !important;
+  }
+
+  .B_schedule_input {
+    width: 190px !important;
+  }
+
+  .B_paddingStart {
+    padding-left: 0 !important;
+  }
+
+  .B_suggestion {
+    width: 95% !important;
+  }
+
 }
 
 @media (max-width: 425px) {
@@ -1955,6 +1974,31 @@ img {
     width: 139px !important;
   }
 
+  .B_schedule_input {
+    width: 350px !important;
+  }
+
+  .B_suggestion {
+    width: 70% !important;
+  }
+
+  .j_schedule_footer {
+    justify-content: center !important;
+  }
+
+  .B_schedule_btn1 {
+    margin-bottom: 0 !important;
+  }
+
+  .j_schedule_footer {
+    gap: 10px;
+  }
+
+  .B_suggestion {
+    width: 92% !important;
+  }
+
+
 }
 
 @media (max-width: 375px) {
@@ -2198,6 +2242,15 @@ img {
     margin-top: 20px !important;
   }
 
+  .B_schedule_input {
+    width: 300px !important;
+  }
+
+  .B_suggestion {
+    width: 89% !important;
+  }
+
+
 }
 
 @media (max-width: 320px) {
@@ -2402,5 +2455,9 @@ img {
 
   .B_review_model_body div {
     font-size: 13px;
+  }
+
+  .B_schedule_input {
+    width: 270px !important;
   }
 }

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import HomeNavBar from '../Component/HomeNavBar';
 import SideBar from '../Component/SideBar';
 import { IoSearchSharp } from 'react-icons/io5';
@@ -17,8 +17,12 @@ import { Link } from 'react-router-dom';
 import * as Yup from 'yup';
 import { Formik } from 'formik';
 import { createreview } from '../Redux/Slice/reviews.slice';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { createschedule } from '../Redux/Slice/schedule.slice';
+import { getAllUsers } from '../Redux/Slice/user.slice';
+import bin from '../Image/j_bin.svg'
+import { IMAGE_URL } from '../Utils/baseUrl';
+
 
 
 function Meeting() {
@@ -43,6 +47,19 @@ function Meeting() {
     const [linkError, setLinkError] = useState('');
     const [repeatType, setRepeatType] = useState('0');
     const [endsSelection, setEndsSelection] = useState('0');
+    const userId = sessionStorage.getItem('userId')
+    const gettoken = sessionStorage.getItem('token')
+    const allusers = useSelector((state) => state.user.allusers);
+    const [showDropdown, setShowDropdown] = useState(false);
+    const [filteredUsers, setFilteredUsers] = useState([]);
+    const dropdownRef = useRef(null);
+    const searchInputRef = useRef(null);
+    const IMG_URL = IMAGE_URL
+    const [activeButton, setActiveButton] = useState([]);
+    const [rating, setRating] = useState(0);
+    const dispatch = useDispatch();
+
+
 
     const handleLinkDiceClick = () => {
         setIsLinkRotating(true);
@@ -52,6 +69,11 @@ function Meeting() {
         }, 1000);
     };
 
+    useEffect(() => {
+        dispatch(getAllUsers());
+
+    }, [dispatch]);
+
     const generateLinkNumber = () => {
         let number = '';
         for (let i = 0; i < 5; i++) {
@@ -59,6 +81,21 @@ function Meeting() {
         }
         return number;
     };
+
+    useEffect(() => {
+        function handleClickOutside(event) {
+            if (dropdownRef.current &&
+                !dropdownRef.current.contains(event.target) &&
+                !searchInputRef.current.contains(event.target)) {
+                setShowDropdown(false);
+                setFilteredUsers([]);
+            }
+        }
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
 
     const validateLink = (value) => {
         if (value.length < 5) {
@@ -1500,9 +1537,6 @@ function Meeting() {
         }, 1000);
     };
 
-    const [activeButton, setActiveButton] = useState([]);
-    const [rating, setRating] = useState(0);
-    const dispatch = useDispatch();
 
     // const reviewSchema = Yup.object().shape({
     //     rating: Yup.string().required("rating is required"),
@@ -1700,7 +1734,15 @@ function Meeting() {
                                 </div>
 
                                 <div className='d-flex gap-4'>
-                                    <button className="btn btn-outline-light B_metting_btn" onClick={handleShowScheduleModel1}>Schedule</button>
+                                    <button className="btn btn-outline-light B_metting_btn" onClick={() => {
+                                        if (!gettoken || !userId) {
+                                            alert('Please login to create a schedule');
+                                            return;
+                                        }
+                                        handleShowScheduleModel1();
+                                    }}>
+                                        Schedule
+                                    </button>
                                     <button className="btn btn-outline-light B_metting_btn">Meet Now</button>
                                 </div>
                             </div>
@@ -1761,6 +1803,7 @@ function Meeting() {
                                     }}
                                     validationSchema={scheduleSchema}
                                     onSubmit={(values, { resetForm }) => {
+
                                         dispatch(createschedule(values)).then((response) => {
                                             if (response.payload?._id) {
                                                 resetForm();
@@ -1773,8 +1816,8 @@ function Meeting() {
                                     {({ values, errors, touched, handleSubmit, handleChange, setFieldValue }) => (
 
                                         <form onSubmit={handleSubmit}>
-                                            <div className="row">
-                                                <div className="col-6 col-md-8 ps-0 j_schedule_border">
+                                            <div className="row B_flex_reverse">
+                                                <div className="col-12 col-lg-8 ps-0 j_schedule_border">
                                                     <div className="mb-3 pt-3">
                                                         <label htmlFor="title" className="form-label text-white j_join_text">Title</label>
                                                         <input
@@ -1786,7 +1829,7 @@ function Meeting() {
                                                             onChange={handleChange}
                                                             placeholder="Enter title for meeting"
                                                         />
-                                                        {touched.title && errors.title && <div className="text-danger">{errors.title}</div>}
+                                                        {touched.title && errors.title && <div style={{ color: '#cd1425', fontSize: '14px' }}>{errors.title}</div>}
                                                     </div>
 
                                                     <div className="j_schedule_DnT B_schedule_DnT">
@@ -1800,7 +1843,7 @@ function Meeting() {
                                                                 value={values.date}
                                                                 onChange={handleChange}
                                                             />
-                                                            {touched.date && errors.date && <div className="text-danger">{errors.date}</div>}
+                                                            {touched.date && errors.date && <div style={{ color: '#cd1425', fontSize: '14px' }}>{errors.date}</div>}
                                                         </div>
 
                                                         <div className="mb-3">
@@ -1813,7 +1856,7 @@ function Meeting() {
                                                                 value={values.startTime}
                                                                 onChange={handleChange}
                                                             />
-                                                            {touched.startTime && errors.startTime && <div className="text-danger">{errors.startTime}</div>}
+                                                            {touched.startTime && errors.startTime && <div style={{ color: '#cd1425', fontSize: '14px' }}>{errors.startTime}</div>}
                                                         </div>
 
                                                         <div className="mb-3">
@@ -1826,7 +1869,7 @@ function Meeting() {
                                                                 value={values.endTime}
                                                                 onChange={handleChange}
                                                             />
-                                                            {touched.endTime && errors.endTime && <div className="text-danger">{errors.endTime}</div>}
+                                                            {touched.endTime && errors.endTime && <div style={{ color: '#cd1425', fontSize: '14px' }}>{errors.endTime}</div>}
                                                         </div>
                                                     </div>
 
@@ -1843,7 +1886,7 @@ function Meeting() {
                                                             <option value="GenerateaOneTimeMeetingLink">Generate a one time meeting link</option>
                                                             <option value="UseMyPersonalRoomLink">Use my personal room link</option>
                                                         </select>
-                                                        {touched.meetingLink && errors.meetingLink && <div className="text-danger">{errors.meetingLink}</div>}
+                                                        {touched.meetingLink && errors.meetingLink && <div style={{ color: '#cd1425', fontSize: '14px' }}>{errors.meetingLink}</div>}
                                                     </div>
 
                                                     <div className="mb-3">
@@ -1857,7 +1900,7 @@ function Meeting() {
                                                             onChange={handleChange}
                                                             placeholder="Enter a description for meeting"
                                                         />
-                                                        {touched.description && errors.description && <div className="text-danger">{errors.description}</div>}
+                                                        {touched.description && errors.description && <div style={{ color: '#cd1425', fontSize: '14px' }}>{errors.description}</div>}
                                                     </div>
 
                                                     <div className="mb-3">
@@ -1880,7 +1923,7 @@ function Meeting() {
                                                                     </button>
                                                                 ))}
                                                         </div>
-                                                        {touched.reminder && errors.reminder && <div className="text-danger">{errors.reminder}</div>}
+                                                        {touched.reminder && errors.reminder && <div style={{ color: '#cd1425', fontSize: '14px' }}>{errors.reminder}</div>}
                                                     </div>
 
                                                     <div className="mb-3">
@@ -1906,7 +1949,7 @@ function Meeting() {
                                                             <option value="custom">Custom</option>
                                                         </select>
                                                         {touched.recurringMeeting && errors.recurringMeeting &&
-                                                            <div className="text-danger">{errors.recurringMeeting}</div>}
+                                                            <div style={{ color: '#cd1425', fontSize: '14px' }}>{errors.recurringMeeting}</div>}
                                                     </div>
 
                                                     <div className="modal-footer j_schedule_footer border-0 p-0 pt-4 pb-3">
@@ -1923,34 +1966,169 @@ function Meeting() {
                                                     </div>
                                                 </div>
 
-                                                <div className="col-6 col-md-4 pe-0">
+                                                <div className="col-12 col-lg-4 pe-0 B_paddingStart">
                                                     <div className="mb-3 pt-3">
-                                                        <p className='mb-0 text-white'>Invitees (0)</p>
+                                                        <p className='mb-0 text-white'>
+                                                            Invitees ({values.invitees.length + (userId ? 1 : 0)})
+                                                        </p>
                                                         <div className="position-relative mt-1">
                                                             <IoSearch className='position-absolute' style={{ top: "50%", transform: "translateY(-50%)", left: "4px", fontSize: "15px", color: "rgba(255, 255, 255, 0.7)" }} />
                                                             <input
+                                                                ref={searchInputRef}
                                                                 type="search"
                                                                 name="invitees"
                                                                 className="form-control text-white j_input ps-4 j_join_text"
                                                                 placeholder="Add people by name or email..."
                                                                 style={{ borderRadius: '5px', border: 'none', backgroundColor: "#202F41" }}
-                                                                onKeyPress={(e) => {
-                                                                    if (e.key === 'Enter') {
-                                                                        e.preventDefault();
-                                                                        const email = e.target.value.trim();
-                                                                        if (email) {
-                                                                            setFieldValue('invitees', [...values.invitees, email]);
-                                                                            e.target.value = '';
-                                                                        }
-                                                                    }
+                                                                onChange={(e) => {
+                                                                    const searchTerm = e.target.value.toLowerCase();
+                                                                    const filtered = allusers.filter(user =>
+                                                                        user.email.toLowerCase().includes(searchTerm) ||
+                                                                        user.name.toLowerCase().includes(searchTerm)
+                                                                    );
+                                                                    setFilteredUsers(filtered);
+                                                                    setShowDropdown(true);
                                                                 }}
+                                                                onFocus={() => setShowDropdown(true)}
                                                             />
                                                         </div>
-                                                        {values.invitees.length > 0 && (
+                                                        {showDropdown && (
+                                                            <div
+                                                                ref={dropdownRef}
+                                                                className="position-absolute mt-1 B_suggestion"
+                                                                style={{
+                                                                    backgroundColor: "#202F41",
+                                                                    borderRadius: '5px',
+                                                                    width: '31%',
+                                                                    zIndex: 1000,
+                                                                    maxHeight: '200px',
+                                                                    overflowY: 'auto'
+                                                                }}
+                                                            >
+                                                                {filteredUsers.length > 0 ? (
+                                                                    filteredUsers
+                                                                        .filter(user => user._id !== userId)
+                                                                        .map((user) => (
+                                                                            <div
+                                                                                key={user._id}
+                                                                                className="d-flex align-items-center p-2 cursor-pointer hover-bg-dark"
+                                                                                style={{ cursor: 'pointer' }}
+                                                                                onClick={() => {
+                                                                                    if (!values.invitees.some(invitee => invitee.email === user.email)) {
+                                                                                        setFieldValue('invitees', [...values.invitees, {
+                                                                                            _id: user._id,
+                                                                                            name: user.name,
+                                                                                            email: user.email,
+                                                                                            photo: user.photo
+                                                                                        }]);
+                                                                                    }
+                                                                                    setShowDropdown(false);
+                                                                                }}
+                                                                            >
+                                                                                <div className="me-2">
+                                                                                    {user.photo ? (
+                                                                                        <img
+                                                                                            src={`${IMG_URL}${user.photo}`}
+                                                                                            alt="Profile"
+                                                                                            className="rounded-circle"
+                                                                                            style={{ width: '30px', height: '30px', objectFit: 'cover' }}
+                                                                                        />
+                                                                                    ) : (
+                                                                                        <div
+                                                                                            className="rounded-circle d-flex align-items-center justify-content-center"
+                                                                                            style={{
+                                                                                                width: '30px',
+                                                                                                height: '30px',
+                                                                                                backgroundColor: '#364758',
+                                                                                                color: 'white'
+                                                                                            }}
+                                                                                        >
+                                                                                            {user.name.charAt(0).toUpperCase()}
+                                                                                        </div>
+                                                                                    )}
+                                                                                </div>
+                                                                                <div className="text-white">
+                                                                                    <div style={{ fontSize: '14px' }}>{user.name}</div>
+                                                                                    <div style={{ fontSize: '12px', color: '#8B9CAF' }}>{user.email}</div>
+                                                                                </div>
+                                                                            </div>
+                                                                        ))
+                                                                ) : (
+                                                                    <div className="p-3 text-center text-white" style={{ fontSize: '14px' }}>
+                                                                        No users found
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        )}
+                                                        {touched.invitees && errors.invitees && (
+                                                            <div style={{ fontSize: '14px', marginTop: '4px', color: '#cd1425' }}>
+                                                                {errors.invitees}
+                                                            </div>
+                                                        )}
+                                                        {(values.invitees.length > 0 || userId) && (
                                                             <div className="mt-2">
-                                                                {values.invitees.map((email, index) => (
-                                                                    <div key={index} className="d-flex align-items-center mb-1">
-                                                                        <span className="text-white">{email}</span>
+                                                                {allusers
+                                                                    .filter(user => user._id === userId)
+                                                                    .map(user => (
+                                                                        <div key={user._id} className="d-flex align-items-center mb-1">
+                                                                            <div className="me-2">
+                                                                                {user.photo ? (
+                                                                                    <img
+                                                                                        src={`${IMG_URL}${user.photo}`}
+                                                                                        alt="Profile"
+                                                                                        className="rounded-circle"
+                                                                                        style={{ width: '30px', height: '30px', objectFit: 'cover' }}
+                                                                                    />
+                                                                                ) : (
+                                                                                    <div
+                                                                                        className="rounded-circle d-flex align-items-center justify-content-center"
+                                                                                        style={{
+                                                                                            width: '30px',
+                                                                                            height: '30px',
+                                                                                            backgroundColor: '#364758',
+                                                                                            color: 'white'
+                                                                                        }}
+                                                                                    >
+                                                                                        {user.name.charAt(0).toUpperCase()}
+                                                                                    </div>
+                                                                                )}
+                                                                            </div>
+                                                                            <div className="ms-2">
+                                                                                <span className="text-white" style={{ fontSize: '13.5px' }}>{user.email}</span>
+                                                                                <p className="mb-0" style={{ fontSize: '13px', color: '#BFBFBF' }}>Host</p>
+                                                                            </div>
+                                                                        </div>
+                                                                    ))}
+
+                                                                {values.invitees.map((invitee, index) => (
+                                                                    <div key={index} className="d-flex justify-content-between align-items-center mb-2">
+                                                                        <div className="d-flex justify-content-between align-items-center">
+                                                                            <div className="me-2">
+                                                                                {invitee.photo ? (
+                                                                                    <img
+                                                                                        src={`${IMG_URL}${invitee.photo}`}
+                                                                                        alt="Profile"
+                                                                                        className="rounded-circle"
+                                                                                        style={{ width: '30px', height: '30px', objectFit: 'cover' }}
+                                                                                    />
+                                                                                ) : (
+                                                                                    <div
+                                                                                        className="rounded-circle d-flex align-items-center justify-content-center"
+                                                                                        style={{
+                                                                                            width: '30px',
+                                                                                            height: '30px',
+                                                                                            backgroundColor: '#364758',
+                                                                                            color: 'white'
+                                                                                        }}
+                                                                                    >
+                                                                                        {invitee.name.charAt(0).toUpperCase()}
+                                                                                    </div>
+                                                                                )}
+                                                                            </div>
+                                                                            <div className="ms-2 ">
+                                                                                <span className="text-white " style={{ fontSize: '14px' }}>{invitee.email}</span>
+                                                                            </div>
+                                                                        </div>
                                                                         <button
                                                                             type="button"
                                                                             className="btn btn-link text-danger p-0 ms-2"
@@ -1959,11 +2137,26 @@ function Meeting() {
                                                                                 setFieldValue('invitees', newInvitees);
                                                                             }}
                                                                         >
-                                                                            ×
+                                                                            <img src={bin} alt="bin" />
                                                                         </button>
                                                                     </div>
                                                                 ))}
                                                             </div>
+                                                        )}
+                                                        {values.invitees.length > 0 && (
+                                                            <button
+                                                                type="button"
+                                                                className="btn btn-link text-white p-0"
+                                                                style={{
+                                                                    fontSize: '14px',
+                                                                    textDecoration: 'underline',
+                                                                    border: 'none',
+                                                                    background: 'none'
+                                                                }}
+                                                                onClick={() => setFieldValue('invitees', [])}
+                                                            >
+                                                                Remove all
+                                                            </button>
                                                         )}
                                                     </div>
                                                 </div>
