@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { IoSearch } from "react-icons/io5";
 import NavBar from '../Component/NavBar';
 import Footer from '../Component/Footer';
 import image1 from '../Image/Account.svg';
@@ -6,7 +7,6 @@ import image2 from '../Image/Audio.svg';
 import image3 from '../Image/Screen2.svg';
 import image4 from '../Image/Schedule2.svg';
 import image5 from '../Image/Setting.svg';
-import { IoSearch } from "react-icons/io5";
 
 function HelpCenter() {
     const [activeFAQ, setActiveFAQ] = useState('account');
@@ -24,16 +24,18 @@ function HelpCenter() {
         }
     };
 
-    const handleCardClick = (section) => {
-        setActiveFAQ(section);
-    };
-
     const getTextStyle = (section) => {
         if (activeFAQ === section) {
             return { color: '#FFFFFF', cursor: 'pointer' };
         }
         return { color: '#87898B', cursor: 'pointer' };
     };
+
+
+    const handleCardClick = (section) => {
+        setActiveFAQ(section);
+    };
+
 
     return (
         <div>
@@ -410,7 +412,6 @@ function HelpCenter() {
                                 </div>
                             </div>
                         )}
-
 
                     </section>
                     {/*  FAQ  Section End.............. */}

@@ -37,6 +37,7 @@ function Meeting() {
     const [selectedDays, setSelectedDays] = useState([]);
     const [RepeatEvery, setRepeatEvery] = useState(1);
     const [RepeatEvery1, setRepeatEvery1] = useState(1);
+    const [rating, setRating] = useState(0);
     const [billingCycle, setBillingCycle] = useState('Meeting Details');
     const [meetingFilter, setMeetingFilter] = useState("All Meetings");
     const [securityType, setSecurityType] = useState('alwaysLocked');
@@ -47,17 +48,16 @@ function Meeting() {
     const [linkError, setLinkError] = useState('');
     const [repeatType, setRepeatType] = useState('0');
     const [endsSelection, setEndsSelection] = useState('0');
-    const userId = sessionStorage.getItem('userId')
-    const gettoken = sessionStorage.getItem('token')
+    const userId = sessionStorage.getItem('userId');
+    const gettoken = sessionStorage.getItem('token');
     const allusers = useSelector((state) => state.user.allusers);
     const [showDropdown, setShowDropdown] = useState(false);
     const [filteredUsers, setFilteredUsers] = useState([]);
-    const dropdownRef = useRef(null);
-    const searchInputRef = useRef(null);
-    const IMG_URL = IMAGE_URL
     const [activeButton, setActiveButton] = useState([]);
-    const [rating, setRating] = useState(0);
+    const searchInputRef = useRef(null);
+    const dropdownRef = useRef(null);
     const dispatch = useDispatch();
+    const IMG_URL = IMAGE_URL
 
 
 
@@ -71,8 +71,8 @@ function Meeting() {
 
     useEffect(() => {
         dispatch(getAllUsers());
-
     }, [dispatch]);
+
 
     const generateLinkNumber = () => {
         let number = '';
@@ -141,6 +141,11 @@ function Meeting() {
         });
     };
 
+    const handleDotsClick = (meetingId, event) => {
+        event.stopPropagation();
+        setOpenDropdownId(openDropdownId === meetingId ? null : meetingId);
+    };
+
     const toggleReminder = (reminder) => {
         setSelectedReminders(prev =>
             prev.includes(reminder)
@@ -148,11 +153,6 @@ function Meeting() {
                 : [...prev, reminder]
         )
     }
-
-    const handleDotsClick = (meetingId, event) => {
-        event.stopPropagation();
-        setOpenDropdownId(openDropdownId === meetingId ? null : meetingId);
-    };
 
     const handleIncrement = () => {
         setRepeatEvery(prev => prev + 1);
@@ -1465,7 +1465,6 @@ function Meeting() {
         setOffcanvasModel(true);
     };
 
-
     const handleSecurityChange = (type) => {
         setSecurityType(type);
     };
@@ -1548,7 +1547,7 @@ function Meeting() {
     // };
 
     const handleRating = (value) => {
-        // setRating(value);
+
         if (value === rating) {
             setRating(rating - 1);
         } else {
@@ -1952,7 +1951,7 @@ function Meeting() {
                                                             <div style={{ color: '#cd1425', fontSize: '14px' }}>{errors.recurringMeeting}</div>}
                                                     </div>
 
-                                                    <div className="modal-footer j_schedule_footer border-0 p-0 pt-4 pb-3">
+                                                    <div className="modal-footer j_schedule_footer B_Gap_Button border-0 p-0 pt-4 pb-3">
                                                         <button
                                                             type="button"
                                                             className="btn btn-outline-light j_home_button B_schedule_btn1 fw-semibold"
@@ -1967,7 +1966,7 @@ function Meeting() {
                                                 </div>
 
                                                 <div className="col-12 col-lg-4 pe-0 B_paddingStart">
-                                                    <div className="mb-3 pt-3">
+                                                    <div className="mb-3 pt-3 B_MarGin">
                                                         <p className='mb-0 text-white'>
                                                             Invitees ({values.invitees.length + (userId ? 1 : 0)})
                                                         </p>
@@ -2275,7 +2274,7 @@ function Meeting() {
                                         <div className="mb-3 j_select_fill J_Fill_bottom">
                                             <Form.Label className="text-white j_join_text"></Form.Label>
                                             <Form.Control
-                                                type="date"
+                                                type="date".
                                                 className="j_input j_join_text j_special_m"
                                             />
                                         </div>
