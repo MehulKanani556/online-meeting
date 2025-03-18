@@ -358,6 +358,7 @@
     justify-content: center;
     align-items: center;
     flex-direction: column;
+    min-height: 100%;
 }
 
 .j_schedule_DnT {
@@ -1018,6 +1019,32 @@
 
 /* ============================================== end calendar ================================================== */
 
+.j_notification_badge {
+    top: 10px;
+    right: 0;
+    background-color: #f95262;
+    border-radius: 50%;
+    height: 18px;
+    width: 18px;
+    font-size: 11px;
+    color: white;
+    font-weight: 700;
+}
+
+.j_notification_style {
+    background-color: #202F41;
+    border-radius: 8px;
+    padding: 10px;
+    margin-bottom: 10px;
+    font-size: 16px;
+}
+
+.j_null_notification {
+    font-size: 16px;
+}
+
+/* ============================================== Media Quary ================================================== */
+
 @media (min-width: 1921px) {
     .j_Home_sidebar {
         height: 96vh;
@@ -1325,6 +1352,11 @@
     .j_schedule_buttons button {
         padding: 8px !important;
         font-size: 13px !important;
+    }
+
+    .j_notification_style,
+    .j_null_notification {
+        font-size: 14px;
     }
 }
 

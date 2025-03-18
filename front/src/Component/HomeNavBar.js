@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react'
 import logo from '../Image/logo.svg'
 import bell from '../Image/j_bell.svg'
 import camera from '../Image/j_camera.svg'
-import notification from '../Image/j_Navbar_bell.svg'
+import notificationImg from '../Image/j_Navbar_bell.svg'
 import { IoClose, IoEye, IoEyeOff } from 'react-icons/io5'
 import { useDispatch, useSelector } from 'react-redux'
 import { logout, logoutUser, setauth } from '../Redux/Slice/auth.slice'
@@ -14,6 +14,7 @@ import langs from 'langs';
 import moment from 'moment-timezone';
 import { Modal, Button, Offcanvas, Dropdown } from 'react-bootstrap';
 import { IMAGE_URL } from '../Utils/baseUrl'
+import { useSocket } from '../Hooks/useSocket'
 
 function HomeNavBar() {
 
@@ -36,6 +37,10 @@ function HomeNavBar() {
     const [uploadedFile, setUploadedFile] = useState(null);
     const fileInputRef = useRef(null);
     const IMG_URL = IMAGE_URL
+    const {
+        socket,
+        reminders
+    } = useSocket(userId);
 
     const handleprofileshow = () => setprofileShow(true)
     const handleprofileclose = () => setprofileShow(false)
@@ -118,8 +123,13 @@ function HomeNavBar() {
                     </Link>
 
                     <div className="d-flex align-items-center">
-                        <button className="btn border-0" type="button" onClick={handleshowcanvas}>
+                        <button className="btn border-0  position-relative" type="button" onClick={handleshowcanvas}>
                             <img src={bell} alt="Bell" style={{ height: '22px', width: '22px' }} />
+                            {reminders.length > 0 && (
+                                <span className="position-absolute translate-middle j_notification_badge">
+                                    {reminders.length}
+                                </span>
+                            )}
                         </button>
                         {isAuthenticated ? (
                             <Dropdown>
@@ -304,7 +314,7 @@ function HomeNavBar() {
                 </Modal.Body>
             </Modal>
 
-            {/*Upload Media and Remove Pic */}
+            {/* ============== Upload Media and Remove Pic ============== */}
             <Modal show={showProfilePicOptions} onHide={handleCloseProfilePicOptions} className='j_Modal_backcolor' centered>
                 <Modal.Header className='border-0 d-flex justify-content-between align-items-center'>
                     <Modal.Title className='text-white j_modal_header_text'>Profile Picture Options</Modal.Title>
@@ -461,14 +471,24 @@ function HomeNavBar() {
                     <Offcanvas.Title className='text-white j_modal_header_text'>Notification</Offcanvas.Title>
                     <IoClose style={{ color: '#fff', fontSize: '22px', cursor: 'pointer' }} onClick={handleClosecanvas} />
                 </Offcanvas.Header>
-                <Offcanvas.Body className='j_notification'>
-                    <div className="text-center">
-                        <img src={notification} alt="notification" className='j_notification_bell' />
-                    </div>
-                    <div className="j_null_notification">
-                        <p className='mb-0 text-white text-center'>No Notification</p>
-                        <p className='mb-0 text-white text-center'>Nothing to see here - stay tuned for updates</p>
-                    </div>
+                <Offcanvas.Body>
+                    {reminders.length > 0 ? (
+                        reminders.map((reminder, index) => (
+                            <div className="reminders-container j_notification_style">
+                                <p key={index} className="text-white mb-0">{reminder}</p>
+                            </div>
+                        ))
+                    ) : (
+                        <div className='j_notification'>
+                            <div className="text-center">
+                                <img src={notificationImg} alt="notification" className='j_notification_bell' />
+                            </div>
+                            <div className="j_null_notification">
+                                <p className='mb-0 text-white text-center'>No Notification</p>
+                                <p className='mb-0 text-white text-center'>Nothing to see here - stay tuned for updates</p>
+                            </div>
+                        </div>
+                    )}
                 </Offcanvas.Body>
             </Offcanvas>
 

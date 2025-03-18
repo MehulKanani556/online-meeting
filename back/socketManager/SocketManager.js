@@ -9,11 +9,11 @@ const onlineEmails = new Map();
 async function sendReminder(socket) {
     const data = await schedule.find();
 
-    console.log("Inveetssss data", data);
+    // console.log("Inveetssss data", data);
 
     if (data.length > 0) {
         data.forEach(meeting => {
-            const { invitees, title, startTime, reminder } = meeting; // Destructure meeting data
+            const { invitees, title, startTime, reminder } = meeting;
             const reminderMinutes = reminder.map(rem => {
                 const parts = rem.split(' ');
                 const value = parseInt(parts[0]);
@@ -37,31 +37,23 @@ async function sendReminder(socket) {
             const startParts = startTime.split(':');
             const currentParts = currentTime.split(':');
 
-            const startMinutes = parseInt(startParts[0]) * 60 + parseInt(startParts[1]); // Convert startTime to total minutes
+            const startMinutes = parseInt(startParts[0]) * 60 + parseInt(startParts[1]);
             const currentMinutes = parseInt(currentParts[0]) * 60 + parseInt(currentParts[1]);
 
-            console.log("startTime", startTime);
-            console.log("currentTime", currentTime);
-            console.log("reminderMinutes", reminderMinutes);
-            const shouldSendReminder = reminderMinutes.some(reminder =>
-                startMinutes - currentMinutes === reminder
-            );
-            console.log("shouldSendReminder", shouldSendReminder);
-            console.log("startTime - currentTime", startMinutes - currentMinutes === shouldSendReminder);
+            // console.log("reminder", reminder);
+            // console.log("reminderMinutes", reminderMinutes);
+            // console.log("check conditions", reminderMinutes.includes(startMinutes - currentMinutes));
 
-
-            if (startMinutes - currentMinutes === shouldSendReminder) {
+            if (reminderMinutes.includes(startMinutes - currentMinutes)) {
                 invitees.forEach(v => {
                     const userId = v.userId.toString();
-                    console.log("Attempting to retrieve socketId for userId:", userId);
+                    const socketId = onlineUsers.get(userId);
+                    const reminderTime = startMinutes - currentMinutes;
 
-                    const socketId = onlineUsers.get(userId); // Retrieve the socketId from onlineUsers map
-                    console.log("Retrieved socketId for userId:", userId, "is", socketId);
-
-                    if (socketId) { // Check if the socketId exists
-                        console.log(`Sending reminder to ${userId}: Your meeting "${title}" starts in ${reminderMinutes} minutes at ${startTime}.`);
+                    if (socketId) {
+                        // console.log(`Sending reminder to ${userId}: Your meeting "${title}" starts in ${reminderTime} minutes at ${startTime}.`);
                         socket.to(socketId).emit('reminder', {
-                            message: `Your meeting "${title}" starts in ${reminderMinutes} minutes at ${startTime}.`
+                            message: `Your meeting "${title}" starts in ${reminderTime} minutes at ${startTime}.`
                         });
                     } else {
                         console.log(`No socketId found for userId: ${userId}. They may not be connected.`);

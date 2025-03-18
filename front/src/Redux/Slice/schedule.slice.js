@@ -39,11 +39,11 @@ export const createschedule = createAsyncThunk(
     async (data, { dispatch, rejectWithValue }) => {
         try {
             const token = await sessionStorage.getItem("token");
-                        
+
             // Transform invitees data to only include emails
             const transformedData = {
                 ...data,
-                invitees:  data.invitees.map(invitee => ({ email: invitee.email, userId: invitee._id })),
+                invitees: data.invitees.map(invitee => ({ email: invitee.email, userId: invitee._id })),
             };
 
             const response = await axios.post(BASE_URL + '/createschedule', transformedData, {

@@ -47,11 +47,6 @@ function Home() {
   const allschedule = useSelector((state) => state.schedule.allschedule);
   // console.log("allschedule", allschedule);
 
-  const {
-    socket,
-    reminders
-  } = useSocket(userId, allusers);
-
   useEffect(() => {
     dispatch(getAllschedule());
     dispatch(getAllUsers());
@@ -244,19 +239,6 @@ function Home() {
                   <span className='j_text_sixze text-nowrap mt-4 mb-0' style={{ color: activeItem === 'Join Meeting' ? '#fff' : '#bfbfbf', }}>Join Meeting</span>
                 </div>
               </div>
-            </div>
-
-            <div className="reminders-container mt-4">
-              <h5 className="text-white">Reminders</h5>
-              {reminders.length > 0 ? (
-                <ul>
-                  {reminders.map((reminder, index) => (
-                    <li key={index} className="text-white">{reminder}</li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="text-white">No reminders available.</p>
-              )}
             </div>
           </div>
         </div>
@@ -451,7 +433,7 @@ function Home() {
                           <div style={{ color: '#cd1425', fontSize: '14px' }}>{errors.recurringMeeting}</div>}
                       </div>
 
-                      <div className="modal-footer j_schedule_footer border-0 p-0 pt-4 pb-3">
+                      <div className="modal-footer j_schedule_footer border-0 p-0 pt-4 pb-3 B_Gap_Button">
                         <button
                           type="button"
                           className="btn btn-outline-light j_home_button B_schedule_btn1 fw-semibold"
@@ -466,7 +448,7 @@ function Home() {
                     </div>
 
                     <div className="col-12 col-lg-4 pe-0 B_paddingStart">
-                      <div className="mb-3 pt-3">
+                      <div className="mb-3 pt-3 B_MarGin">
                         <p className='mb-0 text-white'>
                           Invitees ({values.invitees.length + (userId ? 1 : 0)})
                         </p>

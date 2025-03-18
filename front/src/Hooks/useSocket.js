@@ -34,7 +34,7 @@ export const useSocket = (userId, allusers) => {
             });
 
             socketRef.current.on("user-status-changed", (onlineUserIds) => {
-                console.log("Online users updated:", onlineUserIds);
+                // console.log("Online users updated:", onlineUserIds);
             });
 
             socketRef.current.on("connect_error", (error) => {
@@ -71,7 +71,9 @@ export const useSocket = (userId, allusers) => {
 
             // Cleanup function to remove the listener
             return () => {
-                socketRef.current.off('reminder', handleReminder);
+                if (socketRef.current) { // Check if socketRef.current is not null
+                    socketRef.current.off('reminder', handleReminder);
+                }
             };
         }
     }, [socketRef.current]); // Add socketRef.current as a dependency
