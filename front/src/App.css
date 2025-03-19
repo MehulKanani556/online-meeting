@@ -866,6 +866,10 @@ img {
   outline: none !important;
 }
 
+.B_Gap_Button {
+  gap: 20px !important;
+}
+
 
 /* MiN MEDIA QUERY START.............. */
 
@@ -1529,10 +1533,19 @@ img {
 
   .B_paddingStart {
     padding-left: 0 !important;
+    border-bottom: 1px solid #525558;
   }
 
   .B_suggestion {
     width: 95% !important;
+  }
+
+  .B_MarGin {
+    margin-bottom: 35px !important;
+  }
+
+  .j_Schedule_width {
+    padding-left: 0px;
   }
 
 }
@@ -1998,6 +2011,13 @@ img {
     width: 92% !important;
   }
 
+  .j_home_button {
+    font-size: 14.5px;
+  }
+  .B_TOP_setMargin{
+    margin-top: 10px !important;
+  }
+
 
 }
 
@@ -2250,6 +2270,14 @@ img {
     width: 89% !important;
   }
 
+  .j_home_button {
+    font-size: 14px;
+  }
+
+  .B_schedule_btn1 {
+    padding: 5px 20px !important;
+  }
+
 
 }
 
@@ -2459,5 +2487,13 @@ img {
 
   .B_schedule_input {
     width: 270px !important;
+  }
+
+  .B_schedule_btn1 {
+    padding: 5px 18px !important;
+  }
+
+  .j_general_settings h5 {
+    font-size: 10.5px !important;
   }
 }

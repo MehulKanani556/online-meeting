@@ -53,28 +53,28 @@ function Setting() {
                             </div>
                             {settingformat === 'general' && (
                                 <div className="j_general_settings">
-                                    <h5 className='text-white j_margin_setting'>Use original audio</h5>
+                                    <h5 className='text-white j_margin_setting pt-3 pb-2'>Use original audio</h5>
                                     <p className='d-flex align-items-center'>
                                         <input type="checkbox" className='form-check-input j_setting_check' defaultChecked />
                                         <label className='ms-2 '>
                                             Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's stan
                                         </label>
                                     </p>
-                                    <h5 className='text-white j_margin_setting'>Add to Google Calendar</h5>
+                                    <h5 className='text-white j_margin_setting py-2'>Add to Google Calendar</h5>
                                     <p className='d-flex align-items-center'>
                                         <input type="checkbox" className='form-check-input j_setting_check' />
                                         <label className='ms-2'>
                                             Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's stan Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's stan
                                         </label>
                                     </p>
-                                    <h5 className='text-white j_margin_setting'>Chat notification</h5>
+                                    <h5 className='text-white j_margin_setting py-2'>Chat notification</h5>
                                     <p className='d-flex align-items-center'>
                                         <input type="checkbox" className='form-check-input j_setting_check' />
                                         <label className='ms-2'>
                                             Display a chat and play a sound whenever a new chat arrives.
                                         </label>
                                     </p>
-                                    <h5 className='text-white j_margin_setting'>Join notification</h5>
+                                    <h5 className='text-white j_margin_setting py-2'>Join notification</h5>
                                     <p className='d-flex align-items-center'>
                                         <input type="checkbox" className='form-check-input j_setting_check' defaultChecked />
                                         <label className='ms-2'>
@@ -85,7 +85,7 @@ function Setting() {
                             )}
                             {settingformat === 'meeting' && (
                                 <div className="j_general_settings">
-                                    <h5 className='text-white j_margin_setting'>Allow participants to join before the host</h5>
+                                    <h5 className='text-white j_margin_setting py-2'>Allow participants to join before the host</h5>
                                     <p className='d-flex align-items-center'>
                                         <input type="checkbox" className='form-check-input j_setting_check' defaultChecked />
                                         <label className='ms-2 '>
@@ -93,7 +93,7 @@ function Setting() {
                                             Note: Participants can enter the meeting without the host, starting from the host, starting from one hour before the schedule time
                                         </label>
                                     </p>
-                                    <h5 className='text-white j_margin_setting'>Display a participants name on their video</h5>
+                                    <h5 className='text-white j_margin_setting pt-3'>Display a participants name on their video</h5>
                                     <p className='d-flex align-items-center'>
                                         <input type="checkbox" className='form-check-input j_setting_check' />
                                         <label className='ms-2'>
@@ -101,14 +101,14 @@ function Setting() {
                                             Note: Participants can enter the meeting without the host, starting from the host, starting from one hour before the schedule time
                                         </label>
                                     </p>
-                                    <h5 className='text-white j_margin_setting'>View video muted participants</h5>
+                                    <h5 className='text-white j_margin_setting pt-3'>View video muted participants</h5>
                                     <p className='d-flex align-items-center'>
                                         <input type="checkbox" className='form-check-input j_setting_check' defaultChecked />
                                         <label className='ms-2'>
                                             Display a user profile picture in the video feed when their video is turned off.
                                         </label>
                                     </p>
-                                    <h5 className='text-white j_margin_setting'>All participants to share screen</h5>
+                                    <h5 className='text-white j_margin_setting pt-3'>All participants to share screen</h5>
                                     <p className='d-flex align-items-center'>
                                         <input type="checkbox" className='form-check-input j_setting_check' />
                                         <label className='ms-2'>
@@ -119,14 +119,14 @@ function Setting() {
                             )}
                             {settingformat === 'recording' && (
                                 <div className="j_general_settings">
-                                    <h5 className='text-white j_margin_setting'>Auto record meeting</h5>
+                                    <h5 className='text-white j_margin_setting pt-3'>Auto record meeting</h5>
                                     <p className='d-flex align-items-center'>
                                         <input type="checkbox" className='form-check-input j_setting_check' defaultChecked />
                                         <label className='ms-2 '>
                                             Enable automatic recording all meetings you created
                                         </label>
                                     </p>
-                                    <h5 className='text-white j_margin_setting'>Recording layout for meeting</h5>
+                                    <h5 className='text-white j_margin_setting pt-3'>Recording layout for meeting</h5>
                                     <select class="form-select j_select" aria-label="Default select example">
                                         <option value="0">Select</option>
                                         <option value="1">All video feed with shared screen</option>
