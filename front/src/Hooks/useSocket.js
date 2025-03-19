@@ -34,7 +34,7 @@ export const useSocket = (userId, allusers) => {
             });
 
             socketRef.current.on("user-status-changed", (onlineUserIds) => {
-                // console.log("Online users updated:", onlineUserIds);
+                console.log("Online users updated:", onlineUserIds);
             });
 
             socketRef.current.on("connect_error", (error) => {

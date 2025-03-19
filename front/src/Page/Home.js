@@ -21,7 +21,7 @@ function Home() {
   const dispatch = useDispatch()
   const [activeItem, setActiveItem] = useState('')
   const [RepeatEvery, setRepeatEvery] = useState(1)
-  const [RepeatEvery1, setRepeatEvery1] = useState(1)
+  // const [RepeatEvery1, setRepeatEvery1] = useState(1)
   const [selectedDays, setSelectedDays] = useState([]);
   const [repeatType, setRepeatType] = useState('0');
   const [endsSelection, setEndsSelection] = useState("0");
@@ -73,22 +73,6 @@ function Home() {
         : [...prev, day]
     );
   };
-
-  const handleIncrement = () => {
-    setRepeatEvery(prev => prev + 1);
-  }
-
-  const handleDecrement = () => {
-    setRepeatEvery(prev => Math.max(prev - 1, 1));
-  }
-
-  const handleIncrement1 = () => {
-    setRepeatEvery1(prev => prev + 1);
-  }
-
-  const handleDecrement1 = () => {
-    setRepeatEvery1(prev => Math.max(prev - 1, 1));
-  }
 
   const scheduleSchema = Yup.object().shape({
     title: Yup.string().required('Title is required'),
@@ -276,8 +260,10 @@ function Home() {
                   repeatType: '',
                   repeatEvery: 1,
                   repeatOn: [],
-                  ends: '',
-                  endDate: ''
+                  ends: '0',
+                  endDate: '',
+                  Recurrence: '',
+                  Monthfirst: '',
                 },
                 invitees: []
               }}
@@ -287,7 +273,12 @@ function Home() {
                   alert('Please login to create a schedule');
                   return;
                 }
+                console.log("Submitting values:", values);
+                if (values.recurringMeeting === 'custom') {
+                  // console.log("Custom recurring meeting selected:", values.customRecurrence);
+                }
                 dispatch(createschedule(values)).then((response) => {
+                  // console.log("Response from API:", response);
                   if (response.payload?._id) {
                     resetForm();
                     handleScheduleclose();
@@ -417,7 +408,7 @@ function Home() {
                           onChange={(e) => {
                             handleChange(e);
                             if (e.target.value === "custom") {
-                              handleScheduleclose();
+                              // handleScheduleclose();
                               handlecustomshow();
                             }
                           }}
@@ -642,195 +633,181 @@ function Home() {
                       </div>
                     </div>
                   </div>
+
+                  {/* ============================ Schedule Meeting custom Modal ============================  */}
+                  <Modal
+                    show={customModal}
+                    onHide={handlecustomclose}
+                    centered
+                    contentClassName="j_modal_join"
+                  >
+                    <Modal.Header className="border-0 d-flex justify-content-between align-items-center">
+                      <Modal.Title className="text-white j_join_title">Custom Recurrence</Modal.Title>
+                      <IoClose
+                        style={{ color: '#fff', fontSize: '22px', cursor: 'pointer' }}
+                        onClick={handlecustomclose}
+                      />
+                    </Modal.Header>
+                    <div className="j_modal_header"></div>
+                    <Modal.Body>
+                      <div className="j_schedule_Repeat">
+                        <div className="mb-3 flex-fill me-2 j_select_fill">
+                          <label htmlFor="RepeatType" className="form-label text-white j_join_text">Repeat Type</label>
+                          <select
+                            className="form-select j_select j_join_text"
+                            id="RepeatType"
+                            name="customRecurrence.repeatType"
+                            value={values.customRecurrence.repeatType}
+                            onChange={handleChange}
+                          >
+                            <option value="0">Select</option>
+                            <option value="daily">Daily</option>
+                            <option value="weekly">Weekly</option>
+                            <option value="monthly">Monthly</option>
+                            <option value="yearly">Yearly</option>
+                          </select>
+                        </div>
+                        <div className="mb-3 flex-fill j_select_fill">
+                          <label htmlFor="RepeatEvery" className="form-label text-white j_join_text">Repeat Every</label>
+                          <div className='position-relative'>
+                            <input
+                              type="text"
+                              className="form-control j_input j_join_text"
+                              id="RepeatEvery"
+                              name="customRecurrence.repeatEvery"
+                              value={values.customRecurrence.repeatEvery}
+                              onChange={(e) => setFieldValue('customRecurrence.repeatEvery', e.target.value)}
+                            />
+                            <div className="j_custom_icons">
+                              <FaAngleUp
+                                style={{ color: 'white', fontSize: '12px', cursor: 'pointer' }}
+                                onClick={() => setFieldValue('customRecurrence.repeatEvery', values.customRecurrence.repeatEvery + 1)}
+                              />
+                              <FaAngleDown
+                                style={{ color: 'white', fontSize: '12px', cursor: 'pointer' }}
+                                onClick={() => setFieldValue('customRecurrence.repeatEvery', Math.max(values.customRecurrence.repeatEvery - 1, 1))}
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      {values.customRecurrence.repeatType === 'weekly' && (
+                        <div className="mb-3">
+                          <label className="form-label text-white j_join_text">Repeat On</label>
+                          <div className="d-flex B_Repeat_on_btn">
+                            {['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'].map(day => (
+                              <button
+                                key={day}
+                                className={`btn ${values.customRecurrence.repeatOn.includes(day) ? 'j_day_selected_btn' : 'j_day_btn'} me-1`}
+                                onClick={() => {
+                                  const newDays = values.customRecurrence.repeatOn.includes(day)
+                                    ? values.customRecurrence.repeatOn.filter(d => d !== day)
+                                    : [...values.customRecurrence.repeatOn, day];
+                                  setFieldValue('customRecurrence.repeatOn', newDays);
+                                }}
+                              >
+                                {day.charAt(0)}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {values.customRecurrence.repeatType === 'monthly' && (
+                        <div className="mb-3">
+                          <label className="text-white j_join_text">Every</label>
+                          <select
+                            className="form-select j_select j_join_text"
+                            name="customRecurrence.Monthfirst"
+                            value={values.customRecurrence.Monthfirst}
+                            onChange={handleChange}
+                          >
+                            <option value="0">Select</option>
+                            <option value="firstmonday">Monthly on first monday</option>
+                            <option value="firstday">Monthly on first day</option>
+                          </select>
+                        </div>
+                      )}
+
+                      <div className="j_schedule_Repeat">
+                        <div className="mb-3 flex-fill me-2  j_select_fill">
+                          <label htmlFor="RepeatType1" className="form-label text-white j_join_text">Ends</label>
+                          <select
+                            className="form-select j_select j_join_text"
+                            name="customRecurrence.ends"
+                            value={values.customRecurrence.ends}
+                            onChange={handleChange}
+                          >
+                            <option value="0">Select</option>
+                            <option value="never">Never</option>
+                            <option value="on">On</option>
+                            <option value="after">After</option>
+                          </select>
+                        </div>
+
+                        {(values.customRecurrence.ends === "0" || values.customRecurrence.ends === "on") && (
+                          <div className="mb-3 flex-fill  j_select_fill">
+                            <label htmlFor="RepeatType1" className="form-label text-white j_join_text"></label>
+                            <input
+                              type="date"
+                              className="form-control j_input j_join_text j_special_m"
+                              name="customRecurrence.endDate"
+                              value={values.customRecurrence.endDate}
+                              onChange={handleChange}
+                            />
+                          </div>
+                        )}
+
+                        {values.customRecurrence.ends === "after" && (
+                          <div className="mb-3 flex-fill j_select_fill J_Fill_bottom">
+                            <label className="form-label text-white j_join_text"></label>
+                            <div className='position-relative'>
+                              <input
+                                type="text"
+                                name='customRecurrence.Recurrence'
+                                className="form-control j_input j_join_text j_special_m"
+                                value={`${values.customRecurrence.Recurrence || 1} Recurrence`}
+                                readOnly
+                              />
+                              <div className="j_custom_icons">
+                                <FaAngleUp
+                                  style={{ color: 'white', fontSize: '12px', cursor: 'pointer' }}
+                                  onClick={() => setFieldValue('customRecurrence.Recurrence', values.customRecurrence.Recurrence + 1)}
+                                />
+                                <FaAngleDown
+                                  style={{ color: 'white', fontSize: '12px', cursor: 'pointer' }}
+                                  onClick={() => setFieldValue('customRecurrence.Recurrence', Math.max(values.customRecurrence.Recurrence - 1, 1))}
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                      <Modal.Footer className="j_custom_footer border-0 p-0 pt-4 pb-3">
+                        <Button
+                          variant="outline-light"
+                          className="j_custom_button fw-semibold"
+                          onClick={() => { handlecustomclose(); handleScheduleshow() }}
+                        >
+                          Cancel
+                        </Button>
+                        <Button
+                          variant="light"
+                          className="j_custom_button fw-semibold"
+                          onClick={() => {
+                            console.log("customRecurrence", values.customRecurrence);
+                            setFieldValue('customRecurrence', values.customRecurrence);
+                            handlecustomclose();
+                          }}
+                        >
+                          Done
+                        </Button>
+                      </Modal.Footer>
+                    </Modal.Body>
+                  </Modal>
                 </form>
               )}
             </Formik>
-          </Modal.Body>
-        </Modal>
-
-        {/* ============================ Schedule Meeting custom Modal ============================  */}
-        <Modal
-          show={customModal}
-          onHide={handlecustomclose}
-          centered
-          contentClassName="j_modal_join"
-        >
-          <Modal.Header className="border-0 d-flex justify-content-between align-items-center">
-            <Modal.Title className="text-white j_join_title">Custom Recurrence</Modal.Title>
-            <IoClose
-              style={{ color: '#fff', fontSize: '22px', cursor: 'pointer' }}
-              onClick={handlecustomclose}
-            />
-          </Modal.Header>
-          <div className="j_modal_header"></div>
-          <Modal.Body>
-            <div className="j_schedule_Repeat">
-              <div className="mb-3 flex-fill me-2  j_select_fill">
-                <label htmlFor="RepeatType" className="form-label text-white j_join_text">Repeat Type</label>
-                <select
-                  className="form-select j_select j_join_text"
-                  id="RepeatType"
-                  onChange={(e) => {
-                    setRepeatType(e.target.value);
-                    setEndsSelection("0");
-                    setSelectedDays([]);
-                  }} >
-                  <option value="0">Select</option>
-                  <option value="1">Daily</option>
-                  <option value="2">Weekly</option>
-                  <option value="3">Monthly</option>
-                  <option value="4">Yearly</option>
-                </select>
-              </div>
-              <div className="mb-3 flex-fill  j_select_fill">
-                <label htmlFor="RepeatEvery" className="form-label text-white j_join_text">Repeat Every</label>
-                <div className='position-relative'>
-                  <input
-                    type="text"
-                    className="form-control j_input j_join_text"
-                    id="RepeatEvery"
-                    onChange={(e) => setRepeatEvery(Number(e.target.value) || 1)}
-                    value={RepeatEvery}
-                  />
-                  <div className="j_custom_icons">
-                    <FaAngleUp
-                      style={{ color: 'white', fontSize: '12px' }}
-                      onClick={() => handleIncrement()}
-                    />
-                    <FaAngleDown
-                      style={{ color: 'white', fontSize: '12px' }}
-                      onClick={() => handleDecrement()}
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-            {repeatType === '2' && (
-              <div className="mb-3">
-                <label className="form-label text-white j_join_text">Repeat On</label>
-                <div className="d-flex B_Repeat_on_btn">
-                  <button
-                    className={`btn ${selectedDays.includes('Sunday') ? 'j_day_selected_btn' : 'j_day_btn'} me-1`}
-                    onClick={() => toggleDay('Sunday')}
-                  >
-                    S
-                  </button>
-                  <button
-                    className={`btn ${selectedDays.includes('Monday') ? 'j_day_selected_btn' : 'j_day_btn'} me-1`}
-                    onClick={() => toggleDay('Monday')}
-                  >
-                    M
-                  </button>
-                  <button
-                    className={`btn ${selectedDays.includes('Tuesday') ? 'j_day_selected_btn' : 'j_day_btn'} me-1`}
-                    onClick={() => toggleDay('Tuesday')}
-                  >
-                    T
-                  </button>
-                  <button
-                    className={`btn ${selectedDays.includes('Wednesday') ? 'j_day_selected_btn' : 'j_day_btn'} me-1`}
-                    onClick={() => toggleDay('Wednesday')}
-                  >
-                    W
-                  </button>
-                  <button
-                    className={`btn ${selectedDays.includes('Thursday') ? 'j_day_selected_btn' : 'j_day_btn'} me-1`}
-                    onClick={() => toggleDay('Thursday')}
-                  >
-                    T
-                  </button>
-                  <button
-                    className={`btn ${selectedDays.includes('Friday') ? 'j_day_selected_btn' : 'j_day_btn'} me-1`}
-                    onClick={() => toggleDay('Friday')}
-                  >
-                    F
-                  </button>
-                  <button
-                    className={`btn ${selectedDays.includes('Saturday') ? 'j_day_selected_btn' : 'j_day_btn'} me-1`}
-                    onClick={() => toggleDay('Saturday')}
-                  >
-                    S
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {repeatType === '3' && (
-              <div className="mb-3">
-                <label className="text-white j_join_text">Every</label>
-                <select
-                  className="form-select j_select j_join_text"
-                >
-                  <option value="0">Select</option>
-                  <option value="1">Monthly on first monday</option>
-                  <option value="2">Monthly on first day</option>
-                </select>
-              </div>
-            )}
-
-            <div className="j_schedule_Repeat">
-              <div className="mb-3 flex-fill me-2  j_select_fill">
-                <label htmlFor="RepeatType1" className="form-label text-white j_join_text">Ends</label>
-                <select
-                  className="form-select j_select j_join_text"
-                  id="RepeatType1"
-                  value={endsSelection}
-                  onChange={(e) => setEndsSelection(e.target.value)}
-                >
-                  <option value="0">Select</option>
-                  <option value="1">Never</option>
-                  {repeatType !== '1' && <option value="2">On</option>}
-                  <option value="3">After</option>
-                </select>
-              </div>
-
-              {(endsSelection == "0" || endsSelection == "2") && (
-                <div className="mb-3 flex-fill  j_select_fill">
-                  <label htmlFor="RepeatType1" className="form-label text-white j_join_text"></label>
-                  <input type="date" className="form-control j_input j_join_text j_special_m" id="RepeatEvery1" />
-                </div>
-              )}
-
-              {endsSelection == "3" && (
-                <div className="mb-3 flex-fill j_select_fill J_Fill_bottom">
-                  <label className="form-label text-white j_join_text"></label>
-                  <div className='position-relative'>
-                    <input
-                      type="text"
-                      className="form-control j_input j_join_text j_special_m"
-                      value={`${RepeatEvery1} Recurrence`}
-                      readOnly
-                    />
-                    <div className="j_custom_icons">
-                      <FaAngleUp
-                        style={{ color: 'white', fontSize: '12px', cursor: 'pointer' }}
-                        onClick={handleIncrement1}
-                      />
-                      <FaAngleDown
-                        style={{ color: 'white', fontSize: '12px', cursor: 'pointer' }}
-                        onClick={handleDecrement1}
-                      />
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-            <Modal.Footer className="j_custom_footer border-0 p-0 pt-4 pb-3">
-              <Button
-                variant="outline-light"
-                className="j_custom_button fw-semibold"
-                onClick={() => { handlecustomclose(); handleScheduleshow() }}
-              >
-                Cancel
-              </Button>
-              <Button
-                variant="light"
-                className="j_custom_button fw-semibold"
-                onClick={handleScheduleshow}
-              >
-                Done
-              </Button>
-            </Modal.Footer>
           </Modal.Body>
         </Modal>
 
