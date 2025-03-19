@@ -42,18 +42,18 @@ function HomeNavBar() {
         reminders
     } = useSocket(userId);
 
-    const handleprofileshow = () => setprofileShow(true)
-    const handleprofileclose = () => setprofileShow(false)
-    const handlelogoutshow = () => setlogoutShow(true)
-    const handlelogoutclose = () => setlogoutShow(false)
-    const handlepasswordshow = () => setpasswordShow(true)
-    const handlepasswordclose = () => setpasswordShow(false)
+    const handleCloseProfilePicOptions = () => setshowProfilePicOptions(false)
     const handlechangeprofileClose = () => setchangeprofileshow(false);
+    const handlepasswordclose = () => setpasswordShow(false)
+    const handleprofileclose = () => setprofileShow(false)
+    const handleClosecanvas = () => setshowcanvas(false)
+    const handlelogoutclose = () => setlogoutShow(false)
+    const handleprofileshow = () => setprofileShow(true)
+    const handlelogoutshow = () => setlogoutShow(true)
+    const handlepasswordshow = () => setpasswordShow(true)
     const handlechangeprofileShow = () => setchangeprofileshow(true);
     const handleshowcanvas = () => setshowcanvas(true)
-    const handleClosecanvas = () => setshowcanvas(false)
     const handleProfilePicClick = () => setshowProfilePicOptions(true)
-    const handleCloseProfilePicOptions = () => setshowProfilePicOptions(false)
 
     useEffect(() => {
         dispatch(getUserById(userId))
@@ -165,7 +165,7 @@ function HomeNavBar() {
             {/* ============= My profile Modal ============= */}
             <Modal show={profileshow} onHide={handleprofileclose} className='j_Modal_backcolor' centered>
                 <Modal.Header className='border-0 d-flex justify-content-between align-items-center'>
-                    <Modal.Title className='j_modal_header_text text-white'>Edit Profile</Modal.Title>
+                    <Modal.Title className='j_modal_header_text text-white'> Profile</Modal.Title>
                     <IoClose style={{ color: '#fff', fontSize: '22px', cursor: 'pointer' }} onClick={handleprofileclose} />
                 </Modal.Header>
                 <div className="j_modal_header"></div>

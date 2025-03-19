@@ -16,6 +16,10 @@ function HelpCenter() {
         window.scrollTo(0, 0);
     }, []);
 
+    const handleCardClick = (section) => {
+        setActiveFAQ(section);
+    };
+
     const getIconStyle = (section) => {
         if (activeFAQ === section) {
             return {
@@ -31,10 +35,6 @@ function HelpCenter() {
         return { color: '#87898B', cursor: 'pointer' };
     };
 
-
-    const handleCardClick = (section) => {
-        setActiveFAQ(section);
-    };
 
 
     return (

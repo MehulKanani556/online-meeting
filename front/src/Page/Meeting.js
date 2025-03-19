@@ -35,9 +35,9 @@ function Meeting() {
     const [selectedReminders, setSelectedReminders] = useState([]);
     const [openDropdownId, setOpenDropdownId] = useState(null);
     const [selectedDays, setSelectedDays] = useState([]);
-    const [RepeatEvery, setRepeatEvery] = useState(1);
-    const [RepeatEvery1, setRepeatEvery1] = useState(1);
     const [rating, setRating] = useState(0);
+    const [RepeatEvery1, setRepeatEvery1] = useState(1);
+    const [RepeatEvery, setRepeatEvery] = useState(1);
     const [billingCycle, setBillingCycle] = useState('Meeting Details');
     const [meetingFilter, setMeetingFilter] = useState("All Meetings");
     const [securityType, setSecurityType] = useState('alwaysLocked');
@@ -54,10 +54,10 @@ function Meeting() {
     const [showDropdown, setShowDropdown] = useState(false);
     const [filteredUsers, setFilteredUsers] = useState([]);
     const [activeButton, setActiveButton] = useState([]);
-    const searchInputRef = useRef(null);
-    const dropdownRef = useRef(null);
-    const dispatch = useDispatch();
     const IMG_URL = IMAGE_URL
+    const dispatch = useDispatch();
+    const dropdownRef = useRef(null);
+    const searchInputRef = useRef(null);
 
 
 

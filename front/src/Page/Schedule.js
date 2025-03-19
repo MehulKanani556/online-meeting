@@ -58,6 +58,10 @@ const events = [
 ]
 
 const CustomToolbar = (toolbar) => {
+    const goToCurrent = () => {
+        toolbar.onNavigate('TODAY');
+    };
+
     const goToBack = () => {
         toolbar.onNavigate('PREV');
     };
@@ -66,9 +70,6 @@ const CustomToolbar = (toolbar) => {
         toolbar.onNavigate('NEXT');
     };
 
-    const goToCurrent = () => {
-        toolbar.onNavigate('TODAY');
-    };
 
 
     const label = () => {
@@ -152,8 +153,8 @@ function Schedule() {
     const [customModal, setcustomModal] = useState(false);
     const [endsSelection, setEndsSelection] = useState("0");
     const [repeatType, setRepeatType] = useState('0');
-    const [RepeatEvery, setRepeatEvery] = useState(1);
     const [RepeatEvery1, setRepeatEvery1] = useState(1);
+    const [RepeatEvery, setRepeatEvery] = useState(1);
     const userId = sessionStorage.getItem('userId')
     const gettoken = sessionStorage.getItem('token')
     const IMG_URL = IMAGE_URL
@@ -176,13 +177,6 @@ function Schedule() {
         );
     };
 
-    const toggleReminder = (reminder) => {
-        setSelectedReminders(prev =>
-            prev.includes(reminder)
-                ? prev.filter(r => r !== reminder)
-                : [...prev, reminder]
-        )
-    }
 
     const handleIncrement = () => {
         setRepeatEvery(prev => prev + 1);
@@ -191,6 +185,42 @@ function Schedule() {
     const handleDecrement = () => {
         setRepeatEvery(prev => Math.max(prev - 1, 1));
     }
+
+
+    const handleIncrement1 = () => {
+        setRepeatEvery1(prev => prev + 1);
+    }
+
+    const handleDecrement1 = () => {
+        setRepeatEvery1(prev => Math.max(prev - 1, 1));
+    }
+
+    const toggleReminder = (reminder) => {
+        setSelectedReminders(prev =>
+            prev.includes(reminder)
+                ? prev.filter(r => r !== reminder)
+                : [...prev, reminder]
+        )
+    }
+
+    useEffect(() => {
+        dispatch(getAllUsers());
+    }, [dispatch]);
+
+    useEffect(() => {
+        function handleClickOutside(event) {
+            if (dropdownRef.current &&
+                !dropdownRef.current.contains(event.target) &&
+                !searchInputRef.current.contains(event.target)) {
+                setShowDropdown(false);
+                setFilteredUsers([]);
+            }
+        }
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
 
     const scheduleSchema = Yup.object().shape({
         title: Yup.string().required('Title is required'),
@@ -278,32 +308,6 @@ function Schedule() {
                 return nonHostInvitees.length >= 1;
             })
     });
-
-    const handleIncrement1 = () => {
-        setRepeatEvery1(prev => prev + 1);
-    }
-
-    const handleDecrement1 = () => {
-        setRepeatEvery1(prev => Math.max(prev - 1, 1));
-    }
-
-    useEffect(() => {
-        dispatch(getAllUsers());
-    }, [dispatch]);
-
-    useEffect(() => {
-        function handleClickOutside(event) {
-            if (dropdownRef.current &&
-                !dropdownRef.current.contains(event.target) &&
-                !searchInputRef.current.contains(event.target)) {
-                setShowDropdown(false);
-                setFilteredUsers([]);
-            }
-        }
-
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, []);
 
     return (
         <div>

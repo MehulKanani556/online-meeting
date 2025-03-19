@@ -16,6 +16,7 @@ import Alert from './Page/Alert';
 import { SnackbarProvider } from 'notistack';
 import Setting from './Page/Setting';
 import Schedule from './Page/Schedule';
+import Test from './Page/Test';
 
 function App() {
   const { store, persistor } = configureStore();
@@ -34,6 +35,7 @@ function App() {
           <Route path="/meeting" element={<Meeting />} />
           <Route path="/schedule" element={<Schedule />} />
           <Route path="/setting" element={<Setting />} />
+          <Route path="/test" element={<Test />} />
         </Routes>
       </Provider>
     </SnackbarProvider>
