@@ -2,6 +2,7 @@
 import { Route, Routes } from 'react-router-dom';
 import './App.css';
 import '../src/CSS/jay.css'
+import '../src/CSS/darshan.css'
 import Home from "./Page/Home";
 import Login from './Page/Login';
 import { configureStore } from './Redux/Store';
@@ -18,6 +19,7 @@ import Setting from './Page/Setting';
 import Schedule from './Page/Schedule';
 import Test from './Page/Test';
 import Screen from './Page/Screen';
+import Demo from './Page/Demo';
 
 function App() {
   const { store, persistor } = configureStore();
@@ -38,6 +40,7 @@ function App() {
           <Route path="/setting" element={<Setting />} />
           <Route path="/test" element={<Test />} />
           <Route path="/screen" element={<Screen />} />
+          <Route path="/demo" element={<Demo />} />
         </Routes>
       </Provider>
     </SnackbarProvider>
