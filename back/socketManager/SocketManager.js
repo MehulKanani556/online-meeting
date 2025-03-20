@@ -13,7 +13,7 @@ async function sendReminder(socket) {
 
     if (data.length > 0) {
         data.forEach(meeting => {
-            const { invitees, title, startTime, reminder } = meeting;
+            const { invitees, title, date, startTime, reminder } = meeting;
             const reminderMinutes = reminder.map(rem => {
                 const parts = rem.split(' ');
                 const value = parseInt(parts[0]);
@@ -33,6 +33,14 @@ async function sendReminder(socket) {
             });
 
             const now = new Date();
+            const meetingdate = new Date(date);
+
+            // Calculate the difference in time
+            const timeDifference = meetingdate - now; // Difference in milliseconds
+            const daysDifference = Math.ceil(timeDifference / (1000 * 60 * 60 * 24)); // Convert to days
+
+            console.log(`The meeting is in ${daysDifference} days.`);
+
             const currentTime = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`; // Format current time
             const startParts = startTime.split(':');
             const currentParts = currentTime.split(':');
@@ -40,20 +48,35 @@ async function sendReminder(socket) {
             const startMinutes = parseInt(startParts[0]) * 60 + parseInt(startParts[1]);
             const currentMinutes = parseInt(currentParts[0]) * 60 + parseInt(currentParts[1]);
 
-            // console.log("reminder", reminder);
-            // console.log("reminderMinutes", reminderMinutes);
-            // console.log("check conditions", reminderMinutes.includes(startMinutes - currentMinutes));
-
             if (reminderMinutes.includes(startMinutes - currentMinutes)) {
+                const reminderTime = startMinutes - currentMinutes;
+                const reminderMessage = reminderTime === 60 ? 
+                    `Your meeting "${title}" starts in 1 hour at ${startTime}.` : 
+                    reminderTime === 120 ? 
+                    `Your meeting "${title}" starts in 2 hours at ${startTime}.` : 
+                    `Your meeting "${title}" starts in ${reminderTime} minutes at ${startTime}.`;
+
                 invitees.forEach(v => {
                     const userId = v.userId.toString();
                     const socketId = onlineUsers.get(userId);
-                    const reminderTime = startMinutes - currentMinutes;
 
                     if (socketId) {
-                        // console.log(`Sending reminder to ${userId}: Your meeting "${title}" starts in ${reminderTime} minutes at ${startTime}.`);
+                        // console.log(`Sending reminder to ${userId}: ${reminderMessage}`);
                         socket.to(socketId).emit('reminder', {
-                            message: `Your meeting "${title}" starts in ${reminderTime} minutes at ${startTime}.`
+                            message: reminderMessage
+                        });
+                    } else {
+                        console.log(`No socketId found for userId: ${userId}. They may not be connected.`);
+                    }
+                });
+            } else if (startMinutes - currentMinutes == 0 && daysDifference > 0) {
+                invitees.forEach(v => {
+                    const userId = v.userId.toString();
+                    const socketId = onlineUsers.get(userId);
+
+                    if (socketId) {
+                        socket.to(socketId).emit('reminder', {
+                            message: `Your meeting "${title}" starts in ${daysDifference} Days at ${startTime}.`
                         });
                     } else {
                         console.log(`No socketId found for userId: ${userId}. They may not be connected.`);

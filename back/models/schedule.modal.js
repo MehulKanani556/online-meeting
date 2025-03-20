@@ -40,9 +40,17 @@ const scheduleSchema = mongoose.Schema({
             type: Number,
             min: 1
         },
+        Recurrence: {
+            type: Number,
+            min: 1
+        },
         repeatOn: [{
             type: String,
             enum: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+        }],
+        Monthfirst:[{
+            type: String,
+            enum: ['firstmonday', 'firstday']
         }],
         ends: {
             type: String,
