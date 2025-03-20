@@ -20,11 +20,6 @@ import { useSocket } from '../Hooks/useSocket';
 function Home() {
   const dispatch = useDispatch()
   const [activeItem, setActiveItem] = useState('')
-  const [RepeatEvery, setRepeatEvery] = useState(1)
-  // const [RepeatEvery1, setRepeatEvery1] = useState(1)
-  const [selectedDays, setSelectedDays] = useState([]);
-  const [repeatType, setRepeatType] = useState('0');
-  const [endsSelection, setEndsSelection] = useState("0");
   const [ScheduleModal, setScheduleModal] = useState(false)
   const [customModal, setcustomModal] = useState(false)
   const [joinModal, setjoinModal] = useState(false)
@@ -65,14 +60,6 @@ function Home() {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
-
-  const toggleDay = (day) => {
-    setSelectedDays(prev =>
-      prev.includes(day)
-        ? prev.filter(d => d !== day)
-        : [...prev, day]
-    );
-  };
 
   const scheduleSchema = Yup.object().shape({
     title: Yup.string().required('Title is required'),
@@ -143,8 +130,22 @@ function Home() {
           is: 'on',
           then: () => Yup.date()
             .required('End date is required')
-            .min(Yup.ref('date'), 'End date must be after start date')
-        })
+        }),
+
+        Recurrence: Yup.number().when('ends', {
+          is: 'after',
+          then: () => Yup.number().required('Recurrence is required')
+            .min(1, 'Must be at least 1'),
+        }),
+
+        Monthfirst: Yup.string()
+          .oneOf(['firstmonday', 'firstday'])
+          .when('repeatType', {
+            is: 'monthly',
+            then: () => Yup.string().required('Please select a valid option')
+          }),
+
+
       }),
       otherwise: () => Yup.object().nullable()
     }),
@@ -258,25 +259,26 @@ function Home() {
                 recurringMeeting: '',
                 customRecurrence: {
                   repeatType: '',
-                  repeatEvery: 1,
+                  repeatEvery: "1",
                   repeatOn: [],
                   ends: '0',
                   endDate: '',
-                  Recurrence: '',
+                  Recurrence: '1',
                   Monthfirst: '',
                 },
                 invitees: []
               }}
               validationSchema={scheduleSchema}
               onSubmit={(values, { resetForm }) => {
+                console.log("Submitting values:", values);
                 if (!gettoken || !userId) {
                   alert('Please login to create a schedule');
                   return;
                 }
-                console.log("Submitting values:", values);
-                if (values.recurringMeeting === 'custom') {
-                  // console.log("Custom recurring meeting selected:", values.customRecurrence);
-                }
+                // Check if the end date is required and set
+                // if (values.recurringMeeting === 'custom') {
+                // console.log("Custom recurring meeting selected:", values.customRecurrence);
+                // }
                 dispatch(createschedule(values)).then((response) => {
                   // console.log("Response from API:", response);
                   if (response.payload?._id) {
@@ -681,7 +683,7 @@ function Home() {
                             <div className="j_custom_icons">
                               <FaAngleUp
                                 style={{ color: 'white', fontSize: '12px', cursor: 'pointer' }}
-                                onClick={() => setFieldValue('customRecurrence.repeatEvery', values.customRecurrence.repeatEvery + 1)}
+                                onClick={() => setFieldValue('customRecurrence.repeatEvery', Number(values.customRecurrence.repeatEvery) + 1)}
                               />
                               <FaAngleDown
                                 style={{ color: 'white', fontSize: '12px', cursor: 'pointer' }}
@@ -731,7 +733,7 @@ function Home() {
 
                       <div className="j_schedule_Repeat">
                         <div className="mb-3 flex-fill me-2  j_select_fill">
-                          <label htmlFor="RepeatType1" className="form-label text-white j_join_text">Ends</label>
+                          <label htmlFor="ends" className="form-label text-white j_join_text">Ends</label>
                           <select
                             className="form-select j_select j_join_text"
                             name="customRecurrence.ends"
@@ -740,14 +742,14 @@ function Home() {
                           >
                             <option value="0">Select</option>
                             <option value="never">Never</option>
-                            <option value="on">On</option>
+                            {values.customRecurrence.repeatType !== 'daily' && <option value="on">On</option>}
                             <option value="after">After</option>
                           </select>
                         </div>
 
-                        {(values.customRecurrence.ends === "0" || values.customRecurrence.ends === "on") && (
-                          <div className="mb-3 flex-fill  j_select_fill">
-                            <label htmlFor="RepeatType1" className="form-label text-white j_join_text"></label>
+                        {values.customRecurrence.ends === "on" && (
+                          <div className="mb-3 flex-fill j_select_fill">
+                            <label htmlFor="endDate" className="form-label text-white j_join_text"></label>
                             <input
                               type="date"
                               className="form-control j_input j_join_text j_special_m"
@@ -755,10 +757,15 @@ function Home() {
                               value={values.customRecurrence.endDate}
                               onChange={handleChange}
                             />
+                            {touched.customRecurrence?.endDate && errors.customRecurrence?.endDate && (
+                              <div style={{ color: '#cd1425', fontSize: '14px' }}>{errors.customRecurrence.endDate}</div>
+                            )}
                           </div>
                         )}
 
                         {values.customRecurrence.ends === "after" && (
+                          console.log(values.customRecurrence.Recurrence),
+
                           <div className="mb-3 flex-fill j_select_fill J_Fill_bottom">
                             <label className="form-label text-white j_join_text"></label>
                             <div className='position-relative'>
@@ -766,13 +773,13 @@ function Home() {
                                 type="text"
                                 name='customRecurrence.Recurrence'
                                 className="form-control j_input j_join_text j_special_m"
-                                value={`${values.customRecurrence.Recurrence || 1} Recurrence`}
-                                readOnly
+                                value={`${values.customRecurrence.Recurrence} Recurrence`}
+                                onChange={(e) => setFieldValue('customRecurrence.Recurrence', e.target.value)}
                               />
                               <div className="j_custom_icons">
                                 <FaAngleUp
                                   style={{ color: 'white', fontSize: '12px', cursor: 'pointer' }}
-                                  onClick={() => setFieldValue('customRecurrence.Recurrence', values.customRecurrence.Recurrence + 1)}
+                                  onClick={() => setFieldValue('customRecurrence.Recurrence', Number(values.customRecurrence.Recurrence) + 1)}
                                 />
                                 <FaAngleDown
                                   style={{ color: 'white', fontSize: '12px', cursor: 'pointer' }}

@@ -18,7 +18,7 @@ import * as Yup from 'yup';
 import { Formik } from 'formik';
 import { createreview } from '../Redux/Slice/reviews.slice';
 import { useDispatch, useSelector } from 'react-redux';
-import { createschedule } from '../Redux/Slice/schedule.slice';
+import { createschedule, getAllschedule } from '../Redux/Slice/schedule.slice';
 import { getAllUsers } from '../Redux/Slice/user.slice';
 import bin from '../Image/j_bin.svg'
 import { IMAGE_URL } from '../Utils/baseUrl';
@@ -182,6 +182,32 @@ function Meeting() {
         };
     }, []);
 
+    const allschedule = useSelector((state) => state.schedule.allschedule);
+    // console.log("allschedule", allschedule);
+
+    useEffect(() => {
+        dispatch(getAllschedule());
+    }, [dispatch]);
+
+    const formatDate = (dateString) => {
+        const date = new Date(dateString);
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = date.getFullYear();
+        return `${day}-${month}-${year}`;
+    };
+
+    const calculateDuration = (startTime, endTime) => {
+        const start = new Date(`1970-01-01T${startTime}:00`);
+        const end = new Date(`1970-01-01T${endTime}:00`);
+        const durationInMinutes = (end - start) / (1000 * 60);
+
+        const hours = Math.floor(durationInMinutes / 60);
+        const minutes = durationInMinutes % 60;
+
+        return `${hours}h ${minutes}m`;
+    };
+
     const renderMeetingCards = () => {
 
         if (meetingType === "All Meetings" && meetingFilter === "All Meetings") {
@@ -191,9 +217,12 @@ function Meeting() {
                         {/* METTING CARD ALL SECTION */}
 
                         {/* Upcoming Meeting Card */}
+                        {/* {allschedule.map((schedule, index) => {
+                        return ( */}
                         <div className=" col-xl-3 col-lg-4 col-md-6 col-12">
                             <div className="B_meeting_card" style={{ backgroundColor: '#0A1119', borderRadius: '6px' }}>
                                 <div className="d-flex justify-content-between align-items-center  p-3 B_meeting_padding">
+                                    {/* <h6 className="text-white m-0 B_card_title">{schedule.title}</h6> */}
                                     <h6 className="text-white m-0 B_card_title">Project Meeting</h6>
                                     <div>
                                         <button type="button" class="btn btn-outline-primary B_upcoming_btn me-2">Upcoming</button>
@@ -238,19 +267,24 @@ function Meeting() {
                                 <div className="B_meetingALl_details p-3 B_meeting_padding" style={{ color: '#B3AEAE' }}>
                                     <div className="d-flex  mb-2">
                                         <span className='B_meetingALl_details_span'>Meeting Date</span>
+                                        {/* <span className='text-white'>: {formatDate(schedule.date)}</span> */}
                                         <span className='text-white'>: 23-01-2025</span>
                                     </div>
                                     <div className="d-flex  mb-2">
                                         <span className='B_meetingALl_details_span'>Meeting Time</span>
+                                        {/* <span className='text-white'>: {schedule.startTime}</span> */}
                                         <span className='text-white'>: 11:00 AM</span>
                                     </div>
                                     <div className="d-flex ">
                                         <span className='B_meetingALl_details_span'>Meeting Duration</span>
+                                        {/* <span className='text-white'>: {calculateDuration(schedule.startTime, schedule.endTime)}</span> */}
                                         <span className='text-white'>: 0h 30m</span>
                                     </div>
                                 </div>
                             </div>
                         </div>
+                        {/* )
+                        })} */}
 
                         {/* Completed Meeting Card */}
                         <div className=" col-xl-3 col-lg-4 col-md-6 col-12">
@@ -2170,161 +2204,6 @@ function Meeting() {
                         </Modal>
 
                         {/* ============================ Schedule Meeting custom Modal ============================ */}
-                        {/* 
-                        <Modal
-                            show={ScheduleCustomModel}
-                            onHide={handleCloseScheduleCustomModel}
-                            centered
-                            contentClassName="j_modal_join"
-                        >
-                            <Modal.Header className="border-0 d-flex justify-content-between align-items-center">
-                                <Modal.Title className="text-white j_join_title">Custom Recurrence</Modal.Title>
-                                <IoClose
-                                    style={{ color: '#fff', fontSize: '22px', cursor: 'pointer' }}
-                                    onClick={handleCloseScheduleCustomModel}
-                                />
-                            </Modal.Header>
-                            <div className="j_modal_header"></div>
-                            <Modal.Body>
-                                <div className="j_schedule_Repeat">
-                                    <div className="mb-3 flex-fill me-2 j_select_fill J_Fill_bottom">
-                                        <Form.Label className="text-white j_join_text">Repeat Type</Form.Label>
-                                        <Form.Select
-                                            className="j_select j_join_text"
-                                            onChange={(e) => {
-                                                setRepeatType(e.target.value);
-                                                setEndsSelection('0');
-                                                setSelectedDays([]);
-                                            }}
-                                        >
-                                            <option value="0">Select</option>
-                                            <option value="1">Daily</option>
-                                            <option value="2">Weekly</option>
-                                            <option value="3">Monthly</option>
-                                            <option value="4">Yearly</option>
-                                        </Form.Select>
-                                    </div>
-                                    <div className="mb-3 flex-fill j_select_fill J_Fill_bottom">
-                                        <Form.Label className="text-white j_join_text">Repeat Every</Form.Label>
-                                        <div className='position-relative'>
-                                            <Form.Control
-                                                type="text"
-                                                className="j_input j_join_text"
-                                                value={RepeatEvery}
-                                                onChange={(e) => setRepeatEvery(Number(e.target.value) || 1)}
-                                            />
-                                            <div className="j_custom_icons">
-                                                <FaAngleUp
-                                                    style={{ color: 'white', fontSize: '12px', cursor: 'pointer' }}
-                                                    onClick={handleIncrement}
-                                                />
-                                                <FaAngleDown
-                                                    style={{ color: 'white', fontSize: '12px', cursor: 'pointer' }}
-                                                    onClick={handleDecrement}
-                                                />
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {repeatType === '2' && (
-                                    <div className="mb-3">
-                                        <Form.Label className="text-white j_join_text">Repeat On</Form.Label>
-                                        <div className="d-flex B_Repeat_on_btn">
-                                            {['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'].map((day) => (
-                                                <Button
-                                                    key={day}
-                                                    className={`${selectedDays.includes(day) ? 'j_day_selected_btn' : 'j_day_btn'} me-1`}
-                                                    onClick={() => toggleDay(day)}
-                                                >
-                                                    {day[0]}
-                                                </Button>
-                                            ))}
-                                        </div>
-                                    </div>
-                                )}
-
-                                {repeatType === '3' && (
-                                    <div className="mb-3">
-                                        <Form.Label className="text-white j_join_text">Every</Form.Label>
-                                        <Form.Select
-                                            className="j_select j_join_text"
-                                        >
-                                            <option value="0">Select</option>
-                                            <option value="1">Monthly on first monday</option>
-                                            <option value="2">Monthly on first day</option>
-                                        </Form.Select>
-                                    </div>
-                                )}
-
-
-                                <div className="j_schedule_Repeat">
-                                    <div className="mb-3 flex-fill me-2 j_select_fill J_Fill_bottom">
-                                        <Form.Label className="text-white j_join_text">Ends</Form.Label>
-                                        <Form.Select className="j_select j_join_text" value={endsSelection} onChange={(e) => setEndsSelection(e.target.value)}>
-                                            <option value="0">Select</option>
-                                            <option value="1">Never</option>
-                                            {repeatType !== '1' && <option value="2">On</option>}
-                                            <option value="3">After</option>
-                                        </Form.Select>
-                                    </div>
-
-
-                                    {endsSelection == "0" || endsSelection == "2" ? (
-                                        <div className="mb-3 j_select_fill J_Fill_bottom">
-                                            <Form.Label className="text-white j_join_text"></Form.Label>
-                                            <Form.Control
-                                                type="date".
-                                                className="j_input j_join_text j_special_m"
-                                            />
-                                        </div>
-                                    ) : null}
-
-                                    {
-                                        endsSelection == "3" && (
-                                            <div className="mb-3 flex-fill j_select_fill J_Fill_bottom">
-                                                <Form.Label className=" text-white j_join_text"></Form.Label>
-                                                <div className='position-relative'>
-                                                    <Form.Control
-                                                        type="text"
-                                                        className="j_input j_join_text"
-                                                        value={`${RepeatEvery1} Recurrence`} // Update to show the recurrence text
-                                                        readOnly // Make it read-only to prevent direct editing
-                                                    />
-                                                    <div className="j_custom_icons">
-                                                        <FaAngleUp
-                                                            style={{ color: 'white', fontSize: '12px', cursor: 'pointer' }}
-                                                            onClick={handleIncrement1}
-                                                        />
-                                                        <FaAngleDown
-                                                            style={{ color: 'white', fontSize: '12px', cursor: 'pointer' }}
-                                                            onClick={handleDecrement1}
-                                                        />
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        )
-                                    }
-                                </div>
-                            </Modal.Body>
-                            <Modal.Footer className="j_custom_footer border-0 p-0 pt-4 pb-3">
-                                <Button
-                                    variant="outline-light"
-                                    className="j_custom_button fw-semibold"
-                                    onClick={handleCloseScheduleCustomModel}
-                                >
-                                    Cancel
-                                </Button>
-                                <Button
-                                    variant="light"
-                                    className="j_custom_button fw-semibold"
-                                >
-                                    Done
-                                </Button>
-                            </Modal.Footer>
-                        </Modal> */}
-
-
                         <Modal
                             show={ScheduleCustomModel}
                             onHide={handleCloseScheduleCustomModel}
