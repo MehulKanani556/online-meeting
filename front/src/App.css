@@ -870,6 +870,59 @@ img {
   gap: 20px !important;
 }
 
+.B_screen_btn:hover {
+  background-color: #202F41 !important;
+}
+
+.B_screen_offcanvas::-webkit-scrollbar {
+  width: 8px;
+}
+
+.B_screen_offcanvas::-webkit-scrollbar-track {
+  background: #121a24;
+  border-radius: 4px;
+}
+
+.B_screen_offcanvas::-webkit-scrollbar-thumb {
+  background: #2a323b;
+  border-radius: 4px;
+}
+
+.B_screen_offcanvas::-webkit-scrollbar-thumb:hover {
+  background: #394857;
+}
+
+.B_screen_offcanvas {
+  scrollbar-width: thin;
+  scrollbar-color: #2a323b #121a24;
+}
+
+.B_chat_msg::-webkit-scrollbar {
+  width: 8px;
+}
+
+.B_chat_msg::-webkit-scrollbar-track {
+  background: #121a24;
+  border-radius: 4px;
+}
+
+.B_chat_msg::-webkit-scrollbar-thumb {
+  background: #2a323b;
+  border-radius: 4px;
+}
+
+.B_chat_msg::-webkit-scrollbar-thumb:hover {
+  background: #394857;
+}
+
+.B_chat_msg {
+  scrollbar-width: thin;
+  scrollbar-color: #2a323b #121a24;
+}
+
+.B_EditName {
+  font-size: 18px;
+}
 
 /* MiN MEDIA QUERY START.............. */
 
@@ -2014,8 +2067,14 @@ img {
   .j_home_button {
     font-size: 14.5px;
   }
-  .B_TOP_setMargin{
+
+  .B_TOP_setMargin {
     margin-top: 10px !important;
+  }
+
+  .B_vertical {
+    margin-bottom: 7px;
+    margin-left: 7px;
   }
 
 
@@ -2276,6 +2335,31 @@ img {
 
   .B_schedule_btn1 {
     padding: 5px 20px !important;
+  }
+
+  .B_EditName {
+    font-size: 16px;
+  }
+
+  .B_screen_Margin {
+    margin-top: 25px !important;
+  }
+
+  .B_screen_Pad {
+    padding: 15px !important;
+  }
+
+  .B_participateName {
+    font-size: 14px;
+  }
+
+  .B_Ofcanvasbody {
+    padding: 5px;
+  }
+
+  .B_circle {
+    height: 35px !important;
+    width: 35px !important;
   }
 
 

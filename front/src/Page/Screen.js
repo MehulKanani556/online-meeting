@@ -26,6 +26,10 @@ function Screen() {
     const [showAllParticipants, setShowAllParticipants] = useState(false);
     const [showViewMoreDropdown, setShowViewMoreDropdown] = useState(false);
     const [isMicrophoneOn1, setMicrophoneOn1] = useState(false);
+    const [showRenameModal, setShowRenameModal] = useState(false);
+    const [selectedParticipant, setSelectedParticipant] = useState(null);
+    const [newName, setNewName] = useState('');
+    const [activeDropdown, setActiveDropdown] = useState(null);
     const [billingCycle, setBillingCycle] = useState('Messages');
     const [show, setShow] = useState(false);
     const dispatch = useDispatch()
@@ -56,6 +60,68 @@ function Screen() {
         );
     };
 
+    
+    useEffect(() => {
+        const handleClickOutside = () => {
+            setActiveDropdown(null);
+        };
+
+        document.addEventListener('click', handleClickOutside);
+
+        return () => {
+            document.removeEventListener('click', handleClickOutside);
+        };
+    }, []);
+
+
+    const makeHost = (newHostId) => {
+
+        setParticipants(participants.map(participant => ({
+            ...participant,
+            isHost: participant.id === newHostId
+        })));
+
+        setActiveDropdown(null);
+    };
+
+    const makeCohost = (newCohostId) => {
+
+        setParticipants(participants.map(participant => ({
+            ...participant,
+            isCohost: participant.id === newCohostId
+        })));
+
+        setActiveDropdown(null);
+    };
+
+    const openRenameModal = (participant) => {
+        setSelectedParticipant(participant);
+        setNewName(participant.name);
+        setShowRenameModal(true);
+        setActiveDropdown(null); 
+    };
+
+
+    const saveNewName = () => {
+        if (selectedParticipant && newName.trim()) {
+           
+            setParticipants(participants.map(participant =>
+                participant.id === selectedParticipant.id
+                    ? { ...participant, name: newName.trim() }
+                    : participant
+            ));
+
+            setShowRenameModal(false);
+            setSelectedParticipant(null);
+        }
+    };
+
+    const removeParticipant = (participantId) => {
+
+        setParticipants(participants.filter(participant => participant.id !== participantId));
+        setActiveDropdown(null);
+    };
+
 
     const toggleMicrophone = () => {
         setMicrophoneOn(!isMicrophoneOn);
@@ -84,20 +150,38 @@ function Screen() {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, [showViewMoreDropdown]);
 
-    const [participants, setParticipants] = useState([]);
+    const [participants, setParticipants] = useState([
+        { id: 1, name: 'Johan Kumar', initials: 'JK', hasVideo: false, hasAudio: true,isHost: true },
+        // Comment or uncomment participants to test different layouts
+        { id: 2, name: 'Lisa Nihar', initials: 'LN', hasVideo: true, hasAudio: false },
+        { id: 3, name: 'Kiara Patel', initials: 'KP', hasVideo: false, hasAudio: true },
+        { id: 4, name: 'Rohan Patel', initials: 'RP', hasVideo: false, hasAudio: true },
+        { id: 5, name: 'Vikram Gupta', initials: 'VG', hasVideo: false, hasAudio: true },
+        { id: 6, name: 'Another User', initials: 'AU', hasVideo: false, hasAudio: true },
+        { id: 7, name: 'User Seven', initials: 'US', hasVideo: false, hasAudio: true },
+        { id: 8, name: 'User Eight', initials: 'UE', hasVideo: false, hasAudio: true },
+        { id: 9, name: 'User Nine', initials: 'UN', hasVideo: false, hasAudio: true },
+        { id: 10, name: 'User Nine', initials: 'UN', hasVideo: false, hasAudio: true },
+        { id: 11, name: 'User Nine', initials: 'UN', hasVideo: false, hasAudio: true },
+        { id: 12, name: 'User Nine', initials: 'UN', hasVideo: false, hasAudio: true },
+        { id: 13, name: 'User Nine', initials: 'UN', hasVideo: false, hasAudio: true },
+    ]);
 
-    useEffect(() => {
-        setParticipants([
-            {
-                id: 1,
-                name: currUser?.name,
-                initials: userInitials,
-                hasVideo: false,
-                hasAudio: true
-            }
-        ]);
+    // const [participants, setParticipants] = useState([]);
 
-    }, [currUser, userInitials]);
+    // useEffect(() => {
+    //     setParticipants([
+    //         {
+    //             id: 1,
+    //             name: currUser?.name,
+    //             initials: userInitials,
+    //             hasVideo: false,
+    //             hasAudio: true,
+    //             isHost: true
+    //         }
+    //     ]);
+
+    // }, [currUser, userInitials]);
 
     // One person with video on (for testing)
     const hasVideoParticipant = participants.find(p => p.id === 4);
@@ -376,9 +460,9 @@ function Screen() {
 
 
                 {billingCycle === 'Participants' ? (
-                    <Offcanvas.Body >
+                    <Offcanvas.Body className='B_Ofcanvasbody' >
                         <>
-                            <div className='d-flex flex-column h-100'>
+                            <div className='d-flex flex-column h-100 '>
                                 <div className="B_search-container  mb-3" >
                                     <div className="position-relative B_input_search B_input_search11  mx-auto">
                                         <IoSearch className=' position-absolute' style={{ top: "50%", transform: "translateY(-50%)", left: "15px", fontSize: "20px", color: "rgba(255, 255, 255, 0.7)" }} />
@@ -393,7 +477,7 @@ function Screen() {
                                 <div className="list-group B_screen_offcanvas " style={{ height: "82%", overflowY: "auto" }}>
                                     {participants.map((participant) => (
                                         <div key={participant.id} className="list-group-item d-flex align-items-center">
-                                            <div className="rounded-circle d-flex justify-content-center align-items-center me-3"
+                                            <div className="rounded-circle B_circle d-flex justify-content-center align-items-center me-3"
                                                 style={{
                                                     width: "40px",
                                                     height: "40px",
@@ -402,17 +486,147 @@ function Screen() {
                                                 }}>
                                                 {participant.initials}
                                             </div>
-                                            <div className="flex-grow-1">
+                                            <div className="flex-grow-1 B_participateName">
                                                 <div>{participant.name}</div>
                                             </div>
-                                            <div className="d-flex align-items-center ">
-                                                <div className="d_box me-sm-3 mb-2 mb-sm-0" onClick={() => toggleMicrophone1(participant.id)}>
+
+                                            {/* {/ Display Host or Cohost label /} */}
+                                            {(participant.isHost || participant.isCohost) && (
+                                                <div className="me-3">
+                                                    <span className="px-3 py-1 rounded-pill text-white"
+                                                        style={{
+                                                            backgroundColor: "rgba(255, 255, 255, 0.2)",
+                                                            fontSize: "0.8rem"
+                                                        }}>
+                                                        {participant.isHost ? "Host" : "Cohost"}
+                                                    </span>
+                                                </div>
+                                            )}
+
+                                            <div className="d-flex align-items-center">
+                                                <div className="d_box me-sm-3 mb-2 mb-sm-0" onClick={() => toggleMicrophone1(participant.id)} style={{ cursor: "pointer" }}>
                                                     <img src={participant.isMicrophoneOn ? onmicrophone : offmicrophone} alt="" />
                                                 </div>
-                                                <HiOutlineDotsVertical className='mt-1' />
+
+                                                <div className="position-relative">
+                                                    <HiOutlineDotsVertical
+                                                        className='mt-1 cursor-pointer B_vertical'
+                                                        style={{ cursor: "pointer" }}
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            setActiveDropdown(activeDropdown === participant.id ? null : participant.id);
+                                                        }}
+                                                    />
+
+                                                    {activeDropdown === participant.id && (
+                                                        <div
+                                                            className="position-absolute end-0 bg-dark text-white rounded shadow py-2"
+                                                            style={{
+                                                                zIndex: 1000,
+                                                                width: '150px',
+                                                                top: '100%',
+                                                                right: 0,
+                                                                cursor: "pointer "
+                                                            }}
+                                                        >
+                                                            {!participant.isHost && (
+                                                                <div
+                                                                    className="px-3 py-2 hover-bg-secondary cursor-pointer"
+                                                                    onClick={() => makeHost(participant.id)}
+                                                                >
+                                                                    Make host
+                                                                </div>
+                                                            )}
+                                                            {!participant.isCohost && !participant.isHost && (
+                                                                <div
+                                                                    className="px-3 py-2 hover-bg-secondary cursor-pointer"
+                                                                    onClick={() => makeCohost(participant.id)}
+                                                                >
+                                                                    Make cohost
+                                                                </div>
+                                                            )}
+                                                            <div
+                                                                className="px-3 py-2 hover-bg-secondary cursor-pointer"
+                                                                onClick={() => openRenameModal(participant)}>
+                                                                Rename
+                                                            </div>
+
+                                                            <div className="px-3 py-2 hover-bg-secondary cursor-pointer"
+                                                                onClick={() => toggleMicrophone1(participant.id)}
+                                                            >
+                                                                {
+                                                                    participant.isMicrophoneOn ? "Mute" : "Unmute"
+                                                                }
+                                                            </div>
+
+                                                            <div
+                                                                className="px-3 py-2 hover-bg-secondary cursor-pointer"
+                                                                onClick={() => removeParticipant(participant.id)}
+                                                            >
+                                                                Remove
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                </div>
                                             </div>
                                         </div>
                                     ))}
+
+                                    {showRenameModal && (
+                                        <div className="position-fixed top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center"
+                                            style={{ backgroundColor: 'rgba(0, 0, 0, 0.7)', zIndex: 1050 }}>
+                                            <div className=" text-white rounded" style={{ width: '430px', maxWidth: '90%', backgroundColor: "#12161C" }}>
+                                                <div className="d-flex justify-content-between align-items-center p-3 border-bottom border-secondary">
+                                                    <h6 className="m-0 B_EditName" >Edit display name</h6>
+                                                    <button
+                                                        type="button"
+                                                        className="btn-close btn-close-white"
+                                                        onClick={() => setShowRenameModal(false)}
+                                                        aria-label="Close"
+                                                    ></button>
+                                                </div>
+
+                                                <div className="p-4 B_screen_Pad">
+                                                    <div className="mb-3">
+                                                        <label className="form-label small mb-2 text-white-50 mb-2  ">Name</label>
+                                                        <input
+                                                            type="text"
+                                                            className="form-control  text-white border-0"
+                                                            value={newName}
+                                                            onChange={(e) => setNewName(e.target.value)}
+                                                            style={{ padding: '10px', backgroundColor: "#202F41" }}
+                                                        />
+                                                    </div>
+
+                                                    <div className="d-flex justify-content-between gap-3 mt-5 B_screen_Margin">
+                                                        <button
+                                                            className="btn flex-grow-1 py-2"
+                                                            onClick={() => setShowRenameModal(false)}
+                                                            style={{
+                                                                border: '1px solid rgba(255, 255, 255, 0.2)',
+                                                                borderRadius: '4px',
+                                                                backgroundColor: 'transparent',
+                                                                color: 'white'
+                                                            }}
+                                                        >
+                                                            Cancel
+                                                        </button>
+                                                        <button
+                                                            className="btn btn-light flex-grow-1 py-2"
+                                                            onClick={saveNewName}
+                                                            style={{
+                                                                borderRadius: '4px',
+                                                                backgroundColor: 'white',
+                                                                color: 'black'
+                                                            }}
+                                                        >
+                                                            Save
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
 
                                 <div className='d-flex justify-content-center mb-3 mt-auto' >
@@ -429,7 +643,7 @@ function Screen() {
                     <Offcanvas.Body >
                         <>
                             <div className="chat-container h-100 d-flex flex-column">
-                                <div className="chat-messages B_chat_msg flex-grow-1" style={{ overflowY: 'auto' }}>
+                                <div className="chat-messages flex-grow-1" style={{ overflowY: 'auto' }}>
                                     <div className="d-flex align-items-start mb-3">
                                         <div className="chat-avatar me-2" style={{ backgroundColor: '#2B7982', width: '32px', height: '32px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                             <span style={{ color: '#fff' }}>LN</span>
