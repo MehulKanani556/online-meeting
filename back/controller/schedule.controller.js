@@ -73,9 +73,11 @@ exports.createNewschedule = async (req, res) => {
             scheduleData.customRecurrence = {
                 repeatType: customRecurrence.repeatType,
                 repeatEvery: customRecurrence.repeatEvery,
-                repeatOn: customRecurrence.repeatOn,
                 ends: customRecurrence.ends,
-                endDate: customRecurrence.ends === 'on' ? customRecurrence.endDate : undefined
+                repeatOn: customRecurrence.repeatType === 'weekly' ? customRecurrence.repeatOn : undefined,
+                endDate: customRecurrence.ends === 'on' ? customRecurrence.endDate : undefined,
+                Recurrence: customRecurrence.ends === 'after' ? customRecurrence.Recurrence : undefined,
+                Monthfirst: customRecurrence.repeatType == 'monthly' ? customRecurrence.Monthfirst : undefined
             };
         }
 
