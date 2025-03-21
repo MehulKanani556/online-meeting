@@ -16,6 +16,8 @@ import { HiOutlineUserPlus } from "react-icons/hi2";
 import { HiOutlineDotsVertical } from "react-icons/hi";
 import { IoClose, IoSearch } from 'react-icons/io5'
 import { IoMdSend } from "react-icons/io";
+import { getUserById } from '../Redux/Slice/user.slice';
+import { useDispatch, useSelector } from 'react-redux';
 
 
 function Screen() {
@@ -26,6 +28,18 @@ function Screen() {
     const [isMicrophoneOn1, setMicrophoneOn1] = useState(false);
     const [billingCycle, setBillingCycle] = useState('Messages');
     const [show, setShow] = useState(false);
+    const dispatch = useDispatch()
+
+    const userId = sessionStorage.getItem('userId')
+
+    const currUser = useSelector((state) => state.user.currUser);
+    useEffect(() => {
+        dispatch(getUserById(userId))
+    }, [userId])
+    console.log(currUser);
+
+    const userInitials = `${currUser?.name?.charAt(0)}${currUser?.name?.split(' ')[1] ? currUser.name.split(' ')[1].charAt(0) : ''}`
+
 
     const handleClose = () => setShow(false);
     const handleShow = () => setShow(true);
@@ -70,22 +84,20 @@ function Screen() {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, [showViewMoreDropdown]);
 
-    const [participants, setParticipants] = useState([
-        { id: 1, name: 'Johan Kumar', initials: 'JK', hasVideo: false, hasAudio: true },
-        // Comment or uncomment participants to test different layouts
-        { id: 2, name: 'Lisa Nihar', initials: 'LN', hasVideo: true, hasAudio: false },
-        { id: 3, name: 'Kiara Patel', initials: 'KP', hasVideo: false, hasAudio: true },
-        { id: 4, name: 'Rohan Patel', initials: 'RP', hasVideo: false, hasAudio: true },
-        { id: 5, name: 'Vikram Gupta', initials: 'VG', hasVideo: false, hasAudio: true },
-        { id: 6, name: 'Another User', initials: 'AU', hasVideo: false, hasAudio: true },
-        { id: 7, name: 'User Seven', initials: 'US', hasVideo: false, hasAudio: true },
-        { id: 8, name: 'User Eight', initials: 'UE', hasVideo: false, hasAudio: true },
-        { id: 9, name: 'User Nine', initials: 'UN', hasVideo: false, hasAudio: true },
-        { id: 10, name: 'User Nine', initials: 'UN', hasVideo: false, hasAudio: true },
-        { id: 11, name: 'User Nine', initials: 'UN', hasVideo: false, hasAudio: true },
-        { id: 12, name: 'User Nine', initials: 'UN', hasVideo: false, hasAudio: true },
-        { id: 13, name: 'User Nine', initials: 'UN', hasVideo: false, hasAudio: true },
-    ]);
+    const [participants, setParticipants] = useState([]);
+
+    useEffect(() => {
+        setParticipants([
+            {
+                id: 1,
+                name: currUser?.name,
+                initials: userInitials,
+                hasVideo: false,
+                hasAudio: true
+            }
+        ]);
+
+    }, [currUser, userInitials]);
 
     // One person with video on (for testing)
     const hasVideoParticipant = participants.find(p => p.id === 4);
@@ -177,6 +189,7 @@ function Screen() {
                                         <div
                                             className="d_avatar-circle"
                                             style={{
+                                                textTransform: 'capitalize',
                                                 backgroundColor: `hsl(${participant.id * 60}, 70%, 45%)`
                                             }}
                                         >
@@ -416,7 +429,7 @@ function Screen() {
                     <Offcanvas.Body >
                         <>
                             <div className="chat-container h-100 d-flex flex-column">
-                                <div className="chat-messages flex-grow-1" style={{ overflowY: 'auto' }}>
+                                <div className="chat-messages B_chat_msg flex-grow-1" style={{ overflowY: 'auto' }}>
                                     <div className="d-flex align-items-start mb-3">
                                         <div className="chat-avatar me-2" style={{ backgroundColor: '#2B7982', width: '32px', height: '32px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                             <span style={{ color: '#fff' }}>LN</span>

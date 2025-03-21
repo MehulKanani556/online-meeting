@@ -41,7 +41,7 @@ exports.createNewschedule = async (req, res) => {
 
         if (meetingLink === "GenerateaOneTimeMeetingLink") {
             const uniqueId = crypto.randomBytes(10).toString('hex');
-            scheduleData.meetingLink = `http://localhost:3000/${uniqueId}`;
+            scheduleData.meetingLink = `http://localhost:3000/screen/${uniqueId}`;
         }
 
         // Add email sending functionality

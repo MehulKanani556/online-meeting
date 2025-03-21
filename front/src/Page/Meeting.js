@@ -22,6 +22,7 @@ import { createschedule, getAllschedule } from '../Redux/Slice/schedule.slice';
 import { getAllUsers } from '../Redux/Slice/user.slice';
 import bin from '../Image/j_bin.svg'
 import { IMAGE_URL } from '../Utils/baseUrl';
+import { current } from '@reduxjs/toolkit';
 
 
 
@@ -58,7 +59,6 @@ function Meeting() {
     const dispatch = useDispatch();
     const dropdownRef = useRef(null);
     const searchInputRef = useRef(null);
-
 
 
     const handleLinkDiceClick = () => {
@@ -183,11 +183,22 @@ function Meeting() {
     }, []);
 
     const allschedule = useSelector((state) => state.schedule.allschedule);
-    // console.log("allschedule", allschedule);
+    console.log("allschedule", allschedule);
 
     useEffect(() => {
         dispatch(getAllschedule());
     }, [dispatch]);
+
+    const currentDate = new Date().toISOString().split('T')[0];
+    const currentTime = new Date().toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit',
+        // second: '2-digit',
+        hour12: false // set to false if you want 24-hour format
+    });
+    console.log(currentTime);
+
+
 
     const formatDate = (dateString) => {
         const date = new Date(dateString);
@@ -208,6 +219,9 @@ function Meeting() {
         return `${hours}h ${minutes}m`;
     };
 
+
+
+
     const renderMeetingCards = () => {
 
         if (meetingType === "All Meetings" && meetingFilter === "All Meetings") {
@@ -217,77 +231,101 @@ function Meeting() {
                         {/* METTING CARD ALL SECTION */}
 
                         {/* Upcoming Meeting Card */}
-                        {/* {allschedule.map((schedule, index) => {
-                        return ( */}
-                        <div className=" col-xl-3 col-lg-4 col-md-6 col-12">
-                            <div className="B_meeting_card" style={{ backgroundColor: '#0A1119', borderRadius: '6px' }}>
-                                <div className="d-flex justify-content-between align-items-center  p-3 B_meeting_padding">
-                                    {/* <h6 className="text-white m-0 B_card_title">{schedule.title}</h6> */}
-                                    <h6 className="text-white m-0 B_card_title">Project Meeting</h6>
-                                    <div>
-                                        <button type="button" class="btn btn-outline-primary B_upcoming_btn me-2">Upcoming</button>
-                                        <HiOutlineDotsVertical
-                                            className='text-white'
-                                            size={22}
-                                            style={{ cursor: "pointer" }}
-                                            onClick={(e) => handleDotsClick('meeting1', e)}
-                                        />
-                                        {openDropdownId === 'meeting1' && (
-                                            <div className="position-absolute  mt-2 py-2 B_boxEdit  rounded shadow-lg"
-                                                style={{ minWidth: '120px', zIndex: 1000 }}>
-                                                <button className="dropdown-item text-white px-3 py-1 hover-bg-secondary"
-                                                    style={{ backgroundColor: 'transparent', border: 'none', width: '100%', textAlign: 'left' }}>
-                                                    Start
-                                                </button>
-                                                <button
-                                                    className="dropdown-item text-white px-3 py-1 hover-bg-secondary"
-                                                    style={{ backgroundColor: 'transparent', border: 'none', width: '100%', textAlign: 'left' }}
-                                                    onClick={handleShowScheduleModel}
-                                                >
-                                                    Edit
-                                                </button>
-                                                <button
-                                                    className="dropdown-item text-white px-3 py-1 hover-bg-secondary"
-                                                    style={{ backgroundColor: 'transparent', border: 'none', width: '100%', textAlign: 'left' }}
-                                                    onClick={handleShowCancelModel}
-                                                >
-                                                    Cancel
-                                                </button>
-                                                <button className="dropdown-item text-white px-3 py-1 hover-bg-secondary"
-                                                    style={{ backgroundColor: 'transparent', border: 'none', width: '100%', textAlign: 'left' }}
-                                                    onClick={handleShowInviteModel}
-                                                >
-                                                    Invite People
-                                                </button>
+                        {allschedule.map((schedule, index) => {
+                            console.log(formatDate(schedule.date), formatDate(currentDate))
+                            console.log(formatDate(schedule.date) > formatDate(currentDate));
+
+                            return (
+                                <div className=" col-xl-3 col-lg-4 col-md-6 col-12">
+                                    <div className="B_meeting_card" style={{ backgroundColor: '#0A1119', borderRadius: '6px' }}>
+                                        <div className="d-flex justify-content-between align-items-center  p-3 B_meeting_padding">
+                                            <h6 className="text-white m-0 B_card_title">{schedule.title}</h6>
+                                            {/* <h6 className="text-white m-0 B_card_title">Project Meeting</h6> */}
+                                            <div>
+                                                {formatDate(schedule.date) >= formatDate(currentDate) && schedule.startTime != currentTime && (
+                                                    <>
+                                                        <button type="button" class="btn btn-outline-primary B_upcoming_btn me-2">Upcoming</button>
+
+                                                        <HiOutlineDotsVertical
+                                                            className='text-white'
+                                                            size={22}
+                                                            style={{ cursor: "pointer" }}
+                                                            onClick={(e) => handleDotsClick(schedule._id, e)}
+                                                        />
+
+                                                        {openDropdownId === schedule._id && (
+                                                            <div className="position-absolute  mt-2 py-2 B_boxEdit  rounded shadow-lg"
+                                                                style={{ minWidth: '120px', zIndex: 1000 }}>
+                                                                {/* <Link target="_blank" to={`${schedule.meetingLink}`} className="dropdown-item text-white px-3 py-1 hover-bg-secondary"
+                                                                    style={{ backgroundColor: 'transparent', border: 'none', width: '100%', textAlign: 'left' }}>
+                                                                    Start
+                                                                </Link> */}
+                                                                <button
+                                                                    className="dropdown-item text-white px-3 py-1 hover-bg-secondary"
+                                                                    style={{ backgroundColor: 'transparent', border: 'none', width: '100%', textAlign: 'left' }}
+                                                                    onClick={() => window.open(schedule.meetingLink, '_blank')}
+                                                                >
+                                                                    Start
+                                                                </button>
+                                                                <button
+                                                                    className="dropdown-item text-white px-3 py-1 hover-bg-secondary"
+                                                                    style={{ backgroundColor: 'transparent', border: 'none', width: '100%', textAlign: 'left' }}
+                                                                    onClick={handleShowScheduleModel}
+                                                                >
+                                                                    Edit
+                                                                </button>
+                                                                <button
+                                                                    className="dropdown-item text-white px-3 py-1 hover-bg-secondary"
+                                                                    style={{ backgroundColor: 'transparent', border: 'none', width: '100%', textAlign: 'left' }}
+                                                                    onClick={handleShowCancelModel}
+                                                                >
+                                                                    Cancel
+                                                                </button>
+                                                                <button className="dropdown-item text-white px-3 py-1 hover-bg-secondary"
+                                                                    style={{ backgroundColor: 'transparent', border: 'none', width: '100%', textAlign: 'left' }}
+                                                                    onClick={handleShowInviteModel}
+                                                                >
+                                                                    Invite People
+                                                                </button>
+                                                            </div>
+                                                        )}
+                                                    </>
+                                                )}
+                                                {formatDate(schedule.date) < formatDate(currentDate) && (
+                                                    <button type="button" class="btn btn-outline-success B_upcoming_btn1 me-2">Completed</button>
+                                                )}
+
+                                                {formatDate(schedule.date) == formatDate(currentDate) && schedule.startTime == currentTime && (
+                                                    <button type="button" class="btn btn-outline-secondary B_upcoming_btn1 B_upcoming_btn2 me-2">Join</button>
+                                                )}
+                                                {/* <button type="button" class="btn btn-outline-danger B_upcoming_btn1 me-2">Cancelled</button> */}
                                             </div>
-                                        )}
+                                        </div>
+                                        <div style={{ borderTop: "1px solid #525252" }}></div>
+                                        <div className="B_meetingALl_details p-3 B_meeting_padding" style={{ color: '#B3AEAE' }}>
+                                            <div className="d-flex  mb-2">
+                                                <span className='B_meetingALl_details_span'>Meeting Date</span>
+                                                <span className='text-white'>: {formatDate(schedule.date)}</span>
+                                                {/* <span className='text-white'>: 23-01-2025</span> */}
+                                            </div>
+                                            <div className="d-flex  mb-2">
+                                                <span className='B_meetingALl_details_span'>Meeting Time</span>
+                                                <span className='text-white'>: {schedule.startTime}</span>
+                                                {/* <span className='text-white'>: 11:00 AM</span> */}
+                                            </div>
+                                            <div className="d-flex ">
+                                                <span className='B_meetingALl_details_span'>Meeting Duration</span>
+                                                <span className='text-white'>: {calculateDuration(schedule.startTime, schedule.endTime)}</span>
+                                                {/* <span className='text-white'>: 0h 30m</span> */}
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-                                <div style={{ borderTop: "1px solid #525252" }}></div>
-                                <div className="B_meetingALl_details p-3 B_meeting_padding" style={{ color: '#B3AEAE' }}>
-                                    <div className="d-flex  mb-2">
-                                        <span className='B_meetingALl_details_span'>Meeting Date</span>
-                                        {/* <span className='text-white'>: {formatDate(schedule.date)}</span> */}
-                                        <span className='text-white'>: 23-01-2025</span>
-                                    </div>
-                                    <div className="d-flex  mb-2">
-                                        <span className='B_meetingALl_details_span'>Meeting Time</span>
-                                        {/* <span className='text-white'>: {schedule.startTime}</span> */}
-                                        <span className='text-white'>: 11:00 AM</span>
-                                    </div>
-                                    <div className="d-flex ">
-                                        <span className='B_meetingALl_details_span'>Meeting Duration</span>
-                                        {/* <span className='text-white'>: {calculateDuration(schedule.startTime, schedule.endTime)}</span> */}
-                                        <span className='text-white'>: 0h 30m</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        {/* )
-                        })} */}
+                            )
+                        })}
 
                         {/* Completed Meeting Card */}
-                        <div className=" col-xl-3 col-lg-4 col-md-6 col-12">
+                        {/* <div className=" col-xl-3 col-lg-4 col-md-6 col-12">
                             <div className="B_meeting_card " style={{ backgroundColor: '#0A1119', borderRadius: '6px' }}>
                                 <div className="d-flex justify-content-between align-items-center  p-3 B_meeting_padding ">
                                     <h6 className="text-white m-0 B_card_title">Online Meeting</h6>
@@ -311,10 +349,10 @@ function Meeting() {
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </div> */}
 
                         {/* Join Meeting Card */}
-                        <div className=" col-xl-3 col-lg-4 col-md-6 col-12">
+                        {/* <div className=" col-xl-3 col-lg-4 col-md-6 col-12">
                             <div className="B_meeting_card " style={{ backgroundColor: '#0A1119', borderRadius: '6px' }}>
                                 <div className="d-flex justify-content-between align-items-center p-3 B_meeting_padding">
                                     <h6 className="text-white m-0 B_card_title">Project Meeting</h6>
@@ -338,10 +376,10 @@ function Meeting() {
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </div> */}
 
                         {/* Cancelled Meeting Card */}
-                        <div className=" col-xl-3 col-lg-4 col-md-6 col-12">
+                        {/* <div className=" col-xl-3 col-lg-4 col-md-6 col-12">
                             <div className="B_meeting_card " style={{ backgroundColor: '#0A1119', borderRadius: '6px' }}>
                                 <div className="d-flex justify-content-between align-items-center p-3 B_meeting_padding">
                                     <h6 className="text-white m-0 B_card_title">Online Meeting</h6>
@@ -366,7 +404,7 @@ function Meeting() {
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </div> */}
                     </div>
                 </div>
             );
