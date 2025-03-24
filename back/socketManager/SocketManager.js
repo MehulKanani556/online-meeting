@@ -133,24 +133,10 @@ async function initializeSocket(io) {
         // User joins a room
         socket.on('join-room', async ({ roomId, userId, userName }) => {
             try {
-                // Ensure roomId is valid
-                if (!roomId) {
-                    throw new Error('Invalid roomId');
-                }
-
                 // Initialize rooms[roomId] if it doesn't exist
                 if (!rooms[roomId]) {
                     rooms[roomId] = [];
-                    console.log("Room initialized:", roomId, rooms[roomId]); // Debug log
                 }
-
-                // Add debugging to check room state
-                console.log("Room state before operations:", {
-                    roomId,
-                    roomExists: !!rooms[roomId],
-                    isArray: Array.isArray(rooms[roomId]),
-                    roomContent: rooms[roomId]
-                });
 
                 // Check for existing user
                 const existingUser = rooms[roomId].find(user => user.userId === userId);
@@ -177,12 +163,6 @@ async function initializeSocket(io) {
                     roomId
                 };
 
-                // Ensure rooms[roomId] is still an array before pushing
-                if (!Array.isArray(rooms[roomId])) {
-                    rooms[roomId] = [];
-                    console.log("Re-initializing room array:", roomId); // Debug log
-                }
-
                 // Add user to room participants
                 rooms[roomId].push({
                     id: socket.id,
@@ -204,11 +184,8 @@ async function initializeSocket(io) {
 
                 console.log("rooms========", rooms);
             } catch (error) {
-                console.error("Error in join-room:", error, {
-                    roomId,
-                    roomState: rooms[roomId]
-                });
-                socket.emit('error', { message: 'Failed to join room: ' + error.message });
+                console.error("Error in join-room:", error);
+                socket.emit('error', { message: 'Failed to join room' });
             }
         });
 

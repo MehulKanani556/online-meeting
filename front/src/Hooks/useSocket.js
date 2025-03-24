@@ -77,6 +77,7 @@ export const useSocket = (userId, roomId, userName) => {
         // Handle chat messages
         socketRef.current.on('receive-message', (message) => {
             setMessages(prev => [...prev, message]);
+            
         });
 
         return () => {
