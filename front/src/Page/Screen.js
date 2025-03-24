@@ -291,10 +291,10 @@ function Screen() {
                                     <div className="d_controls-top">
                                         <div className="d_controls-container">
                                             <img src={hand} className="d_control-icon" alt="Raise hand" />
-                                            {isVideoOff ? (
-                                                <img src={offcamera} className="d_control-icon" alt="Camera on" />
+                                            {participant.hadVideo ? (
+                                                <img src={oncamera} className="d_control-icon" alt="Camera on" />
                                             ) : (
-                                                <img src={oncamera} className="d_control-icon" alt="Camera off" />
+                                                <img src={offcamera} className="d_control-icon" alt="Camera off" />
                                             )}
                                         </div>
                                     </div>
@@ -304,10 +304,10 @@ function Screen() {
                                             {participant.isHost ? ' (Host)' : ''}
                                         </span>
                                         <div className="d_mic-status">
-                                            {isMuted ? (
-                                                <img src={offmicrophone} className="d_control-icon" alt="Microphone on" />
+                                            {participant.hasAudio ? (
+                                                <img src={onmicrophone} className="d_control-icon" alt="Microphone on" />
                                             ) : (
-                                                <img src={onmicrophone} className="d_control-icon" alt="Microphone off" />
+                                                <img src={offmicrophone} className="d_control-icon" alt="Microphone off" />
                                             )}
                                         </div>
                                     </div>

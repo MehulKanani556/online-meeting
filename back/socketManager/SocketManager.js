@@ -132,49 +132,61 @@ async function initializeSocket(io) {
 
         // User joins a room
         socket.on('join-room', async ({ roomId, userId, userName }) => {
-            // console.log(`User ${userName} (${userId}) joined room: ${roomId}`);
+            try {
+                // Initialize rooms[roomId] if it doesn't exist
+                if (!rooms[roomId]) {
+                    rooms[roomId] = [];
+                }
 
-            // Get meeting details from the database
-            const meetingDetails = await schedule.findOne({
-                meetingLink: { $regex: roomId }
-            });
+                // Check for existing user
+                const existingUser = rooms[roomId].find(user => user.userId === userId);
+                if (existingUser) {
+                    // Remove the existing user entry
+                    rooms[roomId] = rooms[roomId].filter(user => user.userId !== userId);
+                    // Notify others about disconnection of the old session
+                    socket.to(roomId).emit('user-disconnected', existingUser.id);
+                }
 
-            const hostUserId = meetingDetails?.userId.toString();
+                // Get meeting details from the database
+                const meetingDetails = await schedule.findOne({
+                    meetingLink: { $regex: roomId }
+                });
 
-            // Join the room
-            socket.join(roomId);
+                const hostUserId = meetingDetails?.userId?.toString();
 
-            if (!rooms[roomId]) {
-                rooms[roomId] = [];
+                // Join the room
+                socket.join(roomId);
+
+                onlineUsers[socket.id] = {
+                    userId,
+                    userName,
+                    roomId
+                };
+
+                // Add user to room participants
+                rooms[roomId].push({
+                    id: socket.id,
+                    userId,
+                    userName,
+                    isHost: userId === hostUserId
+                });
+
+                // Notify others in the room
+                socket.to(roomId).emit('user-connected', {
+                    socketId: socket.id,
+                    userId,
+                    userName,
+                    isHost: userId === hostUserId
+                });
+
+                // Send list of all users in the room to the new participant
+                socket.emit('room-users', rooms[roomId]);
+
+                console.log("rooms========", rooms);
+            } catch (error) {
+                console.error("Error in join-room:", error);
+                socket.emit('error', { message: 'Failed to join room' });
             }
-
-            onlineUsers[socket.id] = { // Changed from users to onlineUsers
-                userId,
-                userName,
-                roomId
-            };
-
-            // Add user to room participants
-            rooms[roomId].push({
-                id: socket.id,
-                userId,
-                userName,
-                isHost: userId === hostUserId
-            });
-
-            // Notify others in the room
-            socket.to(roomId).emit('user-connected', {
-                socketId: socket.id,
-                userId,
-                userName,
-                isHost: userId === hostUserId
-            });
-
-            // Send list of all users in the room to the new participant
-            socket.emit('room-users', rooms[roomId]);
-
-            console.log("rooms========", rooms);
-
         });
 
         // Handle WebRTC signaling

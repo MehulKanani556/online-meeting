@@ -51,7 +51,7 @@ export const useSocket = (userId, roomId, userName) => {
 
         // Get list of room users when joining
         socketRef.current.on('room-users', (roomUsers) => {
-            // console.log('Current room users:', roomUsers);
+            console.log('Current room users:', roomUsers);
             const formattedParticipants = roomUsers.map(user => ({
                 id: user.id,
                 userId: user.userId,
