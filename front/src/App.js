@@ -36,10 +36,10 @@ function App() {
           <Route path="/contactus" element={<ContactUs />} />
           <Route path="/home" element={<Home />} />
           <Route path="/meeting" element={<Meeting />} />
+          <Route path="/screen/:id" element={<Screen />} />
           <Route path="/schedule" element={<Schedule />} />
           <Route path="/setting" element={<Setting />} />
           <Route path="/test" element={<Test />} />
-          <Route path="/screen/:id" element={<Screen />} />
           <Route path="/demo" element={<Demo />} />
         </Routes>
       </Provider>

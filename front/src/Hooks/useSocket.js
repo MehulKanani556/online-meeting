@@ -3,83 +3,163 @@ import { io } from 'socket.io-client';
 
 const SOCKET_SERVER_URL = "http://localhost:5000"; // Move to environment variable in production
 
-
-export const useSocket = (userId, allusers) => {
+export const useSocket = (userId, roomId, userName) => {
     const socketRef = useRef(null);
     const [isConnected, setIsConnected] = useState(false);
-    const [reminders, setReminders] = useState([]); // State to hold reminders
+    const [participants, setParticipants] = useState([]);
+    const [messages, setMessages] = useState([]);
 
-    // ===========================socket connection=============================
+    // console.log("participants----------", participants);
 
+
+    // Initialize socket connection
     useEffect(() => {
+        if (!userId || !roomId) return;
+
         // Clear any existing connection
         if (socketRef.current && isConnected) {
             socketRef.current.disconnect();
         }
 
-        // Only create socket connection if we have a userId
-        if (userId && !isConnected) {
-            socketRef.current = io(SOCKET_SERVER_URL);
+        socketRef.current = io(SOCKET_SERVER_URL);
 
-            socketRef.current.on("connect", () => {
-                setIsConnected(true);
-                // console.log("Socket connected with userId:", userId);
-                // Emit user-login after connection
-                socketRef.current.emit("user-login", userId);
+        socketRef.current.on("connect", () => {
+            setIsConnected(true);
+            // Join room
+            socketRef.current.emit('join-room', {
+                roomId,
+                userId,
+                userName
             });
+        });
 
-            socketRef.current.on("disconnect", () => {
-                setIsConnected(false);
-                console.log("Socket disconnected");
-            });
-
-            socketRef.current.on("user-status-changed", (onlineUserIds) => {
-                console.log("Online users updated:", onlineUserIds);
-            });
-
-            socketRef.current.on("connect_error", (error) => {
-                console.error("Socket connection error:", error);
-                setIsConnected(false);
-            });
-
-            socketRef.current.on("connect_timeout", () => {
-                console.error("Socket connection timeout");
-                setIsConnected(false);
-            });
-
-            // Handle reminder messages
-            socketRef.current.on('reminder', (data) => {
-                setReminders(prevReminders => [...prevReminders, data.message]); // Add new reminder to state
-            });
-
-            return () => {
-                if (socketRef.current) {
-                    socketRef.current.disconnect();
-                    socketRef.current = null;
+        // Handle new user connected
+        socketRef.current.on('user-connected', (user) => {
+            // console.log('New user connected:', user);
+            setParticipants(prev => [
+                ...prev,
+                {
+                    id: user.socketId,
+                    userId: user.userId,
+                    name: user.userName,
+                    hasVideo: true,
+                    hasAudio: true,
+                    isHost: user.isHost
                 }
-            };
-        }
-    }, [userId]); // Only depend on userId
+            ]);
+        });
 
-    useEffect(() => {
+        // Get list of room users when joining
+        socketRef.current.on('room-users', (roomUsers) => {
+            // console.log('Current room users:', roomUsers);
+            const formattedParticipants = roomUsers.map(user => ({
+                id: user.id,
+                userId: user.userId,
+                name: user.userName,
+                hasVideo: true,
+                hasAudio: true,
+                isHost: user.isHost
+            }));
+
+            // console.log("formattedParticipants", formattedParticipants);
+
+            setParticipants(formattedParticipants);
+        });
+
+        // Handle user disconnection
+        socketRef.current.on('user-disconnected', (socketId) => {
+            // console.log('User disconnected:', socketId);
+            setParticipants(prev =>
+                prev.filter(participant => participant.id !== socketId)
+            );
+        });
+
+        // Handle chat messages
+        socketRef.current.on('receive-message', (message) => {
+            setMessages(prev => [...prev, message]);
+        });
+
+        return () => {
+            if (socketRef.current) {
+                socketRef.current.disconnect();
+                socketRef.current = null;
+            }
+        };
+    }, [userId, roomId, userName]);
+
+    // Helper function to send a message
+    const sendMessage = (message) => {
+        if (socketRef.current && message.trim()) {
+            socketRef.current.emit('send-message', {
+                roomId,
+                message,
+                sender: userName
+            });
+        }
+    };
+
+    // WebRTC signaling handlers
+    const setupWebRTCHandlers = (callbacks) => {
+        if (!socketRef.current) return;
+
+        socketRef.current.on('offer', async ({ from, offer }) => {
+            if (callbacks.handleOffer) {
+                await callbacks.handleOffer(from, offer);
+            }
+        });
+
+        socketRef.current.on('answer', async ({ from, answer }) => {
+            if (callbacks.handleAnswer) {
+                await callbacks.handleAnswer(from, answer);
+            }
+        });
+
+        socketRef.current.on('ice-candidate', async ({ from, candidate }) => {
+            if (callbacks.handleIceCandidate) {
+                await callbacks.handleIceCandidate(from, candidate);
+            }
+        });
+    };
+
+    // WebRTC signaling emitters
+    const sendOffer = (to, offer) => {
         if (socketRef.current) {
-            const handleReminder = (data) => {
-                console.log("Received reminder data:", data); // Updated log message for clarity
-            };
-
-            socketRef.current.on('reminder', handleReminder);
-
-            // Cleanup function to remove the listener
-            return () => {
-                if (socketRef.current) { // Check if socketRef.current is not null
-                    socketRef.current.off('reminder', handleReminder);
-                }
-            };
+            socketRef.current.emit('offer', {
+                to,
+                from: socketRef.current.id,
+                offer
+            });
         }
-    }, [socketRef.current]); // Add socketRef.current as a dependency
+    };
+
+    const sendAnswer = (to, answer) => {
+        if (socketRef.current) {
+            socketRef.current.emit('answer', {
+                to,
+                from: socketRef.current.id,
+                answer
+            });
+        }
+    };
+
+    const sendIceCandidate = (to, candidate) => {
+        if (socketRef.current) {
+            socketRef.current.emit('ice-candidate', {
+                to,
+                candidate
+            });
+        }
+    };
 
     return {
         socket: socketRef.current,
-        reminders // Return reminders state
+        isConnected,
+        participants,
+        messages,
+        sendMessage,
+        setupWebRTCHandlers,
+        sendOffer,
+        sendAnswer,
+        sendIceCandidate
     };
 }

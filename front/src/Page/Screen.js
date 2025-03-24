@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import './../CSS/darshan.css';
 import onmicrophone from '../Image/d_onmicrophone.svg';
 import offmicrophone from '../Image/d_offmicrophone.svg';
@@ -18,176 +18,171 @@ import { IoClose, IoSearch } from 'react-icons/io5'
 import { IoMdSend } from "react-icons/io";
 import { getUserById } from '../Redux/Slice/user.slice';
 import { useDispatch, useSelector } from 'react-redux';
-
+import { useParams, useNavigate } from 'react-router-dom';
+import io from 'socket.io-client';
+import { useSocket } from '../Hooks/useSocket';
 
 function Screen() {
-    const [isMicrophoneOn, setMicrophoneOn] = useState(false);
-    const [isCameraOn, setCameraOn] = useState(false);
+    const { id: roomId } = useParams();
+    const navigate = useNavigate();
+    const dispatch = useDispatch();
+
+    // Current user information
+    const userId = sessionStorage.getItem('userId');
+    const currUser = useSelector((state) => state.user.currUser);
+    const userInitials = currUser?.name ? `${currUser.name.charAt(0)}${currUser.name.split(' ')[1] ? currUser.name.split(' ')[1].charAt(0) : ''}` : 'U';
+    const userName = currUser?.name || 'User';
+
+    // Use the socket hook
+    const { socket, isConnected, participants, messages, sendMessage } = useSocket(userId, roomId, userName);
+    // console.log("participants", participants.length);
+
+
+    // WebRTC State
+    const [isMuted, setIsMuted] = useState(false);
+    const [isVideoOff, setIsVideoOff] = useState(false);
+    const [isScreenSharing, setIsScreenSharing] = useState(false);
+    const [newMessage, setNewMessage] = useState('');
     const [showAllParticipants, setShowAllParticipants] = useState(false);
     const [showViewMoreDropdown, setShowViewMoreDropdown] = useState(false);
-    const [isMicrophoneOn1, setMicrophoneOn1] = useState(false);
-    const [showRenameModal, setShowRenameModal] = useState(false);
-    const [selectedParticipant, setSelectedParticipant] = useState(null);
-    const [newName, setNewName] = useState('');
-    const [activeDropdown, setActiveDropdown] = useState(null);
-    const [billingCycle, setBillingCycle] = useState('Messages');
     const [show, setShow] = useState(false);
-    const dispatch = useDispatch()
 
-    const userId = sessionStorage.getItem('userId')
+    // Refs
+    const socketRef = useRef();
+    const localStreamRef = useRef();
+    const screenStreamRef = useRef();
+    const localVideoRef = useRef();
+    const peerConnectionsRef = useRef({});
+    const messageContainerRef = useRef();
 
-    const currUser = useSelector((state) => state.user.currUser);
-    useEffect(() => {
-        dispatch(getUserById(userId))
-    }, [userId])
-    console.log(currUser);
-
-    const userInitials = `${currUser?.name?.charAt(0)}${currUser?.name?.split(' ')[1] ? currUser.name.split(' ')[1].charAt(0) : ''}`
-
-
+    // Off-canvas handlers
     const handleClose = () => setShow(false);
     const handleShow = () => setShow(true);
 
-
-
-    const toggleMicrophone1 = (participantId) => {
-        setParticipants(prevParticipants =>
-            prevParticipants.map(participant =>
-                participant.id === participantId
-                    ? { ...participant, isMicrophoneOn: !participant.isMicrophoneOn }
-                    : participant
-            )
-        );
-    };
-
-    
+    // Get current user data
     useEffect(() => {
-        const handleClickOutside = () => {
-            setActiveDropdown(null);
-        };
-
-        document.addEventListener('click', handleClickOutside);
-
-        return () => {
-            document.removeEventListener('click', handleClickOutside);
-        };
-    }, []);
+        dispatch(getUserById(userId));
+    }, [userId, dispatch]);
 
 
-    const makeHost = (newHostId) => {
-
-        setParticipants(participants.map(participant => ({
-            ...participant,
-            isHost: participant.id === newHostId
-        })));
-
-        setActiveDropdown(null);
-    };
-
-    const makeCohost = (newCohostId) => {
-
-        setParticipants(participants.map(participant => ({
-            ...participant,
-            isCohost: participant.id === newCohostId
-        })));
-
-        setActiveDropdown(null);
-    };
-
-    const openRenameModal = (participant) => {
-        setSelectedParticipant(participant);
-        setNewName(participant.name);
-        setShowRenameModal(true);
-        setActiveDropdown(null); 
-    };
-
-
-    const saveNewName = () => {
-        if (selectedParticipant && newName.trim()) {
-           
-            setParticipants(participants.map(participant =>
-                participant.id === selectedParticipant.id
-                    ? { ...participant, name: newName.trim() }
-                    : participant
-            ));
-
-            setShowRenameModal(false);
-            setSelectedParticipant(null);
+    // Toggle audio
+    const toggleAudio = () => {
+        if (localStreamRef.current) {
+            const audioTrack = localStreamRef.current.getAudioTracks()[0];
+            if (audioTrack) {
+                audioTrack.enabled = !audioTrack.enabled;
+                setIsMuted(!audioTrack.enabled);
+            }
+        } else {
+            setIsMuted(!isMuted);
         }
     };
 
-    const removeParticipant = (participantId) => {
-
-        setParticipants(participants.filter(participant => participant.id !== participantId));
-        setActiveDropdown(null);
+    // Toggle video
+    const toggleVideo = () => {
+        if (localStreamRef.current) {
+            const videoTrack = localStreamRef.current.getVideoTracks()[0];
+            if (videoTrack) {
+                videoTrack.enabled = !videoTrack.enabled;
+                setIsVideoOff(!videoTrack.enabled);
+            }
+        }
+        else {
+            setIsVideoOff(!isVideoOff);
+        }
     };
 
+    // Share screen
+    const toggleScreenShare = async () => {
+        if (!isScreenSharing) {
+            try {
+                const screenStream = await navigator.mediaDevices.getDisplayMedia({
+                    video: true
+                });
 
-    const toggleMicrophone = () => {
-        setMicrophoneOn(!isMicrophoneOn);
+                screenStreamRef.current = screenStream;
+
+                // Replace video track in all peer connections
+                const videoTrack = screenStream.getVideoTracks()[0];
+
+                Object.values(peerConnectionsRef.current).forEach(pc => {
+                    const senders = pc.getSenders();
+                    const sender = senders.find(s =>
+                        s.track && s.track.kind === 'video'
+                    );
+
+                    if (sender) {
+                        sender.replaceTrack(videoTrack);
+                    }
+                });
+
+                // Show screen share in local video
+                if (localVideoRef.current) {
+                    localVideoRef.current.srcObject = screenStream;
+                }
+
+                // Listen for end of screen sharing
+                videoTrack.onended = () => {
+                    toggleScreenShare();
+                };
+
+                setIsScreenSharing(true);
+            } catch (error) {
+                console.error('Error sharing screen:', error);
+            }
+        } else {
+            // Stop screen sharing
+            if (screenStreamRef.current) {
+                screenStreamRef.current.getTracks().forEach(track => track.stop());
+                screenStreamRef.current = null;
+            }
+
+            // Revert to camera
+            const videoTrack = localStreamRef.current.getVideoTracks()[0];
+
+            Object.values(peerConnectionsRef.current).forEach(pc => {
+                const senders = pc.getSenders();
+                const sender = senders.find(s =>
+                    s.track && s.track.kind === 'video'
+                );
+
+                if (sender && videoTrack) {
+                    sender.replaceTrack(videoTrack);
+                }
+            });
+
+            // Show camera in local video
+            if (localVideoRef.current) {
+                localVideoRef.current.srcObject = localStreamRef.current;
+            }
+
+            setIsScreenSharing(false);
+        }
     };
 
-    const toggleCamera = () => {
-        setCameraOn(!isCameraOn);
+    // Update the sendMessage handler
+    const handleSendMessage = (e) => {
+        e.preventDefault();
+        if (newMessage.trim()) {
+            sendMessage(newMessage);
+            setNewMessage('');
+        }
     };
 
+    // Toggle participants list
     const toggleParticipantsList = () => {
         setShowAllParticipants(!showAllParticipants);
     };
 
+    // Toggle view more dropdown
     const toggleViewMoreDropdown = () => {
         setShowViewMoreDropdown(!showViewMoreDropdown);
     };
 
-    useEffect(() => {
-        const handleClickOutside = (event) => {
-            if (showViewMoreDropdown && !event.target.closest('.d_dropdown') && !event.target.closest('.d_box1')) {
-                setShowViewMoreDropdown(false);
-            }
-        };
-
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, [showViewMoreDropdown]);
-
-    const [participants, setParticipants] = useState([
-        { id: 1, name: 'Johan Kumar', initials: 'JK', hasVideo: false, hasAudio: true,isHost: true },
-        // Comment or uncomment participants to test different layouts
-        { id: 2, name: 'Lisa Nihar', initials: 'LN', hasVideo: true, hasAudio: false },
-        { id: 3, name: 'Kiara Patel', initials: 'KP', hasVideo: false, hasAudio: true },
-        { id: 4, name: 'Rohan Patel', initials: 'RP', hasVideo: false, hasAudio: true },
-        { id: 5, name: 'Vikram Gupta', initials: 'VG', hasVideo: false, hasAudio: true },
-        { id: 6, name: 'Another User', initials: 'AU', hasVideo: false, hasAudio: true },
-        { id: 7, name: 'User Seven', initials: 'US', hasVideo: false, hasAudio: true },
-        { id: 8, name: 'User Eight', initials: 'UE', hasVideo: false, hasAudio: true },
-        { id: 9, name: 'User Nine', initials: 'UN', hasVideo: false, hasAudio: true },
-        { id: 10, name: 'User Nine', initials: 'UN', hasVideo: false, hasAudio: true },
-        { id: 11, name: 'User Nine', initials: 'UN', hasVideo: false, hasAudio: true },
-        { id: 12, name: 'User Nine', initials: 'UN', hasVideo: false, hasAudio: true },
-        { id: 13, name: 'User Nine', initials: 'UN', hasVideo: false, hasAudio: true },
-    ]);
-
-    // const [participants, setParticipants] = useState([]);
-
-    // useEffect(() => {
-    //     setParticipants([
-    //         {
-    //             id: 1,
-    //             name: currUser?.name,
-    //             initials: userInitials,
-    //             hasVideo: false,
-    //             hasAudio: true,
-    //             isHost: true
-    //         }
-    //     ]);
-
-    // }, [currUser, userInitials]);
-
-    // One person with video on (for testing)
-    const hasVideoParticipant = participants.find(p => p.id === 4);
-    if (hasVideoParticipant) {
-        hasVideoParticipant.hasVideo = true;
-    }
+    // End meeting
+    const endMeeting = () => {
+        navigate('/home');
+    };
 
     // Calculate grid columns based on participant count
     const getGridColumns = () => {
@@ -210,37 +205,15 @@ function Screen() {
         return 'multi-participants';
     };
 
-    // Add useEffect to handle window resize
+    // Set max visible participants based on screen size
     const [maxVisibleParticipants, setMaxVisibleParticipants] = useState(9);
-
-    // useEffect(() => {
-    //     const handleResize = () => {
-    //         if (window.innerWidth <= 425) {
-    //             setMaxVisibleParticipants(6); // Show 6 participants on small screens
-    //         } else if (window.innerWidth <= 576) {
-    //             setMaxVisibleParticipants(6);
-    //         } else if (window.innerWidth <= 992) {
-    //             setMaxVisibleParticipants(6);
-    //         } else {
-    //             setMaxVisibleParticipants(9);
-    //         }
-    //     };
-
-    //     // Set initial value
-    //     handleResize();
-
-    //     // Add event listener
-    //     window.addEventListener('resize', handleResize);
-
-    //     // Clean up
-    //     return () => window.removeEventListener('resize', handleResize);
-    // }, []);
 
     useEffect(() => {
         const handleResize = () => {
             setMaxVisibleParticipants(window.innerWidth <= 425 ? 6 : 9);
         };
 
+        handleResize();
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
     }, []);
@@ -249,6 +222,20 @@ function Screen() {
     const visibleParticipants = participants.slice(0, maxVisibleParticipants);
     const extraParticipants = participants.length > maxVisibleParticipants ?
         participants.length - (maxVisibleParticipants - 1) : 0;
+    // console.log("visibleParticipants", visibleParticipants)
+
+
+    // Handle clickoutside for dropdown
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (showViewMoreDropdown && !event.target.closest('.d_dropdown') && !event.target.closest('.d_box1')) {
+                setShowViewMoreDropdown(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, [showViewMoreDropdown]);
 
     return (
         <>
@@ -257,53 +244,77 @@ function Screen() {
                 <div className="d_mainscreen">
                     <div className={`d_participants-grid ${getGridClass()}`}
                         style={{ gridTemplateColumns: `repeat(${getGridColumns()}, 1fr)` }}>
+                        {/* Map all participants including local user */}
                         {visibleParticipants.map((participant, index) => (
+                            // console.log("participant", participant),
+
                             <div key={participant.id} className="d_grid-item">
                                 <div className="d_avatar-container">
-                                    {participant.hasVideo ? (
-                                        <video
-                                            src={require('../Image/video.mp4')}
-                                            alt={participant.name}
-                                            className="d_video-element"
-                                            autoPlay
-                                            muted
-                                            loop
-                                        />
+                                    {participant.id === socketRef.current?.id ? (
+                                        // Local user video
+                                        isVideoOff ? (
+                                            <video
+                                                ref={localVideoRef}
+                                                className="d_video-element"
+                                                autoPlay
+                                                muted
+                                                playsInline
+                                            />
+                                        ) : (
+                                            <div className="d_avatar-circle"
+                                                style={{
+                                                    textTransform: 'capitalize',
+                                                    backgroundColor: `hsl(60, 70%, 45%)`
+                                                }}>
+                                                {userInitials}
+                                            </div>
+                                        )
                                     ) : (
-                                        <div
-                                            className="d_avatar-circle"
-                                            style={{
-                                                textTransform: 'capitalize',
-                                                backgroundColor: `hsl(${participant.id * 60}, 70%, 45%)`
-                                            }}
-                                        >
-                                            {participant.initials}
-                                        </div>
+                                        // Remote participant video
+                                        participant.hasVideo ? (
+                                            <video
+                                                id={`video-${participant.id}`}
+                                                className="d_video-element"
+                                                autoPlay
+                                                playsInline
+                                            />
+                                        ) : (
+                                            <div className="d_avatar-circle"
+                                                style={{
+                                                    textTransform: 'capitalize',
+                                                    backgroundColor: `hsl(${participant.id.charCodeAt(0) * 60}, 70%, 45%)`
+                                                }}>
+                                                {participant.initials}
+                                            </div>
+                                        )
                                     )}
                                     <div className="d_controls-top">
                                         <div className="d_controls-container">
                                             <img src={hand} className="d_control-icon" alt="Raise hand" />
-                                            {participant.hasVideo ? (
-                                                <img src={oncamera} className="d_control-icon" alt="Camera on" />
+                                            {isVideoOff ? (
+                                                <img src={offcamera} className="d_control-icon" alt="Camera on" />
                                             ) : (
-                                                <img src={offcamera} className="d_control-icon" alt="Camera off" />
+                                                <img src={oncamera} className="d_control-icon" alt="Camera off" />
                                             )}
                                         </div>
                                     </div>
                                     <div className="d_controls-bottom">
-                                        <span className="d_participant-name">{participant.name}</span>
+                                        <span className="d_participant-name">
+                                            {participant.name}
+                                            {participant.isHost ? ' (Host)' : ''}
+                                        </span>
                                         <div className="d_mic-status">
-                                            {participant.hasAudio ? (
-                                                <img src={onmicrophone} className="d_control-icon" alt="Microphone on" />
+                                            {isMuted ? (
+                                                <img src={offmicrophone} className="d_control-icon" alt="Microphone on" />
                                             ) : (
-                                                <img src={offmicrophone} className="d_control-icon" alt="Microphone off" />
+                                                <img src={onmicrophone} className="d_control-icon" alt="Microphone off" />
                                             )}
                                         </div>
                                     </div>
                                 </div>
 
                                 {/* Display extra participants indicator */}
-                                {index === maxVisibleParticipants - 1 && extraParticipants > 0 && (
+                                {index === maxVisibleParticipants - 2 && extraParticipants > 0 && (
                                     <div
                                         onClick={handleShow}
                                         className="d_extra-participants"
@@ -320,11 +331,11 @@ function Screen() {
                         {/* 1st div */}
                         <div className='d-none d-sm-block'>
                             <div className="d-flex align-items-center d_resposive">
-                                <div className="d_box me-sm-3 mb-2 mb-sm-0" onClick={toggleMicrophone}>
-                                    <img src={isMicrophoneOn ? onmicrophone : offmicrophone} alt="" />
+                                <div className="d_box me-sm-3 mb-2 mb-sm-0" onClick={toggleAudio}>
+                                    <img src={isMuted ? offmicrophone : onmicrophone} alt="" />
                                 </div>
-                                <div className="d_box" onClick={toggleCamera}>
-                                    <img src={isCameraOn ? oncamera : offcamera} alt="" />
+                                <div className="d_box" onClick={toggleVideo}>
+                                    <img src={isVideoOff ? offcamera : oncamera} alt="" />
                                 </div>
                             </div>
                         </div>
@@ -333,7 +344,7 @@ function Screen() {
                         <div className="d-flex align-items-center">
                             <div className='d-none d-sm-block'>
                                 <div className='d-flex d_resposive'>
-                                    <div className="d_box me-sm-3 mb-2 mb-sm-0">
+                                    <div className="d_box me-sm-3 mb-2 mb-sm-0" onClick={toggleScreenShare}>
                                         <img src={upload} alt="" />
                                     </div>
                                     <div className="d_box me-sm-3">
@@ -341,7 +352,7 @@ function Screen() {
                                     </div>
                                 </div>
                             </div>
-                            <div className="d_box1 me-sm-3 mx-3 mx-sm-0 d_red" style={{ cursor: "pointer" }} >
+                            <div className="d_box1 me-sm-3 mx-3 mx-sm-0 d_red" style={{ cursor: "pointer" }} onClick={endMeeting}>
                                 <p className="mb-0">End Meeting</p>
                             </div>
                             <div className="position-relative">
@@ -355,15 +366,15 @@ function Screen() {
                                 {showViewMoreDropdown && window.innerWidth <= 425 && (
                                     <div className="d_dropdown position-absolute bottom-100 start-50 translate-middle-x mb-2 rounded shadow-lg p-2"
                                         style={{ minWidth: '200px', zIndex: 1000 }}>
-                                        <div className="d-flex align-items-center p-2">
-                                            <img src={isMicrophoneOn ? onmicrophone : offmicrophone} className="me-2" alt="" />
+                                        <div className="d-flex align-items-center p-2" onClick={toggleAudio}>
+                                            <img src={isMuted ? offmicrophone : onmicrophone} className="me-2" alt="" />
                                             <span>Microphone</span>
                                         </div>
-                                        <div className="d-flex align-items-center p-2">
-                                            <img src={isCameraOn ? oncamera : offcamera} className="me-2" alt="" />
+                                        <div className="d-flex align-items-center p-2" onClick={toggleVideo}>
+                                            <img src={isVideoOff ? offcamera : oncamera} className="me-2" alt="" />
                                             <span>Camera</span>
                                         </div>
-                                        <div className="d-flex align-items-center p-2">
+                                        <div className="d-flex align-items-center p-2" onClick={toggleScreenShare}>
                                             <img src={upload} alt="" className="me-2" />
                                             <span>Share Screen</span>
                                         </div>
@@ -408,7 +419,7 @@ function Screen() {
                                     <img src={hand} alt="" />
                                 </div>
                                 <div className="d_box">
-                                    <img src={bar} alt="" />
+                                    <img src={bar} alt="" onClick={handleShow} />
                                 </div>
                             </div>
                         </div>
@@ -416,339 +427,78 @@ function Screen() {
                 </div>
             </section>
 
-            {/* Offcanvas  */}
-
-            <Offcanvas show={show} className='B_screen_offcanvas' placement='end' onHide={handleClose}>
-
-                <Offcanvas.Header className='d-flex justify-content-between align-items-center' >
-                    <div className='d-flex justify-content-center ms-3 py-2' >
-                        <div className='d-flex' style={{ backgroundColor: '#101924', padding: '6px', borderRadius: '8px' }}>
-                            <button
-                                type="button"
-                                className=" B_screen_button border-0 rounded"
-                                style={{
-                                    minWidth: '100px',
-                                    backgroundColor: billingCycle === 'Messages' ? '#2A323B' : 'transparent',
-                                    color: billingCycle === 'Messages' ? '#ffffff' : '#87898B'
-                                }}
-                                onClick={() => setBillingCycle('Messages')}
-                            >
-                                Messages (3)
-                            </button>
-                            <button
-                                type="button"
-                                className=" B_screen_button border-0 rounded"
-                                style={{
-                                    minWidth: '100px',
-                                    backgroundColor: billingCycle === 'Participants' ? '#2A323B' : 'transparent',
-                                    color: billingCycle === 'Participants' ? '#ffffff' : '#87898B'
-                                }}
-                                onClick={() => setBillingCycle('Participants')}
-                            >
-                                Participants (4)
-                            </button>
-                        </div>
-                    </div>
-
-                    <IoClose
-                        style={{ color: '#fff', fontSize: '20px', marginBottom: "20px", cursor: 'pointer' }}
-                        onClick={handleClose}
-                    />
+            {/* Participants and Chat sidebar (Off-canvas) */}
+            <Offcanvas show={show} onHide={handleClose} placement="end">
+                <Offcanvas.Header closeButton>
+                    <Offcanvas.Title>Meeting Info</Offcanvas.Title>
                 </Offcanvas.Header>
-                <div className='mx-2 mb-4' style={{ borderBottom: "1px solid #3f464e" }}></div>
-
-
-
-                {billingCycle === 'Participants' ? (
-                    <Offcanvas.Body className='B_Ofcanvasbody' >
-                        <>
-                            <div className='d-flex flex-column h-100 '>
-                                <div className="B_search-container  mb-3" >
-                                    <div className="position-relative B_input_search B_input_search11  mx-auto">
-                                        <IoSearch className=' position-absolute' style={{ top: "50%", transform: "translateY(-50%)", left: "15px", fontSize: "20px", color: "rgba(255, 255, 255, 0.7)" }} />
-                                        <input
-                                            type="text"
-                                            className="form-control text-white  ps-5"
-                                            placeholder="Search..."
-                                            style={{ borderRadius: '5px', border: 'none', backgroundColor: "#202F41" }}
-                                        />
+                <Offcanvas.Body>
+                    <div className="p-2">
+                        <h5>Meeting ID: {roomId}</h5>
+                        <hr />
+                        <h5>Participants ({participants.length})</h5>
+                        <ul className="list-unstyled">
+                            {participants.map(participant => (
+                                <li key={participant.id} className="my-2 d-flex align-items-center justify-content-between">
+                                    <div>
+                                        <span>{participant.name}</span>
+                                        {participant.isHost && participant.userId && <span className="ms-2 badge bg-primary">Host</span>}
+                                        {participant.id === socketRef.current?.id && <span className="ms-2">(You)</span>}
+                                    </div>
+                                    <div>
+                                        {participant.hasAudio ?
+                                            <img src={onmicrophone} className="d_control-icon me-2" alt="Mic on" width="20" /> :
+                                            <img src={offmicrophone} className="d_control-icon me-2" alt="Mic off" width="20" />
+                                        }
+                                        {participant.hasVideo ?
+                                            <img src={oncamera} className="d_control-icon" alt="Cam on" width="20" /> :
+                                            <img src={offcamera} className="d_control-icon" alt="Cam off" width="20" />
+                                        }
+                                    </div>
+                                </li>
+                            ))}
+                        </ul>
+                        <hr />
+                        <h5>Chat</h5>
+                        <div
+                            ref={messageContainerRef}
+                            className="chat-messages p-2"
+                            style={{ height: "200px", overflowY: "auto", border: "1px solid #ddd", borderRadius: "8px" }}
+                        >
+                            {messages.map((msg, index) => (
+                                <div
+                                    key={index}
+                                    className={`p-2 mb-2 rounded ${msg.sender === userName ? 'bg-primary text-white ms-auto' : 'bg-light'}`}
+                                    style={{ maxWidth: "80%" }}
+                                >
+                                    <div className="small fw-bold">{msg.sender}</div>
+                                    <div>{msg.message}</div>
+                                    <div className="small text-end">
+                                        {new Date(msg.timestamp).toLocaleTimeString([], {
+                                            hour: '2-digit',
+                                            minute: '2-digit'
+                                        })}
                                     </div>
                                 </div>
-                                <div className="list-group B_screen_offcanvas " style={{ height: "82%", overflowY: "auto" }}>
-                                    {participants.map((participant) => (
-                                        <div key={participant.id} className="list-group-item d-flex align-items-center">
-                                            <div className="rounded-circle B_circle d-flex justify-content-center align-items-center me-3"
-                                                style={{
-                                                    width: "40px",
-                                                    height: "40px",
-                                                    backgroundColor: `hsl(${participant.id * 60}, 70%, 45%)`,
-                                                    color: 'white'
-                                                }}>
-                                                {participant.initials}
-                                            </div>
-                                            <div className="flex-grow-1 B_participateName">
-                                                <div>{participant.name}</div>
-                                            </div>
-
-                                            {/* {/ Display Host or Cohost label /} */}
-                                            {(participant.isHost || participant.isCohost) && (
-                                                <div className="me-3">
-                                                    <span className="px-3 py-1 rounded-pill text-white"
-                                                        style={{
-                                                            backgroundColor: "rgba(255, 255, 255, 0.2)",
-                                                            fontSize: "0.8rem"
-                                                        }}>
-                                                        {participant.isHost ? "Host" : "Cohost"}
-                                                    </span>
-                                                </div>
-                                            )}
-
-                                            <div className="d-flex align-items-center">
-                                                <div className="d_box me-sm-3 mb-2 mb-sm-0" onClick={() => toggleMicrophone1(participant.id)} style={{ cursor: "pointer" }}>
-                                                    <img src={participant.isMicrophoneOn ? onmicrophone : offmicrophone} alt="" />
-                                                </div>
-
-                                                <div className="position-relative">
-                                                    <HiOutlineDotsVertical
-                                                        className='mt-1 cursor-pointer B_vertical'
-                                                        style={{ cursor: "pointer" }}
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            setActiveDropdown(activeDropdown === participant.id ? null : participant.id);
-                                                        }}
-                                                    />
-
-                                                    {activeDropdown === participant.id && (
-                                                        <div
-                                                            className="position-absolute end-0 bg-dark text-white rounded shadow py-2"
-                                                            style={{
-                                                                zIndex: 1000,
-                                                                width: '150px',
-                                                                top: '100%',
-                                                                right: 0,
-                                                                cursor: "pointer "
-                                                            }}
-                                                        >
-                                                            {!participant.isHost && (
-                                                                <div
-                                                                    className="px-3 py-2 hover-bg-secondary cursor-pointer"
-                                                                    onClick={() => makeHost(participant.id)}
-                                                                >
-                                                                    Make host
-                                                                </div>
-                                                            )}
-                                                            {!participant.isCohost && !participant.isHost && (
-                                                                <div
-                                                                    className="px-3 py-2 hover-bg-secondary cursor-pointer"
-                                                                    onClick={() => makeCohost(participant.id)}
-                                                                >
-                                                                    Make cohost
-                                                                </div>
-                                                            )}
-                                                            <div
-                                                                className="px-3 py-2 hover-bg-secondary cursor-pointer"
-                                                                onClick={() => openRenameModal(participant)}>
-                                                                Rename
-                                                            </div>
-
-                                                            <div className="px-3 py-2 hover-bg-secondary cursor-pointer"
-                                                                onClick={() => toggleMicrophone1(participant.id)}
-                                                            >
-                                                                {
-                                                                    participant.isMicrophoneOn ? "Mute" : "Unmute"
-                                                                }
-                                                            </div>
-
-                                                            <div
-                                                                className="px-3 py-2 hover-bg-secondary cursor-pointer"
-                                                                onClick={() => removeParticipant(participant.id)}
-                                                            >
-                                                                Remove
-                                                            </div>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    ))}
-
-                                    {showRenameModal && (
-                                        <div className="position-fixed top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center"
-                                            style={{ backgroundColor: 'rgba(0, 0, 0, 0.7)', zIndex: 1050 }}>
-                                            <div className=" text-white rounded" style={{ width: '430px', maxWidth: '90%', backgroundColor: "#12161C" }}>
-                                                <div className="d-flex justify-content-between align-items-center p-3 border-bottom border-secondary">
-                                                    <h6 className="m-0 B_EditName" >Edit display name</h6>
-                                                    <button
-                                                        type="button"
-                                                        className="btn-close btn-close-white"
-                                                        onClick={() => setShowRenameModal(false)}
-                                                        aria-label="Close"
-                                                    ></button>
-                                                </div>
-
-                                                <div className="p-4 B_screen_Pad">
-                                                    <div className="mb-3">
-                                                        <label className="form-label small mb-2 text-white-50 mb-2  ">Name</label>
-                                                        <input
-                                                            type="text"
-                                                            className="form-control  text-white border-0"
-                                                            value={newName}
-                                                            onChange={(e) => setNewName(e.target.value)}
-                                                            style={{ padding: '10px', backgroundColor: "#202F41" }}
-                                                        />
-                                                    </div>
-
-                                                    <div className="d-flex justify-content-between gap-3 mt-5 B_screen_Margin">
-                                                        <button
-                                                            className="btn flex-grow-1 py-2"
-                                                            onClick={() => setShowRenameModal(false)}
-                                                            style={{
-                                                                border: '1px solid rgba(255, 255, 255, 0.2)',
-                                                                borderRadius: '4px',
-                                                                backgroundColor: 'transparent',
-                                                                color: 'white'
-                                                            }}
-                                                        >
-                                                            Cancel
-                                                        </button>
-                                                        <button
-                                                            className="btn btn-light flex-grow-1 py-2"
-                                                            onClick={saveNewName}
-                                                            style={{
-                                                                borderRadius: '4px',
-                                                                backgroundColor: 'white',
-                                                                color: 'black'
-                                                            }}
-                                                        >
-                                                            Save
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
-
-                                <div className='d-flex justify-content-center mb-3 mt-auto' >
-                                    <Button className='B_screen_btn fw-semibold p-2'> <HiOutlineUserPlus className='fw-bold' style={{ fontSize: "20px" }} /> Invite people </Button>
-                                    <Button className='B_screen_btn fw-semibold p-2'> Mute all </Button>
-                                </div>
-
-                            </div>
-                        </>
-
-
-                    </Offcanvas.Body>
-                ) : (
-                    <Offcanvas.Body >
-                        <>
-                            <div className="chat-container h-100 d-flex flex-column">
-                                <div className="chat-messages flex-grow-1" style={{ overflowY: 'auto' }}>
-                                    <div className="d-flex align-items-start mb-3">
-                                        <div className="chat-avatar me-2" style={{ backgroundColor: '#2B7982', width: '32px', height: '32px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                            <span style={{ color: '#fff' }}>LN</span>
-                                        </div>
-                                        <div>
-                                            <div className="chat-name" style={{ color: '#fff', fontSize: '14px' }}>Lisa</div>
-                                            <div className="chat-message" style={{ backgroundColor: '#1E242B', color: '#B3AEAE', padding: '8px 12px', borderRadius: '8px', maxWidth: '250px', marginTop: '4px' }}>
-                                                Can u hear my voice
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div className="d-flex justify-content-end mb-3">
-                                        <div className="chat-message" style={{ backgroundColor: '#2A323B', color: '#fff', padding: '8px 12px', borderRadius: '8px', maxWidth: '250px' }}>
-                                            Ok, wait, 5 min
-                                        </div>
-                                    </div>
-
-                                    <div className="d-flex align-items-start mb-3">
-                                        <div className="chat-avatar me-2" style={{ backgroundColor: '#2B7982', width: '32px', height: '32px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                            <span style={{ color: '#fff' }}>LN</span>
-                                        </div>
-                                        <div>
-                                            <div className="chat-name" style={{ color: '#fff', fontSize: '14px' }}>Lisa</div>
-                                            <div className="chat-message" style={{ backgroundColor: '#1E242B', color: '#B3AEAE', padding: '8px 12px', borderRadius: '8px', maxWidth: '250px', marginTop: '4px' }}>
-                                                Thanks....
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div className="d-flex align-items-start mb-3">
-                                        <div className="chat-avatar me-2" style={{ backgroundColor: '#382B82', width: '32px', height: '32px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                            <span style={{ color: '#fff' }}>KP</span>
-                                        </div>
-                                        <div>
-                                            <div className="chat-name" style={{ color: '#fff', fontSize: '14px' }}>Kiara</div>
-                                            <div className="chat-message" style={{ backgroundColor: '#1E242B', color: '#B3AEAE', padding: '8px 12px', borderRadius: '8px', maxWidth: '250px', marginTop: '4px' }}>
-                                                Lorem ipsum is simply dummy
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div className="d-flex justify-content-end mb-3">
-                                        <div className="chat-message" style={{ backgroundColor: '#2A323B', color: '#fff', padding: '8px 12px', borderRadius: '8px', maxWidth: '250px' }}>
-                                            Lorem ipsum is simply dummy text of the printing
-                                        </div>
-                                    </div>
-
-                                    <div className="d-flex align-items-start mb-3">
-                                        <div className="chat-avatar me-2" style={{ backgroundColor: '#2B7982', width: '32px', height: '32px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                            <span style={{ color: '#fff' }}>LN</span>
-                                        </div>
-                                        <div>
-                                            <div className="chat-name" style={{ color: '#fff', fontSize: '14px' }}>Lisa</div>
-                                            <div className="chat-message" style={{ backgroundColor: '#1E242B', color: '#B3AEAE', padding: '8px 12px', borderRadius: '8px', maxWidth: '250px', marginTop: '4px' }}>
-                                                Lorem ipsum is simply dummy
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div className="d-flex justify-content-end mb-3">
-                                        <div className="chat-message" style={{ backgroundColor: '#2A323B', color: '#fff', padding: '8px 12px', borderRadius: '8px', maxWidth: '250px' }}>
-                                            Ok, wait, 5 min
-                                        </div>
-                                    </div>
-                                    <div className="d-flex align-items-start mb-3">
-                                        <div className="chat-avatar me-2" style={{ backgroundColor: '#2B7982', width: '32px', height: '32px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                            <span style={{ color: '#fff' }}>LN</span>
-                                        </div>
-                                        <div>
-                                            <div className="chat-name" style={{ color: '#fff', fontSize: '14px' }}>Lisa</div>
-                                            <div className="chat-message" style={{ backgroundColor: '#1E242B', color: '#B3AEAE', padding: '8px 12px', borderRadius: '8px', maxWidth: '250px', marginTop: '4px' }}>
-                                                Lorem ipsum is simply dummy
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div className="d-flex justify-content-end mb-3">
-                                        <div className="chat-message" style={{ backgroundColor: '#2A323B', color: '#fff', padding: '8px 12px', borderRadius: '8px', maxWidth: '250px' }}>
-                                            Ok, wait, 5 min
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="B_search-container  mb-3" >
-                                    <div className="position-relative B_input_search B_input_search22  mx-auto">
-                                        <input
-                                            type="text"
-                                            className="form-control text-white ps-3"
-                                            placeholder="Write a message..."
-                                            style={{ borderRadius: '5px', border: 'none', backgroundColor: "#202F41" }}
-                                        />
-                                        <IoMdSend className='position-absolute B_sendMsg' />
-
-                                    </div>
-                                </div>
-                            </div>
-                        </>
-                    </Offcanvas.Body>
-                )}
-
+                            ))}
+                        </div>
+                        <form onSubmit={handleSendMessage} className="mt-3 d-flex">
+                            <input
+                                type="text"
+                                className="form-control"
+                                value={newMessage}
+                                onChange={(e) => setNewMessage(e.target.value)}
+                                placeholder="Type a message..."
+                            />
+                            <button type="submit" className="btn btn-primary ms-2">
+                                <IoMdSend />
+                            </button>
+                        </form>
+                    </div>
+                </Offcanvas.Body>
             </Offcanvas>
-
         </>
-    )
+    );
 }
 
 export default Screen;

@@ -125,7 +125,7 @@ function HomeNavBar() {
                     <div className="d-flex align-items-center">
                         <button className="btn border-0  position-relative" type="button" onClick={handleshowcanvas}>
                             <img src={bell} alt="Bell" style={{ height: '22px', width: '22px' }} />
-                            {reminders.length > 0 && (
+                            {reminders?.length > 0 && (
                                 <span className="position-absolute translate-middle j_notification_badge">
                                     {reminders.length}
                                 </span>
@@ -472,8 +472,8 @@ function HomeNavBar() {
                     <IoClose style={{ color: '#fff', fontSize: '22px', cursor: 'pointer' }} onClick={handleClosecanvas} />
                 </Offcanvas.Header>
                 <Offcanvas.Body>
-                    {reminders.length > 0 ? (
-                        reminders.map((reminder, index) => (
+                    {reminders?.length > 0 ? (
+                        reminders?.map((reminder, index) => (
                             <div className="reminders-container j_notification_style">
                                 <p key={index} className="text-white mb-0">{reminder}</p>
                             </div>

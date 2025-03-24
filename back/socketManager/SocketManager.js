@@ -3,7 +3,7 @@ const schedule = require('../models/schedule.modal')
 
 const onlineUsers = new Map();
 const onlineEmails = new Map();
-
+const rooms = {};
 // console.log("onlineUsers", onlineUsers);
 
 async function sendReminder(socket) {
@@ -39,7 +39,7 @@ async function sendReminder(socket) {
             const timeDifference = meetingdate - now; // Difference in milliseconds
             const daysDifference = Math.ceil(timeDifference / (1000 * 60 * 60 * 24)); // Convert to days
 
-            console.log(`The meeting is in ${daysDifference} days.`);
+            // console.log(`The meeting is in ${daysDifference} days.`);
 
             const currentTime = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`; // Format current time
             const startParts = startTime.split(':');
@@ -50,15 +50,15 @@ async function sendReminder(socket) {
 
             if (reminderMinutes.includes(startMinutes - currentMinutes)) {
                 const reminderTime = startMinutes - currentMinutes;
-                const reminderMessage = reminderTime === 60 ? 
-                    `Your meeting "${title}" starts in 1 hour at ${startTime}.` : 
-                    reminderTime === 120 ? 
-                    `Your meeting "${title}" starts in 2 hours at ${startTime}.` : 
-                    `Your meeting "${title}" starts in ${reminderTime} minutes at ${startTime}.`;
+                const reminderMessage = reminderTime === 60 ?
+                    `Your meeting "${title}" starts in 1 hour at ${startTime}.` :
+                    reminderTime === 120 ?
+                        `Your meeting "${title}" starts in 2 hours at ${startTime}.` :
+                        `Your meeting "${title}" starts in ${reminderTime} minutes at ${startTime}.`;
 
                 invitees.forEach(v => {
                     const userId = v.userId.toString();
-                    const socketId = onlineUsers.get(userId);
+                    const socketId = onlineUsers[userId];
 
                     if (socketId) {
                         // console.log(`Sending reminder to ${userId}: ${reminderMessage}`);
@@ -72,7 +72,7 @@ async function sendReminder(socket) {
             } else if (startMinutes - currentMinutes == 0 && daysDifference > 0) {
                 invitees.forEach(v => {
                     const userId = v.userId.toString();
-                    const socketId = onlineUsers.get(userId);
+                    const socketId = onlineUsers[userId];
 
                     if (socketId) {
                         socket.to(socketId).emit('reminder', {
@@ -89,47 +89,153 @@ async function sendReminder(socket) {
 
 function handleDisconnect(socket) {
     if (socket.userId) {
-        onlineUsers.delete(socket.userId);
+        delete onlineUsers[socket.userId];
         // Broadcast updated online users list
-        const onlineUsersList = Array.from(onlineUsers.keys());
+        const onlineUsersList = Object.keys(onlineUsers);
         global.io.emit("user-status-changed", onlineUsersList);
     }
 }
 
 async function handleUserLogin(socket, userId) {
     // Check if the user is already connected
-    if (onlineUsers.has(userId)) {
-        console.log(`User ${userId} is already connected.`);
+    if (onlineUsers.hasOwnProperty(userId)) {
+        // console.log(`User ${userId} is already connected.`);
         return;
     }
 
     // Remove any existing socket connection for this user
-    for (const [existingUserId, existingSocketId] of onlineUsers.entries()) {
-        if (existingUserId === userId && existingSocketId !== socket.id) {
-            const existingSocket = global.io.sockets.sockets.get(existingSocketId);
+    for (const existingUserId in onlineUsers) {
+        if (existingUserId === userId && onlineUsers[existingUserId] !== socket.id) {
+            const existingSocket = global.io.sockets.sockets.get(onlineUsers[existingUserId]);
             if (existingSocket) {
                 existingSocket.disconnect(); // Disconnect the existing socket
             }
-            onlineUsers.delete(existingUserId);
+            delete onlineUsers[existingUserId];
         }
     }
 
     // Add new socket connection
-    onlineUsers.set(userId, socket.id);
+    onlineUsers[userId] = socket.id;
     socket.userId = userId;
 
     // Broadcast updated online users list to all connected clients
-    const onlineUsersList = Array.from(onlineUsers.keys());
+    const onlineUsersList = Object.keys(onlineUsers);
     global.io.emit("user-status-changed", onlineUsersList);
     // console.log(onlineUsers);
 }
-
 
 async function initializeSocket(io) {
     // console.log("SDvzdvdvdvdv");
 
     io.on("connection", (socket) => {
         console.log("New socket connection:", socket.id);
+
+        // User joins a room
+        socket.on('join-room', async ({ roomId, userId, userName }) => {
+            // console.log(`User ${userName} (${userId}) joined room: ${roomId}`);
+
+            // Get meeting details from the database
+            const meetingDetails = await schedule.findOne({
+                meetingLink: { $regex: roomId }
+            });
+
+            const hostUserId = meetingDetails?.userId.toString();
+
+            // Join the room
+            socket.join(roomId);
+
+            if (!rooms[roomId]) {
+                rooms[roomId] = [];
+            }
+
+            onlineUsers[socket.id] = { // Changed from users to onlineUsers
+                userId,
+                userName,
+                roomId
+            };
+
+            // Add user to room participants
+            rooms[roomId].push({
+                id: socket.id,
+                userId,
+                userName,
+                isHost: userId === hostUserId
+            });
+
+            // Notify others in the room
+            socket.to(roomId).emit('user-connected', {
+                socketId: socket.id,
+                userId,
+                userName,
+                isHost: userId === hostUserId
+            });
+
+            // Send list of all users in the room to the new participant
+            socket.emit('room-users', rooms[roomId]);
+
+            console.log("rooms========", rooms);
+
+        });
+
+        // Handle WebRTC signaling
+        socket.on('offer', ({ to, from, offer }) => {
+            io.to(to).emit('offer', {
+                from,
+                offer
+            });
+        });
+
+        socket.on('answer', ({ to, from, answer }) => {
+            io.to(to).emit('answer', {
+                from,
+                answer
+            });
+        });
+
+        socket.on('ice-candidate', ({ to, candidate }) => {
+            io.to(to).emit('ice-candidate', {
+                from: socket.id,
+                candidate
+            });
+        });
+
+        // User disconnects
+        socket.on('disconnect', () => {
+            const user = onlineUsers[socket.id]; // Changed from users to onlineUsers
+
+            if (user) {
+                const roomId = user.roomId;
+
+                // Remove user from rooms
+                if (rooms[roomId]) {
+                    rooms[roomId] = rooms[roomId].filter(
+                        participant => participant.id !== socket.id
+                    );
+
+                    // Delete room if empty
+                    if (rooms[roomId].length === 0) {
+                        delete rooms[roomId];
+                    } else {
+                        // Notify others about disconnection
+                        socket.to(roomId).emit('user-disconnected', socket.id);
+                    }
+                }
+
+                // Remove user from onlineUsers
+                delete onlineUsers[socket.id]; // Changed from users to onlineUsers
+            }
+
+            console.log('User disconnected:', socket.id);
+        });
+
+        // Chat functionality
+        socket.on('send-message', ({ roomId, message, sender }) => {
+            io.to(roomId).emit('receive-message', {
+                sender,
+                message,
+                timestamp: new Date().toISOString()
+            });
+        });
 
         socket.on("user-login", async (userId) => {
             handleUserLogin(socket, userId);
@@ -140,7 +246,6 @@ async function initializeSocket(io) {
         // Handle disconnection
         socket.on("disconnect", () => handleDisconnect(socket));
     });
-
 }
 
 module.exports = {

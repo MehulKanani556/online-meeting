@@ -15,6 +15,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { getAllUsers } from '../Redux/Slice/user.slice';
 import { IMAGE_URL } from '../Utils/baseUrl';
 import { useSocket } from '../Hooks/useSocket';
+import { useNavigate } from 'react-router-dom';
 
 
 function Home() {
@@ -27,6 +28,10 @@ function Home() {
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef(null);
   const searchInputRef = useRef(null);
+  const [meetingId, setMeetingId] = useState('');
+  const [meetingName, setMeetingName] = useState('');
+  const [error, setError] = useState('');
+  const navigate = useNavigate();
 
   const handleScheduleclose = () => setScheduleModal(false)
   const handleScheduleshow = () => setScheduleModal(true)
@@ -834,35 +839,107 @@ function Home() {
           </Modal.Header>
           <div className="j_modal_header"></div>
           <Modal.Body>
-            <form>
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              
+              if (!meetingId.trim()) {
+                setError('Please enter a meeting ID');
+                return;
+              }
+
+              if (!meetingName.trim()) {
+                setError('Please enter your name');
+                return;
+              }
+
+              // Find meeting in allschedule that matches the entered ID
+              const meeting = allschedule.find(schedule => 
+                schedule.meetingLink.includes(meetingId.trim())
+              );
+
+              if (!meeting) {
+                setError('Invalid meeting ID');
+                return;
+              }
+
+              // Check if current time is within meeting time
+              const meetingDate = new Date(meeting.date);
+              const today = new Date();
+              const startTime = meeting.startTime.split(':');
+              const endTime = meeting.endTime.split(':');
+              
+              meetingDate.setHours(parseInt(startTime[0]), parseInt(startTime[1]));
+              const meetingEndDate = new Date(meeting.date);
+              meetingEndDate.setHours(parseInt(endTime[0]), parseInt(endTime[1]));
+
+              // if (today < meetingDate) {
+              //   setError('Meeting has not started yet');
+              //   return;
+              // }
+
+              // if (today > meetingEndDate) {
+              //   setError('Meeting has ended');
+              //   return;
+              // }
+
+              // If all checks pass, navigate to meeting screen
+              handlejoinclose();
+              navigate(`/screen/${meetingId}`);
+            }}>
               <div className="mb-3">
-                <label htmlFor="meetingTitle" className="form-label text-white j_join_text">Meeting ID or Personal Link</label>
-                <input type="text" className="form-control j_input" id="meetingTitle" placeholder="Enter meeting ID " />
+                <label htmlFor="meetingId" className="form-label text-white j_join_text">
+                  Meeting ID or Personal Link
+                </label>
+                <input
+                  type="text"
+                  className="form-control j_input j_join_text"
+                  id="meetingId"
+                  value={meetingId}
+                  onChange={(e) => {
+                    setMeetingId(e.target.value);
+                    setError(''); // Clear error when input changes
+                  }}
+                  placeholder="Enter meeting ID"
+                />
               </div>
               <div className="mb-3">
-                <label htmlFor="meetingTitle" className="form-label text-white j_join_text">Password</label>
-                <input type="text" className="form-control j_input" id="meetingTitle" placeholder="Enter password " />
+                <label htmlFor="meetingName" className="form-label text-white j_join_text">
+                  Name
+                </label>
+                <input
+                  type="text"
+                  className="form-control j_input j_join_text"
+                  id="meetingName"
+                  value={meetingName}
+                  onChange={(e) => {
+                    setMeetingName(e.target.value);
+                    setError(''); // Clear error when input changes
+                  }}
+                  placeholder="Enter Name"
+                />
               </div>
-              <div className="mb-3">
-                <label htmlFor="meetingTitle" className="form-label text-white j_join_text">Name</label>
-                <input type="text" className="form-control j_input" id="meetingTitle" placeholder="Enter Name " />
-              </div>
+              {error && (
+                <div className="alert alert-danger py-2" role="alert">
+                  {error}
+                </div>
+              )}
+              <Modal.Footer className="border-0 p-0 pt-4 justify-content-center">
+                <Button
+                  variant="outline-light"
+                  className="btn btn-outline-light j_join_button m-1"
+                  onClick={handlejoinclose}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  variant="light"
+                  className="btn btn-light j_join_button m-1"
+                >
+                  Join
+                </Button>
+              </Modal.Footer>
             </form>
-            <Modal.Footer className="border-0 p-0 pt-4 justify-content-center">
-              <Button
-                variant="outline-light"
-                className="btn btn-outline-light j_join_button m-1"
-                onClick={handlejoinclose}
-              >
-                Cancel
-              </Button>
-              <Button
-                variant="light"
-                className="btn btn-light j_join_button m-1"
-              >
-                Join
-              </Button>
-            </Modal.Footer>
           </Modal.Body>
         </Modal>
 

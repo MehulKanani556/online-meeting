@@ -183,7 +183,7 @@ function Meeting() {
     }, []);
 
     const allschedule = useSelector((state) => state.schedule.allschedule);
-    console.log("allschedule", allschedule);
+    // console.log("allschedule", allschedule);
 
     useEffect(() => {
         dispatch(getAllschedule());
@@ -196,7 +196,7 @@ function Meeting() {
         // second: '2-digit',
         hour12: false // set to false if you want 24-hour format
     });
-    console.log(currentTime);
+    // console.log(currentTime);
 
 
 
@@ -232,8 +232,8 @@ function Meeting() {
 
                         {/* Upcoming Meeting Card */}
                         {allschedule.map((schedule, index) => {
-                            console.log(formatDate(schedule.date), formatDate(currentDate))
-                            console.log(formatDate(schedule.date) > formatDate(currentDate));
+                            // console.log(formatDate(schedule.date), formatDate(currentDate))
+                            // console.log(formatDate(schedule.date) > formatDate(currentDate));
 
                             return (
                                 <div className=" col-xl-3 col-lg-4 col-md-6 col-12">
