@@ -279,9 +279,11 @@
 }
 
 .B_sendMsg {
-    top: 28%;
+    top: 12%;
     font-size: 22px;
-
+    background: transparent;
+    border: none;
+    color: white;
     right: 10px;
 }
 
@@ -483,8 +485,19 @@
 }
 
 @keyframes d_handWave {
-    0% { transform: translateY(-2px) rotate(0deg); }
-    25% { transform: translateY(-2px) rotate(-10deg); }
-    75% { transform: translateY(-2px) rotate(10deg); }
-    100% { transform: translateY(-2px) rotate(0deg); }
+    0% {
+        transform: translateY(-2px) rotate(0deg);
+    }
+
+    25% {
+        transform: translateY(-2px) rotate(-10deg);
+    }
+
+    75% {
+        transform: translateY(-2px) rotate(10deg);
+    }
+
+    100% {
+        transform: translateY(-2px) rotate(0deg);
+    }
 }

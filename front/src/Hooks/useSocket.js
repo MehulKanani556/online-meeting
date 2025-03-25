@@ -44,8 +44,9 @@ export const useSocket = (userId, roomId, userName) => {
                     id: user.socketId,
                     userId: user.userId,
                     name: user.userName,
-                    hasVideo: true,
-                    hasAudio: true,
+                    hasVideo: false,
+                    hasAudio: false,
+                    initials: `${user.userName.charAt(0)}${user.userName.split(' ')[1] ? user.userName.split(' ')[1].charAt(0) : ''}`,
                     isHost: user.isHost
                 }
             ]);
@@ -56,10 +57,11 @@ export const useSocket = (userId, roomId, userName) => {
             console.log('Current room users:', roomUsers);
             const formattedParticipants = roomUsers.map(user => ({
                 id: user.id,
+                initials: `${user.userName.charAt(0)}${user.userName.split(' ')[1] ? user.userName.split(' ')[1].charAt(0) : ''}`,
                 userId: user.userId,
                 name: user.userName,
-                hasVideo: true,
-                hasAudio: true,
+                hasVideo: false,
+                hasAudio: false,
                 isHost: user.isHost
             }));
 

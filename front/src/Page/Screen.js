@@ -10,17 +10,23 @@ import smile from '../Image/d_smile.svg';
 import podcast from '../Image/d_podcast.svg';
 import hand from '../Image/d_hand.svg';
 import bar from '../Image/d_bar.svg';
-import Button from 'react-bootstrap/Button';
-import Offcanvas from 'react-bootstrap/Offcanvas';
 import { HiOutlineUserPlus } from "react-icons/hi2";
 import { HiOutlineDotsVertical } from "react-icons/hi";
 import { IoClose, IoSearch } from 'react-icons/io5'
 import { IoMdSend } from "react-icons/io";
 import { getUserById } from '../Redux/Slice/user.slice';
 import { useDispatch, useSelector } from 'react-redux';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import io from 'socket.io-client';
 import { useSocket } from '../Hooks/useSocket';
+import { Button, Modal, Offcanvas } from 'react-bootstrap';
+import * as Yup from 'yup';
+import { Formik } from 'formik';
+import { createreview } from '../Redux/Slice/reviews.slice';
+import { FaStar } from 'react-icons/fa6';
+import MeetingAudio from '../Image/B_Audioo.svg'
+import MeetingVideo from '../Image/B_Videoo.svg'
+import MeetingConnection from '../Image/B_shearing.svg'
 
 function Screen() {
     const { id: roomId } = useParams();
@@ -50,6 +56,13 @@ function Screen() {
     const [isHandRaised, setIsHandRaised] = useState(false);
     const [showEmojis, setshowEmojis] = useState(false);
     const [activeEmojis, setActiveEmojis] = useState([]);
+    const [rating, setRating] = useState(0);
+    const [ReviewModel, setReviewModel] = useState(false);
+    const handleCloseReviewModel = () => setReviewModel(false);
+    const handleShowReviewModel = () => setReviewModel(true);
+    const [activeButton, setActiveButton] = useState([]);
+    const [isNavigating, setIsNavigating] = useState(false);
+
 
     // Refs
     const socketRef = useRef();
@@ -228,8 +241,17 @@ function Screen() {
 
     // End meeting
     const endMeeting = () => {
-        navigate('/home');
+        handleShowReviewModel();
+        setIsNavigating(true);
     };
+
+    // Add useEffect to handle navigation after modal closes
+    useEffect(() => {
+        if (isNavigating && !ReviewModel) {
+            navigate('/home');
+            setIsNavigating(false);
+        }
+    }, [isNavigating, ReviewModel]);
 
     // Calculate grid columns based on participant count
     const getGridColumns = () => {
@@ -398,7 +420,33 @@ function Screen() {
         setActiveDropdown(null);
     };
 
+    // Add logic to set isMuted and isVideoOff based on participants' states
+    useEffect(() => {
+        const currentUser = participants.find(participant => participant.userId === userId);
+        if (currentUser) {
+            setIsMuted(!currentUser.hasAudio); // Set muted state based on participant's audio status
+            setIsVideoOff(!currentUser.hasVideo); // Set video off state based on participant's video status
+        }
+    }, [participants, userId]);
 
+    const handleRating = (value) => {
+
+        if (value === rating) {
+            setRating(rating - 1);
+        } else {
+            setRating(value);
+        }
+    };
+
+    const handleButtonClick = (button) => {
+        setActiveButton((prev) => {
+            if (prev.includes(button)) {
+                return prev.filter((b) => b !== button);
+            } else {
+                return [...prev, button];
+            }
+        });
+    };
 
     return (
         <>
@@ -755,7 +803,7 @@ function Screen() {
                                 }}
                                 onClick={() => setBillingCycle('Messages')}
                             >
-                                Messages (3)
+                                Messages ({messages.length})
                             </button>
                             <button
                                 type="button"
@@ -767,7 +815,7 @@ function Screen() {
                                 }}
                                 onClick={() => setBillingCycle('Participants')}
                             >
-                                Participants (4)
+                                Participants ({participants.length})
                             </button>
                         </div>
                     </div>
@@ -797,13 +845,15 @@ function Screen() {
                                 </div>
                                 <div className="list-group B_screen_offcanvas " style={{ height: "82%", overflowY: "auto" }}>
                                     {participants.map((participant) => (
+                                        console.log("participant", participant),
                                         <div key={participant.id} className="list-group-item d-flex align-items-center">
                                             <div className="rounded-circle B_circle d-flex justify-content-center align-items-center me-3"
                                                 style={{
                                                     width: "40px",
                                                     height: "40px",
-                                                    backgroundColor: `hsl(${participant.id * 60}, 70%, 45%)`,
-                                                    color: 'white'
+                                                    backgroundColor: `hsl(${participant.id.charCodeAt(0) * 60}, 70%, 45%)`,
+                                                    color: 'white',
+                                                    textTransform: 'uppercase'
                                                 }}>
                                                 {participant.initials}
                                             </div>
@@ -966,101 +1016,55 @@ function Screen() {
                     <Offcanvas.Body >
                         <>
                             <div className="chat-container h-100 d-flex flex-column">
-                                <div className="chat-messages flex-grow-1" style={{ overflowY: 'auto' }}>
-                                    <div className="d-flex align-items-start mb-3">
-                                        <div className="chat-avatar me-2" style={{ backgroundColor: '#2B7982', width: '32px', height: '32px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                            <span style={{ color: '#fff' }}>LN</span>
-                                        </div>
-                                        <div>
-                                            <div className="chat-name" style={{ color: '#fff', fontSize: '14px' }}>Lisa</div>
-                                            <div className="chat-message" style={{ backgroundColor: '#1E242B', color: '#B3AEAE', padding: '8px 12px', borderRadius: '8px', maxWidth: '250px', marginTop: '4px' }}>
-                                                Can u hear my voice
+                                <div className="chat-messages flex-grow-1" ref={messageContainerRef} style={{ overflowY: 'auto' }}>
+                                    {messages.map((msg, index) => (
+                                        <div key={index} className='d-flex align-items-start mb-3'>
+                                            {msg.sender !== userName && (
+                                                <div className="chat-avatar me-2" style={{
+                                                    backgroundColor: msg.sender === userName ? '#2B7982' : '#4A90E2',
+                                                    width: '32px',
+                                                    height: '32px',
+                                                    borderRadius: '50%',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    textTransform: 'uppercase'
+                                                }}>
+                                                    <span style={{ color: '#fff' }}>{msg.sender.charAt(0)}</span>
+                                                </div>
+                                            )}
+                                            <div className="chat-message" style={{ marginLeft: msg.sender === userName ? 'auto' : '0' }}>
+                                                <div className="small" style={{ color: msg.sender === userName ? 'white' : '#b3aeae', textAlign: msg.sender === userName ? 'end' : 'start' }}>
+                                                    {msg.sender === userName ? 'You' : msg.sender}
+                                                </div>
+                                                <div style={{
+                                                    backgroundColor: msg.sender === userName ? '#2A323B' : '#1E242B',
+                                                    color: msg.sender === userName ? 'white' : '#b3aeae',
+                                                    padding: '8px 12px',
+                                                    borderRadius: '8px',
+                                                    maxWidth: '250px',
+
+                                                }}>{msg.message}</div>
                                             </div>
                                         </div>
-                                    </div>
-
-                                    <div className="d-flex justify-content-end mb-3">
-                                        <div className="chat-message" style={{ backgroundColor: '#2A323B', color: '#fff', padding: '8px 12px', borderRadius: '8px', maxWidth: '250px' }}>
-                                            Ok, wait, 5 min
-                                        </div>
-                                    </div>
-
-                                    <div className="d-flex align-items-start mb-3">
-                                        <div className="chat-avatar me-2" style={{ backgroundColor: '#2B7982', width: '32px', height: '32px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                            <span style={{ color: '#fff' }}>LN</span>
-                                        </div>
-                                        <div>
-                                            <div className="chat-name" style={{ color: '#fff', fontSize: '14px' }}>Lisa</div>
-                                            <div className="chat-message" style={{ backgroundColor: '#1E242B', color: '#B3AEAE', padding: '8px 12px', borderRadius: '8px', maxWidth: '250px', marginTop: '4px' }}>
-                                                Thanks....
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div className="d-flex align-items-start mb-3">
-                                        <div className="chat-avatar me-2" style={{ backgroundColor: '#382B82', width: '32px', height: '32px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                            <span style={{ color: '#fff' }}>KP</span>
-                                        </div>
-                                        <div>
-                                            <div className="chat-name" style={{ color: '#fff', fontSize: '14px' }}>Kiara</div>
-                                            <div className="chat-message" style={{ backgroundColor: '#1E242B', color: '#B3AEAE', padding: '8px 12px', borderRadius: '8px', maxWidth: '250px', marginTop: '4px' }}>
-                                                Lorem ipsum is simply dummy
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div className="d-flex justify-content-end mb-3">
-                                        <div className="chat-message" style={{ backgroundColor: '#2A323B', color: '#fff', padding: '8px 12px', borderRadius: '8px', maxWidth: '250px' }}>
-                                            Lorem ipsum is simply dummy text of the printing
-                                        </div>
-                                    </div>
-
-                                    <div className="d-flex align-items-start mb-3">
-                                        <div className="chat-avatar me-2" style={{ backgroundColor: '#2B7982', width: '32px', height: '32px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                            <span style={{ color: '#fff' }}>LN</span>
-                                        </div>
-                                        <div>
-                                            <div className="chat-name" style={{ color: '#fff', fontSize: '14px' }}>Lisa</div>
-                                            <div className="chat-message" style={{ backgroundColor: '#1E242B', color: '#B3AEAE', padding: '8px 12px', borderRadius: '8px', maxWidth: '250px', marginTop: '4px' }}>
-                                                Lorem ipsum is simply dummy
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div className="d-flex justify-content-end mb-3">
-                                        <div className="chat-message" style={{ backgroundColor: '#2A323B', color: '#fff', padding: '8px 12px', borderRadius: '8px', maxWidth: '250px' }}>
-                                            Ok, wait, 5 min
-                                        </div>
-                                    </div>
-                                    <div className="d-flex align-items-start mb-3">
-                                        <div className="chat-avatar me-2" style={{ backgroundColor: '#2B7982', width: '32px', height: '32px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                            <span style={{ color: '#fff' }}>LN</span>
-                                        </div>
-                                        <div>
-                                            <div className="chat-name" style={{ color: '#fff', fontSize: '14px' }}>Lisa</div>
-                                            <div className="chat-message" style={{ backgroundColor: '#1E242B', color: '#B3AEAE', padding: '8px 12px', borderRadius: '8px', maxWidth: '250px', marginTop: '4px' }}>
-                                                Lorem ipsum is simply dummy
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div className="d-flex justify-content-end mb-3">
-                                        <div className="chat-message" style={{ backgroundColor: '#2A323B', color: '#fff', padding: '8px 12px', borderRadius: '8px', maxWidth: '250px' }}>
-                                            Ok, wait, 5 min
-                                        </div>
-                                    </div>
+                                    ))}
                                 </div>
 
                                 <div className="B_search-container  mb-3" >
                                     <div className="position-relative B_input_search B_input_search22  mx-auto">
-                                        <input
-                                            type="text"
-                                            className="form-control text-white ps-3"
-                                            placeholder="Write a message..."
-                                            style={{ borderRadius: '5px', border: 'none', backgroundColor: "#202F41" }}
-                                        />
-                                        <IoMdSend className='position-absolute B_sendMsg' />
-
+                                        <form onSubmit={handleSendMessage} className="mt-3 d-flex">
+                                            <input
+                                                type="text"
+                                                className="form-control text-white ps-3"
+                                                value={newMessage}
+                                                onChange={(e) => setNewMessage(e.target.value)}
+                                                placeholder="Write a message..."
+                                                style={{ borderRadius: '5px', border: 'none', backgroundColor: "#202F41" }}
+                                            />
+                                            <button type="submit" className="position-absolute B_sendMsg">
+                                                <IoMdSend />
+                                            </button>
+                                        </form>
                                     </div>
                                 </div>
                             </div>
@@ -1069,6 +1073,191 @@ function Screen() {
                 )}
 
             </Offcanvas>
+
+            <Modal centered show={ReviewModel} onHide={handleCloseReviewModel} className='B_review_model'>
+                <Modal.Header className=' border-0 B_review_model_header' >
+                    <Modal.Title className='B_review_model_title my-1'>How was your meeting experience?</Modal.Title>
+                </Modal.Header>
+                <div className='j_modal_header'>
+                </div>
+                <Modal.Body className='B_review_model_body'>
+
+                    <Formik
+                        initialValues={{
+                            rating: 0,
+                            trouble: [],
+                            comments: ''
+                        }}
+                        validationSchema={Yup.object().shape({
+                            rating: Yup.number().min(1, 'Please select a rating').required('Rating is required'),
+                            comments: Yup.string().required('Comments are required')
+                        })}
+                        onSubmit={(values, { resetForm }) => {
+                            const troubleArray = activeButton.map(item => ({ [item]: item }));
+                            const reviewData = {
+                                rating: rating,
+                                trouble: troubleArray,
+                                comments: values.comments
+                            };
+                            dispatch(createreview(reviewData)).then((response) => {
+                                if (response.payload?._id) {
+                                    resetForm();
+                                    setRating(0);
+                                    // navigate('/home');
+                                    setActiveButton([]);
+                                    handleCloseReviewModel();
+                                }
+                            });
+                        }}
+                    >
+                        {({ values, errors, touched, handleChange, handleSubmit, setFieldValue }) => (
+                            <form onSubmit={handleSubmit}>
+                                <div className='mt-3'>
+                                    Help us improve - share your thoughts
+                                </div>
+                                <div>
+                                    {[1, 2, 3, 4, 5].map((star) => (
+                                        <FaStar
+                                            key={star}
+                                            className={star <= rating ? 'B_yellow_star' : 'B_grey_star'}
+                                            onClick={() => {
+                                                handleRating(star);
+                                                setFieldValue('rating', star);
+                                            }}
+                                            style={{ cursor: 'pointer', marginRight: '20px', fontSize: '20px', marginTop: '20px' }}
+                                        />
+                                    ))}
+                                </div>
+                                {errors.rating && touched.rating && (
+                                    <div className="mt-2" style={{ color: '#cd1425' }}>{errors.rating}</div>
+                                )}
+
+                                <div className='B_review_model_text'>
+                                    What aspect of session gives you trouble?
+                                </div>
+                                <div className='d-flex gap-5 B_gapDiv justify-content-center'>
+                                    <div
+                                        className='B_review_model_Box text-decoration-none'
+                                        onClick={() => handleButtonClick('audio')}
+                                        style={{
+                                            cursor: 'pointer',
+                                            color: 'white',
+                                            border: activeButton.includes('audio') ? '1px solid #BFBFBF' : '2px solid transparent',
+                                            padding: '10px',
+                                            borderRadius: '5px'
+                                        }}
+                                    >
+                                        <img
+                                            src={MeetingAudio}
+                                            alt=""
+                                            style={{
+                                                opacity: activeButton.includes('audio') ? 1 : 0.5,
+                                                color: 'white'
+                                            }}
+                                        />
+                                        <p className='B_Box_Textt' style={{ color: activeButton.includes('audio') ? 'white' : '#BFBFBF' }}>Audio</p>
+                                    </div>
+                                    <div
+                                        className='B_review_model_Box text-decoration-none'
+                                        onClick={() => handleButtonClick('video')}
+                                        style={{
+                                            cursor: 'pointer',
+                                            color: 'white',
+                                            border: activeButton.includes('video') ? '1px solid #BFBFBF' : '2px solid transparent',
+                                            padding: '10px',
+                                            borderRadius: '5px'
+                                        }}
+                                    >
+                                        <img
+                                            src={MeetingVideo}
+                                            alt=""
+                                            style={{
+                                                opacity: activeButton.includes('video') ? 1 : 0.5,
+                                                color: 'white'
+                                            }}
+                                        />
+                                        <p className='B_Box_Textt' style={{ color: activeButton.includes('video') ? 'white' : '#BFBFBF' }}>Video</p>
+                                    </div>
+                                    <div
+                                        className='B_review_model_Box text-decoration-none'
+                                        onClick={() => handleButtonClick('connection')}
+                                        style={{
+                                            cursor: 'pointer',
+                                            color: 'white',
+                                            border: activeButton.includes('connection') ? '1px solid #BFBFBF' : '2px solid transparent',
+                                            padding: '10px',
+                                            borderRadius: '5px'
+                                        }}
+                                    >
+                                        <img
+                                            src={MeetingConnection}
+                                            className='B_review_model_Box_img'
+                                            alt=""
+                                            style={{
+                                                opacity: activeButton.includes('connection') ? 1 : 0.5,
+                                                color: 'white'
+                                            }}
+                                        />
+                                        <p className='B_Box_Textt' style={{ color: activeButton.includes('connection') ? 'white' : '#BFBFBF' }}>Screen Sharing</p>
+                                    </div>
+
+                                </div>
+                                <div className='mt-5 B_textAreaa' style={{ textAlign: "left" }}>
+                                    <p className='B_addtional_text'>Additional Comments</p>
+                                    <textarea
+                                        name="comments"
+                                        value={values.comments}
+                                        onChange={handleChange}
+                                        className='B_text_Area'
+                                        placeholder="Enter additional comments"
+                                        style={{
+                                            width: '100%',
+                                            height: '100px',
+                                            borderRadius: '4px',
+                                            border: '1px solid #2d394b',
+                                            backgroundColor: '#202F41',
+                                            color: '#BFBFBF',
+                                            padding: '10px',
+                                            resize: 'none'
+                                        }}
+                                    />
+                                    {errors.comments && touched.comments && (
+                                        <div className="" style={{ color: '#cd1425' }}>{errors.comments}</div>
+                                    )}
+                                </div>
+                                <div className=' BB_margin_home gap-5' style={{ display: 'flex', justifyContent: 'center', marginTop: '40px', marginBottom: "20px" }}>
+                                    <Link to={'/home'}>
+                                        <button className='B_hover_bttn'
+                                        >
+                                            Back To Home
+                                        </button>
+                                    </Link>
+
+                                    <button
+                                        type="submit"
+                                        className='B_lastbtn'
+                                        style={{
+                                            backgroundColor: '#FFFFFF',
+                                            border: 'none',
+                                            color: '#000',
+                                            padding: '8px 20px',
+                                            borderRadius: '6px',
+                                            cursor: 'pointer',
+                                            transition: 'background-color 0.3s ease',
+                                            width: '170px',
+                                            textAlign: 'center'
+                                        }}
+                                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f0f0f0'}
+                                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#FFFFFF'}
+                                    >
+                                        Submit
+                                    </button>
+                                </div>
+                            </form>
+                        )}
+                    </Formik>
+                </Modal.Body>
+            </Modal>
 
             {/*  Render active emojis with usernames */}
             <div className="active-emojis">

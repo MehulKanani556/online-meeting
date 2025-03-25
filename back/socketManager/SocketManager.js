@@ -168,6 +168,8 @@ async function initializeSocket(io) {
                     id: socket.id,
                     userId,
                     userName,
+                    hasVideo: false, // Set to false initially
+                    hasAudio: false, // Set to false initially
                     isHost: userId === hostUserId
                 });
 
@@ -176,6 +178,8 @@ async function initializeSocket(io) {
                     socketId: socket.id,
                     userId,
                     userName,
+                    hasVideo: false, // Send hasVideo status as false
+                    hasAudio: false, // Send hasAudio status as false
                     isHost: userId === hostUserId
                 });
 
@@ -268,7 +272,7 @@ async function initializeSocket(io) {
             if (rooms[roomId]) {
                 rooms[roomId] = rooms[roomId].map(user =>
                     user.id === socket.id
-                        ? { ...user, hasAudio }
+                        ? { ...user, hasAudio } // Update hasAudio
                         : user
                 );
 
@@ -285,7 +289,7 @@ async function initializeSocket(io) {
             if (rooms[roomId]) {
                 rooms[roomId] = rooms[roomId].map(user =>
                     user.id === socket.id
-                        ? { ...user, hasVideo }
+                        ? { ...user, hasVideo } // Update hasVideo
                         : user
                 );
 
