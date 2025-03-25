@@ -481,3 +481,10 @@
         width: 44%;
     }
 }
+
+@keyframes d_handWave {
+    0% { transform: translateY(-2px) rotate(0deg); }
+    25% { transform: translateY(-2px) rotate(-10deg); }
+    75% { transform: translateY(-2px) rotate(10deg); }
+    100% { transform: translateY(-2px) rotate(0deg); }
+}

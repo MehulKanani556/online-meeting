@@ -8,6 +8,8 @@ export const useSocket = (userId, roomId, userName) => {
     const [isConnected, setIsConnected] = useState(false);
     const [participants, setParticipants] = useState([]);
     const [messages, setMessages] = useState([]);
+    const [emojis, setemojis] = useState([]);
+
 
     // console.log("participants----------", participants);
 
@@ -77,7 +79,43 @@ export const useSocket = (userId, roomId, userName) => {
         // Handle chat messages
         socketRef.current.on('receive-message', (message) => {
             setMessages(prev => [...prev, message]);
-            
+
+        });
+
+        // Handle received emojis
+        socketRef.current.on('receive-emoji', (data) => {
+            setemojis(prev => [...prev, {
+                sender: data.sender,
+                message: data.emoji,
+                timestamp: data.timestamp
+            }]);
+        });
+
+        // Handle audio status changes
+        socketRef.current.on('audio-status-updated', ({ userId, hasAudio }) => {
+            setParticipants(prev => prev.map(participant =>
+                participant.id === userId
+                    ? { ...participant, hasAudio }
+                    : participant
+            ));
+        });
+
+        // Handle video status changes
+        socketRef.current.on('video-status-updated', ({ userId, hasVideo }) => {
+            setParticipants(prev => prev.map(participant =>
+                participant.id === userId
+                    ? { ...participant, hasVideo }
+                    : participant
+            ));
+        });
+
+        // Handle hand raise status changes
+        socketRef.current.on('hand-status-updated', ({ userId, hasRaisedHand }) => {
+            setParticipants(prev => prev.map(participant =>
+                participant.id === userId
+                    ? { ...participant, hasRaisedHand }
+                    : participant
+            ));
         });
 
         return () => {
@@ -133,6 +171,17 @@ export const useSocket = (userId, roomId, userName) => {
         }
     };
 
+    // Helper function to send an emoji
+    const sendEmoji = (emoji) => {
+        if (socketRef.current && emoji.trim()) {
+            socketRef.current.emit('send-emoji', {
+                roomId,
+                emoji,
+                sender: userName
+            });
+        }
+    };
+
     const sendAnswer = (to, answer) => {
         if (socketRef.current) {
             socketRef.current.emit('answer', {
@@ -158,9 +207,12 @@ export const useSocket = (userId, roomId, userName) => {
         participants,
         messages,
         sendMessage,
+        setParticipants,
         setupWebRTCHandlers,
         sendOffer,
         sendAnswer,
-        sendIceCandidate
+        sendIceCandidate,
+        sendEmoji,
+        emojis,
     };
 }

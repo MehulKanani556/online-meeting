@@ -1050,6 +1050,16 @@ img {
     width: 85px !important;
   }
 
+  .d_avatar-circle {
+    width: 105px;
+    height: 105px;
+    font-size: 32px;
+  }
+
+  .d_mainscreen {
+    height: calc(100vh - 158px) !important;
+  }
+
 }
 
 @media (max-width: 1024px) {
@@ -2077,6 +2087,10 @@ img {
     margin-left: 7px;
   }
 
+  .d_mainsec {
+    margin-right: 300px;
+  }
+
 
 }
 
@@ -2362,6 +2376,10 @@ img {
     width: 35px !important;
   }
 
+  .B_screen_offcanvas {
+    width: 370px !important;
+  }
+
 
 }
 
@@ -2580,4 +2598,9 @@ img {
   .j_general_settings h5 {
     font-size: 10.5px !important;
   }
+
+  .B_screen_offcanvas {
+    width: 315px !important;
+  }
+
 }

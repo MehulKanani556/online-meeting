@@ -253,6 +253,67 @@ async function initializeSocket(io) {
             handleUserLogin(socket, userId);
         });
 
+        // Handle sending emojis
+        socket.on('send-emoji', ({ roomId, emoji, sender }) => {
+            io.to(roomId).emit('receive-emoji', {
+                sender,
+                emoji,
+                timestamp: new Date().toISOString()
+            });
+        });
+
+
+        socket.on('audio-status-change', ({ roomId, hasAudio }) => {
+            // Update the user's audio status in the rooms data structure
+            if (rooms[roomId]) {
+                rooms[roomId] = rooms[roomId].map(user =>
+                    user.id === socket.id
+                        ? { ...user, hasAudio }
+                        : user
+                );
+
+                // Broadcast the audio status change to all users in the room
+                io.to(roomId).emit('audio-status-updated', {
+                    userId: socket.id,
+                    hasAudio
+                });
+            }
+        });
+
+        socket.on('video-status-change', ({ roomId, hasVideo }) => {
+            // Update the user's video status in the rooms data structure
+            if (rooms[roomId]) {
+                rooms[roomId] = rooms[roomId].map(user =>
+                    user.id === socket.id
+                        ? { ...user, hasVideo }
+                        : user
+                );
+
+                // Broadcast the video status change to all users in the room
+                io.to(roomId).emit('video-status-updated', {
+                    userId: socket.id,
+                    hasVideo
+                });
+            }
+        });
+
+        // Add hand raise status handler
+        socket.on('hand-status-change', ({ roomId, hasRaisedHand }) => {
+            if (rooms[roomId]) {
+                rooms[roomId] = rooms[roomId].map(user =>
+                    user.id === socket.id
+                        ? { ...user, hasRaisedHand }
+                        : user
+                );
+
+                // Broadcast the hand raise status change to all users in the room
+                io.to(roomId).emit('hand-status-updated', {
+                    userId: socket.id,
+                    hasRaisedHand
+                });
+            }
+        });
+
         sendReminder(socket);
 
         // Handle disconnection
