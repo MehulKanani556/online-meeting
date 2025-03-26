@@ -15,7 +15,12 @@ import { useDispatch, useSelector } from 'react-redux';
 import { getAllUsers } from '../Redux/Slice/user.slice';
 import { IMAGE_URL } from '../Utils/baseUrl';
 import { useSocket } from '../Hooks/useSocket';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { createreview } from '../Redux/Slice/reviews.slice';
+import { FaStar } from 'react-icons/fa6';
+import MeetingAudio from '../Image/B_Audioo.svg'
+import MeetingVideo from '../Image/B_Videoo.svg'
+import MeetingConnection from '../Image/B_shearing.svg'
 
 
 function Home() {
@@ -24,15 +29,19 @@ function Home() {
   const [ScheduleModal, setScheduleModal] = useState(false)
   const [customModal, setcustomModal] = useState(false)
   const [joinModal, setjoinModal] = useState(false)
+  const [ReviewModel, setReviewModel] = useState(false);
   const [filteredUsers, setFilteredUsers] = useState([]);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [rating, setRating] = useState(0);
   const dropdownRef = useRef(null);
   const searchInputRef = useRef(null);
   const [meetingId, setMeetingId] = useState('');
-  const [meetingName, setMeetingName] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  const [activeButton, setActiveButton] = useState([]);
 
+  const handleCloseReviewModel = () => setReviewModel(false);
+  const handleShowReviewModel = () => setReviewModel(true);
   const handleScheduleclose = () => setScheduleModal(false)
   const handleScheduleshow = () => setScheduleModal(true)
   const handlecustomclose = () => setcustomModal(false)
@@ -46,6 +55,9 @@ function Home() {
   const allusers = useSelector((state) => state.user.allusers);
   const allschedule = useSelector((state) => state.schedule.allschedule);
   // console.log("allschedule", allschedule);
+
+  const currentUser = allusers.find((id) => id._id === userId)
+  // console.log("currentUser", currentUser);
 
   useEffect(() => {
     dispatch(getAllschedule());
@@ -65,6 +77,34 @@ function Home() {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  useEffect(() => {
+    // Check if the flag is set in session storage
+    const openReviewModal = sessionStorage.getItem('openReviewModal');
+    if (openReviewModal) {
+      setReviewModel(true); // Open the review modal
+      sessionStorage.removeItem('openReviewModal'); // Remove the flag
+    }
+  }, []);
+
+  const handleRating = (value) => {
+
+    if (value === rating) {
+      setRating(rating - 1);
+    } else {
+      setRating(value);
+    }
+  };
+
+  const handleButtonClick = (button) => {
+    setActiveButton((prev) => {
+      if (prev.includes(button)) {
+        return prev.filter((b) => b !== button);
+      } else {
+        return [...prev, button];
+      }
+    });
+  };
 
   const scheduleSchema = Yup.object().shape({
     title: Yup.string().required('Title is required'),
@@ -823,6 +863,10 @@ function Home() {
           </Modal.Body>
         </Modal>
 
+        {
+          console.log("error", error)
+        }
+
         {/* ============================ join Meeting Modal ============================ */}
         <Modal
           show={joinModal}
@@ -841,19 +885,14 @@ function Home() {
           <Modal.Body>
             <form onSubmit={(e) => {
               e.preventDefault();
-              
+
               if (!meetingId.trim()) {
                 setError('Please enter a meeting ID');
                 return;
               }
 
-              if (!meetingName.trim()) {
-                setError('Please enter your name');
-                return;
-              }
-
               // Find meeting in allschedule that matches the entered ID
-              const meeting = allschedule.find(schedule => 
+              const meeting = allschedule.find(schedule =>
                 schedule.meetingLink.includes(meetingId.trim())
               );
 
@@ -867,7 +906,7 @@ function Home() {
               const today = new Date();
               const startTime = meeting.startTime.split(':');
               const endTime = meeting.endTime.split(':');
-              
+
               meetingDate.setHours(parseInt(startTime[0]), parseInt(startTime[1]));
               const meetingEndDate = new Date(meeting.date);
               meetingEndDate.setHours(parseInt(endTime[0]), parseInt(endTime[1]));
@@ -882,7 +921,6 @@ function Home() {
               //   return;
               // }
 
-              // If all checks pass, navigate to meeting screen
               handlejoinclose();
               navigate(`/screen/${meetingId}`);
             }}>
@@ -897,9 +935,24 @@ function Home() {
                   value={meetingId}
                   onChange={(e) => {
                     setMeetingId(e.target.value);
-                    setError(''); // Clear error when input changes
+                    setError('');
                   }}
                   placeholder="Enter meeting ID"
+                />
+                {error && (
+                  <div style={{ color: '#cd1425', fontSize: '14px' }}>{error}</div>
+                )}
+              </div>
+              <div className="mb-3">
+                <label htmlFor="meetingPassword" className="form-label text-white j_join_text">
+                  Password
+                </label>
+                <input
+                  type="text"
+                  className="form-control j_input j_join_text"
+                  id="meetingPassword"
+                  // value={currentUser?.name}
+                  placeholder="Enter Password"
                 />
               </div>
               <div className="mb-3">
@@ -910,19 +963,11 @@ function Home() {
                   type="text"
                   className="form-control j_input j_join_text"
                   id="meetingName"
-                  value={meetingName}
-                  onChange={(e) => {
-                    setMeetingName(e.target.value);
-                    setError(''); // Clear error when input changes
-                  }}
+                  value={currentUser?.name}
                   placeholder="Enter Name"
+                  readOnly
                 />
               </div>
-              {error && (
-                <div className="alert alert-danger py-2" role="alert">
-                  {error}
-                </div>
-              )}
               <Modal.Footer className="border-0 p-0 pt-4 justify-content-center">
                 <Button
                   variant="outline-light"
@@ -940,6 +985,188 @@ function Home() {
                 </Button>
               </Modal.Footer>
             </form>
+          </Modal.Body>
+        </Modal>
+
+        <Modal centered show={ReviewModel} onHide={handleCloseReviewModel} className='B_review_model'>
+          <Modal.Header className=' border-0 B_review_model_header' >
+            <Modal.Title className='B_review_model_title my-1'>How was your meeting experience?</Modal.Title>
+          </Modal.Header>
+          <div className='j_modal_header'>
+          </div>
+          <Modal.Body className='B_review_model_body'>
+
+            <Formik
+              initialValues={{
+                rating: 0,
+                trouble: [],
+                comments: ''
+              }}
+              validationSchema={Yup.object().shape({
+                rating: Yup.number().min(1, 'Please select a rating').required('Rating is required'),
+                comments: Yup.string().required('Comments are required')
+              })}
+              onSubmit={(values, { resetForm }) => {
+                const troubleArray = activeButton.map(item => ({ [item]: item }));
+                const reviewData = {
+                  rating: rating,
+                  trouble: troubleArray,
+                  comments: values.comments
+                };
+                dispatch(createreview(reviewData)).then((response) => {
+                  if (response.payload?._id) {
+                    resetForm();
+                    setRating(0);
+                    setActiveButton([]);
+                    handleCloseReviewModel();
+                  }
+                });
+              }}
+            >
+              {({ values, errors, touched, handleChange, handleSubmit, setFieldValue }) => (
+                <form onSubmit={handleSubmit}>
+                  <div className='mt-3'>
+                    Help us improve - share your thoughts
+                  </div>
+                  <div>
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <FaStar
+                        key={star}
+                        className={star <= rating ? 'B_yellow_star' : 'B_grey_star'}
+                        onClick={() => {
+                          handleRating(star);
+                          setFieldValue('rating', star);
+                        }}
+                        style={{ cursor: 'pointer', marginRight: '20px', fontSize: '20px', marginTop: '20px' }}
+                      />
+                    ))}
+                  </div>
+                  {errors.rating && touched.rating && (
+                    <div className="mt-2" style={{ color: '#cd1425' }}>{errors.rating}</div>
+                  )}
+
+                  <div className='B_review_model_text'>
+                    What aspect of session gives you trouble?
+                  </div>
+                  <div className='d-flex gap-5 B_gapDiv justify-content-center'>
+                    <div
+                      className='B_review_model_Box text-decoration-none'
+                      onClick={() => handleButtonClick('audio')}
+                      style={{
+                        cursor: 'pointer',
+                        color: 'white',
+                        border: activeButton.includes('audio') ? '1px solid #BFBFBF' : '2px solid transparent',
+                        padding: '10px',
+                        borderRadius: '5px'
+                      }}
+                    >
+                      <img
+                        src={MeetingAudio}
+                        alt=""
+                        style={{
+                          opacity: activeButton.includes('audio') ? 1 : 0.5,
+                          color: 'white'
+                        }}
+                      />
+                      <p className='B_Box_Textt' style={{ color: activeButton.includes('audio') ? 'white' : '#BFBFBF' }}>Audio</p>
+                    </div>
+                    <div
+                      className='B_review_model_Box text-decoration-none'
+                      onClick={() => handleButtonClick('video')}
+                      style={{
+                        cursor: 'pointer',
+                        color: 'white',
+                        border: activeButton.includes('video') ? '1px solid #BFBFBF' : '2px solid transparent',
+                        padding: '10px',
+                        borderRadius: '5px'
+                      }}
+                    >
+                      <img
+                        src={MeetingVideo}
+                        alt=""
+                        style={{
+                          opacity: activeButton.includes('video') ? 1 : 0.5,
+                          color: 'white'
+                        }}
+                      />
+                      <p className='B_Box_Textt' style={{ color: activeButton.includes('video') ? 'white' : '#BFBFBF' }}>Video</p>
+                    </div>
+                    <div
+                      className='B_review_model_Box text-decoration-none'
+                      onClick={() => handleButtonClick('connection')}
+                      style={{
+                        cursor: 'pointer',
+                        color: 'white',
+                        border: activeButton.includes('connection') ? '1px solid #BFBFBF' : '2px solid transparent',
+                        padding: '10px',
+                        borderRadius: '5px'
+                      }}
+                    >
+                      <img
+                        src={MeetingConnection}
+                        className='B_review_model_Box_img'
+                        alt=""
+                        style={{
+                          opacity: activeButton.includes('connection') ? 1 : 0.5,
+                          color: 'white'
+                        }}
+                      />
+                      <p className='B_Box_Textt' style={{ color: activeButton.includes('connection') ? 'white' : '#BFBFBF' }}>Screen Sharing</p>
+                    </div>
+
+                  </div>
+                  <div className='mt-5 B_textAreaa' style={{ textAlign: "left" }}>
+                    <p className='B_addtional_text'>Additional Comments</p>
+                    <textarea
+                      name="comments"
+                      value={values.comments}
+                      onChange={handleChange}
+                      className='B_text_Area'
+                      placeholder="Enter additional comments"
+                      style={{
+                        width: '100%',
+                        height: '100px',
+                        borderRadius: '4px',
+                        border: '1px solid #2d394b',
+                        backgroundColor: '#202F41',
+                        color: '#BFBFBF',
+                        padding: '10px',
+                        resize: 'none'
+                      }}
+                    />
+                    {errors.comments && touched.comments && (
+                      <div className="" style={{ color: '#cd1425' }}>{errors.comments}</div>
+                    )}
+                  </div>
+                  <div className=' BB_margin_home gap-5' style={{ display: 'flex', justifyContent: 'center', marginTop: '40px', marginBottom: "20px" }}>
+                    <button className='B_hover_bttn' onClick={handleCloseReviewModel}
+                    >
+                      Back To Home
+                    </button>
+
+                    <button
+                      type="submit"
+                      className='B_lastbtn'
+                      style={{
+                        backgroundColor: '#FFFFFF',
+                        border: 'none',
+                        color: '#000',
+                        padding: '8px 20px',
+                        borderRadius: '6px',
+                        cursor: 'pointer',
+                        transition: 'background-color 0.3s ease',
+                        width: '170px',
+                        textAlign: 'center'
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f0f0f0'}
+                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#FFFFFF'}
+                    >
+                      Submit
+                    </button>
+                  </div>
+                </form>
+              )}
+            </Formik>
           </Modal.Body>
         </Modal>
 

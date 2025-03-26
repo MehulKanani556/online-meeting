@@ -17,16 +17,8 @@ import { IoMdSend } from "react-icons/io";
 import { getUserById } from '../Redux/Slice/user.slice';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import io from 'socket.io-client';
 import { useSocket } from '../Hooks/useSocket';
-import { Button, Modal, Offcanvas } from 'react-bootstrap';
-import * as Yup from 'yup';
-import { Formik } from 'formik';
-import { createreview } from '../Redux/Slice/reviews.slice';
-import { FaStar } from 'react-icons/fa6';
-import MeetingAudio from '../Image/B_Audioo.svg'
-import MeetingVideo from '../Image/B_Videoo.svg'
-import MeetingConnection from '../Image/B_shearing.svg'
+import { Button,  Offcanvas } from 'react-bootstrap';
 
 function Screen() {
     const { id: roomId } = useParams();
@@ -56,12 +48,6 @@ function Screen() {
     const [isHandRaised, setIsHandRaised] = useState(false);
     const [showEmojis, setshowEmojis] = useState(false);
     const [activeEmojis, setActiveEmojis] = useState([]);
-    const [rating, setRating] = useState(0);
-    const [ReviewModel, setReviewModel] = useState(false);
-    const handleCloseReviewModel = () => setReviewModel(false);
-    const handleShowReviewModel = () => setReviewModel(true);
-    const [activeButton, setActiveButton] = useState([]);
-    const [isNavigating, setIsNavigating] = useState(false);
 
 
     // Refs
@@ -88,7 +74,6 @@ function Screen() {
                     video: true
                 });
                 localStreamRef.current = stream;
-                console.log("***", stream)
                 if (localVideoRef.current) {
                     localVideoRef.current.srcObject = stream;
                 }
@@ -241,17 +226,9 @@ function Screen() {
 
     // End meeting
     const endMeeting = () => {
-        handleShowReviewModel();
-        setIsNavigating(true);
+        sessionStorage.setItem('openReviewModal', 'true');
+        navigate("/home");
     };
-
-    // Add useEffect to handle navigation after modal closes
-    useEffect(() => {
-        if (isNavigating && !ReviewModel) {
-            navigate('/home');
-            setIsNavigating(false);
-        }
-    }, [isNavigating, ReviewModel]);
 
     // Calculate grid columns based on participant count
     const getGridColumns = () => {
@@ -428,25 +405,6 @@ function Screen() {
             setIsVideoOff(!currentUser.hasVideo); // Set video off state based on participant's video status
         }
     }, [participants, userId]);
-
-    const handleRating = (value) => {
-
-        if (value === rating) {
-            setRating(rating - 1);
-        } else {
-            setRating(value);
-        }
-    };
-
-    const handleButtonClick = (button) => {
-        setActiveButton((prev) => {
-            if (prev.includes(button)) {
-                return prev.filter((b) => b !== button);
-            } else {
-                return [...prev, button];
-            }
-        });
-    };
 
     return (
         <>
@@ -1073,191 +1031,6 @@ function Screen() {
                 )}
 
             </Offcanvas>
-
-            <Modal centered show={ReviewModel} onHide={handleCloseReviewModel} className='B_review_model'>
-                <Modal.Header className=' border-0 B_review_model_header' >
-                    <Modal.Title className='B_review_model_title my-1'>How was your meeting experience?</Modal.Title>
-                </Modal.Header>
-                <div className='j_modal_header'>
-                </div>
-                <Modal.Body className='B_review_model_body'>
-
-                    <Formik
-                        initialValues={{
-                            rating: 0,
-                            trouble: [],
-                            comments: ''
-                        }}
-                        validationSchema={Yup.object().shape({
-                            rating: Yup.number().min(1, 'Please select a rating').required('Rating is required'),
-                            comments: Yup.string().required('Comments are required')
-                        })}
-                        onSubmit={(values, { resetForm }) => {
-                            const troubleArray = activeButton.map(item => ({ [item]: item }));
-                            const reviewData = {
-                                rating: rating,
-                                trouble: troubleArray,
-                                comments: values.comments
-                            };
-                            dispatch(createreview(reviewData)).then((response) => {
-                                if (response.payload?._id) {
-                                    resetForm();
-                                    setRating(0);
-                                    // navigate('/home');
-                                    setActiveButton([]);
-                                    handleCloseReviewModel();
-                                }
-                            });
-                        }}
-                    >
-                        {({ values, errors, touched, handleChange, handleSubmit, setFieldValue }) => (
-                            <form onSubmit={handleSubmit}>
-                                <div className='mt-3'>
-                                    Help us improve - share your thoughts
-                                </div>
-                                <div>
-                                    {[1, 2, 3, 4, 5].map((star) => (
-                                        <FaStar
-                                            key={star}
-                                            className={star <= rating ? 'B_yellow_star' : 'B_grey_star'}
-                                            onClick={() => {
-                                                handleRating(star);
-                                                setFieldValue('rating', star);
-                                            }}
-                                            style={{ cursor: 'pointer', marginRight: '20px', fontSize: '20px', marginTop: '20px' }}
-                                        />
-                                    ))}
-                                </div>
-                                {errors.rating && touched.rating && (
-                                    <div className="mt-2" style={{ color: '#cd1425' }}>{errors.rating}</div>
-                                )}
-
-                                <div className='B_review_model_text'>
-                                    What aspect of session gives you trouble?
-                                </div>
-                                <div className='d-flex gap-5 B_gapDiv justify-content-center'>
-                                    <div
-                                        className='B_review_model_Box text-decoration-none'
-                                        onClick={() => handleButtonClick('audio')}
-                                        style={{
-                                            cursor: 'pointer',
-                                            color: 'white',
-                                            border: activeButton.includes('audio') ? '1px solid #BFBFBF' : '2px solid transparent',
-                                            padding: '10px',
-                                            borderRadius: '5px'
-                                        }}
-                                    >
-                                        <img
-                                            src={MeetingAudio}
-                                            alt=""
-                                            style={{
-                                                opacity: activeButton.includes('audio') ? 1 : 0.5,
-                                                color: 'white'
-                                            }}
-                                        />
-                                        <p className='B_Box_Textt' style={{ color: activeButton.includes('audio') ? 'white' : '#BFBFBF' }}>Audio</p>
-                                    </div>
-                                    <div
-                                        className='B_review_model_Box text-decoration-none'
-                                        onClick={() => handleButtonClick('video')}
-                                        style={{
-                                            cursor: 'pointer',
-                                            color: 'white',
-                                            border: activeButton.includes('video') ? '1px solid #BFBFBF' : '2px solid transparent',
-                                            padding: '10px',
-                                            borderRadius: '5px'
-                                        }}
-                                    >
-                                        <img
-                                            src={MeetingVideo}
-                                            alt=""
-                                            style={{
-                                                opacity: activeButton.includes('video') ? 1 : 0.5,
-                                                color: 'white'
-                                            }}
-                                        />
-                                        <p className='B_Box_Textt' style={{ color: activeButton.includes('video') ? 'white' : '#BFBFBF' }}>Video</p>
-                                    </div>
-                                    <div
-                                        className='B_review_model_Box text-decoration-none'
-                                        onClick={() => handleButtonClick('connection')}
-                                        style={{
-                                            cursor: 'pointer',
-                                            color: 'white',
-                                            border: activeButton.includes('connection') ? '1px solid #BFBFBF' : '2px solid transparent',
-                                            padding: '10px',
-                                            borderRadius: '5px'
-                                        }}
-                                    >
-                                        <img
-                                            src={MeetingConnection}
-                                            className='B_review_model_Box_img'
-                                            alt=""
-                                            style={{
-                                                opacity: activeButton.includes('connection') ? 1 : 0.5,
-                                                color: 'white'
-                                            }}
-                                        />
-                                        <p className='B_Box_Textt' style={{ color: activeButton.includes('connection') ? 'white' : '#BFBFBF' }}>Screen Sharing</p>
-                                    </div>
-
-                                </div>
-                                <div className='mt-5 B_textAreaa' style={{ textAlign: "left" }}>
-                                    <p className='B_addtional_text'>Additional Comments</p>
-                                    <textarea
-                                        name="comments"
-                                        value={values.comments}
-                                        onChange={handleChange}
-                                        className='B_text_Area'
-                                        placeholder="Enter additional comments"
-                                        style={{
-                                            width: '100%',
-                                            height: '100px',
-                                            borderRadius: '4px',
-                                            border: '1px solid #2d394b',
-                                            backgroundColor: '#202F41',
-                                            color: '#BFBFBF',
-                                            padding: '10px',
-                                            resize: 'none'
-                                        }}
-                                    />
-                                    {errors.comments && touched.comments && (
-                                        <div className="" style={{ color: '#cd1425' }}>{errors.comments}</div>
-                                    )}
-                                </div>
-                                <div className=' BB_margin_home gap-5' style={{ display: 'flex', justifyContent: 'center', marginTop: '40px', marginBottom: "20px" }}>
-                                    <Link to={'/home'}>
-                                        <button className='B_hover_bttn'
-                                        >
-                                            Back To Home
-                                        </button>
-                                    </Link>
-
-                                    <button
-                                        type="submit"
-                                        className='B_lastbtn'
-                                        style={{
-                                            backgroundColor: '#FFFFFF',
-                                            border: 'none',
-                                            color: '#000',
-                                            padding: '8px 20px',
-                                            borderRadius: '6px',
-                                            cursor: 'pointer',
-                                            transition: 'background-color 0.3s ease',
-                                            width: '170px',
-                                            textAlign: 'center'
-                                        }}
-                                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f0f0f0'}
-                                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#FFFFFF'}
-                                    >
-                                        Submit
-                                    </button>
-                                </div>
-                            </form>
-                        )}
-                    </Formik>
-                </Modal.Body>
-            </Modal>
 
             {/*  Render active emojis with usernames */}
             <div className="active-emojis">

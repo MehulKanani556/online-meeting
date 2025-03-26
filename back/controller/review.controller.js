@@ -10,7 +10,7 @@ exports.createNewreviews = async (req, res) => {
             comments
         });
 
-        return res.json({ status: 200, message: "reviews Created Successfully", reviews: chekreviews });
+        return res.json({ status: 200, message: "Reviews Submitted....", reviews: chekreviews });
 
     } catch (error) {
         res.json({ status: 500, message: error.message });
