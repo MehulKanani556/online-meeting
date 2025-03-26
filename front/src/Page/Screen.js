@@ -111,6 +111,14 @@ function Screen() {
                         roomId,
                         hasAudio: !newMutedState
                     });
+
+                    // Signal to peers
+                    Object.values(peerConnectionsRef.current).forEach(pc => {
+                        const sender = pc.getSenders().find(s => s.track.kind === 'audio');
+                        if (sender) {
+                            sender.replaceTrack(audioTrack);
+                        }
+                    });
                 }
             }
 
@@ -122,7 +130,7 @@ function Screen() {
     const toggleVideo = () => {
         setIsVideoOff(prevVideoOff => {
             const newVideoOffState = !prevVideoOff;
-            console.log("nnn", localStreamRef.current)
+
             if (localStreamRef.current) {
                 const videoTrack = localStreamRef.current.getVideoTracks()[0];
                 if (videoTrack) {
@@ -132,6 +140,14 @@ function Screen() {
                     socket.emit('video-status-change', {
                         roomId,
                         hasVideo: !newVideoOffState
+                    });
+
+                    // Signal to peers
+                    Object.values(peerConnectionsRef.current).forEach(pc => {
+                        const sender = pc.getSenders().find(s => s.track.kind === 'video');
+                        if (sender) {
+                            sender.replaceTrack(videoTrack);
+                        }
                     });
                 }
             }
@@ -156,9 +172,7 @@ function Screen() {
 
                 Object.values(peerConnectionsRef.current).forEach(pc => {
                     const senders = pc.getSenders();
-                    const sender = senders.find(s =>
-                        s.track && s.track.kind === 'video'
-                    );
+                    const sender = senders.find(s => s.track && s.track.kind === 'video');
 
                     if (sender) {
                         sender.replaceTrack(videoTrack);
@@ -191,9 +205,7 @@ function Screen() {
 
             Object.values(peerConnectionsRef.current).forEach(pc => {
                 const senders = pc.getSenders();
-                const sender = senders.find(s =>
-                    s.track && s.track.kind === 'video'
-                );
+                const sender = senders.find(s => s.track && s.track.kind === 'video');
 
                 if (sender && videoTrack) {
                     sender.replaceTrack(videoTrack);
@@ -411,7 +423,6 @@ function Screen() {
                                         // Local user video
                                         !isVideoOff ? (
                                             <video
-                                                src={require('../Image/video.mp4')}
                                                 ref={localVideoRef}
                                                 className="d_video-element"
                                                 autoPlay
@@ -431,9 +442,9 @@ function Screen() {
                                         // Remote participant video
                                         participant.hasVideo ? (
                                             <video
-                                                src={require('../Image/video.mp4')} 
                                                 id={`video-${participant.id}`}
-                                                className="d_video-element" 
+                                                className="d_video-element"
+                                                ref={localVideoRef}
                                                 autoPlay
                                                 playsInline
                                             />

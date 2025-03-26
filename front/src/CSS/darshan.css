@@ -192,9 +192,10 @@
 .d_controls-bottom {
     position: absolute;
     bottom: 0px;
-    width: 100%;
+    right: 0px;
+    /* width: 100%; */
     display: flex;
-    justify-content: end;
+    /* justify-content: end; */
     padding: 10px 15px;
 }
 

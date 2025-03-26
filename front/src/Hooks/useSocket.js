@@ -9,10 +9,9 @@ export const useSocket = (userId, roomId, userName) => {
     const [participants, setParticipants] = useState([]);
     const [messages, setMessages] = useState([]);
     const [emojis, setemojis] = useState([]);
-
+    const peerConnectionsRef = useRef({});
 
     // console.log("participants----------", participants);
-
 
     // Initialize socket connection
     useEffect(() => {
@@ -202,6 +201,58 @@ export const useSocket = (userId, roomId, userName) => {
             });
         }
     };
+
+    // Add this function to create a peer connection
+    const createPeerConnection = (userId) => {
+        const peerConnection = new RTCPeerConnection(); // Create a new RTCPeerConnection
+
+        // Handle ICE candidates
+        peerConnection.onicecandidate = (event) => {
+            if (event.candidate) {
+                socketRef.current.emit('ice-candidate', {
+                    to: userId,
+                    candidate: event.candidate
+                });
+            }
+        };
+
+        // Handle remote stream
+        peerConnection.ontrack = (event) => {
+            // Add logic to display the remote stream
+        };
+
+        peerConnectionsRef.current[userId] = peerConnection; // Store the peer connection
+    };
+
+    // Add this function to handle the offer
+    const handleOffer = async (from, offer) => {
+        const peerConnection = createPeerConnection(from);
+        await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
+        const answer = await peerConnection.createAnswer();
+        await peerConnection.setLocalDescription(answer);
+        socketRef.current.emit('answer', { to: from, answer });
+    };
+
+    // Add this function to handle the answer
+    const handleAnswer = async (from, answer) => {
+        const peerConnection = peerConnectionsRef.current[from];
+        await peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
+    };
+
+    // Add this function to handle ICE candidates
+    const handleIceCandidate = async (from, candidate) => {
+        const peerConnection = peerConnectionsRef.current[from];
+        await peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
+    };
+
+    // Call setupWebRTCHandlers to initialize signaling
+    useEffect(() => {
+        setupWebRTCHandlers({
+            handleOffer,
+            handleAnswer,
+            handleIceCandidate
+        });
+    }, []);
 
     return {
         socket: socketRef.current,
