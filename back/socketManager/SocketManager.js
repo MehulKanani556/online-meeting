@@ -185,8 +185,6 @@ async function initializeSocket(io) {
 
                 // Send list of all users in the room to the new participant
                 socket.emit('room-users', rooms[roomId]);
-
-                console.log("rooms========", rooms);
             } catch (error) {
                 console.error("Error in join-room:", error);
                 socket.emit('error', { message: 'Failed to join room' });

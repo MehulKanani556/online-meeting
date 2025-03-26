@@ -405,9 +405,6 @@ function Screen() {
                         style={{ gridTemplateColumns: `repeat(${getGridColumns()}, 1fr)` }}>
                         {/* Map all participants including local user */}
                         {visibleParticipants.map((participant, index) => (
-                            console.log("participant", participant),
-
-
                             <div key={participant.id} className="d_grid-item">
                                 <div className="d_avatar-container">
                                     {participant.id === socketRef.current?.id ? (
