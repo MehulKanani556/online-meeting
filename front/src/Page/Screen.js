@@ -409,8 +409,9 @@ function Screen() {
                                 <div className="d_avatar-container">
                                     {participant.id === socketRef.current?.id ? (
                                         // Local user video
-                                        isVideoOff ? (
+                                        !isVideoOff ? (
                                             <video
+                                                src={require('../Image/video.mp4')}
                                                 ref={localVideoRef}
                                                 className="d_video-element"
                                                 autoPlay
@@ -430,8 +431,9 @@ function Screen() {
                                         // Remote participant video
                                         participant.hasVideo ? (
                                             <video
+                                                src={require('../Image/video.mp4')} 
                                                 id={`video-${participant.id}`}
-                                                className="d_video-element"
+                                                className="d_video-element" 
                                                 autoPlay
                                                 playsInline
                                             />
