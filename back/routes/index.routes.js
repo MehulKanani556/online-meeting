@@ -6,7 +6,6 @@ const { userLogin, googleLogin, forgotPassword, verifyOtp, changePassword, userL
 const { getAllcontact, getcontactById, updatecontact, removecontact, createNewcontact } = require('../controller/contactus.controller');
 const { createNewreviews, getAllreviews, getreviewsById, updatereviews, removereviews } = require('../controller/review.controller');
 const { createNewschedule, getAllschedule, getscheduleById, updateschedule, removeschedule } = require('../controller/schedule.controller');
-const { createNewTest } = require('../controller/test.controller');
 
 // auth Routes
 
@@ -50,9 +49,5 @@ indexRoutes.get('/allschedules', getAllschedule);
 indexRoutes.get('/getscheduleById/:id', getscheduleById);
 indexRoutes.put('/scheduleUpdate/:id', updateschedule);
 indexRoutes.delete('/deleteschedule/:id', removeschedule);
-
-// test Routes 
-
-indexRoutes.post('/createNewTest', createNewTest);
 
 module.exports = indexRoutes

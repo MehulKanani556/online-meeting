@@ -17,7 +17,6 @@ import Alert from './Page/Alert';
 import { SnackbarProvider } from 'notistack';
 import Setting from './Page/Setting';
 import Schedule from './Page/Schedule';
-import Test from './Page/Test';
 import Screen from './Page/Screen';
 import Demo from './Page/Demo';
 
@@ -39,7 +38,6 @@ function App() {
           <Route path="/screen/:id" element={<Screen />} />
           <Route path="/schedule" element={<Schedule />} />
           <Route path="/setting" element={<Setting />} />
-          <Route path="/test" element={<Test />} />
           <Route path="/demo" element={<Demo />} />
         </Routes>
       </Provider>
