@@ -18,7 +18,7 @@ import { getUserById } from '../Redux/Slice/user.slice';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useSocket } from '../Hooks/useSocket';
-import { Button,  Offcanvas } from 'react-bootstrap';
+import { Button, Offcanvas } from 'react-bootstrap';
 
 function Screen() {
     const { id: roomId } = useParams();
@@ -34,20 +34,24 @@ function Screen() {
     // Use the socket hook
     const { socket, isConnected, participants, messages, sendMessage, emojis, sendEmoji } = useSocket(userId, roomId, userName);
 
-    // console.log("participants", participants.length);
-
 
     // WebRTC State
     const [isMuted, setIsMuted] = useState(false);
     const [isVideoOff, setIsVideoOff] = useState(false);
     const [isScreenSharing, setIsScreenSharing] = useState(false);
     const [newMessage, setNewMessage] = useState('');
-    const [showAllParticipants, setShowAllParticipants] = useState(false);
     const [showViewMoreDropdown, setShowViewMoreDropdown] = useState(false);
     const [show, setShow] = useState(false);
     const [isHandRaised, setIsHandRaised] = useState(false);
     const [showEmojis, setshowEmojis] = useState(false);
     const [activeEmojis, setActiveEmojis] = useState([]);
+    const [billingCycle, setBillingCycle] = useState('Messages');
+    const [activeDropdown, setActiveDropdown] = useState(null);
+    const [mainSectionMargin, setMainSectionMargin] = useState(0);
+    const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+    const [newName, setNewName] = useState('');
+    const [showRenameModal, setShowRenameModal] = useState(false);
+    const [selectedParticipant, setSelectedParticipant] = useState(null);
 
 
     // Refs
@@ -214,11 +218,6 @@ function Screen() {
         }
     };
 
-    // Toggle participants list
-    const toggleParticipantsList = () => {
-        setShowAllParticipants(!showAllParticipants);
-    };
-
     // Toggle view more dropdown
     const toggleViewMoreDropdown = () => {
         setShowViewMoreDropdown(!showViewMoreDropdown);
@@ -268,7 +267,6 @@ function Screen() {
     const visibleParticipants = participants.slice(0, maxVisibleParticipants);
     const extraParticipants = participants.length > maxVisibleParticipants ?
         participants.length - (maxVisibleParticipants - 1) : 0;
-    // console.log("visibleParticipants", visibleParticipants)
 
 
     // Handle clickoutside for dropdown
@@ -297,22 +295,9 @@ function Screen() {
 
 
     const handleEmojiClick = (emoji) => {
-        // Send the emoji through the socket
         sendEmoji(emoji);
-
-        // Add the emoji and username to the active emojis state
         setActiveEmojis(prev => [...prev, { emoji, userName, id: Date.now() }]);
     };
-
-
-    const [billingCycle, setBillingCycle] = useState('Messages');
-    const [activeDropdown, setActiveDropdown] = useState(null);
-    const [mainSectionMargin, setMainSectionMargin] = useState(0);
-    const [windowWidth, setWindowWidth] = useState(window.innerWidth);
-    const [newName, setNewName] = useState('');
-    const [showRenameModal, setShowRenameModal] = useState(false);
-    const [selectedParticipant, setSelectedParticipant] = useState(null);
-
 
     useEffect(() => {
         const handleResize = () => {
