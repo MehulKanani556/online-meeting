@@ -9,6 +9,7 @@ export const useSocket = (userId, roomId, userName) => {
     const [participants, setParticipants] = useState([]);
     const [messages, setMessages] = useState([]);
     const [emojis, setemojis] = useState([]);
+    const [streams, setStreams] = useState({});
     const peerConnectionsRef = useRef({});
 
     // console.log("participants----------", participants);
@@ -103,6 +104,7 @@ export const useSocket = (userId, roomId, userName) => {
 
         // Handle video status changes
         socketRef.current.on('video-status-updated', ({ userId, hasVideo }) => {
+            console.log('Video status updated:', userId, hasVideo); // Debug log
             setParticipants(prev => prev.map(participant =>
                 participant.id === userId
                     ? { ...participant, hasVideo }
@@ -115,6 +117,50 @@ export const useSocket = (userId, roomId, userName) => {
             setParticipants(prev => prev.map(participant =>
                 participant.id === userId
                     ? { ...participant, hasRaisedHand }
+                    : participant
+            ));
+        });
+
+        // Handle host changes
+        socketRef.current.on('host-updated', ({ newHostId }) => {
+            setParticipants(prev => prev.map(participant => ({
+                ...participant,
+                isHost: participant.id === newHostId,
+                isCohost: participant.id === newHostId ? false : participant.isCohost
+            })));
+        });
+
+        // Handle co-host changes
+        socketRef.current.on('cohost-updated', ({ newCohostId }) => {
+            setParticipants(prev => prev.map(participant => ({
+                ...participant,
+                isCohost: participant.id === newCohostId
+            })));
+        });
+
+        // Handle participant rename
+        socketRef.current.on('participant-renamed', ({ participantId, newName }) => {
+            setParticipants(prev => prev.map(participant => 
+                participant.id === participantId 
+                    ? { 
+                        ...participant, 
+                        name: newName,
+                        initials: `${newName.charAt(0)}${newName.split(' ')[1] ? newName.split(' ')[1].charAt(0) : ''}`
+                    } 
+                    : participant
+            ));
+        });
+
+        // Handle participant removal
+        socketRef.current.on('participant-removed', ({ participantId }) => {
+            setParticipants(prev => prev.filter(participant => participant.id !== participantId));
+        });
+
+        // Handle audio toggle
+        socketRef.current.on('audio-status-updated', ({ participantId, hasAudio }) => {
+            setParticipants(prev => prev.map(participant =>
+                participant.id === participantId
+                    ? { ...participant, hasAudio }
                     : participant
             ));
         });
@@ -202,9 +248,29 @@ export const useSocket = (userId, roomId, userName) => {
         }
     };
 
-    // Add this function to create a peer connection
+    const startStreaming = (stream) => {
+        if (!socketRef.current) return;
+
+        // Add local stream to all peer connections
+        Object.entries(peerConnectionsRef.current).forEach(([userId, pc]) => {
+            stream.getTracks().forEach(track => {
+                pc.addTrack(track, stream);
+            });
+        });
+
+        // Notify other users about video status
+        socketRef.current.emit('video-status-change', {
+            roomId,
+            hasVideo: true
+        });
+    };
+
     const createPeerConnection = (userId) => {
-        const peerConnection = new RTCPeerConnection(); // Create a new RTCPeerConnection
+        const peerConnection = new RTCPeerConnection({
+            iceServers: [
+                { urls: 'stun:stun.l.google.com:19302' }
+            ]
+        });
 
         // Handle ICE candidates
         peerConnection.onicecandidate = (event) => {
@@ -218,10 +284,14 @@ export const useSocket = (userId, roomId, userName) => {
 
         // Handle remote stream
         peerConnection.ontrack = (event) => {
-            // Add logic to display the remote stream
+            setStreams(prev => ({
+                ...prev,
+                [userId]: event.streams[0]
+            }));
         };
 
-        peerConnectionsRef.current[userId] = peerConnection; // Store the peer connection
+        peerConnectionsRef.current[userId] = peerConnection;
+        return peerConnection;
     };
 
     // Add this function to handle the offer
@@ -267,5 +337,7 @@ export const useSocket = (userId, roomId, userName) => {
         sendIceCandidate,
         sendEmoji,
         emojis,
+        streams,
+        startStreaming,
     };
 }

@@ -283,19 +283,18 @@ async function initializeSocket(io) {
         });
 
         socket.on('video-status-change', ({ roomId, hasVideo }) => {
-            // Update the user's video status in the rooms data structure
             if (rooms[roomId]) {
-                rooms[roomId] = rooms[roomId].map(user =>
-                    user.id === socket.id
-                        ? { ...user, hasVideo } // Update hasVideo
-                        : user
-                );
+                // Update user's video status
+                const userIndex = rooms[roomId].findIndex(user => user.id === socket.id);
+                if (userIndex !== -1) {
+                    rooms[roomId][userIndex].hasVideo = hasVideo;
 
-                // Broadcast the video status change to all users in the room
-                io.to(roomId).emit('video-status-updated', {
-                    userId: socket.id,
-                    hasVideo
-                });
+                    // Broadcast to all users in the room
+                    io.to(roomId).emit('video-status-updated', {
+                        userId: socket.id,
+                        hasVideo
+                    });
+                }
             }
         });
 
@@ -313,6 +312,31 @@ async function initializeSocket(io) {
                     userId: socket.id,
                     hasRaisedHand
                 });
+            }
+        });
+
+        socket.on('toggle-participant-audio', ({ roomId, participantId, isMuted }) => {
+            io.to(roomId).emit('audio-status-updated', { participantId, hasAudio: !isMuted });
+        });
+
+        socket.on('make-host', ({ roomId, newHostId }) => {
+            io.to(roomId).emit('host-updated', { newHostId });
+        });
+
+        socket.on('make-cohost', ({ roomId, newCohostId }) => {
+            io.to(roomId).emit('cohost-updated', { newCohostId });
+        });
+
+        socket.on('rename-participant', ({ roomId, participantId, newName }) => {
+            io.to(roomId).emit('participant-renamed', { participantId, newName });
+        });
+
+        socket.on('remove-participant', ({ roomId, participantId }) => {
+            io.to(roomId).emit('participant-removed', { participantId });
+            // Also disconnect the removed user's socket
+            const userSocket = io.sockets.sockets.get(participantId);
+            if (userSocket) {
+                userSocket.disconnect();
             }
         });
 

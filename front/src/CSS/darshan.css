@@ -25,10 +25,14 @@
 
 .d_bottombar {
     position: fixed;
-    width: 100%;
+    /* width: 100%; */
     bottom: 0;
     padding: 28px 40px;
     background-color: #080E14;
+}
+
+.j_search_Input:focus {
+    box-shadow: none !important;
 }
 
 .d_bottombar .d_box {

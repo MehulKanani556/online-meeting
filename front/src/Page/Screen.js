@@ -32,12 +32,12 @@ function Screen() {
     const userName = currUser?.name || 'User';
 
     // Use the socket hook
-    const { socket, isConnected, participants, messages, sendMessage, emojis, sendEmoji } = useSocket(userId, roomId, userName);
+    const { socket, isConnected, participants, setParticipants, messages, sendMessage, emojis, sendEmoji, startStreaming } = useSocket(userId, roomId, userName);
 
 
     // WebRTC State
-    const [isMuted, setIsMuted] = useState(false);
-    const [isVideoOff, setIsVideoOff] = useState(false);
+    const [isMuted, setIsMuted] = useState(true);
+    const [isVideoOff, setIsVideoOff] = useState(true);
     const [isScreenSharing, setIsScreenSharing] = useState(false);
     const [newMessage, setNewMessage] = useState('');
     const [showViewMoreDropdown, setShowViewMoreDropdown] = useState(false);
@@ -69,7 +69,7 @@ function Screen() {
         dispatch(getUserById(userId));
     }, [userId, dispatch]);
 
-    // Add this new useEffect to initialize media stream
+    // Initialize media stream with correct initial state
     useEffect(() => {
         const initializeStream = async () => {
             try {
@@ -77,10 +77,23 @@ function Screen() {
                     audio: true,
                     video: true
                 });
+
+                // console.log('Stream obtained:', stream); // Debug log
+                // console.log('Video tracks:', stream.getVideoTracks()); // Debug log
+
                 localStreamRef.current = stream;
+
+                const videoTrack = stream.getVideoTracks()[0];
+                if (videoTrack) {
+                    videoTrack.enabled = !isVideoOff;
+                    // console.log('Initial video track enabled:', !isVideoOff); // Debug log
+                }
+
                 if (localVideoRef.current) {
                     localVideoRef.current.srcObject = stream;
+                    console.log('Video element source set'); // Debug log
                 }
+
             } catch (error) {
                 console.error('Error accessing media devices:', error);
             }
@@ -91,10 +104,23 @@ function Screen() {
         // Cleanup function
         return () => {
             if (localStreamRef.current) {
-                localStreamRef.current.getTracks().forEach(track => track.stop());
+                localStreamRef.current.getTracks().forEach(track => {
+                    track.stop();
+                });
             }
         };
     }, []);
+
+    // Add this useEffect to handle video state changes
+    useEffect(() => {
+        if (localStreamRef.current) {
+            const videoTrack = localStreamRef.current.getVideoTracks()[0];
+            if (videoTrack) {
+                videoTrack.enabled = !isVideoOff;
+                // console.log('Video track enabled:', !isVideoOff); // Debug log
+            }
+        }
+    }, [isVideoOff]);
 
     // Toggle audio
     const toggleAudio = () => {
@@ -126,28 +152,31 @@ function Screen() {
         });
     };
 
-    // Toggle video
     const toggleVideo = () => {
+        if (!localStreamRef.current) return;
+
         setIsVideoOff(prevVideoOff => {
             const newVideoOffState = !prevVideoOff;
 
-            if (localStreamRef.current) {
-                const videoTrack = localStreamRef.current.getVideoTracks()[0];
-                if (videoTrack) {
-                    videoTrack.enabled = !newVideoOffState;
+            const videoTrack = localStreamRef.current.getVideoTracks()[0];
+            if (videoTrack) {
+                videoTrack.enabled = !newVideoOffState;
 
-                    // Emit video status change to other participants
+                // Update local video display
+                if (localVideoRef.current) {
+                    localVideoRef.current.srcObject = localStreamRef.current;
+                }
+
+                // Start streaming if video is being turned on
+                if (!newVideoOffState) {
+                    startStreaming(localStreamRef.current);
+                }
+
+                // Emit video status change
+                if (socket) {
                     socket.emit('video-status-change', {
                         roomId,
                         hasVideo: !newVideoOffState
-                    });
-
-                    // Signal to peers
-                    Object.values(peerConnectionsRef.current).forEach(pc => {
-                        const sender = pc.getSenders().find(s => s.track.kind === 'video');
-                        if (sender) {
-                            sender.replaceTrack(videoTrack);
-                        }
                     });
                 }
             }
@@ -155,7 +184,6 @@ function Screen() {
             return newVideoOffState;
         });
     };
-
 
     // Share screen
     const toggleScreenShare = async () => {
@@ -337,36 +365,42 @@ function Screen() {
         setMainSectionMargin(0);
     };
 
-    // const toggleMicrophone1 = (participantId) => {
-    //     setParticipants(prevParticipants =>
-    //         prevParticipants.map(participant =>
-    //             participant.id === participantId
-    //                 ? { ...participant, isMicrophoneOn: !participant.isMicrophoneOn }
-    //                 : participant
-    //         )
-    //     );
-    // };
+    // Function to toggle participant's microphone
+    const toggleMicrophone = (participantId) => {
+        if (!socket) return;
 
+        socket.emit('toggle-participant-audio', {
+            roomId,
+            participantId,
+            isMuted: !participants.find(p => p.id === participantId)?.hasAudio
+        });
+    };
+
+    // Function to make a participant host
     const makeHost = (newHostId) => {
+        if (!socket) return;
 
-        // setParticipants(participants.map(participant => ({
-        //     ...participant,
-        //     isHost: participant.id === newHostId
-        // })));
+        socket.emit('make-host', {
+            roomId,
+            newHostId
+        });
 
         setActiveDropdown(null);
     };
 
+    // Function to make a participant co-host
     const makeCohost = (newCohostId) => {
+        if (!socket) return;
 
-        // setParticipants(participants.map(participant => ({
-        //     ...participant,
-        //     isCohost: participant.id === newCohostId
-        // })));
+        socket.emit('make-cohost', {
+            roomId,
+            newCohostId
+        });
 
         setActiveDropdown(null);
     };
 
+    // Function to handle participant rename
     const openRenameModal = (participant) => {
         setSelectedParticipant(participant);
         setNewName(participant.name);
@@ -375,33 +409,38 @@ function Screen() {
     };
 
     const saveNewName = () => {
-        if (selectedParticipant && newName.trim()) {
+        if (!socket || !selectedParticipant || !newName.trim()) return;
 
-            // setParticipants(participants.map(participant =>
-            //     participant.id === selectedParticipant.id
-            //         ? { ...participant, name: newName.trim() }
-            //         : participant
-            // ));
+        socket.emit('rename-participant', {
+            roomId,
+            participantId: selectedParticipant.id,
+            newName: newName.trim()
+        });
 
-            setShowRenameModal(false);
-            setSelectedParticipant(null);
-        }
+        setShowRenameModal(false);
+        setSelectedParticipant(null);
     };
 
+    // Function to remove a participant
     const removeParticipant = (participantId) => {
+        if (!socket) return;
 
-        // setParticipants(participants.filter(participant => participant.id !== participantId));
+        socket.emit('remove-participant', {
+            roomId,
+            participantId
+        });
+
         setActiveDropdown(null);
     };
 
-    // Add logic to set isMuted and isVideoOff based on participants' states
-    useEffect(() => {
-        const currentUser = participants.find(participant => participant.userId === userId);
-        if (currentUser) {
-            setIsMuted(!currentUser.hasAudio); // Set muted state based on participant's audio status
-            setIsVideoOff(!currentUser.hasVideo); // Set video off state based on participant's video status
-        }
-    }, [participants, userId]);
+
+    const [searchTerm, setSearchTerm] = useState('');
+
+    // Add this function to filter participants
+    const filteredParticipants = participants.filter(participant =>
+        participant.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
 
     return (
         <>
@@ -419,7 +458,55 @@ function Screen() {
                         {visibleParticipants.map((participant, index) => (
                             <div key={participant.id} className="d_grid-item">
                                 <div className="d_avatar-container">
-                                    {participant.id === socketRef.current?.id ? (
+                                    {/* <video
+                                        id={`video-${participant.id}`}
+                                        className="d_video-element"
+                                        ref={localVideoRef}
+                                        autoPlay
+                                        playsInline
+                                        muted
+                                    /> */}
+
+                                    {participant.id === userId ? (
+                                        // Local user video
+                                        !isVideoOff && localStreamRef.current ? (
+                                            <video
+                                                id={`video-${participant.id}`}
+                                                ref={localVideoRef}
+                                                className="d_video-element"
+                                                autoPlay
+                                                playsInline
+                                                muted
+                                            />
+                                        ) : (
+                                            <div className="d_avatar-circle"
+                                                style={{
+                                                    textTransform: 'uppercase',
+                                                    backgroundColor: `hsl(${participant.id.charCodeAt(0) * 60}, 70%, 45%)`
+                                                }}>
+                                                {`${participant.name.charAt(0)}${participant.name.split(' ')[1] ? participant.name.split(' ')[1].charAt(0) : ''}`}
+                                            </div>
+                                        )
+                                    ) : (
+                                        // Remote participant video
+                                        participant.hasVideo ? (
+                                            <video
+                                                id={`video-${participant.id}`}
+                                                className="d_video-element"
+                                                autoPlay
+                                                playsInline
+                                            />
+                                        ) : (
+                                            <div className="d_avatar-circle"
+                                                style={{
+                                                    textTransform: 'uppercase',
+                                                    backgroundColor: `hsl(${participant.id.charCodeAt(0) * 60}, 70%, 45%)`
+                                                }}>
+                                                {`${participant.name.charAt(0)}${participant.name.split(' ')[1] ? participant.name.split(' ')[1].charAt(0) : ''}`}
+                                            </div>
+                                        )
+                                    )}
+                                    {/* {participant.id === socketRef.current?.id ? (
                                         // Local user video
                                         !isVideoOff ? (
                                             <video
@@ -457,7 +544,7 @@ function Screen() {
                                                 {`${participant.name.charAt(0)}${participant.name.split(' ')[1] ? participant.name.split(' ')[1].charAt(0) : ''}`}
                                             </div>
                                         )
-                                    )}
+                                    )} */}
                                     <div className="d_controls-top">
                                         <div className="d_controls-container">
                                             {participant.hasRaisedHand && (
@@ -506,10 +593,14 @@ function Screen() {
                         ))}
                     </div>
                 </div>
-                <div className="d_bottombar" style={{ cursor: "pointer" }}>
-                    <div className="d-flex justify-content-sm-between justify-content-center align-items-center">
+                <div className="d_bottombar"
+                    style={{
+                        cursor: "pointer", width: windowWidth > 768 && show ? `calc(100% - ${mainSectionMargin}px)` : '100%',
+                        transition: 'width 0.3s ease-in-out'
+                    }}>
+                    < div className="d-flex justify-content-sm-between justify-content-center align-items-center" >
                         {/* 1st div */}
-                        <div className='d-none d-sm-block'>
+                        < div className='d-none d-sm-block' >
                             <div className="d-flex align-items-center d_resposive">
                                 <div className="d_box me-sm-3 mb-2 mb-sm-0" onClick={toggleAudio}>
                                     <img src={isMuted ? offmicrophone : onmicrophone} alt="" />
@@ -637,97 +728,17 @@ function Screen() {
                                     }}>
                                     <img src={hand} alt="Raise hand" />
                                 </div>
-                                <div className="d_box" onClick={handleShow}>
+                                <div className="d_box" onClick={handleShow} style={{
+                                    backgroundColor: show ? '#202F41' : 'transparent',
+                                    transition: 'background-color 0.3s'
+                                }}>
                                     <img src={bar} alt="" />
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </div>
-            </section>
-
-            {/* Participants and Chat sidebar (Off-canvas) */}
-            {/* <Offcanvas show={show}
-                className='B_screen_offcanvas'
-                placement='end'
-                onHide={handleClose}
-                backdrop={windowWidth <= 768}
-                style={{
-                    width: windowWidth <= 768 ? '400px' : '400px',
-                    zIndex: windowWidth <= 768 ? 1050 : 1030
-                }}
-
-            >
-
-                <Offcanvas.Header closeButton>
-                    <Offcanvas.Title>Meeting Info</Offcanvas.Title>
-                </Offcanvas.Header>
-                <Offcanvas.Body>
-                    <div className="p-2">
-                        <h5>Meeting ID: {roomId}</h5>
-                        <hr />
-                        <h5>Participants ({participants.length})</h5>
-                        <ul className="list-unstyled">
-                            {participants.map(participant => (
-                                <li key={participant.id} className="my-2 d-flex align-items-center justify-content-between">
-                                    <div>
-                                        <span>{participant.name}</span>
-                                        {participant.isHost && participant.userId && <span className="ms-2 badge bg-primary">Host</span>}
-                                        {participant.id === socketRef.current?.id && <span className="ms-2">(You)</span>}
-                                    </div>
-                                    <div>
-                                        {participant.hasAudio ?
-                                            <img src={onmicrophone} className="d_control-icon me-2" alt="Mic on" width="20" /> :
-                                            <img src={offmicrophone} className="d_control-icon me-2" alt="Mic off" width="20" />
-                                        }
-                                        {participant.hasVideo ?
-                                            <img src={oncamera} className="d_control-icon" alt="Cam on" width="20" /> :
-                                            <img src={offcamera} className="d_control-icon" alt="Cam off" width="20" />
-                                        }
-                                    </div>
-                                </li>
-
-                            ))}
-                        </ul>
-                        <hr />
-                        <h5>Chat</h5>
-                        <div
-                            ref={messageContainerRef}
-                            className="chat-messages p-2"
-                            style={{ height: "200px", overflowY: "auto", border: "1px solid #ddd", borderRadius: "8px" }}
-                        >
-                            {messages.map((msg, index) => (
-                                <div
-                                    key={index}
-                                    className={`p-2 mb-2 rounded ${msg.sender === userName ? 'bg-primary text-white ms-auto' : 'bg-light'}`}
-                                    style={{ maxWidth: "80%" }}
-                                >
-                                    <div className="small fw-bold">{msg.sender}</div>
-                                    <div>{msg.message}</div>
-                                    <div className="small text-end">
-                                        {new Date(msg.timestamp).toLocaleTimeString([], {
-                                            hour: '2-digit',
-                                            minute: '2-digit'
-                                        })}
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                        <form onSubmit={handleSendMessage} className="mt-3 d-flex">
-                            <input
-                                type="text"
-                                className="form-control"
-                                value={newMessage}
-                                onChange={(e) => setNewMessage(e.target.value)}
-                                placeholder="Type a message..."
-                            />
-                            <button type="submit" className="btn btn-primary ms-2">
-                                <IoMdSend />
-                            </button>
-                        </form>
-                    </div>
-                </Offcanvas.Body>
-            </Offcanvas> */}
+                    </div >
+                </div >
+            </section >
 
             {/* {/ Offcanvas  /} */}
 
@@ -790,113 +801,123 @@ function Screen() {
                                         <IoSearch className=' position-absolute' style={{ top: "50%", transform: "translateY(-50%)", left: "15px", fontSize: "20px", color: "rgba(255, 255, 255, 0.7)" }} />
                                         <input
                                             type="text"
-                                            className="form-control text-white  ps-5"
+                                            className="form-control text-white j_search_Input ps-5"
                                             placeholder="Search..."
+                                            value={searchTerm}
+                                            onChange={(e) => setSearchTerm(e.target.value)}
                                             style={{ borderRadius: '5px', border: 'none', backgroundColor: "#202F41" }}
                                         />
                                     </div>
                                 </div>
                                 <div className="list-group B_screen_offcanvas " style={{ height: "82%", overflowY: "auto" }}>
-                                    {participants.map((participant) => (
-                                        console.log("participant", participant),
-                                        <div key={participant.id} className="list-group-item d-flex align-items-center">
-                                            <div className="rounded-circle B_circle d-flex justify-content-center align-items-center me-3"
-                                                style={{
-                                                    width: "40px",
-                                                    height: "40px",
-                                                    backgroundColor: `hsl(${participant.id.charCodeAt(0) * 60}, 70%, 45%)`,
-                                                    color: 'white',
-                                                    textTransform: 'uppercase'
-                                                }}>
-                                                {participant.initials}
-                                            </div>
-                                            <div className="flex-grow-1 B_participateName">
-                                                <div>{participant.name}</div>
-                                            </div>
-
-                                            {/* {/ {/ Display Host or Cohost label /} /} */}
-                                            {(participant.isHost || participant.isCohost) && (
-                                                <div className="me-3">
-                                                    <span className="px-3 py-1 rounded-pill text-white"
-                                                        style={{
-                                                            backgroundColor: "rgba(255, 255, 255, 0.2)",
-                                                            fontSize: "0.8rem"
-                                                        }}>
-                                                        {participant.isHost ? "Host" : "Cohost"}
-                                                    </span>
+                                    {filteredParticipants.length > 0 ? (
+                                        filteredParticipants.map((participant) => (
+                                            console.log("participant", participant),
+                                            <div key={participant.id} className="list-group-item d-flex align-items-center">
+                                                <div className="rounded-circle B_circle d-flex justify-content-center align-items-center me-3"
+                                                    style={{
+                                                        width: "40px",
+                                                        height: "40px",
+                                                        backgroundColor: `hsl(${participant.id.charCodeAt(0) * 60}, 70%, 45%)`,
+                                                        color: 'white',
+                                                        textTransform: 'uppercase'
+                                                    }}>
+                                                    {participant.initials}
                                                 </div>
-                                            )}
-
-                                            <div className="d-flex align-items-center">
-                                                <div className="d_box me-sm-3 mb-2 mb-sm-0"
-                                                    // onClick={() => toggleMicrophone1(participant.id)}
-                                                    style={{ cursor: "pointer" }}>
-                                                    <img src={participant.isMicrophoneOn ? onmicrophone : offmicrophone} alt="" />
+                                                <div className="flex-grow-1 B_participateName">
+                                                    <div>{participant.name}</div>
                                                 </div>
 
-                                                <div className="position-relative">
-                                                    <HiOutlineDotsVertical
-                                                        className='mt-1 cursor-pointer B_vertical'
-                                                        style={{ cursor: "pointer" }}
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            setActiveDropdown(activeDropdown === participant.id ? null : participant.id);
-                                                        }}
-                                                    />
-
-                                                    {activeDropdown === participant.id && (
-                                                        <div
-                                                            className="position-absolute end-0 bg-dark text-white rounded shadow py-2"
+                                                {/* {/ {/ Display Host or Cohost label /} /} */}
+                                                {(participant.isHost || participant.isCohost) && (
+                                                    <div className="me-3">
+                                                        <span className="px-3 py-1 rounded-pill text-white"
                                                             style={{
-                                                                zIndex: 1000,
-                                                                width: '150px',
-                                                                top: '100%',
-                                                                right: 0,
-                                                                cursor: "pointer "
+                                                                backgroundColor: "rgba(255, 255, 255, 0.2)",
+                                                                fontSize: "0.8rem"
+                                                            }}>
+                                                            {participant.isHost ? "Host" : "Cohost"}
+                                                        </span>
+                                                    </div>
+                                                )}
+
+                                                <div className="d-flex align-items-center">
+                                                    <div className="d_box me-sm-3 mb-2 mb-sm-0"
+                                                        onClick={() => toggleMicrophone(participant.id)}
+                                                        style={{ cursor: "pointer" }}>
+                                                        <img src={participant.isMicrophoneOn ? onmicrophone : offmicrophone} alt="" />
+                                                    </div>
+
+                                                    <div className="position-relative">
+                                                        <HiOutlineDotsVertical
+                                                            className='mt-1 cursor-pointer B_vertical'
+                                                            style={{ cursor: "pointer" }}
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                setActiveDropdown(activeDropdown === participant.id ? null : participant.id);
                                                             }}
-                                                        >
-                                                            {!participant.isHost && (
+                                                        />
+
+                                                        {activeDropdown === participant.id && (
+                                                            <div
+                                                                className="position-absolute end-0 bg-dark text-white rounded shadow py-2"
+                                                                style={{
+                                                                    zIndex: 1000,
+                                                                    width: '150px',
+                                                                    top: '100%',
+                                                                    right: 0,
+                                                                    cursor: "pointer "
+                                                                }}
+                                                            >
+                                                                {!participant.isHost && (
+                                                                    <div
+                                                                        className="px-3 py-2 hover-bg-secondary cursor-pointer"
+                                                                        onClick={() => makeHost(participant.id)}
+                                                                    >
+                                                                        Make host
+                                                                    </div>
+                                                                )}
+                                                                {!participant.isCohost && !participant.isHost && (
+                                                                    <div
+                                                                        className="px-3 py-2 hover-bg-secondary cursor-pointer"
+                                                                        onClick={() => makeCohost(participant.id)}
+                                                                    >
+                                                                        Make cohost
+                                                                    </div>
+                                                                )}
                                                                 <div
                                                                     className="px-3 py-2 hover-bg-secondary cursor-pointer"
-                                                                    onClick={() => makeHost(participant.id)}
-                                                                >
-                                                                    Make host
+                                                                    onClick={() => openRenameModal(participant)}>
+                                                                    Rename
                                                                 </div>
-                                                            )}
-                                                            {!participant.isCohost && !participant.isHost && (
+
+                                                                <div className="px-3 py-2 hover-bg-secondary cursor-pointer"
+                                                                    onClick={() => toggleMicrophone(participant.id)}
+                                                                >
+                                                                    {
+                                                                        participant.isMicrophoneOn ? "Mute" : "Unmute"
+                                                                    }
+                                                                </div>
+
                                                                 <div
                                                                     className="px-3 py-2 hover-bg-secondary cursor-pointer"
-                                                                    onClick={() => makeCohost(participant.id)}
+                                                                    onClick={() => removeParticipant(participant.id)}
                                                                 >
-                                                                    Make cohost
+                                                                    Remove
                                                                 </div>
-                                                            )}
-                                                            <div
-                                                                className="px-3 py-2 hover-bg-secondary cursor-pointer"
-                                                                onClick={() => openRenameModal(participant)}>
-                                                                Rename
                                                             </div>
-
-                                                            <div className="px-3 py-2 hover-bg-secondary cursor-pointer"
-                                                            // onClick={() => toggleMicrophone1(participant.id)}
-                                                            >
-                                                                {
-                                                                    participant.isMicrophoneOn ? "Mute" : "Unmute"
-                                                                }
-                                                            </div>
-
-                                                            <div
-                                                                className="px-3 py-2 hover-bg-secondary cursor-pointer"
-                                                                onClick={() => removeParticipant(participant.id)}
-                                                            >
-                                                                Remove
-                                                            </div>
-                                                        </div>
-                                                    )}
+                                                        )}
+                                                    </div>
                                                 </div>
                                             </div>
+                                        ))
+                                    ) : (
+                                        <div className="text-center py-4">
+                                            <p className="text-white-50 mb-0">
+                                                {searchTerm ? 'No users found' : 'No participants in the meeting'}
+                                            </p>
                                         </div>
-                                    ))}
+                                    )}
 
                                     {showRenameModal && (
                                         <div className="position-fixed top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center"
@@ -917,7 +938,7 @@ function Screen() {
                                                         <label className="form-label small mb-2 text-white-50 mb-2  ">Name</label>
                                                         <input
                                                             type="text"
-                                                            className="form-control  text-white border-0"
+                                                            className="form-control j_search_Input text-white border-0"
                                                             value={newName}
                                                             onChange={(e) => setNewName(e.target.value)}
                                                             style={{ padding: '10px', backgroundColor: "#202F41" }}
@@ -996,7 +1017,8 @@ function Screen() {
                                                     padding: '8px 12px',
                                                     borderRadius: '8px',
                                                     maxWidth: '250px',
-
+                                                    wordBreak: 'break-word',
+                                                    whiteSpace: 'pre-wrap'
                                                 }}>{msg.message}</div>
                                             </div>
                                         </div>
@@ -1008,7 +1030,7 @@ function Screen() {
                                         <form onSubmit={handleSendMessage} className="mt-3 d-flex">
                                             <input
                                                 type="text"
-                                                className="form-control text-white ps-3"
+                                                className="form-control j_search_Input text-white ps-3"
                                                 value={newMessage}
                                                 onChange={(e) => setNewMessage(e.target.value)}
                                                 placeholder="Write a message..."
