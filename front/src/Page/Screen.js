@@ -508,7 +508,7 @@ function Screen() {
 
     const debouncedStopTyping = debounce(() => {
         emitTypingStatus(false);
-    }, 2000);
+    }, 2500);
 
     // Render typing indicator
     const renderTypingIndicator = () => {
@@ -523,7 +523,12 @@ function Screen() {
         const displayText = `${typingNames.join(' & ')} is typing...`;
 
         return (
-            <div className="typing-indicator mb-2 ms-2" style={{ color: '#BFBFBF', fontSize: '13px' }}>
+            <div className="typing-indicator mb-2 ms-2 d-flex align-items-center" style={{ color: '#BFBFBF', fontSize: '13px' }}>
+                <div className="typing-dots me-1">
+                    <span className='j_typing_loader'></span>
+                    <span className='j_typing_loader'></span>
+                    <span className='j_typing_loader'></span>
+                </div>
                 {displayText}
             </div>
         );
