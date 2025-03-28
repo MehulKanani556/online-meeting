@@ -70,6 +70,7 @@ function Screen() {
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedParticipant, setSelectedParticipant] = useState(null);
     const [lastUnreadIndex, setLastUnreadIndex] = useState(-1);
+    const [maxVisibleParticipants, setMaxVisibleParticipants] = useState(9);
 
     // Refs
     const localStreamRef = useRef();
@@ -299,9 +300,6 @@ function Screen() {
         return 'multi-participants';
     };
 
-    // Set max visible participants based on screen size
-    const [maxVisibleParticipants, setMaxVisibleParticipants] = useState(9);
-
     useEffect(() => {
         const handleResize = () => {
             setMaxVisibleParticipants(window.innerWidth <= 425 ? 6 : 9);
@@ -316,7 +314,6 @@ function Screen() {
     const visibleParticipants = participants.slice(0, maxVisibleParticipants);
     const extraParticipants = participants.length > maxVisibleParticipants ?
         participants.length - (maxVisibleParticipants - 1) : 0;
-
 
     // Handle clickoutside for dropdown
     useEffect(() => {
@@ -341,7 +338,6 @@ function Screen() {
             return newState;
         });
     };
-
 
     const handleEmojiClick = (emoji) => {
         sendEmoji(emoji);
@@ -405,7 +401,6 @@ function Screen() {
                 }
             }
         }, 0);
-
         markMessagesAsRead();
     };
 
@@ -418,7 +413,6 @@ function Screen() {
     // Function to toggle participant's microphone
     const toggleMicrophone = (participantId) => {
         if (!socket) return;
-
         socket.emit('toggle-participant-audio', {
             roomId,
             participantId,

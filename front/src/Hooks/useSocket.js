@@ -11,13 +11,10 @@ export const useSocket = (userId, roomId, userName) => {
     const [emojis, setemojis] = useState([]);
     const [streams, setStreams] = useState({});
     const peerConnectionsRef = useRef({});
-    // Add this function near the other state declarations at the top
     const [remoteStreams, setRemoteStreams] = useState({});
     const [unreadMessages, setUnreadMessages] = useState(0);
     const [isChatOpen, setIsChatOpen] = useState(false);
     const [typingUsers, setTypingUsers] = useState([]);
-
-    // console.log("participants----------", participants);
 
     // Initialize socket connection
     useEffect(() => {
@@ -69,9 +66,6 @@ export const useSocket = (userId, roomId, userName) => {
                 hasAudio: false,
                 isHost: user.isHost
             }));
-
-            // console.log("formattedParticipants", formattedParticipants);
-
             setParticipants(formattedParticipants);
         });
 
@@ -86,7 +80,6 @@ export const useSocket = (userId, roomId, userName) => {
         // Handle chat messages
         socketRef.current.on('receive-message', (message) => {
             setMessages(prev => [...prev, message]);
-            // Increment unread count if chat is closed and message is from others
             if (!isChatOpen && message.sender !== userName) {
                 setUnreadMessages(prev => prev + 1);
             }
@@ -112,7 +105,7 @@ export const useSocket = (userId, roomId, userName) => {
 
         // Handle video status changes
         socketRef.current.on('video-status-updated', ({ userId, hasVideo }) => {
-            console.log('Video status updated:', userId, hasVideo); // Debug log
+            // console.log('Video status updated:', userId, hasVideo);
             setParticipants(prev => prev.map(participant =>
                 participant.id === userId
                     ? { ...participant, hasVideo }
@@ -394,7 +387,7 @@ export const useSocket = (userId, roomId, userName) => {
         emojis,
         streams,
         startStreaming,
-        remoteStreams,  // Add this
+        remoteStreams,
         unreadMessages,
         markMessagesAsRead,
         toggleChat,
