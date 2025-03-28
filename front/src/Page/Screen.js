@@ -60,6 +60,7 @@ function Screen() {
     const screenStreamRef = useRef();
     const localVideoRef = useRef();
     const peerConnectionsRef = useRef({});
+    const remoteVideoRefs = useRef({});
     const messageContainerRef = useRef();
 
 
@@ -151,39 +152,39 @@ function Screen() {
             return newMutedState;
         });
     };
+    useEffect(() => {
+        if (localVideoRef.current && localStreamRef.current && !isVideoOff) {
+            localVideoRef.current.srcObject = localStreamRef.current;
+        }
+    }, [localStreamRef.current, isVideoOff]);
 
+    // Modify the toggleVideo function
     const toggleVideo = () => {
-        if (!localStreamRef.current) return;
+        setIsVideoOff(prevState => {
+            const newVideoOffState = !prevState;
 
-        setIsVideoOff(prevVideoOff => {
-            const newVideoOffState = !prevVideoOff;
+            if (localStreamRef.current) {
+                const videoTrack = localStreamRef.current.getVideoTracks()[0];
+                if (videoTrack) {
+                    videoTrack.enabled = !newVideoOffState;
 
-            const videoTrack = localStreamRef.current.getVideoTracks()[0];
-            if (videoTrack) {
-                videoTrack.enabled = !newVideoOffState;
-
-                // Update local video display
-                if (localVideoRef.current) {
-                    localVideoRef.current.srcObject = localStreamRef.current;
-                }
-
-                // Start streaming if video is being turned on
-                if (!newVideoOffState) {
-                    startStreaming(localStreamRef.current);
-                }
-
-                // Emit video status change
-                if (socket) {
+                    // Update video status for all peers
                     socket.emit('video-status-change', {
                         roomId,
                         hasVideo: !newVideoOffState
                     });
+
+                    // Ensure local video display is updated
+                    if (localVideoRef.current) {
+                        localVideoRef.current.srcObject = localStreamRef.current;
+                    }
                 }
             }
-
             return newVideoOffState;
         });
     };
+
+
 
     // Share screen
     const toggleScreenShare = async () => {
@@ -467,9 +468,15 @@ function Screen() {
                                         muted
                                     /> */}
 
-                                    {participant.id === userId ? (
+                                    {/* {console.log("localVideoRef", localVideoRef)}
+                                    {console.log("participant.id === userId", participant.id === socket.id)}
+                                    {console.log("participant", participant.id, socket.id)} */}
+
+
+                                    {/* {participant.id === socket?.id ? (
                                         // Local user video
                                         !isVideoOff && localStreamRef.current ? (
+                                            alert("hello"),
                                             <video
                                                 id={`video-${participant.id}`}
                                                 ref={localVideoRef}
@@ -490,10 +497,12 @@ function Screen() {
                                     ) : (
                                         // Remote participant video
                                         participant.hasVideo ? (
+                                            alert("after"),
                                             <video
                                                 id={`video-${participant.id}`}
                                                 className="d_video-element"
                                                 autoPlay
+                                                ref={localVideoRef}
                                                 playsInline
                                             />
                                         ) : (
@@ -505,8 +514,8 @@ function Screen() {
                                                 {`${participant.name.charAt(0)}${participant.name.split(' ')[1] ? participant.name.split(' ')[1].charAt(0) : ''}`}
                                             </div>
                                         )
-                                    )}
-                                    {/* {participant.id === socketRef.current?.id ? (
+                                    )} */}
+                                    {participant.id === socket?.id ? (
                                         // Local user video
                                         !isVideoOff ? (
                                             <video
@@ -531,7 +540,9 @@ function Screen() {
                                             <video
                                                 id={`video-${participant.id}`}
                                                 className="d_video-element"
-                                                ref={localVideoRef}
+                                                ref={el => {
+                                                    if (el) remoteVideoRefs.current[participant.id] = el;
+                                                }}
                                                 autoPlay
                                                 playsInline
                                             />
@@ -544,7 +555,7 @@ function Screen() {
                                                 {`${participant.name.charAt(0)}${participant.name.split(' ')[1] ? participant.name.split(' ')[1].charAt(0) : ''}`}
                                             </div>
                                         )
-                                    )} */}
+                                    )}
                                     <div className="d_controls-top">
                                         <div className="d_controls-container">
                                             {participant.hasRaisedHand && (

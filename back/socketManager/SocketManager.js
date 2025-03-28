@@ -168,8 +168,8 @@ async function initializeSocket(io) {
                     id: socket.id,
                     userId,
                     userName,
-                    hasVideo: false, // Set to false initially
-                    hasAudio: false, // Set to false initially
+                    hasVideo: true, // Change to true for initial state
+                    hasAudio: false,
                     isHost: userId === hostUserId
                 });
 
@@ -178,8 +178,8 @@ async function initializeSocket(io) {
                     socketId: socket.id,
                     userId,
                     userName,
-                    hasVideo: false, // Send hasVideo status as false
-                    hasAudio: false, // Send hasAudio status as false
+                    hasVideo: true, // Change to true for initial state
+                    hasAudio: false,
                     isHost: userId === hostUserId
                 });
 

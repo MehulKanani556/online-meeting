@@ -11,6 +11,8 @@ export const useSocket = (userId, roomId, userName) => {
     const [emojis, setemojis] = useState([]);
     const [streams, setStreams] = useState({});
     const peerConnectionsRef = useRef({});
+    // Add this function near the other state declarations at the top
+    const [remoteStreams, setRemoteStreams] = useState({});
 
     // console.log("participants----------", participants);
 
@@ -140,13 +142,13 @@ export const useSocket = (userId, roomId, userName) => {
 
         // Handle participant rename
         socketRef.current.on('participant-renamed', ({ participantId, newName }) => {
-            setParticipants(prev => prev.map(participant => 
-                participant.id === participantId 
-                    ? { 
-                        ...participant, 
+            setParticipants(prev => prev.map(participant =>
+                participant.id === participantId
+                    ? {
+                        ...participant,
                         name: newName,
                         initials: `${newName.charAt(0)}${newName.split(' ')[1] ? newName.split(' ')[1].charAt(0) : ''}`
-                    } 
+                    }
                     : participant
             ));
         });
@@ -265,6 +267,22 @@ export const useSocket = (userId, roomId, userName) => {
         });
     };
 
+    // Add the handleRemoteStream function before createPeerConnection
+    const handleRemoteStream = (stream, userId) => {
+        setRemoteStreams(prev => ({
+            ...prev,
+            [userId]: stream
+        }));
+
+        // Update participant video status
+        setParticipants(prev => prev.map(participant =>
+            participant.id === userId
+                ? { ...participant, hasVideo: true }
+                : participant
+        ));
+    };
+
+    // Modify the peerConnection.ontrack event handler
     const createPeerConnection = (userId) => {
         const peerConnection = new RTCPeerConnection({
             iceServers: [
@@ -282,12 +300,10 @@ export const useSocket = (userId, roomId, userName) => {
             }
         };
 
-        // Handle remote stream
+        // Handle remote stream with correct userId
         peerConnection.ontrack = (event) => {
-            setStreams(prev => ({
-                ...prev,
-                [userId]: event.streams[0]
-            }));
+            const remoteStream = event.streams[0];
+            handleRemoteStream(remoteStream, userId);
         };
 
         peerConnectionsRef.current[userId] = peerConnection;
@@ -339,5 +355,6 @@ export const useSocket = (userId, roomId, userName) => {
         emojis,
         streams,
         startStreaming,
+        remoteStreams,  // Add this
     };
 }
