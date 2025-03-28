@@ -4,6 +4,7 @@ const schedule = require('../models/schedule.modal')
 const onlineUsers = new Map();
 const onlineEmails = new Map();
 const rooms = {};
+const typingUsers = new Map(); // Store typing status for each room
 // console.log("onlineUsers", onlineUsers);
 
 async function sendReminder(socket) {
@@ -340,10 +341,41 @@ async function initializeSocket(io) {
             }
         });
 
+        socket.on('user-typing', ({ roomId, userId, userName, isTyping }) => {
+            // Get or initialize typing users for this room
+            let roomTypingUsers = typingUsers.get(roomId) || new Map();
+            
+            if (isTyping) {
+                // Add typing user
+                roomTypingUsers.set(userId, { userId, userName });
+            } else {
+                // Remove typing user
+                roomTypingUsers.delete(userId);
+            }
+            
+            typingUsers.set(roomId, roomTypingUsers);
+            
+            // Emit updated typing status to room
+            io.to(roomId).emit('typing-status', {
+                users: Array.from(roomTypingUsers.values())
+            });
+        });
+
         sendReminder(socket);
 
         // Handle disconnection
-        socket.on("disconnect", () => handleDisconnect(socket));
+        socket.on("disconnect", () => {
+            handleDisconnect(socket);
+            // Clean up typing status when user disconnects
+            typingUsers.forEach((roomUsers, roomId) => {
+                if (roomUsers.has(socket.userId)) {
+                    roomUsers.delete(socket.userId);
+                    io.to(roomId).emit('typing-status', {
+                        users: Array.from(roomUsers.values())
+                    });
+                }
+            });
+        });
     });
 }
 

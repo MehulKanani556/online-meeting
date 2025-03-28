@@ -506,3 +506,13 @@
         transform: translateY(-2px) rotate(0deg);
     }
 }
+
+.typing-indicator {
+    color: #BFBFBF;
+    animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}

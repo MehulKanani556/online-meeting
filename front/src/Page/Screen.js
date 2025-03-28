@@ -32,7 +32,23 @@ function Screen() {
     const userName = currUser?.name || 'User';
 
     // Use the socket hook
-    const { socket, isConnected, participants, setParticipants, messages, sendMessage, emojis, sendEmoji, startStreaming } = useSocket(userId, roomId, userName);
+    const {
+        socket,
+        isConnected,
+        participants,
+        setParticipants,
+        messages,
+        sendMessage,
+        emojis,
+        sendEmoji,
+        unreadMessages,
+        markMessagesAsRead,
+        toggleChat,
+        isChatOpen,
+        setIsChatOpen,
+        typingUsers,
+        emitTypingStatus,
+    } = useSocket(userId, roomId, userName);
 
 
     // WebRTC State
@@ -51,19 +67,17 @@ function Screen() {
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
     const [newName, setNewName] = useState('');
     const [showRenameModal, setShowRenameModal] = useState(false);
+    const [searchTerm, setSearchTerm] = useState('');
     const [selectedParticipant, setSelectedParticipant] = useState(null);
-
+    const [lastUnreadIndex, setLastUnreadIndex] = useState(-1);
 
     // Refs
-    const socketRef = useRef();
     const localStreamRef = useRef();
     const screenStreamRef = useRef();
     const localVideoRef = useRef();
     const peerConnectionsRef = useRef({});
     const remoteVideoRefs = useRef({});
     const messageContainerRef = useRef();
-
-
 
     // Get current user data
     useEffect(() => {
@@ -79,20 +93,16 @@ function Screen() {
                     video: true
                 });
 
-                // console.log('Stream obtained:', stream); // Debug log
-                // console.log('Video tracks:', stream.getVideoTracks()); // Debug log
-
                 localStreamRef.current = stream;
 
                 const videoTrack = stream.getVideoTracks()[0];
                 if (videoTrack) {
                     videoTrack.enabled = !isVideoOff;
-                    // console.log('Initial video track enabled:', !isVideoOff); // Debug log
                 }
 
                 if (localVideoRef.current) {
                     localVideoRef.current.srcObject = stream;
-                    console.log('Video element source set'); // Debug log
+                    console.log('Video element source set');
                 }
 
             } catch (error) {
@@ -118,7 +128,6 @@ function Screen() {
             const videoTrack = localStreamRef.current.getVideoTracks()[0];
             if (videoTrack) {
                 videoTrack.enabled = !isVideoOff;
-                // console.log('Video track enabled:', !isVideoOff); // Debug log
             }
         }
     }, [isVideoOff]);
@@ -152,6 +161,7 @@ function Screen() {
             return newMutedState;
         });
     };
+
     useEffect(() => {
         if (localVideoRef.current && localStreamRef.current && !isVideoOff) {
             localVideoRef.current.srcObject = localStreamRef.current;
@@ -183,8 +193,6 @@ function Screen() {
             return newVideoOffState;
         });
     };
-
-
 
     // Share screen
     const toggleScreenShare = async () => {
@@ -357,13 +365,54 @@ function Screen() {
         }
     }, [show, windowWidth]);
 
+    // Add this useEffect for handling auto-scroll and unread messages
+    useEffect(() => {
+        if (messageContainerRef.current) {
+            // If chat is open, scroll to bottom
+            if (isChatOpen) {
+                messageContainerRef.current.scrollTop = messageContainerRef.current.scrollHeight;
+            }
+            // If chat was closed and now opened, scroll to first unread message
+            else if (show && unreadMessages > 0) {
+                const firstUnreadIndex = messages.length - unreadMessages;
+                setLastUnreadIndex(firstUnreadIndex);
+                const unreadElement = messageContainerRef.current.children[firstUnreadIndex];
+                if (unreadElement) {
+                    unreadElement.scrollIntoView({ behavior: 'smooth' });
+                }
+            }
+        }
+    }, [messages, show, isChatOpen, unreadMessages]);
+
+    // Modify handleShow to include scroll behavior
     const handleShow = () => {
         setShow(true);
+        setIsChatOpen(true);
+
+        // Wait for next tick to ensure DOM is updated
+        setTimeout(() => {
+            if (messageContainerRef.current) {
+                if (unreadMessages > 0) {
+                    const firstUnreadIndex = messages.length - unreadMessages;
+                    setLastUnreadIndex(firstUnreadIndex);
+                    const unreadElement = messageContainerRef.current.children[firstUnreadIndex];
+                    if (unreadElement) {
+                        unreadElement.scrollIntoView({ behavior: 'smooth' });
+                    }
+                } else {
+                    // If no unread messages, scroll to bottom
+                    messageContainerRef.current.scrollTop = messageContainerRef.current.scrollHeight;
+                }
+            }
+        }, 0);
+
+        markMessagesAsRead();
     };
 
     const handleClose = () => {
         setShow(false);
         setMainSectionMargin(0);
+        setIsChatOpen(false);
     };
 
     // Function to toggle participant's microphone
@@ -434,14 +483,51 @@ function Screen() {
         setActiveDropdown(null);
     };
 
-
-    const [searchTerm, setSearchTerm] = useState('');
-
     // Add this function to filter participants
     const filteredParticipants = participants.filter(participant =>
         participant.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
+    // Add debounce function for typing
+    const debounce = (func, wait) => {
+        let timeout;
+        return (...args) => {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => func.apply(this, args), wait);
+        };
+    };
+
+    // Handle input changes with typing indicator
+    const handleMessageInput = (e) => {
+        setNewMessage(e.target.value);
+        emitTypingStatus(true);
+
+        // Stop typing indicator after 1 second of no input
+        debouncedStopTyping();
+    };
+
+    const debouncedStopTyping = debounce(() => {
+        emitTypingStatus(false);
+    }, 2000);
+
+    // Render typing indicator
+    const renderTypingIndicator = () => {
+        if (typingUsers.length === 0) return null;
+
+        const typingNames = typingUsers
+            .filter(user => user.userId !== userId)
+            .map(user => user.userName);
+
+        if (typingNames.length === 0) return null;
+
+        const displayText = `${typingNames.join(' & ')} is typing...`;
+
+        return (
+            <div className="typing-indicator mb-2 ms-2" style={{ color: '#BFBFBF', fontSize: '13px' }}>
+                {displayText}
+            </div>
+        );
+    };
 
     return (
         <>
@@ -468,53 +554,6 @@ function Screen() {
                                         muted
                                     /> */}
 
-                                    {/* {console.log("localVideoRef", localVideoRef)}
-                                    {console.log("participant.id === userId", participant.id === socket.id)}
-                                    {console.log("participant", participant.id, socket.id)} */}
-
-
-                                    {/* {participant.id === socket?.id ? (
-                                        // Local user video
-                                        !isVideoOff && localStreamRef.current ? (
-                                            alert("hello"),
-                                            <video
-                                                id={`video-${participant.id}`}
-                                                ref={localVideoRef}
-                                                className="d_video-element"
-                                                autoPlay
-                                                playsInline
-                                                muted
-                                            />
-                                        ) : (
-                                            <div className="d_avatar-circle"
-                                                style={{
-                                                    textTransform: 'uppercase',
-                                                    backgroundColor: `hsl(${participant.id.charCodeAt(0) * 60}, 70%, 45%)`
-                                                }}>
-                                                {`${participant.name.charAt(0)}${participant.name.split(' ')[1] ? participant.name.split(' ')[1].charAt(0) : ''}`}
-                                            </div>
-                                        )
-                                    ) : (
-                                        // Remote participant video
-                                        participant.hasVideo ? (
-                                            alert("after"),
-                                            <video
-                                                id={`video-${participant.id}`}
-                                                className="d_video-element"
-                                                autoPlay
-                                                ref={localVideoRef}
-                                                playsInline
-                                            />
-                                        ) : (
-                                            <div className="d_avatar-circle"
-                                                style={{
-                                                    textTransform: 'uppercase',
-                                                    backgroundColor: `hsl(${participant.id.charCodeAt(0) * 60}, 70%, 45%)`
-                                                }}>
-                                                {`${participant.name.charAt(0)}${participant.name.split(' ')[1] ? participant.name.split(' ')[1].charAt(0) : ''}`}
-                                            </div>
-                                        )
-                                    )} */}
                                     {participant.id === socket?.id ? (
                                         // Local user video
                                         !isVideoOff ? (
@@ -694,9 +733,20 @@ function Screen() {
                                             <img src={hand} alt="" className="me-2" />
                                             <span>Raise Hand</span>
                                         </div>
-                                        <div className="d-flex align-items-center p-2">
+                                        <div className="d-flex align-items-center p-2" onClick={handleShow}>
                                             <img src={bar} alt="" className="me-2" />
                                             <span>Chat</span>
+                                            {unreadMessages > 0 && (
+                                                <span className="ms-2 badge rounded-pill" style={{
+                                                    padding: "5px",
+                                                    width: "25px",
+                                                    height: "25px",
+                                                    fontSize: "14px",
+                                                    background: 'rgb(225, 43, 45)',
+                                                }}>
+                                                    {unreadMessages}
+                                                </span>
+                                            )}
                                         </div>
                                     </div>
                                 )}
@@ -739,11 +789,23 @@ function Screen() {
                                     }}>
                                     <img src={hand} alt="Raise hand" />
                                 </div>
-                                <div className="d_box" onClick={handleShow} style={{
+                                <div className="d_box position-relative" onClick={handleShow} style={{
                                     backgroundColor: show ? '#202F41' : 'transparent',
                                     transition: 'background-color 0.3s'
                                 }}>
                                     <img src={bar} alt="" />
+                                    {unreadMessages > 0 && (
+                                        <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill"
+                                            style={{
+                                                padding: '3px',
+                                                width: '25px',
+                                                height: '25px',
+                                                border: '2px solid #12161C',
+                                                background: '#E12B2D'
+                                            }}>
+                                            {unreadMessages}
+                                        </span>
+                                    )}
                                 </div>
                             </div>
                         </div>
@@ -839,7 +901,7 @@ function Screen() {
                                                     <div>{participant.name}</div>
                                                 </div>
 
-                                                {/* {/ {/ Display Host or Cohost label /} /} */}
+                                                {/* Display Host or Cohost label */}
                                                 {(participant.isHost || participant.isCohost) && (
                                                     <div className="me-3">
                                                         <span className="px-3 py-1 rounded-pill text-white"
@@ -1003,7 +1065,9 @@ function Screen() {
                             <div className="chat-container h-100 d-flex flex-column">
                                 <div className="chat-messages flex-grow-1" ref={messageContainerRef} style={{ overflowY: 'auto' }}>
                                     {messages.map((msg, index) => (
-                                        <div key={index} className='d-flex align-items-start mb-3'>
+                                        <div key={index}
+                                            className={`d-flex align-items-start me-2 mb-3 ${index === lastUnreadIndex ? 'first-unread' : ''}`}
+                                        >
                                             {msg.sender !== userName && (
                                                 <div className="chat-avatar me-2" style={{
                                                     backgroundColor: msg.sender === userName ? '#2B7982' : '#4A90E2',
@@ -1034,7 +1098,14 @@ function Screen() {
                                             </div>
                                         </div>
                                     ))}
+                                    {lastUnreadIndex >= 0 && (
+                                        <div className="unread-messages-divider">
+                                            <span>Unread Messages</span>
+                                        </div>
+                                    )}
                                 </div>
+
+                                {renderTypingIndicator()}
 
                                 <div className="B_search-container  mb-3" >
                                     <div className="position-relative B_input_search B_input_search22  mx-auto">
@@ -1043,7 +1114,7 @@ function Screen() {
                                                 type="text"
                                                 className="form-control j_search_Input text-white ps-3"
                                                 value={newMessage}
-                                                onChange={(e) => setNewMessage(e.target.value)}
+                                                onChange={handleMessageInput}
                                                 placeholder="Write a message..."
                                                 style={{ borderRadius: '5px', border: 'none', backgroundColor: "#202F41" }}
                                             />

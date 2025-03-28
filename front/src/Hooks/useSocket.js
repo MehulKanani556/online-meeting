@@ -13,6 +13,9 @@ export const useSocket = (userId, roomId, userName) => {
     const peerConnectionsRef = useRef({});
     // Add this function near the other state declarations at the top
     const [remoteStreams, setRemoteStreams] = useState({});
+    const [unreadMessages, setUnreadMessages] = useState(0);
+    const [isChatOpen, setIsChatOpen] = useState(false);
+    const [typingUsers, setTypingUsers] = useState([]);
 
     // console.log("participants----------", participants);
 
@@ -83,7 +86,10 @@ export const useSocket = (userId, roomId, userName) => {
         // Handle chat messages
         socketRef.current.on('receive-message', (message) => {
             setMessages(prev => [...prev, message]);
-
+            // Increment unread count if chat is closed and message is from others
+            if (!isChatOpen && message.sender !== userName) {
+                setUnreadMessages(prev => prev + 1);
+            }
         });
 
         // Handle received emojis
@@ -167,13 +173,21 @@ export const useSocket = (userId, roomId, userName) => {
             ));
         });
 
+        // Listen for typing status
+        socketRef.current.on('typing-status', ({ users }) => {
+            setTypingUsers(users);
+        });
+
         return () => {
             if (socketRef.current) {
                 socketRef.current.disconnect();
                 socketRef.current = null;
             }
+            if (socketRef.current) {
+                socketRef.current.off('typing-status');
+            }
         };
-    }, [userId, roomId, userName]);
+    }, [userId, roomId, userName, isChatOpen]);
 
     // Helper function to send a message
     const sendMessage = (message) => {
@@ -340,6 +354,31 @@ export const useSocket = (userId, roomId, userName) => {
         });
     }, []);
 
+    // Add function to mark messages as read
+    const markMessagesAsRead = () => {
+        setUnreadMessages(0);
+    };
+
+    // Add function to toggle chat
+    const toggleChat = () => {
+        setIsChatOpen(prev => !prev);
+        if (!isChatOpen) {
+            markMessagesAsRead();
+        }
+    };
+
+    // Add function to emit typing status
+    const emitTypingStatus = (isTyping) => {
+        if (!socketRef.current) return;
+
+        socketRef.current.emit('user-typing', {
+            roomId,
+            userId,
+            userName,
+            isTyping
+        });
+    };
+
     return {
         socket: socketRef.current,
         isConnected,
@@ -356,5 +395,12 @@ export const useSocket = (userId, roomId, userName) => {
         streams,
         startStreaming,
         remoteStreams,  // Add this
+        unreadMessages,
+        markMessagesAsRead,
+        toggleChat,
+        isChatOpen,
+        setIsChatOpen,
+        typingUsers,
+        emitTypingStatus,
     };
 }
