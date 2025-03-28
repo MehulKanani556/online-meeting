@@ -528,8 +528,8 @@ function Screen() {
                                         ) : (
                                             <div className="d_avatar-circle"
                                                 style={{
-                                                    textTransform: 'capitalize',
-                                                    backgroundColor: `hsl(60, 70%, 45%)`
+                                                    textTransform: 'uppercase',
+                                                    backgroundColor: `hsl(${participant.id.charCodeAt(0) * 60}, 70%, 45%)`
                                                 }}>
                                                 {`${participant.name.charAt(0)}${participant.name.split(' ')[1] ? participant.name.split(' ')[1].charAt(0) : ''}`}
                                             </div>
@@ -549,7 +549,7 @@ function Screen() {
                                         ) : (
                                             <div className="d_avatar-circle"
                                                 style={{
-                                                    textTransform: 'capitalize',
+                                                    textTransform: 'uppercase',
                                                     backgroundColor: `hsl(${participant.id.charCodeAt(0) * 60}, 70%, 45%)`
                                                 }}>
                                                 {`${participant.name.charAt(0)}${participant.name.split(' ')[1] ? participant.name.split(' ')[1].charAt(0) : ''}`}

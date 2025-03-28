@@ -257,7 +257,14 @@ function Home() {
               </div>
               <div className="col-4 g-5 ">
                 <div className="j_home_cards" type="button"
-                  onClick={() => { setActiveItem('Join Meeting'); handlejoinshow() }}
+                  onClick={() => {
+                    if (!gettoken || !userId) {
+                      alert('Please login to Join a meeting');
+                      return;
+                    }
+                    setActiveItem('Join Meeting');
+                    handlejoinshow()
+                  }}
                   style={{
                     border: activeItem === 'Join Meeting' ? '2px solid #bfbfbf' : 'none',
                   }}>
@@ -862,10 +869,6 @@ function Home() {
             </Formik>
           </Modal.Body>
         </Modal>
-
-        {
-          console.log("error", error)
-        }
 
         {/* ============================ join Meeting Modal ============================ */}
         <Modal
