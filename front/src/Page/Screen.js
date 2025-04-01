@@ -528,6 +528,11 @@ function Screen() {
         );
     };
 
+    const handleTextareaResize = (e) => {
+        e.target.style.height = 'auto';
+        e.target.style.height = Math.min(120, e.target.scrollHeight) + 'px';
+    };
+
     return (
         <>
             <section className="d_mainsec"
@@ -579,6 +584,7 @@ function Screen() {
                                                 id={`video-${participant.id}`}
                                                 className="d_video-element"
                                                 ref={el => {
+                                                    console.log("ele",el)
                                                     if (el) remoteVideoRefs.current[participant.id] = el;
                                                 }}
                                                 autoPlay
@@ -1109,17 +1115,28 @@ function Screen() {
                                 <div className="B_search-container  mb-3" >
                                     <div className="position-relative B_input_search B_input_search22  mx-auto">
                                         <form onSubmit={handleSendMessage} className="mt-3 d-flex">
-                                            <input
-                                                type="text"
-                                                className="form-control j_search_Input text-white ps-3"
-                                                value={newMessage}
-                                                onChange={handleMessageInput}
-                                                placeholder="Write a message..."
-                                                style={{ borderRadius: '5px', border: 'none', backgroundColor: "#202F41" }}
-                                            />
-                                            <button type="submit" className="position-absolute B_sendMsg">
-                                                <IoMdSend />
-                                            </button>
+                                            <div className='B_send_msginput j_search_Input'>
+                                            <textarea
+                                                    type="text"
+                                                    className="form-control text-white d_foucscolor B_send_msginput j_search_Input ps-3"
+                                                    value={newMessage}
+                                                    onChange={(e) => {
+                                                        handleMessageInput(e);
+                                                        handleTextareaResize(e);
+                                                    }}
+                                                    onInput={handleTextareaResize}
+                                                    onScroll={(e) => {
+                                                        e.target.style.paddingRight = '30px';
+                                                    }}
+                                                    style={{
+                                                        paddingRight: '50px',
+                                                    }}
+                                                    placeholder="Write a message..."
+                                                />
+                                                <button type="submit" className="position-absolute B_sendMsg">
+                                                    <IoMdSend />
+                                                </button>
+                                            </div>
                                         </form>
                                     </div>
                                 </div>
@@ -1139,9 +1156,6 @@ function Screen() {
                     </div>
                 ))}
             </div>
-
-
-
 
         </>
     );

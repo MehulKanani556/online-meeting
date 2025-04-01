@@ -283,13 +283,42 @@
     width: 95%;
 }
 
+.B_send_msginput {
+    border-radius: 5px;
+    border: none;
+    background-color: #202F41;
+    color: #fff;
+    min-height: 45px;
+    max-height: 120px;
+    /* padding: 10px 15px; */
+    font-size: 14px;
+    width: 100%;
+    resize: none;
+    overflow-y: auto;
+    line-height: 1.4;
+
+}
+.d_foucscolor {
+    width: 349px;
+}
+.d_foucscolor::placeholder{
+    color: #fff;
+}
+
+.d_foucscolor:focus{
+    background-color: #202F41;
+    color: #fff;
+}
+
 .B_sendMsg {
-    top: 12%;
+    position: absolute;
+    top: 50%;
+    right: 20px;
+    transform: translateY(-50%);
     font-size: 22px;
     background: transparent;
     border: none;
     color: white;
-    right: 10px;
 }
 
 
