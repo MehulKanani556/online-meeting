@@ -12,331 +12,349 @@ import { Button, Modal } from 'react-bootstrap';
 import { IoClose, IoSearch } from 'react-icons/io5';
 import { IMAGE_URL } from '../Utils/baseUrl';
 import { useDispatch, useSelector } from 'react-redux';
-import { createschedule } from '../Redux/Slice/schedule.slice';
+import { createschedule, getAllschedule } from '../Redux/Slice/schedule.slice';
 import { getAllUsers } from '../Redux/Slice/user.slice';
 
 
 const localizer = momentLocalizer(moment);
 
 
-const events = [
-    {
-        title: 'Project Meeting',
-        start: new Date(2025, 2, 11, 8, 15), // march 11, 2025, 8:15 PM
-        end: new Date(2025, 2, 11, 9, 30),   // march 11, 2025, 9:30 PM
-    },
-    {
-        title: 'Online Meeting',
-        start: new Date(2025, 2, 15, 18, 15), // march 15, 2025, 6:15 PM
-        end: new Date(2025, 2, 15, 20, 30),   // march 15, 2025, 8:30 PM
-    },
-    {
-        title: 'Project Meeting',
-        start: new Date(2025, 2, 26, 11, 45), // march 26, 2025, 11:45 AM
-        end: new Date(2025, 2, 26, 12, 45),   // march 26, 2025, 12:45 PM
-    },
-    {
-        title: 'Online Meeting',
-        start: new Date(2025, 2, 26, 13, 45), // march 26, 2025, 1:45 PM
-        end: new Date(2025, 2, 26, 14, 45),   // march 26, 2025, 2:45 PM
-    },
-    {
-        title: 'Online Meeting',
-        start: new Date(2025, 3, 10, 18, 15), // apr 10, 2025, 6:15 PM
-        end: new Date(2025, 3, 10, 20, 30),   // apr 10, 2025, 8:30 PM
-    },
-    {
-        title: 'Project Meeting',
-        start: new Date(2025, 3, 24, 11, 45), // apr 24, 2025, 11:45 AM
-        end: new Date(2025, 3, 24, 12, 45),   // apr 24, 2025, 12:45 PM
-    },
-    {
-        title: 'Online Meeting',
-        start: new Date(2025, 3, 29, 13, 45), // apr 29, 2025, 1:45 PM
-        end: new Date(2025, 3, 29, 14, 45),   // apr 29, 2025, 2:45 PM
-    },
-]
-
 const CustomToolbar = (toolbar) => {
-    const goToCurrent = () => {
-        toolbar.onNavigate('TODAY');
-    };
+  const goToCurrent = () => {
+    toolbar.onNavigate('TODAY');
+  };
 
-    const goToBack = () => {
-        toolbar.onNavigate('PREV');
-    };
+  const goToBack = () => {
+    toolbar.onNavigate('PREV');
+  };
 
-    const goToNext = () => {
-        toolbar.onNavigate('NEXT');
-    };
-
-
-
-    const label = () => {
-        const date = moment(toolbar.date);
-        switch (toolbar.view) {
-            case 'week':
-                const weekStart = date.clone().startOf('week').format('DD MMM YYYY');
-                const weekEnd = date.clone().endOf('week').format('DD MMM YYYY');
-                return <span>{`${weekStart} - ${weekEnd}`}</span>;
-            case 'day':
-                return <span>{date.format('DD MMMM  YYYY')}</span>;
-
-            default:
-                return <span>{date.format('MMMM YYYY')}</span>;
-        }
-    };
+  const goToNext = () => {
+    toolbar.onNavigate('NEXT');
+  };
 
 
 
-    return (
-        <div className="rbc-toolbar j_rbc_toolbar">
-            <span className="rbc-btn-group j_LR_rbc_btn">
+  const label = () => {
+    const date = moment(toolbar.date);
+    switch (toolbar.view) {
+      case 'week':
+        const weekStart = date.clone().startOf('week').format('DD MMM YYYY');
+        const weekEnd = date.clone().endOf('week').format('DD MMM YYYY');
+        return <span>{`${weekStart} - ${weekEnd}`}</span>;
+      case 'day':
+        return <span>{date.format('DD MMMM  YYYY')}</span>;
 
-                <button type="button" onClick={goToBack}>
-                    <FaChevronLeft />
-                </button>
+      default:
+        return <span>{date.format('MMMM YYYY')}</span>;
+    }
+  };
 
-                {/* <button type="button" onClick={goToCurrent}>
+
+
+  return (
+    <div className="rbc-toolbar j_rbc_toolbar">
+      <span className="rbc-btn-group j_LR_rbc_btn">
+
+        <button type="button" onClick={goToBack}>
+          <FaChevronLeft />
+        </button>
+
+        {/* <button type="button" onClick={goToCurrent}>
                     Today
                 </button> */}
 
-                <span className="rbc-toolbar-label j_toolbar_label" style={{ fontWeight: 'bold' }}>
-                    {label()}
-                </span>
-                <button type="button" onClick={goToNext}>
-                    <FaChevronRight />
-                </button>
-            </span>
-            <span className="rbc-btn-group j_btn_rbc_group">
-                {toolbar.views.map(view => (
-                    <button
-                        key={view}
-                        type="button"
-                        className={view === toolbar.view ? 'rbc-active' : ''}
-                        onClick={() => toolbar.onView(view)}
-                        style={{
-                            backgroundColor: view === toolbar.view ? '#2C343D' : '',
-                            color: view === toolbar.view ? '#fff' : '#BFBFBF',
-                            border: 'none',
-                            borderRadius: '4px',
-                            padding: '5px 20px',
-                            margin: '0 2px',
-                            textTransform: 'capitalize'
-                        }}
-                    >
-                        {view}
-                    </button>
-                ))}
-            </span>
+        <span className="rbc-toolbar-label j_toolbar_label" style={{ fontWeight: 'bold' }}>
+          {label()}
+        </span>
+        <button type="button" onClick={goToNext}>
+          <FaChevronRight />
+        </button>
+      </span>
+      <span className="rbc-btn-group j_btn_rbc_group">
+        {toolbar.views.map(view => (
+          <button
+            key={view}
+            type="button"
+            className={view === toolbar.view ? 'rbc-active' : ''}
+            onClick={() => toolbar.onView(view)}
+            style={{
+              backgroundColor: view === toolbar.view ? '#2C343D' : '',
+              color: view === toolbar.view ? '#fff' : '#BFBFBF',
+              border: 'none',
+              borderRadius: '4px',
+              padding: '5px 20px',
+              margin: '0 2px',
+              textTransform: 'capitalize'
+            }}
+          >
+            {view}
+          </button>
+        ))}
+      </span>
 
-            <div className="j_schedule_buttons">
-                <button className="btn btn-outline-light j_nav_btn" onClick={toolbar.onScheduleShow}>
-                    Schedule Now
-                </button>
-                <button className="btn btn-outline-light j_nav_btn">
-                    Meet Now
-                </button>
-            </div>
-        </div>
-    );
+      <div className="j_schedule_buttons">
+        <button className="btn btn-outline-light j_nav_btn" onClick={toolbar.onScheduleShow}>
+          Schedule Now
+        </button>
+        <button className="btn btn-outline-light j_nav_btn">
+          Meet Now
+        </button>
+      </div>
+    </div>
+  );
 };
 
 
 function Schedule() {
 
-    const [selectedReminders, setSelectedReminders] = useState([]);
-    const [filteredUsers, setFilteredUsers] = useState([]);
-    const [selectedDays, setSelectedDays] = useState([]);
-    const [ScheduleModal, setScheduleModal] = useState(false);
-    const [showDropdown, setShowDropdown] = useState(false);
-    const [customModal, setcustomModal] = useState(false);
-    const [endsSelection, setEndsSelection] = useState("0");
-    const [repeatType, setRepeatType] = useState('0');
-    const [RepeatEvery1, setRepeatEvery1] = useState(1);
-    const [RepeatEvery, setRepeatEvery] = useState(1);
-    const userId = sessionStorage.getItem('userId')
-    const gettoken = sessionStorage.getItem('token')
-    const IMG_URL = IMAGE_URL
-    const dispatch = useDispatch();
-    const dropdownRef = useRef(null);
-    const searchInputRef = useRef(null);
-    const allusers = useSelector((state) => state.user.allusers);
+  const [selectedReminders, setSelectedReminders] = useState([]);
+  const [filteredUsers, setFilteredUsers] = useState([]);
+  const [selectedDays, setSelectedDays] = useState([]);
+  const [ScheduleModal, setScheduleModal] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [customModal, setcustomModal] = useState(false);
+  const [endsSelection, setEndsSelection] = useState("0");
+  const [repeatType, setRepeatType] = useState('0');
+  const [RepeatEvery1, setRepeatEvery1] = useState(1);
+  const [RepeatEvery, setRepeatEvery] = useState(1);
+  const userId = sessionStorage.getItem('userId')
+  const gettoken = sessionStorage.getItem('token')
+  const IMG_URL = IMAGE_URL
+  const dispatch = useDispatch();
+  const dropdownRef = useRef(null);
+  const searchInputRef = useRef(null);
+  const allusers = useSelector((state) => state.user.allusers);
 
 
-    const handleScheduleclose = () => setScheduleModal(false);
-    const handleScheduleshow = () => setScheduleModal(true);
-    const handlecustomclose = () => setcustomModal(false);
-    const handlecustomshow = () => setcustomModal(true);
+  const handleScheduleclose = () => setScheduleModal(false);
+  const handleScheduleshow = () => setScheduleModal(true);
+  const handlecustomclose = () => setcustomModal(false);
+  const handlecustomshow = () => setcustomModal(true);
 
-    const toggleDay = (day) => {
-        setSelectedDays(prev =>
-            prev.includes(day)
-                ? prev.filter(d => d !== day)
-                : [...prev, day]
-        );
-    };
+  const toggleDay = (day) => {
+    setSelectedDays(prev =>
+      prev.includes(day)
+        ? prev.filter(d => d !== day)
+        : [...prev, day]
+    );
+  };
 
 
-    const handleIncrement = () => {
-        setRepeatEvery(prev => prev + 1);
+  const handleIncrement = () => {
+    setRepeatEvery(prev => prev + 1);
+  }
+
+  const handleDecrement = () => {
+    setRepeatEvery(prev => Math.max(prev - 1, 1));
+  }
+
+
+  const handleIncrement1 = () => {
+    setRepeatEvery1(prev => prev + 1);
+  }
+
+  const handleDecrement1 = () => {
+    setRepeatEvery1(prev => Math.max(prev - 1, 1));
+  }
+
+  const toggleReminder = (reminder) => {
+    setSelectedReminders(prev =>
+      prev.includes(reminder)
+        ? prev.filter(r => r !== reminder)
+        : [...prev, reminder]
+    )
+  }
+
+  useEffect(() => {
+    dispatch(getAllUsers());
+  }, [dispatch]);
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (dropdownRef.current &&
+        !dropdownRef.current.contains(event.target) &&
+        !searchInputRef.current.contains(event.target)) {
+        setShowDropdown(false);
+        setFilteredUsers([]);
+      }
     }
 
-    const handleDecrement = () => {
-        setRepeatEvery(prev => Math.max(prev - 1, 1));
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+
+  const scheduleSchema = Yup.object().shape({
+    title: Yup.string().required('Title is required'),
+
+    date: Yup.date()
+      .required('Date is required'),
+
+    startTime: Yup.string()
+      .required('Start time is required'),
+
+    endTime: Yup.string()
+      .required('End time is required')
+      .test('is-greater', 'End time should be after start time', function (value) {
+        const { startTime } = this.parent;
+        if (!startTime || !value) return true;
+        return value > startTime;
+      }),
+
+    meetingLink: Yup.string()
+      .required('Meeting link is required'),
+
+    description: Yup.string()
+      .required('Description is required'),
+
+    reminder: Yup.array()
+      .of(Yup.string()
+        .oneOf([
+          '5 min before',
+          '10 min before',
+          '15 min before',
+          '30 min before',
+          '1 hr before',
+          '2 hr before',
+          '1 day before',
+          '2 days before'
+        ], 'Please select a valid reminder option')
+      )
+      .min(1, 'Please select at least one reminder'),
+
+    recurringMeeting: Yup.string()
+      .oneOf(['DoesNotRepeat', 'daily', 'weekly', 'monthly', 'custom'], 'Please select a valid recurring option')
+      .required('Please select recurring meeting option'),
+
+    customRecurrence: Yup.object().when('recurringMeeting', {
+      is: 'custom',
+      then: () => Yup.object({
+        repeatType: Yup.string()
+          .required('Repeat type is required')
+          .oneOf(['daily', 'weekly', 'monthly', 'yearly'], 'Please select a valid repeat type'),
+
+        repeatEvery: Yup.number()
+          .required('Repeat frequency is required')
+          .min(1, 'Must be at least 1'),
+
+        repeatOn: Yup.array()
+          .of(Yup.string()
+            .oneOf(['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']))
+          .when('repeatType', {
+            is: 'weekly',
+            then: () => Yup.array().min(1, 'Please select at least one day')
+          }),
+
+        ends: Yup.string()
+          .required('Please select when the recurring meeting ends')
+          .oneOf(['never', 'on', 'after'], 'Invalid end option'),
+
+        endDate: Yup.date().when('ends', {
+          is: 'on',
+          then: () => Yup.date()
+            .required('End date is required')
+            .min(Yup.ref('date'), 'End date must be after start date')
+        })
+      }),
+      otherwise: () => Yup.object().nullable()
+    }),
+
+    invitees: Yup.array()
+      .of(
+        Yup.object().shape({
+          email: Yup.string().email('Invalid email').required('Email is required'),
+        })
+      )
+      .test('min-invitees', 'Please add at least one invitee', function (invitees) {
+        const nonHostInvitees = invitees?.filter(invitee => invitee._id !== userId) || [];
+        return nonHostInvitees.length >= 1;
+      })
+  });
+
+  const allSchedule = useSelector((state) => state.schedule.allschedule)
+  // console.log(allSchedule);
+
+  useEffect(() => {
+    dispatch(getAllschedule())
+  }, [])
+
+  const eventss = [
+    {
+      title: 'Project Meeting',
+      start: new Date(2025, 2, 11, 8, 15), // march 11, 2025, 8:15 PM
+      end: new Date(2025, 2, 11, 9, 30),   // march 11, 2025, 9:30 PM
+    },
+    {
+      title: 'Online Meeting',
+      start: new Date(2025, 2, 15, 18, 15), // march 15, 2025, 6:15 PM
+      end: new Date(2025, 2, 15, 20, 30),   // march 15, 2025, 8:30 PM
+    },
+    {
+      title: 'Project Meeting',
+      start: new Date(2025, 2, 26, 11, 45), // march 26, 2025, 11:45 AM
+      end: new Date(2025, 2, 26, 12, 45),   // march 26, 2025, 12:45 PM
+    },
+    {
+      title: 'Online Meeting',
+      start: new Date(2025, 2, 26, 13, 45), // march 26, 2025, 1:45 PM
+      end: new Date(2025, 2, 26, 14, 45),   // march 26, 2025, 2:45 PM
+    },
+    {
+      title: 'Online Meeting',
+      start: new Date(2025, 3, 10, 18, 15), // apr 10, 2025, 6:15 PM
+      end: new Date(2025, 3, 10, 20, 30),   // apr 10, 2025, 8:30 PM
+    },
+    {
+      title: 'Project Meeting',
+      start: new Date(2025, 3, 24, 11, 45), // apr 24, 2025, 11:45 AM
+      end: new Date(2025, 3, 24, 12, 45),   // apr 24, 2025, 12:45 PM
+    },
+    {
+      title: 'Online Meeting',
+      start: new Date(2025, 3, 29, 13, 45), // apr 29, 2025, 1:45 PM
+      end: new Date(2025, 3, 29, 14, 45),   // apr 29, 2025, 2:45 PM
+    },
+  ]
+
+  const events = allSchedule.map(schedules => {
+    const date = new Date(schedules.date); // Parse the date
+    const [hours, minutes] = schedules.startTime.split(':').map(Number); // Extract hours and minutes from startTime
+    const [endHours, endMinutes] = schedules.endTime.split(':').map(Number);
+    return {
+      title: schedules.title,
+      start: new Date(date.getFullYear(), date.getMonth(), date.getDate(), hours, minutes), // Set start date
+      end: new Date(date.getFullYear(), date.getMonth(), date.getDate(), endHours, endMinutes), // Set end date
     }
+  })
 
+  return (
+    <div>
+      <HomeNavBar />
+      <section className='j_index_main' style={{ backgroundColor: "#060A11" }}>
+        <div className="row">
+          <div className="col-1 p-0 j_sidebar_width">
+            <SideBar />
+          </div>
+          <div className="col-11 p-0 j_contant_width B_TOP_setMargin">
+            <div className='j_calender'>
+              <Calendar
+                localizer={localizer}
+                events={events}
+                startAccessor="start"
+                endAccessor="end"
+                style={{ height: '100%', width: '100%' }}
+                views={['day', 'week', 'month']}
+                defaultView="day"
+                components={{
+                  toolbar: (props) => <CustomToolbar {...props} onScheduleShow={handleScheduleshow} />
+                }}
+              />
+            </div>
+          </div>
+        </div>
 
-    const handleIncrement1 = () => {
-        setRepeatEvery1(prev => prev + 1);
-    }
-
-    const handleDecrement1 = () => {
-        setRepeatEvery1(prev => Math.max(prev - 1, 1));
-    }
-
-    const toggleReminder = (reminder) => {
-        setSelectedReminders(prev =>
-            prev.includes(reminder)
-                ? prev.filter(r => r !== reminder)
-                : [...prev, reminder]
-        )
-    }
-
-    useEffect(() => {
-        dispatch(getAllUsers());
-    }, [dispatch]);
-
-    useEffect(() => {
-        function handleClickOutside(event) {
-            if (dropdownRef.current &&
-                !dropdownRef.current.contains(event.target) &&
-                !searchInputRef.current.contains(event.target)) {
-                setShowDropdown(false);
-                setFilteredUsers([]);
-            }
-        }
-
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, []);
-
-
-    const scheduleSchema = Yup.object().shape({
-        title: Yup.string().required('Title is required'),
-
-        date: Yup.date()
-            .required('Date is required'),
-
-        startTime: Yup.string()
-            .required('Start time is required'),
-
-        endTime: Yup.string()
-            .required('End time is required')
-            .test('is-greater', 'End time should be after start time', function (value) {
-                const { startTime } = this.parent;
-                if (!startTime || !value) return true;
-                return value > startTime;
-            }),
-
-        meetingLink: Yup.string()
-            .required('Meeting link is required'),
-
-        description: Yup.string()
-            .required('Description is required'),
-
-        reminder: Yup.array()
-            .of(Yup.string()
-                .oneOf([
-                    '5 min before',
-                    '10 min before',
-                    '15 min before',
-                    '30 min before',
-                    '1 hr before',
-                    '2 hr before',
-                    '1 day before',
-                    '2 days before'
-                ], 'Please select a valid reminder option')
-            )
-            .min(1, 'Please select at least one reminder'),
-
-        recurringMeeting: Yup.string()
-            .oneOf(['DoesNotRepeat', 'daily', 'weekly', 'monthly', 'custom'], 'Please select a valid recurring option')
-            .required('Please select recurring meeting option'),
-
-        customRecurrence: Yup.object().when('recurringMeeting', {
-            is: 'custom',
-            then: () => Yup.object({
-                repeatType: Yup.string()
-                    .required('Repeat type is required')
-                    .oneOf(['daily', 'weekly', 'monthly', 'yearly'], 'Please select a valid repeat type'),
-
-                repeatEvery: Yup.number()
-                    .required('Repeat frequency is required')
-                    .min(1, 'Must be at least 1'),
-
-                repeatOn: Yup.array()
-                    .of(Yup.string()
-                        .oneOf(['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']))
-                    .when('repeatType', {
-                        is: 'weekly',
-                        then: () => Yup.array().min(1, 'Please select at least one day')
-                    }),
-
-                ends: Yup.string()
-                    .required('Please select when the recurring meeting ends')
-                    .oneOf(['never', 'on', 'after'], 'Invalid end option'),
-
-                endDate: Yup.date().when('ends', {
-                    is: 'on',
-                    then: () => Yup.date()
-                        .required('End date is required')
-                        .min(Yup.ref('date'), 'End date must be after start date')
-                })
-            }),
-            otherwise: () => Yup.object().nullable()
-        }),
-
-        invitees: Yup.array()
-            .of(
-                Yup.object().shape({
-                    email: Yup.string().email('Invalid email').required('Email is required'),
-                })
-            )
-            .test('min-invitees', 'Please add at least one invitee', function (invitees) {
-                const nonHostInvitees = invitees?.filter(invitee => invitee._id !== userId) || [];
-                return nonHostInvitees.length >= 1;
-            })
-    });
-
-    return (
-        <div>
-            <HomeNavBar />
-            <section className='j_index_main' style={{ backgroundColor: "#060A11" }}>
-                <div className="row">
-                    <div className="col-1 p-0 j_sidebar_width">
-                        <SideBar />
-                    </div>
-                    <div className="col-11 p-0 j_contant_width B_TOP_setMargin">
-                        <div className='j_calender'>
-                            <Calendar
-                                localizer={localizer}
-                                events={events}
-                                startAccessor="start"
-                                endAccessor="end"
-                                style={{ height: '100%', width: '100%' }}
-                                views={['day', 'week', 'month']}
-                                defaultView="day"
-                                components={{
-                                    toolbar: (props) => <CustomToolbar {...props} onScheduleShow={handleScheduleshow} />
-                                }}
-                            />
-                        </div>
-                    </div>
-                </div>
-
-                {/* ============================ Schedule Meeting Modal ============================  */}
-                <Modal
+        {/* ============================ Schedule Meeting Modal ============================  */}
+        <Modal
           show={ScheduleModal}
           onHide={handleScheduleclose}
           size="lg"
@@ -925,194 +943,194 @@ function Schedule() {
           </Modal.Body>
         </Modal>
 
-                {/* ============================ Schedule Meeting custom Modal ============================  */}
-                <Modal
-                    show={customModal}
-                    onHide={handlecustomclose}
-                    centered
-                    contentClassName="j_modal_join"
+        {/* ============================ Schedule Meeting custom Modal ============================  */}
+        <Modal
+          show={customModal}
+          onHide={handlecustomclose}
+          centered
+          contentClassName="j_modal_join"
+        >
+          <Modal.Header className="border-0 d-flex justify-content-between align-items-center">
+            <Modal.Title className="text-white j_join_title">Custom Recurrence</Modal.Title>
+            <IoClose
+              style={{ color: '#fff', fontSize: '22px', cursor: 'pointer' }}
+              onClick={handlecustomclose}
+            />
+          </Modal.Header>
+          <div className="j_modal_header"></div>
+          <Modal.Body>
+            <div className="j_schedule_Repeat">
+              <div className="mb-3 flex-fill me-2  j_select_fill">
+                <label htmlFor="RepeatType" className="form-label text-white j_join_text">Repeat Type</label>
+                <select
+                  className="form-select j_select j_join_text"
+                  id="RepeatType"
+                  onChange={(e) => {
+                    setRepeatType(e.target.value);
+                    setEndsSelection("0");
+                    setSelectedDays([]);
+                  }} >
+                  <option value="0">Select</option>
+                  <option value="1">Daily</option>
+                  <option value="2">Weekly</option>
+                  <option value="3">Monthly</option>
+                  <option value="4">Yearly</option>
+                </select>
+              </div>
+              <div className="mb-3 flex-fill  j_select_fill">
+                <label htmlFor="RepeatEvery" className="form-label text-white j_join_text">Repeat Every</label>
+                <div className='position-relative'>
+                  <input
+                    type="text"
+                    className="form-control j_input j_join_text"
+                    id="RepeatEvery"
+                    onChange={(e) => setRepeatEvery(Number(e.target.value) || 1)}
+                    value={RepeatEvery}
+                  />
+                  <div className="j_custom_icons">
+                    <FaAngleUp
+                      style={{ color: 'white', fontSize: '12px' }}
+                      onClick={() => handleIncrement()}
+                    />
+                    <FaAngleDown
+                      style={{ color: 'white', fontSize: '12px' }}
+                      onClick={() => handleDecrement()}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+            {repeatType === '2' && (
+              <div className="mb-3">
+                <label className="form-label text-white j_join_text">Repeat On</label>
+                <div className="d-flex B_Repeat_on_btn">
+                  <button
+                    className={`btn ${selectedDays.includes('Sunday') ? 'j_day_selected_btn' : 'j_day_btn'} me-1`}
+                    onClick={() => toggleDay('Sunday')}
+                  >
+                    S
+                  </button>
+                  <button
+                    className={`btn ${selectedDays.includes('Monday') ? 'j_day_selected_btn' : 'j_day_btn'} me-1`}
+                    onClick={() => toggleDay('Monday')}
+                  >
+                    M
+                  </button>
+                  <button
+                    className={`btn ${selectedDays.includes('Tuesday') ? 'j_day_selected_btn' : 'j_day_btn'} me-1`}
+                    onClick={() => toggleDay('Tuesday')}
+                  >
+                    T
+                  </button>
+                  <button
+                    className={`btn ${selectedDays.includes('Wednesday') ? 'j_day_selected_btn' : 'j_day_btn'} me-1`}
+                    onClick={() => toggleDay('Wednesday')}
+                  >
+                    W
+                  </button>
+                  <button
+                    className={`btn ${selectedDays.includes('Thursday') ? 'j_day_selected_btn' : 'j_day_btn'} me-1`}
+                    onClick={() => toggleDay('Thursday')}
+                  >
+                    T
+                  </button>
+                  <button
+                    className={`btn ${selectedDays.includes('Friday') ? 'j_day_selected_btn' : 'j_day_btn'} me-1`}
+                    onClick={() => toggleDay('Friday')}
+                  >
+                    F
+                  </button>
+                  <button
+                    className={`btn ${selectedDays.includes('Saturday') ? 'j_day_selected_btn' : 'j_day_btn'} me-1`}
+                    onClick={() => toggleDay('Saturday')}
+                  >
+                    S
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {repeatType === '3' && (
+              <div className="mb-3">
+                <label className="text-white j_join_text">Every</label>
+                <select
+                  className="form-select j_select j_join_text"
                 >
-                    <Modal.Header className="border-0 d-flex justify-content-between align-items-center">
-                        <Modal.Title className="text-white j_join_title">Custom Recurrence</Modal.Title>
-                        <IoClose
-                            style={{ color: '#fff', fontSize: '22px', cursor: 'pointer' }}
-                            onClick={handlecustomclose}
-                        />
-                    </Modal.Header>
-                    <div className="j_modal_header"></div>
-                    <Modal.Body>
-                        <div className="j_schedule_Repeat">
-                            <div className="mb-3 flex-fill me-2  j_select_fill">
-                                <label htmlFor="RepeatType" className="form-label text-white j_join_text">Repeat Type</label>
-                                <select
-                                    className="form-select j_select j_join_text"
-                                    id="RepeatType"
-                                    onChange={(e) => {
-                                        setRepeatType(e.target.value);
-                                        setEndsSelection("0");
-                                        setSelectedDays([]);
-                                    }} >
-                                    <option value="0">Select</option>
-                                    <option value="1">Daily</option>
-                                    <option value="2">Weekly</option>
-                                    <option value="3">Monthly</option>
-                                    <option value="4">Yearly</option>
-                                </select>
-                            </div>
-                            <div className="mb-3 flex-fill  j_select_fill">
-                                <label htmlFor="RepeatEvery" className="form-label text-white j_join_text">Repeat Every</label>
-                                <div className='position-relative'>
-                                    <input
-                                        type="text"
-                                        className="form-control j_input j_join_text"
-                                        id="RepeatEvery"
-                                        onChange={(e) => setRepeatEvery(Number(e.target.value) || 1)}
-                                        value={RepeatEvery}
-                                    />
-                                    <div className="j_custom_icons">
-                                        <FaAngleUp
-                                            style={{ color: 'white', fontSize: '12px' }}
-                                            onClick={() => handleIncrement()}
-                                        />
-                                        <FaAngleDown
-                                            style={{ color: 'white', fontSize: '12px' }}
-                                            onClick={() => handleDecrement()}
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        {repeatType === '2' && (
-                            <div className="mb-3">
-                                <label className="form-label text-white j_join_text">Repeat On</label>
-                                <div className="d-flex B_Repeat_on_btn">
-                                    <button
-                                        className={`btn ${selectedDays.includes('Sunday') ? 'j_day_selected_btn' : 'j_day_btn'} me-1`}
-                                        onClick={() => toggleDay('Sunday')}
-                                    >
-                                        S
-                                    </button>
-                                    <button
-                                        className={`btn ${selectedDays.includes('Monday') ? 'j_day_selected_btn' : 'j_day_btn'} me-1`}
-                                        onClick={() => toggleDay('Monday')}
-                                    >
-                                        M
-                                    </button>
-                                    <button
-                                        className={`btn ${selectedDays.includes('Tuesday') ? 'j_day_selected_btn' : 'j_day_btn'} me-1`}
-                                        onClick={() => toggleDay('Tuesday')}
-                                    >
-                                        T
-                                    </button>
-                                    <button
-                                        className={`btn ${selectedDays.includes('Wednesday') ? 'j_day_selected_btn' : 'j_day_btn'} me-1`}
-                                        onClick={() => toggleDay('Wednesday')}
-                                    >
-                                        W
-                                    </button>
-                                    <button
-                                        className={`btn ${selectedDays.includes('Thursday') ? 'j_day_selected_btn' : 'j_day_btn'} me-1`}
-                                        onClick={() => toggleDay('Thursday')}
-                                    >
-                                        T
-                                    </button>
-                                    <button
-                                        className={`btn ${selectedDays.includes('Friday') ? 'j_day_selected_btn' : 'j_day_btn'} me-1`}
-                                        onClick={() => toggleDay('Friday')}
-                                    >
-                                        F
-                                    </button>
-                                    <button
-                                        className={`btn ${selectedDays.includes('Saturday') ? 'j_day_selected_btn' : 'j_day_btn'} me-1`}
-                                        onClick={() => toggleDay('Saturday')}
-                                    >
-                                        S
-                                    </button>
-                                </div>
-                            </div>
-                        )}
+                  <option value="0">Select</option>
+                  <option value="1">Monthly on first monday</option>
+                  <option value="2">Monthly on first day</option>
+                </select>
+              </div>
+            )}
 
-                        {repeatType === '3' && (
-                            <div className="mb-3">
-                                <label className="text-white j_join_text">Every</label>
-                                <select
-                                    className="form-select j_select j_join_text"
-                                >
-                                    <option value="0">Select</option>
-                                    <option value="1">Monthly on first monday</option>
-                                    <option value="2">Monthly on first day</option>
-                                </select>
-                            </div>
-                        )}
+            <div className="j_schedule_Repeat">
+              <div className="mb-3 flex-fill me-2  j_select_fill">
+                <label htmlFor="RepeatType1" className="form-label text-white j_join_text">Ends</label>
+                <select
+                  className="form-select j_select j_join_text"
+                  id="RepeatType1"
+                  value={endsSelection}
+                  onChange={(e) => setEndsSelection(e.target.value)}
+                >
+                  <option value="0">Select</option>
+                  <option value="1">Never</option>
+                  {repeatType !== '1' && <option value="2">On</option>}
+                  <option value="3">After</option>
+                </select>
+              </div>
 
-                        <div className="j_schedule_Repeat">
-                            <div className="mb-3 flex-fill me-2  j_select_fill">
-                                <label htmlFor="RepeatType1" className="form-label text-white j_join_text">Ends</label>
-                                <select
-                                    className="form-select j_select j_join_text"
-                                    id="RepeatType1"
-                                    value={endsSelection}
-                                    onChange={(e) => setEndsSelection(e.target.value)}
-                                >
-                                    <option value="0">Select</option>
-                                    <option value="1">Never</option>
-                                    {repeatType !== '1' && <option value="2">On</option>}
-                                    <option value="3">After</option>
-                                </select>
-                            </div>
+              {(endsSelection == "0" || endsSelection == "2") && (
+                <div className="mb-3 flex-fill  j_select_fill">
+                  <label htmlFor="RepeatType1" className="form-label text-white j_join_text"></label>
+                  <input type="date" className="form-control j_input j_join_text j_special_m" id="RepeatEvery1" />
+                </div>
+              )}
 
-                            {(endsSelection == "0" || endsSelection == "2") && (
-                                <div className="mb-3 flex-fill  j_select_fill">
-                                    <label htmlFor="RepeatType1" className="form-label text-white j_join_text"></label>
-                                    <input type="date" className="form-control j_input j_join_text j_special_m" id="RepeatEvery1" />
-                                </div>
-                            )}
-
-                            {endsSelection == "3" && (
-                                <div className="mb-3 flex-fill j_select_fill J_Fill_bottom">
-                                    <label className="form-label text-white j_join_text"></label>
-                                    <div className='position-relative'>
-                                        <input
-                                            type="text"
-                                            className="form-control j_input j_join_text j_special_m"
-                                            value={`${RepeatEvery1} Recurrence`}
-                                            readOnly
-                                        />
-                                        <div className="j_custom_icons">
-                                            <FaAngleUp
-                                                style={{ color: 'white', fontSize: '12px', cursor: 'pointer' }}
-                                                onClick={handleIncrement1}
-                                            />
-                                            <FaAngleDown
-                                                style={{ color: 'white', fontSize: '12px', cursor: 'pointer' }}
-                                                onClick={handleDecrement1}
-                                            />
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-                        <Modal.Footer className="j_custom_footer border-0 p-0 pt-4 pb-3">
-                            <Button
-                                variant="outline-light"
-                                className="j_custom_button fw-semibold"
-                                onClick={() => { handlecustomclose(); handleScheduleshow() }}
-                            >
-                                Cancel
-                            </Button>
-                            <Button
-                                variant="light"
-                                className="j_custom_button fw-semibold"
-                                onClick={handleScheduleshow}
-                            >
-                                Done
-                            </Button>
-                        </Modal.Footer>
-                    </Modal.Body>
-                </Modal>
-            </section >
-        </div>
-    )
+              {endsSelection == "3" && (
+                <div className="mb-3 flex-fill j_select_fill J_Fill_bottom">
+                  <label className="form-label text-white j_join_text"></label>
+                  <div className='position-relative'>
+                    <input
+                      type="text"
+                      className="form-control j_input j_join_text j_special_m"
+                      value={`${RepeatEvery1} Recurrence`}
+                      readOnly
+                    />
+                    <div className="j_custom_icons">
+                      <FaAngleUp
+                        style={{ color: 'white', fontSize: '12px', cursor: 'pointer' }}
+                        onClick={handleIncrement1}
+                      />
+                      <FaAngleDown
+                        style={{ color: 'white', fontSize: '12px', cursor: 'pointer' }}
+                        onClick={handleDecrement1}
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+            <Modal.Footer className="j_custom_footer border-0 p-0 pt-4 pb-3">
+              <Button
+                variant="outline-light"
+                className="j_custom_button fw-semibold"
+                onClick={() => { handlecustomclose(); handleScheduleshow() }}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="light"
+                className="j_custom_button fw-semibold"
+                onClick={handleScheduleshow}
+              >
+                Done
+              </Button>
+            </Modal.Footer>
+          </Modal.Body>
+        </Modal>
+      </section >
+    </div>
+  )
 }
 
 export default Schedule;
