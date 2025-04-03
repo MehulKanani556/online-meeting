@@ -48,6 +48,10 @@ function Screen() {
         setIsChatOpen,
         typingUsers,
         emitTypingStatus,
+        localStreamRef,
+        localVideoRef,
+        screenStreamRef,
+        peerConnectionsRef
     } = useSocket(userId, roomId, userName);
 
 
@@ -73,11 +77,6 @@ function Screen() {
     const [maxVisibleParticipants, setMaxVisibleParticipants] = useState(9);
 
     // Refs
-    const localStreamRef = useRef();
-    const screenStreamRef = useRef();
-    const localVideoRef = useRef();
-    const peerConnectionsRef = useRef({});
-    const remoteVideoRefs = useRef({});
     const messageContainerRef = useRef();
 
     // Get current user data
@@ -85,179 +84,7 @@ function Screen() {
         dispatch(getUserById(userId));
     }, [userId, dispatch]);
 
-    // Initialize media stream with correct initial state
-    useEffect(() => {
-        const initializeStream = async () => {
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({
-                    audio: true,
-                    video: true
-                });
 
-                localStreamRef.current = stream;
-
-                const videoTrack = stream.getVideoTracks()[0];
-                if (videoTrack) {
-                    videoTrack.enabled = !isVideoOff;
-                }
-
-                if (localVideoRef.current) {
-                    localVideoRef.current.srcObject = stream;
-                    console.log('Video element source set');
-                }
-
-            } catch (error) {
-                console.error('Error accessing media devices:', error);
-            }
-        };
-
-        initializeStream();
-
-        // Cleanup function
-        return () => {
-            if (localStreamRef.current) {
-                localStreamRef.current.getTracks().forEach(track => {
-                    track.stop();
-                });
-            }
-        };
-    }, []);
-
-    // Add this useEffect to handle video state changes
-    useEffect(() => {
-        if (localStreamRef.current) {
-            const videoTrack = localStreamRef.current.getVideoTracks()[0];
-            if (videoTrack) {
-                videoTrack.enabled = !isVideoOff;
-            }
-        }
-    }, [isVideoOff]);
-
-    // Toggle audio
-    const toggleAudio = () => {
-        setIsMuted(prevMuted => {
-            const newMutedState = !prevMuted;
-
-            if (localStreamRef.current) {
-                const audioTrack = localStreamRef.current.getAudioTracks()[0];
-                if (audioTrack) {
-                    audioTrack.enabled = !newMutedState;
-
-                    // Emit audio status change to other participants
-                    socket.emit('audio-status-change', {
-                        roomId,
-                        hasAudio: !newMutedState
-                    });
-
-                    // Signal to peers
-                    Object.values(peerConnectionsRef.current).forEach(pc => {
-                        const sender = pc.getSenders().find(s => s.track.kind === 'audio');
-                        if (sender) {
-                            sender.replaceTrack(audioTrack);
-                        }
-                    });
-                }
-            }
-
-            return newMutedState;
-        });
-    };
-
-    useEffect(() => {
-        if (localVideoRef.current && localStreamRef.current && !isVideoOff) {
-            localVideoRef.current.srcObject = localStreamRef.current;
-        }
-    }, [localStreamRef.current, isVideoOff]);
-
-    // Modify the toggleVideo function
-    const toggleVideo = () => {
-        setIsVideoOff(prevState => {
-            const newVideoOffState = !prevState;
-
-            if (localStreamRef.current) {
-                const videoTrack = localStreamRef.current.getVideoTracks()[0];
-                if (videoTrack) {
-                    videoTrack.enabled = !newVideoOffState;
-
-                    // Update video status for all peers
-                    socket.emit('video-status-change', {
-                        roomId,
-                        hasVideo: !newVideoOffState
-                    });
-
-                    // Ensure local video display is updated
-                    if (localVideoRef.current) {
-                        localVideoRef.current.srcObject = localStreamRef.current;
-                    }
-                }
-            }
-            return newVideoOffState;
-        });
-    };
-
-    // Share screen
-    const toggleScreenShare = async () => {
-        if (!isScreenSharing) {
-            try {
-                const screenStream = await navigator.mediaDevices.getDisplayMedia({
-                    video: true
-                });
-
-                screenStreamRef.current = screenStream;
-
-                // Replace video track in all peer connections
-                const videoTrack = screenStream.getVideoTracks()[0];
-
-                Object.values(peerConnectionsRef.current).forEach(pc => {
-                    const senders = pc.getSenders();
-                    const sender = senders.find(s => s.track && s.track.kind === 'video');
-
-                    if (sender) {
-                        sender.replaceTrack(videoTrack);
-                    }
-                });
-
-                // Show screen share in local video
-                if (localVideoRef.current) {
-                    localVideoRef.current.srcObject = screenStream;
-                }
-
-                // Listen for end of screen sharing
-                videoTrack.onended = () => {
-                    toggleScreenShare();
-                };
-
-                setIsScreenSharing(true);
-            } catch (error) {
-                console.error('Error sharing screen:', error);
-            }
-        } else {
-            // Stop screen sharing
-            if (screenStreamRef.current) {
-                screenStreamRef.current.getTracks().forEach(track => track.stop());
-                screenStreamRef.current = null;
-            }
-
-            // Revert to camera
-            const videoTrack = localStreamRef.current.getVideoTracks()[0];
-
-            Object.values(peerConnectionsRef.current).forEach(pc => {
-                const senders = pc.getSenders();
-                const sender = senders.find(s => s.track && s.track.kind === 'video');
-
-                if (sender && videoTrack) {
-                    sender.replaceTrack(videoTrack);
-                }
-            });
-
-            // Show camera in local video
-            if (localVideoRef.current) {
-                localVideoRef.current.srcObject = localStreamRef.current;
-            }
-
-            setIsScreenSharing(false);
-        }
-    };
 
     // Update the sendMessage handler
     const handleSendMessage = (e) => {
@@ -479,7 +306,7 @@ function Screen() {
 
     // Add this function to filter participants
     const filteredParticipants = participants.filter(participant =>
-        participant.name.toLowerCase().includes(searchTerm.toLowerCase())
+        participant.name?.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     // Add debounce function for typing
@@ -533,6 +360,97 @@ function Screen() {
         e.target.style.height = Math.min(120, e.target.scrollHeight) + 'px';
     };
 
+
+    // Toggle audio
+    const toggleAudio = () => {
+        if (localStreamRef.current) {
+            const audioTrack = localStreamRef.current.getAudioTracks()[0];
+            if (audioTrack) {
+                audioTrack.enabled = !audioTrack.enabled;
+                setIsMuted(!audioTrack.enabled);
+            }
+        }
+    };
+
+    // Toggle video
+    const toggleVideo = () => {
+        if (localStreamRef.current) {
+            const videoTrack = localStreamRef.current.getVideoTracks()[0];
+            if (videoTrack) {
+                videoTrack.enabled = !videoTrack.enabled;
+                setIsVideoOff(!videoTrack.enabled);
+            }
+        }
+    };
+
+    // Share screen
+    const toggleScreenShare = async () => {
+        if (!isScreenSharing) {
+            try {
+                const screenStream = await navigator.mediaDevices.getDisplayMedia({
+                    video: true
+                });
+
+                screenStreamRef.current = screenStream;
+
+                // Replace video track in all peer connections
+                const videoTrack = screenStream.getVideoTracks()[0];
+
+                Object.values(peerConnectionsRef.current).forEach(pc => {
+                    const senders = pc.getSenders();
+                    const sender = senders.find(s =>
+                        s.track && s.track.kind === 'video'
+                    );
+
+                    if (sender) {
+                        sender.replaceTrack(videoTrack);
+                    }
+                });
+
+                // Show screen share in local video
+                if (localVideoRef.current) {
+                    localVideoRef.current.srcObject = screenStream;
+                }
+
+                // Listen for end of screen sharing
+                videoTrack.onended = () => {
+                    toggleScreenShare();
+                };
+
+                setIsScreenSharing(true);
+            } catch (error) {
+                console.error('Error sharing screen:', error);
+            }
+        } else {
+            // Stop screen sharing
+            if (screenStreamRef.current) {
+                screenStreamRef.current.getTracks().forEach(track => track.stop());
+                screenStreamRef.current = null;
+            }
+
+            // Revert to camera
+            const videoTrack = localStreamRef.current.getVideoTracks()[0];
+
+            Object.values(peerConnectionsRef.current).forEach(pc => {
+                const senders = pc.getSenders();
+                const sender = senders.find(s =>
+                    s.track && s.track.kind === 'video'
+                );
+
+                if (sender && videoTrack) {
+                    sender.replaceTrack(videoTrack);
+                }
+            });
+
+            // Show camera in local video
+            if (localVideoRef.current) {
+                localVideoRef.current.srcObject = localStreamRef.current;
+            }
+
+            setIsScreenSharing(false);
+        }
+    };
+
     return (
         <>
             <section className="d_mainsec"
@@ -543,109 +461,51 @@ function Screen() {
                 }} >
                 <div className="d_topbar"></div>
                 <div className="d_mainscreen">
-                    <div className={`d_participants-grid ${getGridClass()}`}
-                        style={{ gridTemplateColumns: `repeat(${getGridColumns()}, 1fr)` }}>
-                        {/* Map all participants including local user */}
-                        {visibleParticipants.map((participant, index) => (
-                            <div key={participant.id} className="d_grid-item">
-                                <div className="d_avatar-container">
-                                    {/* <video
-                                        id={`video-${participant.id}`}
-                                        className="d_video-element"
-                                        ref={localVideoRef}
-                                        autoPlay
-                                        playsInline
-                                        muted
-                                    /> */}
-
-                                    {participant.id === socket?.id ? (
-                                        // Local user video
-                                        !isVideoOff ? (
-                                            <video
-                                                ref={localVideoRef}
-                                                className="d_video-element"
-                                                autoPlay
-                                                muted
-                                                playsInline
-                                            />
-                                        ) : (
-                                            <div className="d_avatar-circle"
-                                                style={{
-                                                    textTransform: 'uppercase',
-                                                    backgroundColor: `hsl(${participant.id.charCodeAt(0) * 60}, 70%, 45%)`
-                                                }}>
-                                                {`${participant.name.charAt(0)}${participant.name.split(' ')[1] ? participant.name.split(' ')[1].charAt(0) : ''}`}
-                                            </div>
-                                        )
-                                    ) : (
-                                        // Remote participant video
-                                        participant.hasVideo ? (
-                                            <video
-                                                id={`video-${participant.id}`}
-                                                className="d_video-element"
-                                                ref={el => {
-                                                    console.log("ele",el)
-                                                    if (el) remoteVideoRefs.current[participant.id] = el;
-                                                }}
-                                                autoPlay
-                                                playsInline
-                                            />
-                                        ) : (
-                                            <div className="d_avatar-circle"
-                                                style={{
-                                                    textTransform: 'uppercase',
-                                                    backgroundColor: `hsl(${participant.id.charCodeAt(0) * 60}, 70%, 45%)`
-                                                }}>
-                                                {`${participant.name.charAt(0)}${participant.name.split(' ')[1] ? participant.name.split(' ')[1].charAt(0) : ''}`}
-                                            </div>
-                                        )
+                    <div id="videos-container" className={`d_participants-grid ${getGridClass()}`} style={{ gridTemplateColumns: `repeat(${getGridColumns()}, 1fr)` }}>
+                        {/* {/ Local video /} */}
+                        <div className="d_grid-item">
+                            {/* <div className='d_avatar-container'> */}
+                            <video
+                                ref={localVideoRef}
+                                className='d_video-element'
+                                muted
+                                autoPlay
+                                playsInline
+                            />
+                            <div className="d_controls-top">
+                                <div className="d_controls-container">
+                                    {userName.hasRaisedHand && (
+                                        <img
+                                            src={hand}
+                                            className="d_control-icon"
+                                            alt="Hand raised"
+                                            style={{
+                                                animation: 'd_handWave 1s infinite',
+                                                transform: 'translateY(-2px)'
+                                            }}
+                                        />
                                     )}
-                                    <div className="d_controls-top">
-                                        <div className="d_controls-container">
-                                            {participant.hasRaisedHand && (
-                                                <img
-                                                    src={hand}
-                                                    className="d_control-icon"
-                                                    alt="Hand raised"
-                                                    style={{
-                                                        animation: 'd_handWave 1s infinite',
-                                                        transform: 'translateY(-2px)'
-                                                    }}
-                                                />
-                                            )}
-                                            {participant.hasVideo ? (
-                                                <img src={oncamera} className="d_control-icon" alt="Camera on" />
-                                            ) : (
-                                                <img src={offcamera} className="d_control-icon" alt="Camera off" />
-                                            )}
-                                        </div>
-                                    </div>
-                                    <div className="d_controls-bottom">
-                                        <span className="d_participant-name">
-                                            {participant.name}
-                                            {participant.isHost ? ' (Host)' : ''}
-                                        </span>
-                                        <div className="d_mic-status">
-                                            {participant.hasAudio ? (
-                                                <img src={onmicrophone} className="d_control-icon" alt="Microphone on" />
-                                            ) : (
-                                                <img src={offmicrophone} className="d_control-icon" alt="Microphone off" />
-                                            )}
-                                        </div>
-                                    </div>
+                                    {userName.hasVideo ? (
+                                        <img src={oncamera} className="d_control-icon" alt="Camera on" />
+                                    ) : (
+                                        <img src={offcamera} className="d_control-icon" alt="Camera off" />
+                                    )}
                                 </div>
-
-                                {/* Display extra participants indicator */}
-                                {index === maxVisibleParticipants - 2 && extraParticipants > 0 && (
-                                    <div
-                                        onClick={handleShow}
-                                        className="d_extra-participants"
-                                    >
-                                        <span>+{extraParticipants} others</span>
-                                    </div>
-                                )}
                             </div>
-                        ))}
+                            <div className="d_controls-bottom">
+                                <span className="d_participant-name">
+                                    {userName}
+                                    {userName.isHost ? ' (Host)' : ''}
+                                </span>
+                                <div className="d_mic-status">
+                                    {userName.hasAudio ? (
+                                        <img src={onmicrophone} className="d_control-icon" alt="Microphone on" />
+                                    ) : (
+                                        <img src={offmicrophone} className="d_control-icon" alt="Microphone off" />
+                                    )}
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div className="d_bottombar"
@@ -1116,7 +976,7 @@ function Screen() {
                                     <div className="position-relative B_input_search B_input_search22  mx-auto">
                                         <form onSubmit={handleSendMessage} className="mt-3 d-flex">
                                             <div className='B_send_msginput j_search_Input'>
-                                            <textarea
+                                                <textarea
                                                     type="text"
                                                     className="form-control text-white d_foucscolor B_send_msginput j_search_Input ps-3"
                                                     value={newMessage}
