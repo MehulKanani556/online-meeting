@@ -1,4 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react'
+import onmicrophone from '../Image/d_onmicrophone.svg';
+import offmicrophone from '../Image/d_offmicrophone.svg';
+import oncamera from '../Image/d_oncamera.svg';
+import offcamera from '../Image/d_offcamera.svg';
+import hand from '../Image/d_hand.svg';
 import { io } from 'socket.io-client';
 
 const SOCKET_SERVER_URL = "http://localhost:5000"; // Move to environment variable in production
@@ -13,6 +18,8 @@ export const useSocket = (userId, roomId, userName) => {
     const [isChatOpen, setIsChatOpen] = useState(false);
     const [typingUsers, setTypingUsers] = useState([]);
 
+
+    console.log('-===', participants)
 
     const localStreamRef = useRef();
     const screenStreamRef = useRef();
@@ -89,8 +96,11 @@ export const useSocket = (userId, roomId, userName) => {
                             isHost: user.isHost
                         }
                     ]);
+                    // Debugging: Log the updated participants
+                    console.log('Updated participants:', participants);
+
                     // Create new peer connection for this user
-                    await createPeerConnection(user.socketId, true);
+                    await createPeerConnection(user.socketId, true, user);
                 });
 
                 // Get list of room users when joining
@@ -122,7 +132,7 @@ export const useSocket = (userId, roomId, userName) => {
 
                     roomUsers.forEach(async (user) => {
                         if (user.id !== socketRef.current.id) {
-                            await createPeerConnection(user.id, false);
+                            await createPeerConnection(user.id, false,user);
                         }
                     });
                 });
@@ -301,8 +311,11 @@ export const useSocket = (userId, roomId, userName) => {
         }
     };
 
+    console.log(participants);
+    
+
     // Create peer connection function
-    const createPeerConnection = async (remotePeerId, isInitiator) => {
+    const createPeerConnection = async (remotePeerId, isInitiator,userName) => {
         // console.log('Creating peer connection with:', remotePeerId, 'isInitiator:', isInitiator);
 
         // Use existing connection if available
@@ -341,20 +354,97 @@ export const useSocket = (userId, roomId, userName) => {
 
         // Handle incoming streams
         peerConnection.ontrack = (event) => {
-
             // Create video element for remote stream if it doesn't exist
             let videoElement = document.getElementById(`video-${remotePeerId}`);
 
             if (!videoElement) {
+                // Create a new div to contain the remote video
+                const remoteVideoContainer = document.createElement('div');
+                remoteVideoContainer.className = 'd_grid-item';
+
+                // Create the video element
                 videoElement = document.createElement('video');
                 videoElement.id = `video-${remotePeerId}`;
+                videoElement.className = 'd_video-element';
                 videoElement.autoplay = true;
                 videoElement.playsInline = true;
-                document.getElementById('videos-container').appendChild(videoElement);
+
+                console.log(remotePeerId);
+
+                console.log(userName);
+                
+
+                const participant = participants.find(p => p.id === remotePeerId);
+                console.log(participant ? participant.name : 'Participant not found');
+
+                // Get participant data
+                const userData = {
+                    name: userName.userName,
+                    hasVideo: false,
+                    hasAudio: false,
+                    hasRaisedHand: false,
+                    isHost: false
+                };
+
+                console.log("userData", userData)
+
+                // Create controls top div
+                const controlsTop = document.createElement('div');
+                controlsTop.className = 'd_controls-top';
+
+                const controlsContainer = document.createElement('div');
+                controlsContainer.className = 'd_controls-container';
+
+                if (userData.hasRaisedHand) {
+                    const handIcon = document.createElement('img');
+                    handIcon.src = hand;
+                    handIcon.className = 'd_control-icon hand-icon';
+                    handIcon.alt = 'Hand raised';
+                    handIcon.style.animation = 'd_handWave 1s infinite';
+                    handIcon.style.transform = 'translateY(-2px)';
+                    controlsContainer.appendChild(handIcon);
+                }
+
+                const cameraIcon = document.createElement('img');
+                cameraIcon.src = userData.hasVideo ? oncamera : offcamera;
+                cameraIcon.className = 'd_control-icon camera-icon';
+                cameraIcon.alt = userData.hasVideo ? 'Camera on' : 'Camera off';
+                controlsContainer.appendChild(cameraIcon);
+
+                controlsTop.appendChild(controlsContainer);
+
+                // Create controls bottom div
+                const controlsBottom = document.createElement('div');
+                controlsBottom.className = 'd_controls-bottom';
+
+                const participantName = document.createElement('span');
+                participantName.className = 'd_participant-name';
+                participantName.textContent = `${userData.name}${userData.isHost ? ' (Host)' : ''}`;
+                controlsBottom.appendChild(participantName);
+
+                const micStatus = document.createElement('div');
+                micStatus.className = 'd_mic-status';
+
+                const micIcon = document.createElement('img');
+                micIcon.src = userData.hasAudio ? onmicrophone : offmicrophone;
+                micIcon.className = 'd_control-icon mic-icon';
+                micIcon.alt = userData.hasAudio ? 'Microphone on' : 'Microphone off';
+                micStatus.appendChild(micIcon);
+
+                controlsBottom.appendChild(micStatus);
+
+                // Append all elements to the container
+                remoteVideoContainer.appendChild(videoElement);
+                remoteVideoContainer.appendChild(controlsTop);
+                remoteVideoContainer.appendChild(controlsBottom);
+
+                // Append the container to videos-container
+                const videosContainer = document.getElementById('videos-container');
+                videosContainer.appendChild(remoteVideoContainer);
             }
 
             videoElement.srcObject = event.streams[0];
-        };
+        }
 
         // If initiator, create and send offer
         if (isInitiator) {

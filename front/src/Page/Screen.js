@@ -54,6 +54,11 @@ function Screen() {
         peerConnectionsRef
     } = useSocket(userId, roomId, userName);
 
+    // Add this line to define videosContainerRef
+    const videosContainerRef = useRef();
+
+    // Add this line to define remoteStreams
+    const [remoteStreams, setRemoteStreams] = useState([]);
 
     // WebRTC State
     const [isMuted, setIsMuted] = useState(true);
@@ -450,6 +455,37 @@ function Screen() {
             setIsScreenSharing(false);
         }
     };
+
+    // Effect to handle rendering remote videos
+    // useEffect(() => {
+    //     if (!videosContainerRef.current) return;
+
+    //     // For each remote stream, ensure we have a video element
+    //     remoteStreams.forEach((stream, index) => {
+    //         const peerId = stream.peerId;
+    //         let videoElement = document.getElementById(`video-${peerId}`);
+
+    //         if (!videoElement) {
+    //             // Create new video element if it doesn't exist
+    //             const remoteVideoContainer = document.createElement('div');
+    //             remoteVideoContainer.className = 'd_grid-item';
+
+    //             videoElement = document.createElement('video');
+    //             videoElement.id = `video-${peerId}`;
+    //             videoElement.className = 'd_video-element';
+    //             videoElement.autoplay = true;
+    //             videoElement.playsInline = true;
+
+    //             remoteVideoContainer.appendChild(videoElement);
+    //             videosContainerRef.current.appendChild(remoteVideoContainer);
+    //         }
+
+    //         // Set the stream to the video element
+    //         if (videoElement.srcObject !== stream.mediaStream) {
+    //             videoElement.srcObject = stream.mediaStream;
+    //         }
+    //     });
+    // }, [remoteStreams]);
 
     return (
         <>
