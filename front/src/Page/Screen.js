@@ -574,7 +574,7 @@ function Screen() {
                                                     textTransform: 'uppercase',
                                                     backgroundColor: `hsl(${participant.id.charCodeAt(0) * 60}, 70%, 45%)`
                                                 }}>
-                                                {`${participant.name.charAt(0)}${participant.name.split(' ')[1] ? participant.name.split(' ')[1].charAt(0) : ''}`}
+                                                {participant.initials}
                                             </div>
                                         )
                                     ) : (
@@ -596,7 +596,7 @@ function Screen() {
                                                     textTransform: 'uppercase',
                                                     backgroundColor: `hsl(${participant.id.charCodeAt(0) * 60}, 70%, 45%)`
                                                 }}>
-                                                {`${participant.name.charAt(0)}${participant.name.split(' ')[1] ? participant.name.split(' ')[1].charAt(0) : ''}`}
+                                                {participant.initials}
                                             </div>
                                         )
                                     )}
