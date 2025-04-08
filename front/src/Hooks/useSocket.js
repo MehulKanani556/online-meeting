@@ -9,9 +9,6 @@ export const useSocket = (userId, roomId, userName) => {
     const [participants, setParticipants] = useState([]);
     const [messages, setMessages] = useState([]);
     const [emojis, setemojis] = useState([]);
-    const [streams, setStreams] = useState({});
-    const peerConnectionsRef = useRef({});
-    const [remoteStreams, setRemoteStreams] = useState({});
     const [unreadMessages, setUnreadMessages] = useState(0);
     const [isChatOpen, setIsChatOpen] = useState(false);
     const [typingUsers, setTypingUsers] = useState([]);
@@ -27,9 +24,9 @@ export const useSocket = (userId, roomId, userName) => {
 
         socketRef.current = io(SOCKET_SERVER_URL);
 
+        // Join room
         socketRef.current.on("connect", () => {
             setIsConnected(true);
-            // Join room
             socketRef.current.emit('join-room', {
                 roomId,
                 userId,
@@ -39,15 +36,14 @@ export const useSocket = (userId, roomId, userName) => {
 
         // Handle new user connected
         socketRef.current.on('user-connected', (user) => {
-            // console.log('New user connected:', user);
             setParticipants(prev => [
                 ...prev,
                 {
                     id: user.socketId,
                     userId: user.userId,
                     name: user.userName,
-                    hasVideo: false,
-                    hasAudio: false,
+                    hasVideo: true,
+                    hasAudio: true,
                     initials: `${user.userName.charAt(0)}${user.userName.split(' ')[1] ? user.userName.split(' ')[1].charAt(0) : ''}`,
                     isHost: user.isHost
                 }
@@ -59,22 +55,14 @@ export const useSocket = (userId, roomId, userName) => {
             console.log('Current room users:', roomUsers);
             const formattedParticipants = roomUsers.map(user => ({
                 id: user.id,
-                initials: `${user.userName.charAt(0)}${user.userName.split(' ')[1] ? user.userName.split(' ')[1].charAt(0) : ''}`,
                 userId: user.userId,
                 name: user.userName,
-                hasVideo: false,
-                hasAudio: false,
+                hasVideo: true,
+                hasAudio: true,
+                initials: `${user.userName.charAt(0)}${user.userName.split(' ')[1] ? user.userName.split(' ')[1].charAt(0) : ''}`,
                 isHost: user.isHost
             }));
             setParticipants(formattedParticipants);
-        });
-
-        // Handle user disconnection
-        socketRef.current.on('user-disconnected', (socketId) => {
-            // console.log('User disconnected:', socketId);
-            setParticipants(prev =>
-                prev.filter(participant => participant.id !== socketId)
-            );
         });
 
         // Handle chat messages
@@ -94,25 +82,6 @@ export const useSocket = (userId, roomId, userName) => {
             }]);
         });
 
-        // Handle audio status changes
-        socketRef.current.on('audio-status-updated', ({ userId, hasAudio }) => {
-            setParticipants(prev => prev.map(participant =>
-                participant.id === userId
-                    ? { ...participant, hasAudio }
-                    : participant
-            ));
-        });
-
-        // Handle video status changes
-        socketRef.current.on('video-status-updated', ({ userId, hasVideo }) => {
-            // console.log('Video status updated:', userId, hasVideo);
-            setParticipants(prev => prev.map(participant =>
-                participant.id === userId
-                    ? { ...participant, hasVideo }
-                    : participant
-            ));
-        });
-
         // Handle hand raise status changes
         socketRef.current.on('hand-status-updated', ({ userId, hasRaisedHand }) => {
             setParticipants(prev => prev.map(participant =>
@@ -122,53 +91,25 @@ export const useSocket = (userId, roomId, userName) => {
             ));
         });
 
-        // Handle host changes
-        socketRef.current.on('host-updated', ({ newHostId }) => {
-            setParticipants(prev => prev.map(participant => ({
-                ...participant,
-                isHost: participant.id === newHostId,
-                isCohost: participant.id === newHostId ? false : participant.isCohost
-            })));
-        });
-
-        // Handle co-host changes
-        socketRef.current.on('cohost-updated', ({ newCohostId }) => {
-            setParticipants(prev => prev.map(participant => ({
-                ...participant,
-                isCohost: participant.id === newCohostId
-            })));
-        });
-
-        // Handle participant rename
-        socketRef.current.on('participant-renamed', ({ participantId, newName }) => {
-            setParticipants(prev => prev.map(participant =>
-                participant.id === participantId
-                    ? {
-                        ...participant,
-                        name: newName,
-                        initials: `${newName.charAt(0)}${newName.split(' ')[1] ? newName.split(' ')[1].charAt(0) : ''}`
-                    }
-                    : participant
-            ));
-        });
-
-        // Handle participant removal
-        socketRef.current.on('participant-removed', ({ participantId }) => {
-            setParticipants(prev => prev.filter(participant => participant.id !== participantId));
-        });
-
-        // Handle audio toggle
-        socketRef.current.on('audio-status-updated', ({ participantId, hasAudio }) => {
-            setParticipants(prev => prev.map(participant =>
-                participant.id === participantId
-                    ? { ...participant, hasAudio }
-                    : participant
-            ));
-        });
-
         // Listen for typing status
         socketRef.current.on('typing-status', ({ users }) => {
             setTypingUsers(users);
+        });
+
+        // Handle media state changes
+        socketRef.current.on('media-state-change', ({ userId, hasVideo, hasAudio }) => {
+            setParticipants(prev =>
+                prev.map(p =>
+                    p.id === userId ? { ...p, hasVideo, hasAudio } : p
+                )
+            );
+        });
+
+        // Handle user disconnection
+        socketRef.current.on('user-disconnected', (socketId) => {
+            setParticipants(prev =>
+                prev.filter(participant => participant.id !== socketId)
+            );
         });
 
         return () => {
@@ -190,6 +131,64 @@ export const useSocket = (userId, roomId, userName) => {
                 message,
                 sender: userName
             });
+        }
+    };
+
+    // Helper function to send an emoji
+    const sendEmoji = (emoji) => {
+        if (socketRef.current && emoji.trim()) {
+            socketRef.current.emit('send-emoji', {
+                roomId,
+                emoji,
+                sender: userName
+            });
+        }
+    };
+
+    // Add function to mark messages as read
+    const markMessagesAsRead = () => {
+        setUnreadMessages(0);
+    };
+
+    // Add function to toggle chat
+    const toggleChat = () => {
+        setIsChatOpen(prev => !prev);
+        if (!isChatOpen) {
+            markMessagesAsRead();
+        }
+    };
+
+    // Add function to emit typing status
+    const emitTypingStatus = (isTyping) => {
+        if (!socketRef.current) return;
+
+        socketRef.current.emit('user-typing', {
+            roomId,
+            userId,
+            userName,
+            isTyping
+        });
+    };
+
+    // Update media state for local user
+    const updateMediaState = (mediaType, isEnabled) => {
+        if (socketRef.current) {
+            const stateUpdate = mediaType === 'video'
+                ? { hasVideo: isEnabled }
+                : { hasAudio: isEnabled };
+
+            socketRef.current.emit('media-state-change', {
+                roomId,
+                userId: socketRef.current.id,
+                ...stateUpdate
+            });
+
+            // Update local state immediately
+            setParticipants(prev =>
+                prev.map(p =>
+                    p.id === socketRef.current.id ? { ...p, ...stateUpdate } : p
+                )
+            );
         }
     };
 
@@ -227,17 +226,6 @@ export const useSocket = (userId, roomId, userName) => {
         }
     };
 
-    // Helper function to send an emoji
-    const sendEmoji = (emoji) => {
-        if (socketRef.current && emoji.trim()) {
-            socketRef.current.emit('send-emoji', {
-                roomId,
-                emoji,
-                sender: userName
-            });
-        }
-    };
-
     const sendAnswer = (to, answer) => {
         if (socketRef.current) {
             socketRef.current.emit('answer', {
@@ -257,137 +245,15 @@ export const useSocket = (userId, roomId, userName) => {
         }
     };
 
-    const startStreaming = (stream) => {
-        if (!socketRef.current) return;
-
-        // Add local stream to all peer connections
-        Object.entries(peerConnectionsRef.current).forEach(([userId, pc]) => {
-            stream.getTracks().forEach(track => {
-                pc.addTrack(track, stream);
-            });
-        });
-
-        // Notify other users about video status
-        socketRef.current.emit('video-status-change', {
-            roomId,
-            hasVideo: true
-        });
-    };
-
-    // Add the handleRemoteStream function before createPeerConnection
-    const handleRemoteStream = (stream, userId) => {
-        setRemoteStreams(prev => ({
-            ...prev,
-            [userId]: stream
-        }));
-
-        // Update participant video status
-        setParticipants(prev => prev.map(participant =>
-            participant.id === userId
-                ? { ...participant, hasVideo: true }
-                : participant
-        ));
-    };
-
-    // Modify the peerConnection.ontrack event handler
-    const createPeerConnection = (userId) => {
-        const peerConnection = new RTCPeerConnection({
-            iceServers: [
-                { urls: 'stun:stun.l.google.com:19302' }
-            ]
-        });
-
-        // Handle ICE candidates
-        peerConnection.onicecandidate = (event) => {
-            if (event.candidate) {
-                socketRef.current.emit('ice-candidate', {
-                    to: userId,
-                    candidate: event.candidate
-                });
-            }
-        };
-
-        // Handle remote stream with correct userId
-        peerConnection.ontrack = (event) => {
-            const remoteStream = event.streams[0];
-            handleRemoteStream(remoteStream, userId);
-        };
-
-        peerConnectionsRef.current[userId] = peerConnection;
-        return peerConnection;
-    };
-
-    // Add this function to handle the offer
-    const handleOffer = async (from, offer) => {
-        const peerConnection = createPeerConnection(from);
-        await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
-        const answer = await peerConnection.createAnswer();
-        await peerConnection.setLocalDescription(answer);
-        socketRef.current.emit('answer', { to: from, answer });
-    };
-
-    // Add this function to handle the answer
-    const handleAnswer = async (from, answer) => {
-        const peerConnection = peerConnectionsRef.current[from];
-        await peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
-    };
-
-    // Add this function to handle ICE candidates
-    const handleIceCandidate = async (from, candidate) => {
-        const peerConnection = peerConnectionsRef.current[from];
-        await peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
-    };
-
-    // Call setupWebRTCHandlers to initialize signaling
-    useEffect(() => {
-        setupWebRTCHandlers({
-            handleOffer,
-            handleAnswer,
-            handleIceCandidate
-        });
-    }, []);
-
-    // Add function to mark messages as read
-    const markMessagesAsRead = () => {
-        setUnreadMessages(0);
-    };
-
-    // Add function to toggle chat
-    const toggleChat = () => {
-        setIsChatOpen(prev => !prev);
-        if (!isChatOpen) {
-            markMessagesAsRead();
-        }
-    };
-
-    // Add function to emit typing status
-    const emitTypingStatus = (isTyping) => {
-        if (!socketRef.current) return;
-
-        socketRef.current.emit('user-typing', {
-            roomId,
-            userId,
-            userName,
-            isTyping
-        });
-    };
-
     return {
         socket: socketRef.current,
         isConnected,
         participants,
+        setParticipants,
         messages,
         sendMessage,
-        setParticipants,
-        setupWebRTCHandlers,
-        sendOffer,
-        sendAnswer,
-        sendIceCandidate,
         sendEmoji,
         emojis,
-        streams,
-        startStreaming,
-        remoteStreams,
         unreadMessages,
         markMessagesAsRead,
         toggleChat,
@@ -395,5 +261,10 @@ export const useSocket = (userId, roomId, userName) => {
         setIsChatOpen,
         typingUsers,
         emitTypingStatus,
+        updateMediaState,
+        setupWebRTCHandlers,
+        sendOffer,
+        sendAnswer,
+        sendIceCandidate
     };
 }

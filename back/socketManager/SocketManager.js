@@ -1,8 +1,6 @@
-const scheduleReminder = require('../controller/schedule.controller')
 const schedule = require('../models/schedule.modal')
 
 const onlineUsers = new Map();
-const onlineEmails = new Map();
 const rooms = {};
 const typingUsers = new Map(); // Store typing status for each room
 // console.log("onlineUsers", onlineUsers);
@@ -169,8 +167,6 @@ async function initializeSocket(io) {
                     id: socket.id,
                     userId,
                     userName,
-                    hasVideo: false, // Change to true for initial state
-                    hasAudio: false,
                     isHost: userId === hostUserId
                 });
 
@@ -179,8 +175,6 @@ async function initializeSocket(io) {
                     socketId: socket.id,
                     userId,
                     userName,
-                    hasVideo: false, // Change to true for initial state
-                    hasAudio: false,
                     isHost: userId === hostUserId
                 });
 
@@ -214,6 +208,111 @@ async function initializeSocket(io) {
             });
         });
 
+        socket.on('media-state-change', ({ roomId, userId, hasVideo, hasAudio }) => {
+            // Find the user in the room
+            if (rooms[roomId]) {
+                const userIndex = rooms[roomId].findIndex(user => user.id === socket.id);
+
+                if (userIndex !== -1) {
+                    // Update the user's media state
+                    if (hasVideo !== undefined) {
+                        rooms[roomId][userIndex].hasVideo = hasVideo;
+                    }
+
+                    if (hasAudio !== undefined) {
+                        rooms[roomId][userIndex].hasAudio = hasAudio;
+                    }
+
+                    // Broadcast to everyone else in the room
+                    socket.to(roomId).emit('media-state-change', {
+                        userId: socket.id,
+                        hasVideo: rooms[roomId][userIndex].hasVideo,
+                        hasAudio: rooms[roomId][userIndex].hasAudio
+                    });
+
+                    console.log(`User ${socket.id} media state updated: video=${rooms[roomId][userIndex].hasVideo}, audio=${rooms[roomId][userIndex].hasAudio}`);
+                }
+            }
+        });
+
+        socket.on('user-typing', ({ roomId, userId, userName, isTyping }) => {
+            // Get or initialize typing users for this room
+            let roomTypingUsers = typingUsers.get(roomId) || new Map();
+
+            if (isTyping) {
+                // Add typing user
+                roomTypingUsers.set(userId, { userId, userName });
+            } else {
+                // Remove typing user
+                roomTypingUsers.delete(userId);
+            }
+
+            typingUsers.set(roomId, roomTypingUsers);
+
+            // Emit updated typing status to room
+            io.to(roomId).emit('typing-status', {
+                users: Array.from(roomTypingUsers.values())
+            });
+        });
+
+        // Chat functionality
+        socket.on('send-message', ({ roomId, message, sender }) => {
+            io.to(roomId).emit('receive-message', {
+                sender,
+                message,
+                timestamp: new Date().toISOString()
+            });
+        });
+
+        socket.on("user-login", async (userId) => {
+            handleUserLogin(socket, userId);
+        });
+
+        sendReminder(socket);
+
+        // Handle sending emojis
+        socket.on('send-emoji', ({ roomId, emoji, sender }) => {
+            io.to(roomId).emit('receive-emoji', {
+                sender,
+                emoji,
+                timestamp: new Date().toISOString()
+            });
+        });
+
+        // Add hand raise status handler
+        socket.on('hand-status-change', ({ roomId, hasRaisedHand }) => {
+            if (rooms[roomId]) {
+                rooms[roomId] = rooms[roomId].map(user =>
+                    user.id === socket.id
+                        ? { ...user, hasRaisedHand }
+                        : user
+                );
+
+                // Broadcast the hand raise status change to all users in the room
+                io.to(roomId).emit('hand-status-updated', {
+                    userId: socket.id,
+                    hasRaisedHand
+                });
+            }
+        });
+
+        // Add video status change handler
+        socket.on('video-status-change', ({ roomId, hasVideo }) => {
+            if (rooms[roomId]) {
+                rooms[roomId] = rooms[roomId].map(user =>
+                    user.id === socket.id
+                        ? { ...user, hasVideo }
+                        : user
+                );
+
+                // Broadcast the video status change to all users in the room
+                io.to(roomId).emit('video-status-updated', {
+                    userId: socket.id,
+                    hasVideo
+                });
+            }
+        });
+
         // User disconnects
         socket.on('disconnect', () => {
             const user = onlineUsers[socket.id]; // Changed from users to onlineUsers
@@ -242,126 +341,6 @@ async function initializeSocket(io) {
 
             console.log('User disconnected:', socket.id);
         });
-
-        // Chat functionality
-        socket.on('send-message', ({ roomId, message, sender }) => {
-            io.to(roomId).emit('receive-message', {
-                sender,
-                message,
-                timestamp: new Date().toISOString()
-            });
-        });
-
-        socket.on("user-login", async (userId) => {
-            handleUserLogin(socket, userId);
-        });
-
-        // Handle sending emojis
-        socket.on('send-emoji', ({ roomId, emoji, sender }) => {
-            io.to(roomId).emit('receive-emoji', {
-                sender,
-                emoji,
-                timestamp: new Date().toISOString()
-            });
-        });
-
-
-        socket.on('audio-status-change', ({ roomId, hasAudio }) => {
-            // Update the user's audio status in the rooms data structure
-            if (rooms[roomId]) {
-                rooms[roomId] = rooms[roomId].map(user =>
-                    user.id === socket.id
-                        ? { ...user, hasAudio } // Update hasAudio
-                        : user
-                );
-
-                // Broadcast the audio status change to all users in the room
-                io.to(roomId).emit('audio-status-updated', {
-                    userId: socket.id,
-                    hasAudio
-                });
-            }
-        });
-
-        socket.on('video-status-change', ({ roomId, hasVideo }) => {
-            if (rooms[roomId]) {
-                // Update user's video status
-                const userIndex = rooms[roomId].findIndex(user => user.id === socket.id);
-                if (userIndex !== -1) {
-                    rooms[roomId][userIndex].hasVideo = hasVideo;
-
-                    // Broadcast to all users in the room
-                    io.to(roomId).emit('video-status-updated', {
-                        userId: socket.id,
-                        hasVideo
-                    });
-                }
-            }
-        });
-
-        // Add hand raise status handler
-        socket.on('hand-status-change', ({ roomId, hasRaisedHand }) => {
-            if (rooms[roomId]) {
-                rooms[roomId] = rooms[roomId].map(user =>
-                    user.id === socket.id
-                        ? { ...user, hasRaisedHand }
-                        : user
-                );
-
-                // Broadcast the hand raise status change to all users in the room
-                io.to(roomId).emit('hand-status-updated', {
-                    userId: socket.id,
-                    hasRaisedHand
-                });
-            }
-        });
-
-        socket.on('toggle-participant-audio', ({ roomId, participantId, isMuted }) => {
-            io.to(roomId).emit('audio-status-updated', { participantId, hasAudio: !isMuted });
-        });
-
-        socket.on('make-host', ({ roomId, newHostId }) => {
-            io.to(roomId).emit('host-updated', { newHostId });
-        });
-
-        socket.on('make-cohost', ({ roomId, newCohostId }) => {
-            io.to(roomId).emit('cohost-updated', { newCohostId });
-        });
-
-        socket.on('rename-participant', ({ roomId, participantId, newName }) => {
-            io.to(roomId).emit('participant-renamed', { participantId, newName });
-        });
-
-        socket.on('remove-participant', ({ roomId, participantId }) => {
-            io.to(roomId).emit('participant-removed', { participantId });
-            // Also disconnect the removed user's socket
-            const userSocket = io.sockets.sockets.get(participantId);
-            if (userSocket) {
-                userSocket.disconnect();
-            }
-        });
-
-        socket.on('user-typing', ({ roomId, userId, userName, isTyping }) => {
-            // Get or initialize typing users for this room
-            let roomTypingUsers = typingUsers.get(roomId) || new Map();
-            
-            if (isTyping) {
-                // Add typing user
-                roomTypingUsers.set(userId, { userId, userName });
-            } else {
-                // Remove typing user
-                roomTypingUsers.delete(userId);
-            }
-            
-            typingUsers.set(roomId, roomTypingUsers);
-            
-            // Emit updated typing status to room
-            io.to(roomId).emit('typing-status', {
-                users: Array.from(roomTypingUsers.values())
-            });
-        });
-
-        sendReminder(socket);
 
         // Handle disconnection
         socket.on("disconnect", () => {

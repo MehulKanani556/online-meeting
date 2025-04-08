@@ -10,15 +10,16 @@ import smile from '../Image/d_smile.svg';
 import podcast from '../Image/d_podcast.svg';
 import hand from '../Image/d_hand.svg';
 import bar from '../Image/d_bar.svg';
+import Button from 'react-bootstrap/Button';
+import Offcanvas from 'react-bootstrap/Offcanvas';
 import { HiOutlineUserPlus } from "react-icons/hi2";
 import { HiOutlineDotsVertical } from "react-icons/hi";
 import { IoClose, IoSearch } from 'react-icons/io5'
 import { IoMdSend } from "react-icons/io";
 import { getUserById } from '../Redux/Slice/user.slice';
 import { useDispatch, useSelector } from 'react-redux';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useSocket } from '../Hooks/useSocket';
-import { Button, Offcanvas } from 'react-bootstrap';
 
 function Screen() {
     const { id: roomId } = useParams();
@@ -48,12 +49,18 @@ function Screen() {
         setIsChatOpen,
         typingUsers,
         emitTypingStatus,
+        updateMediaState,
+        setupWebRTCHandlers,
+        sendOffer,
+        sendAnswer,
+        sendIceCandidate
     } = useSocket(userId, roomId, userName);
 
 
+
     // WebRTC State
-    const [isMuted, setIsMuted] = useState(true);
-    const [isVideoOff, setIsVideoOff] = useState(true);
+    const [isMuted, setIsMuted] = useState(false);
+    const [isVideoOff, setIsVideoOff] = useState(false);
     const [isScreenSharing, setIsScreenSharing] = useState(false);
     const [newMessage, setNewMessage] = useState('');
     const [showViewMoreDropdown, setShowViewMoreDropdown] = useState(false);
@@ -61,6 +68,9 @@ function Screen() {
     const [isHandRaised, setIsHandRaised] = useState(false);
     const [showEmojis, setshowEmojis] = useState(false);
     const [activeEmojis, setActiveEmojis] = useState([]);
+    const [localStream, setLocalStream] = useState(null);
+    const [remoteStreams, setRemoteStreams] = useState({});
+    const [maxVisibleParticipants, setMaxVisibleParticipants] = useState(9);
     const [billingCycle, setBillingCycle] = useState('Messages');
     const [activeDropdown, setActiveDropdown] = useState(null);
     const [mainSectionMargin, setMainSectionMargin] = useState(0);
@@ -70,129 +80,390 @@ function Screen() {
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedParticipant, setSelectedParticipant] = useState(null);
     const [lastUnreadIndex, setLastUnreadIndex] = useState(-1);
-    const [maxVisibleParticipants, setMaxVisibleParticipants] = useState(9);
 
     // Refs
-    const localStreamRef = useRef();
-    const screenStreamRef = useRef();
     const localVideoRef = useRef();
     const peerConnectionsRef = useRef({});
-    const remoteVideoRefs = useRef({});
     const messageContainerRef = useRef();
+    const videoRefsMap = useRef({});
+
+
+    const handleClose = () => {
+        setShow(false);
+        setMainSectionMargin(0);
+        setIsChatOpen(false);
+    };
+
+    // Modify handleShow to include scroll behavior
+    const handleShow = () => {
+        setShow(true);
+        setIsChatOpen(true);
+
+        // Wait for next tick to ensure DOM is updated
+        setTimeout(() => {
+            if (messageContainerRef.current) {
+                if (unreadMessages > 0) {
+                    const firstUnreadIndex = messages.length - unreadMessages;
+                    setLastUnreadIndex(firstUnreadIndex);
+                    const unreadElement = messageContainerRef.current.children[firstUnreadIndex];
+                    if (unreadElement) {
+                        unreadElement.scrollIntoView({ behavior: 'smooth' });
+                    }
+                } else {
+                    // If no unread messages, scroll to bottom
+                    messageContainerRef.current.scrollTop = messageContainerRef.current.scrollHeight;
+                }
+            }
+        }, 0);
+        markMessagesAsRead();
+    };
+
+    useEffect(() => {
+        const handleResize = () => {
+            setWindowWidth(window.innerWidth);
+        };
+
+        window.addEventListener('resize', handleResize);
+        return () => {
+            window.removeEventListener('resize', handleResize);
+        };
+    }, []);
+
+    useEffect(() => {
+        if (show && windowWidth > 768) {
+            setMainSectionMargin(380);
+        }
+    }, [show, windowWidth]);
+
+    // Add this useEffect for handling auto-scroll and unread messages
+    useEffect(() => {
+        if (messageContainerRef.current) {
+            // If chat is open, scroll to bottom
+            if (isChatOpen) {
+                messageContainerRef.current.scrollTop = messageContainerRef.current.scrollHeight;
+            }
+            // If chat was closed and now opened, scroll to first unread message
+            else if (show && unreadMessages > 0) {
+                const firstUnreadIndex = messages.length - unreadMessages;
+                setLastUnreadIndex(firstUnreadIndex);
+                const unreadElement = messageContainerRef.current.children[firstUnreadIndex];
+                if (unreadElement) {
+                    unreadElement.scrollIntoView({ behavior: 'smooth' });
+                }
+            }
+        }
+    }, [messages, show, isChatOpen, unreadMessages]);
 
     // Get current user data
     useEffect(() => {
         dispatch(getUserById(userId));
     }, [userId, dispatch]);
 
-    // Initialize media stream with correct initial state
+    // Initialize WebRTC
     useEffect(() => {
-        const initializeStream = async () => {
+        async function setupLocalMedia() {
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({
-                    audio: true,
-                    video: true
+                    video: true,
+                    audio: true
                 });
 
-                localStreamRef.current = stream;
+                if (stream) {
+                    // Store the stream
+                    setLocalStream(stream);
 
-                const videoTrack = stream.getVideoTracks()[0];
-                if (videoTrack) {
-                    videoTrack.enabled = !isVideoOff;
+                    // Initial state for tracks
+                    const audioTrack = stream.getAudioTracks()[0];
+                    const videoTrack = stream.getVideoTracks()[0];
+
+                    if (audioTrack) {
+                        audioTrack.enabled = !isMuted;
+                    }
+
+                    if (videoTrack) {
+                        videoTrack.enabled = !isVideoOff;
+                    }
+
+                    // Apply to video element with a slight delay to ensure DOM is ready
+                    setTimeout(() => {
+                        if (localVideoRef.current) {
+                            localVideoRef.current.srcObject = stream;
+                        }
+                    }, 100);
                 }
-
-                if (localVideoRef.current) {
-                    localVideoRef.current.srcObject = stream;
-                    console.log('Video element source set');
-                }
-
             } catch (error) {
                 console.error('Error accessing media devices:', error);
+                setIsVideoOff(true);
             }
-        };
+        }
 
-        initializeStream();
+        setupLocalMedia();
 
-        // Cleanup function
         return () => {
-            if (localStreamRef.current) {
-                localStreamRef.current.getTracks().forEach(track => {
-                    track.stop();
-                });
+            if (localStream) {
+                localStream.getTracks().forEach(track => track.stop());
             }
         };
     }, []);
 
-    // Add this useEffect to handle video state changes
-    useEffect(() => {
-        if (localStreamRef.current) {
-            const videoTrack = localStreamRef.current.getVideoTracks()[0];
-            if (videoTrack) {
-                videoTrack.enabled = !isVideoOff;
-            }
+    // Helper function to create peer connection 
+    const createPeerConnection = (peerId) => {
+        if (peerConnectionsRef.current[peerId]) {
+            return peerConnectionsRef.current[peerId];
         }
-    }, [isVideoOff]);
 
-    // Toggle audio
-    const toggleAudio = () => {
-        setIsMuted(prevMuted => {
-            const newMutedState = !prevMuted;
+        console.log(`Creating new peer connection for ${peerId}`);
 
-            if (localStreamRef.current) {
-                const audioTrack = localStreamRef.current.getAudioTracks()[0];
-                if (audioTrack) {
-                    audioTrack.enabled = !newMutedState;
+        const configuration = {
+            iceServers: [
+                { urls: 'stun:stun.l.google.com:19302' },
+                { urls: 'stun:stun1.l.google.com:19302' }
+            ]
+        };
 
-                    // Emit audio status change to other participants
-                    socket.emit('audio-status-change', {
-                        roomId,
-                        hasAudio: !newMutedState
-                    });
+        const pc = new RTCPeerConnection(configuration);
 
-                    // Signal to peers
-                    Object.values(peerConnectionsRef.current).forEach(pc => {
-                        const sender = pc.getSenders().find(s => s.track.kind === 'audio');
-                        if (sender) {
-                            sender.replaceTrack(audioTrack);
-                        }
-                    });
+        // Add local tracks to the peer connection
+        if (localStream) {
+            localStream.getTracks().forEach(track => {
+                console.log(`Adding ${track.kind} track to peer connection for ${peerId}`);
+                pc.addTrack(track, localStream);
+            });
+        }
+
+        // Handle ICE candidates
+        pc.onicecandidate = event => {
+            if (event.candidate) {
+                console.log(`Sending ICE candidate to ${peerId}`);
+                sendIceCandidate(peerId, event.candidate);
+            }
+        };
+
+        // CRITICAL FIX: Completely revised ontrack handler
+        pc.ontrack = event => {
+            console.log(`Received ${event.track.kind} track from ${peerId}`, event.streams[0]);
+
+            // Always use the first stream from the event
+            if (event.streams && event.streams[0]) {
+                const remoteStream = event.streams[0];
+
+                setRemoteStreams(prev => {
+                    // Create a new object to ensure React detects the change
+                    const newRemoteStreams = { ...prev };
+                    newRemoteStreams[peerId] = remoteStream;
+                    return newRemoteStreams;
+                });
+
+                // Force an update to the video ref
+                const videoElement = videoRefsMap.current[peerId];
+                if (videoElement) {
+                    videoElement.srcObject = remoteStream;
+                    videoElement.play().catch(e => console.log('Play error in ontrack:', e));
                 }
             }
+        };
 
-            return newMutedState;
-        });
+        // Store the peer connection
+        peerConnectionsRef.current[peerId] = pc;
+        return pc;
     };
 
+    // Set up WebRTC peer connections when participants change
     useEffect(() => {
-        if (localVideoRef.current && localStreamRef.current && !isVideoOff) {
-            localVideoRef.current.srcObject = localStreamRef.current;
-        }
-    }, [localStreamRef.current, isVideoOff]);
+        if (!socket || !localStream || !isConnected) return;
 
-    // Modify the toggleVideo function
-    const toggleVideo = () => {
-        setIsVideoOff(prevState => {
-            const newVideoOffState = !prevState;
+        // Set up WebRTC handlers for signaling
+        setupWebRTCHandlers({
+            handleOffer: async (from, offer) => {
+                console.log('Received offer from:', from);
 
-            if (localStreamRef.current) {
-                const videoTrack = localStreamRef.current.getVideoTracks()[0];
-                if (videoTrack) {
-                    videoTrack.enabled = !newVideoOffState;
+                // Create a new RTCPeerConnection if it doesn't exist
+                if (!peerConnectionsRef.current[from]) {
+                    createPeerConnection(from);
+                }
 
-                    // Update video status for all peers
-                    socket.emit('video-status-change', {
-                        roomId,
-                        hasVideo: !newVideoOffState
-                    });
+                const pc = peerConnectionsRef.current[from];
 
-                    // Ensure local video display is updated
-                    if (localVideoRef.current) {
-                        localVideoRef.current.srcObject = localStreamRef.current;
+                try {
+                    await pc.setRemoteDescription(new RTCSessionDescription(offer));
+                    const answer = await pc.createAnswer();
+                    await pc.setLocalDescription(answer);
+                    sendAnswer(from, answer);
+                } catch (error) {
+                    console.error('Error handling offer:', error);
+                }
+            },
+
+            handleAnswer: async (from, answer) => {
+                console.log('Received answer from:', from);
+
+                const pc = peerConnectionsRef.current[from];
+                if (pc) {
+                    try {
+                        // Check if the remote description is already set to avoid errors
+                        if (pc.currentRemoteDescription === null) {
+                            await pc.setRemoteDescription(new RTCSessionDescription(answer));
+                            console.log('Remote description set successfully after answer');
+                        }
+                    } catch (error) {
+                        console.error('Error handling answer:', error);
+                    }
+                }
+            },
+
+            handleIceCandidate: async (from, candidate) => {
+                console.log('Received ICE candidate from:', from);
+
+                const pc = peerConnectionsRef.current[from];
+                if (pc) {
+                    try {
+                        await pc.addIceCandidate(new RTCIceCandidate(candidate));
+                    } catch (error) {
+                        console.error('Error adding ICE candidate:', error);
                     }
                 }
             }
-            return newVideoOffState;
         });
+
+        // Initialize connections with a delay to ensure socket is ready
+        const initializeConnections = async () => {
+            // Filter out ourselves
+            const peersToConnect = participants.filter(p => p.id !== socket.id);
+
+            console.log(`Initializing connections with ${peersToConnect.length} peers`);
+
+            for (const peer of peersToConnect) {
+                // Skip if a connection already exists
+                if (peerConnectionsRef.current[peer.id]) {
+                    continue;
+                }
+
+                console.log('Creating new connection with:', peer.id);
+                const pc = createPeerConnection(peer.id);
+
+                try {
+                    const offer = await pc.createOffer();
+                    await pc.setLocalDescription(offer);
+                    sendOffer(peer.id, offer);
+                } catch (error) {
+                    console.error('Error creating offer:', error);
+                }
+            }
+        };
+
+        const timer = setTimeout(initializeConnections, 1000);
+
+        return () => {
+            clearTimeout(timer);
+        };
+    }, [socket, participants, localStream, isConnected]);
+
+    // This effect ensures remote video elements get updated when streams change
+    useEffect(() => {
+        Object.entries(remoteStreams).forEach(([peerId, stream]) => {
+            const videoElement = videoRefsMap.current[peerId];
+
+            if (videoElement && stream) {
+                // Only update if the stream has changed
+                if (videoElement.srcObject !== stream) {
+                    console.log(`Setting stream for ${peerId} to video element`);
+
+                    // Store the stream first
+                    videoElement.srcObject = stream;
+
+                    // Make sure autoplay works even with browser autoplay restrictions
+                    videoElement.muted = true; // Temporarily mute to help with autoplay
+
+                    // Use play() with catch to handle autoplay restrictions
+                    videoElement.play().catch(err => {
+                        console.log(`Error playing video: ${err.message}`);
+                        // If autoplay is blocked, we can unmute after user interaction
+                        const unmute = () => {
+                            videoElement.muted = false;
+                            document.removeEventListener('click', unmute);
+                        };
+                        document.addEventListener('click', unmute);
+                    });
+
+                    // Listen for the loadedmetadata event
+                    videoElement.onloadedmetadata = () => {
+                        console.log(`Video metadata loaded for peer ${peerId}`);
+                        videoElement.play().catch(e => console.log('Play failed after metadata:', e));
+                    };
+                }
+            } else {
+                console.log(`No video element found for peer ${peerId} or no stream available`);
+            }
+        });
+    }, [remoteStreams]);
+
+
+
+    // Force local video connection when ref changes
+    useEffect(() => {
+        if (localStream && localVideoRef.current) {
+            console.log("Setting local video stream to ref");
+            // Only update if different
+            if (localVideoRef.current.srcObject !== localStream) {
+                localVideoRef.current.srcObject = localStream;
+            }
+        }
+    }, [localStream, localVideoRef.current]);
+
+
+    // Toggle audio
+    const toggleAudio = () => {
+        if (localStream) {
+            const audioTrack = localStream.getAudioTracks()[0];
+            if (audioTrack) {
+                audioTrack.enabled = !audioTrack.enabled;
+                setIsMuted(!audioTrack.enabled);
+                updateMediaState('audio', audioTrack.enabled);
+            }
+        } else {
+            setIsMuted(!isMuted);
+        }
+    };
+
+    // Update your toggleVideo function:
+    const toggleVideo = () => {
+        if (localStream) {
+            const videoTrack = localStream.getVideoTracks()[0];
+            if (videoTrack) {
+                const newState = !videoTrack.enabled;
+                videoTrack.enabled = newState;
+                setIsVideoOff(!newState);
+
+                // Log the state and force stream reconnection
+                console.log(`Video toggled. Enabled: ${newState}`);
+
+                // Update all peers about our video state
+                updateMediaState('video', newState);
+            }
+        } else {
+            setIsVideoOff(!isVideoOff);
+        }
+    };
+
+    const setVideoRef = (peerId) => (element) => {
+        if (element) {
+            // Store the element reference
+            videoRefsMap.current[peerId] = element;
+
+            // Get the stream if available
+            const stream = remoteStreams[peerId];
+
+            // Apply the stream to the video element if it exists
+            if (stream && element.srcObject !== stream) {
+                console.log(`Setting stream for ${peerId} in ref callback`);
+                element.srcObject = stream;
+
+                // Force play with error handling
+                element.play().catch(err => {
+                    console.log(`Error playing video in ref callback: ${err.message}`);
+                });
+            }
+        }
     };
 
     // Share screen
@@ -203,14 +474,14 @@ function Screen() {
                     video: true
                 });
 
-                screenStreamRef.current = screenStream;
-
                 // Replace video track in all peer connections
                 const videoTrack = screenStream.getVideoTracks()[0];
 
                 Object.values(peerConnectionsRef.current).forEach(pc => {
                     const senders = pc.getSenders();
-                    const sender = senders.find(s => s.track && s.track.kind === 'video');
+                    const sender = senders.find(s =>
+                        s.track && s.track.kind === 'video'
+                    );
 
                     if (sender) {
                         sender.replaceTrack(videoTrack);
@@ -228,34 +499,51 @@ function Screen() {
                 };
 
                 setIsScreenSharing(true);
+
+                // Save reference to stop later
+                const oldVideoTrack = localStream.getVideoTracks()[0];
+                localStream.removeTrack(oldVideoTrack);
+                localStream.addTrack(videoTrack);
+
             } catch (error) {
                 console.error('Error sharing screen:', error);
             }
         } else {
             // Stop screen sharing
-            if (screenStreamRef.current) {
-                screenStreamRef.current.getTracks().forEach(track => track.stop());
-                screenStreamRef.current = null;
-            }
+            try {
+                const newStream = await navigator.mediaDevices.getUserMedia({ video: true });
+                const videoTrack = newStream.getVideoTracks()[0];
 
-            // Revert to camera
-            const videoTrack = localStreamRef.current.getVideoTracks()[0];
+                // Replace video track in all peer connections
+                Object.values(peerConnectionsRef.current).forEach(pc => {
+                    const senders = pc.getSenders();
+                    const sender = senders.find(s =>
+                        s.track && s.track.kind === 'video'
+                    );
 
-            Object.values(peerConnectionsRef.current).forEach(pc => {
-                const senders = pc.getSenders();
-                const sender = senders.find(s => s.track && s.track.kind === 'video');
+                    if (sender) {
+                        sender.replaceTrack(videoTrack);
+                    }
+                });
 
-                if (sender && videoTrack) {
-                    sender.replaceTrack(videoTrack);
+                // Show camera in local video
+                if (localVideoRef.current) {
+                    localVideoRef.current.srcObject = newStream;
                 }
-            });
 
-            // Show camera in local video
-            if (localVideoRef.current) {
-                localVideoRef.current.srcObject = localStreamRef.current;
+                // Update local stream
+                const oldVideoTrack = localStream.getVideoTracks()[0];
+                if (oldVideoTrack) {
+                    oldVideoTrack.stop();
+                    localStream.removeTrack(oldVideoTrack);
+                }
+                localStream.addTrack(videoTrack);
+
+                setIsScreenSharing(false);
+                updateMediaState('video', true);
+            } catch (error) {
+                console.error('Error returning to camera:', error);
             }
-
-            setIsScreenSharing(false);
         }
     };
 
@@ -275,6 +563,16 @@ function Screen() {
 
     // End meeting
     const endMeeting = () => {
+        // Stop all media tracks
+        if (localStream) {
+            localStream.getTracks().forEach(track => track.stop());
+        }
+
+        // Close all peer connections
+        Object.values(peerConnectionsRef.current).forEach(pc => {
+            pc.close();
+        });
+
         sessionStorage.setItem('openReviewModal', 'true');
         navigate("/home");
     };
@@ -300,6 +598,7 @@ function Screen() {
         return 'multi-participants';
     };
 
+    // Set max visible participants based on screen size
     useEffect(() => {
         const handleResize = () => {
             setMaxVisibleParticipants(window.innerWidth <= 425 ? 6 : 9);
@@ -344,70 +643,50 @@ function Screen() {
         setActiveEmojis(prev => [...prev, { emoji, userName, id: Date.now() }]);
     };
 
-    useEffect(() => {
-        const handleResize = () => {
-            setWindowWidth(window.innerWidth);
+    // Add debounce function for typing
+    const debounce = (func, wait) => {
+        let timeout;
+        return (...args) => {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => func.apply(this, args), wait);
         };
-
-        window.addEventListener('resize', handleResize);
-        return () => {
-            window.removeEventListener('resize', handleResize);
-        };
-    }, []);
-
-    useEffect(() => {
-        if (show && windowWidth > 768) {
-            setMainSectionMargin(380);
-        }
-    }, [show, windowWidth]);
-
-    // Add this useEffect for handling auto-scroll and unread messages
-    useEffect(() => {
-        if (messageContainerRef.current) {
-            // If chat is open, scroll to bottom
-            if (isChatOpen) {
-                messageContainerRef.current.scrollTop = messageContainerRef.current.scrollHeight;
-            }
-            // If chat was closed and now opened, scroll to first unread message
-            else if (show && unreadMessages > 0) {
-                const firstUnreadIndex = messages.length - unreadMessages;
-                setLastUnreadIndex(firstUnreadIndex);
-                const unreadElement = messageContainerRef.current.children[firstUnreadIndex];
-                if (unreadElement) {
-                    unreadElement.scrollIntoView({ behavior: 'smooth' });
-                }
-            }
-        }
-    }, [messages, show, isChatOpen, unreadMessages]);
-
-    // Modify handleShow to include scroll behavior
-    const handleShow = () => {
-        setShow(true);
-        setIsChatOpen(true);
-
-        // Wait for next tick to ensure DOM is updated
-        setTimeout(() => {
-            if (messageContainerRef.current) {
-                if (unreadMessages > 0) {
-                    const firstUnreadIndex = messages.length - unreadMessages;
-                    setLastUnreadIndex(firstUnreadIndex);
-                    const unreadElement = messageContainerRef.current.children[firstUnreadIndex];
-                    if (unreadElement) {
-                        unreadElement.scrollIntoView({ behavior: 'smooth' });
-                    }
-                } else {
-                    // If no unread messages, scroll to bottom
-                    messageContainerRef.current.scrollTop = messageContainerRef.current.scrollHeight;
-                }
-            }
-        }, 0);
-        markMessagesAsRead();
     };
 
-    const handleClose = () => {
-        setShow(false);
-        setMainSectionMargin(0);
-        setIsChatOpen(false);
+    // Handle input changes with typing indicator
+    const handleMessageInput = (e) => {
+        setNewMessage(e.target.value);
+        emitTypingStatus(true);
+
+        // Stop typing indicator after 1 second of no input
+        debouncedStopTyping();
+    };
+
+    const debouncedStopTyping = debounce(() => {
+        emitTypingStatus(false);
+    }, 2500);
+
+    // Render typing indicator
+    const renderTypingIndicator = () => {
+        if (typingUsers.length === 0) return null;
+
+        const typingNames = typingUsers
+            .filter(user => user.userId !== userId)
+            .map(user => user.userName);
+
+        if (typingNames.length === 0) return null;
+
+        const displayText = `${typingNames.join(' & ')} is typing...`;
+
+        return (
+            <div className="typing-indicator mb-2 ms-2 d-flex align-items-center" style={{ color: '#BFBFBF', fontSize: '13px' }}>
+                <div className="typing-dots me-1">
+                    <span className='j_typing_loader'></span>
+                    <span className='j_typing_loader'></span>
+                    <span className='j_typing_loader'></span>
+                </div>
+                {displayText}
+            </div>
+        );
     };
 
     // Function to toggle participant's microphone
@@ -482,52 +761,6 @@ function Screen() {
         participant.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
-    // Add debounce function for typing
-    const debounce = (func, wait) => {
-        let timeout;
-        return (...args) => {
-            clearTimeout(timeout);
-            timeout = setTimeout(() => func.apply(this, args), wait);
-        };
-    };
-
-    // Handle input changes with typing indicator
-    const handleMessageInput = (e) => {
-        setNewMessage(e.target.value);
-        emitTypingStatus(true);
-
-        // Stop typing indicator after 1 second of no input
-        debouncedStopTyping();
-    };
-
-    const debouncedStopTyping = debounce(() => {
-        emitTypingStatus(false);
-    }, 2500);
-
-    // Render typing indicator
-    const renderTypingIndicator = () => {
-        if (typingUsers.length === 0) return null;
-
-        const typingNames = typingUsers
-            .filter(user => user.userId !== userId)
-            .map(user => user.userName);
-
-        if (typingNames.length === 0) return null;
-
-        const displayText = `${typingNames.join(' & ')} is typing...`;
-
-        return (
-            <div className="typing-indicator mb-2 ms-2 d-flex align-items-center" style={{ color: '#BFBFBF', fontSize: '13px' }}>
-                <div className="typing-dots me-1">
-                    <span className='j_typing_loader'></span>
-                    <span className='j_typing_loader'></span>
-                    <span className='j_typing_loader'></span>
-                </div>
-                {displayText}
-            </div>
-        );
-    };
-
     const handleTextareaResize = (e) => {
         e.target.style.height = 'auto';
         e.target.style.height = Math.min(120, e.target.scrollHeight) + 'px';
@@ -535,31 +768,23 @@ function Screen() {
 
     return (
         <>
-            <section className="d_mainsec"
-                style={{
-                    marginRight: windowWidth > 768 ? `${mainSectionMargin}px` : 0,
-                    transition: 'margin-right 0.3s ease-in-out'
-
-                }} >
+            <section className="d_mainsec" style={{
+                marginRight: windowWidth > 768 ? `${mainSectionMargin}px` : 0,
+                transition: 'margin-right 0.3s ease-in-out'
+            }} >
                 <div className="d_topbar"></div>
                 <div className="d_mainscreen">
                     <div className={`d_participants-grid ${getGridClass()}`}
                         style={{ gridTemplateColumns: `repeat(${getGridColumns()}, 1fr)` }}>
                         {/* Map all participants including local user */}
                         {visibleParticipants.map((participant, index) => (
+                            // console.log("participant", participant),
+
                             <div key={participant.id} className="d_grid-item">
                                 <div className="d_avatar-container">
-                                    {/* <video
-                                        id={`video-${participant.id}`}
-                                        className="d_video-element"
-                                        ref={localVideoRef}
-                                        autoPlay
-                                        playsInline
-                                        muted
-                                    /> */}
-
                                     {participant.id === socket?.id ? (
                                         // Local user video
+                                        console.log("local", localVideoRef),
                                         !isVideoOff ? (
                                             <video
                                                 ref={localVideoRef}
@@ -578,15 +803,12 @@ function Screen() {
                                             </div>
                                         )
                                     ) : (
-                                        // Remote participant video
-                                        participant.hasVideo ? (
+                                        // Remote participant video - fixed version
+                                        remoteStreams[participant.id] && participant.hasVideo !== false ? (
                                             <video
+                                                ref={setVideoRef(participant.id)}
                                                 id={`video-${participant.id}`}
                                                 className="d_video-element"
-                                                ref={el => {
-                                                    console.log("ele", el)
-                                                    if (el) remoteVideoRefs.current[participant.id] = el;
-                                                }}
                                                 autoPlay
                                                 playsInline
                                             />
@@ -648,14 +870,13 @@ function Screen() {
                         ))}
                     </div>
                 </div>
-                <div className="d_bottombar"
-                    style={{
-                        cursor: "pointer", width: windowWidth > 768 && show ? `calc(100% - ${mainSectionMargin}px)` : '100%',
-                        transition: 'width 0.3s ease-in-out'
-                    }}>
-                    < div className="d-flex justify-content-sm-between justify-content-center align-items-center" >
+                <div className="d_bottombar" style={{
+                    cursor: "pointer", width: windowWidth > 768 && show ? `calc(100% - ${mainSectionMargin}px)` : '100%',
+                    transition: 'width 0.3s ease-in-out'
+                }}>
+                    <div className="d-flex justify-content-sm-between justify-content-center align-items-center">
                         {/* 1st div */}
-                        < div className='d-none d-sm-block' >
+                        <div className='d-none d-sm-block'>
                             <div className="d-flex align-items-center d_resposive">
                                 <div className="d_box me-sm-3 mb-2 mb-sm-0" onClick={toggleAudio}>
                                     <img src={isMuted ? offmicrophone : onmicrophone} alt="" />
@@ -814,12 +1035,21 @@ function Screen() {
                                 </div>
                             </div>
                         </div>
-                    </div >
-                </div >
-            </section >
+                    </div>
+                </div>
+            </section>
 
-            {/* {/ Offcanvas  /} */}
+            {/*  Render active emojis with usernames */}
+            <div className="active-emojis">
+                {emojis.map(({ sender, message, timestamp }, index) => (
+                    <div key={index} className="emoji-animation">
+                        <span className="emoji">{message}</span>
+                        <span className="user-name">{sender}</span>
+                    </div>
+                ))}
+            </div>
 
+            {/* Participants and Chat sidebar (Off-canvas) */}
             <Offcanvas show={show}
                 className='B_screen_offcanvas'
                 placement='end'
@@ -1146,17 +1376,6 @@ function Screen() {
                 )}
 
             </Offcanvas>
-
-            {/*  Render active emojis with usernames */}
-            <div className="active-emojis">
-                {emojis.map(({ sender, message, timestamp }, index) => (
-                    <div key={index} className="emoji-animation">
-                        <span className="emoji">{message}</span>
-                        <span className="user-name">{sender}</span>
-                    </div>
-                ))}
-            </div>
-
         </>
     );
 }
