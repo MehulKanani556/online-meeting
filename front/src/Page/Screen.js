@@ -768,6 +768,20 @@ function Screen() {
 
     return (
         <>
+            <div className="position-fixed top-0 end-0 p-3 ps-0 pb-0" style={{ zIndex: '1' }}>
+                <div className="j_Invite text-white p-3">
+                    <div className="d-flex align-items-center j_Box_margin">
+                        <div className="j_join_user">
+                            KP
+                        </div>
+                        <p className="p-0 m-0">Kiara Patel wants to join this meeting.</p>
+                    </div>
+                    <div className="mt-2">
+                        <button className="btn j_deny_button me-2">Deny</button>
+                        <button className="btn j_accept_button">Accept</button>
+                    </div>
+                </div>
+            </div>
             <section className="d_mainsec" style={{
                 marginRight: windowWidth > 768 ? `${mainSectionMargin}px` : 0,
                 transition: 'margin-right 0.3s ease-in-out'
@@ -933,7 +947,7 @@ function Screen() {
                                             <img src={smile} alt="Emoji" className="me-2" />
                                             <span>Reactions</span>
                                             {showEmojis && (
-                                                <div className="emoji-container" style={{ position: 'absolute', width: '250px', bottom: '45px', backgroundColor: '#12161C', border: '1px solid #202f41', padding: '10px', borderRadius: '5px', zIndex: 1000 }}>
+                                                <div className="emoji-container j_mobile_containet_emoji">
                                                     {['❤️', '😃', '😮', '🙌', '😂', '🎉', '👏', '💥', '😉', '🔥', '👍', '👎', '▶️', '✨'].map((emoji, index) => (
                                                         <span
                                                             key={index}

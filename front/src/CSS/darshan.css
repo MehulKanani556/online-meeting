@@ -298,14 +298,16 @@
     line-height: 1.4;
 
 }
+
 .d_foucscolor {
     width: 349px;
 }
-.d_foucscolor::placeholder{
+
+.d_foucscolor::placeholder {
     color: #fff;
 }
 
-.d_foucscolor:focus{
+.d_foucscolor:focus {
     background-color: #202F41;
     color: #fff;
 }
@@ -321,8 +323,75 @@
     color: white;
 }
 
+.j_Invite {
+    background-color: #12161C;
+    width: 440px;
+    border-radius: 6px;
+    transition: opacity 0.3s ease;
+}
 
+.j_deny_button {
+    border: 1px solid #fff;
+    border-radius: 6px;
+    padding: 5px 12px;
+    font-weight: 600;
+    color: white;
+    width: 80px;
+    transition: all 0.5s;
+}
 
+.j_deny_button:hover {
+    font-weight: 600;
+    border: 1px solid #fff;
+    border-radius: 6px;
+    background-color: white;
+    color: black;
+}
+
+.j_accept_button {
+    font-weight: 600;
+    border: 1px solid #fff;
+    border-radius: 6px;
+    padding: 5px 12px;
+    background-color: white;
+    transition: all 0.5s;
+    color: black;
+    width: 80px;
+}
+
+.j_accept_button:hover {
+    border: 1px solid #fff;
+    border-radius: 6px;
+    font-weight: 600;
+    color: white;
+}
+
+.j_join_user {
+    background: #382B82;
+    height: 30px;
+    width: 30px;
+    border-radius: 50%;
+    text-align: center;
+    font-weight: 600;
+    font-size: 16px;
+    padding: 3px;
+    margin-right: 10px;
+}
+
+.j_Box_margin {
+    margin-bottom: 24px;
+}
+
+.j_mobile_containet_emoji {
+    position: absolute;
+    width: 250px;
+    bottom: 45px;
+    background-color: #12161C;
+    border: 1px solid #202f41;
+    padding: 10px;
+    border-radius: 5px;
+    z-index: 1000;
+}
 
 /* Responsive design */
 @media(max-width:1024px) {
@@ -353,6 +422,10 @@
 
     .d_extra-participants span {
         font-size: 16px;
+    }
+
+    .j_Invite {
+        width: 350px;
     }
 }
 
@@ -453,6 +526,25 @@
     .d_extra-participants {
         top: 50px;
     }
+
+    .j_Invite {
+        width: 325px;
+    }
+
+    .j_Box_margin {
+        margin-bottom: 15px;
+    }
+
+    .j_join_user {
+        height: 32px;
+        width: 32px;
+        padding: 4px;
+    }
+
+    .j_mobile_containet_emoji {
+        width: 200px;
+        right: -15px;
+    }
 }
 
 @media(max-width:375px) {
@@ -486,6 +578,27 @@
         width: 40%;
 
     }
+
+    .j_Invite {
+        width: 300px;
+    }
+
+    .j_Box_margin p {
+        font-size: 14px;
+    }
+
+    .j_join_user {
+        height: 25px;
+        width: 25px;
+        padding: 2px;
+        font-size: 14px;
+    }
+
+    .j_deny_button,
+    .j_accept_button {
+        padding: 3px 10px;
+        font-size: 14px;
+    }
 }
 
 @media(max-width:320px) {
@@ -517,6 +630,17 @@
     .B_screen_btn {
         font-size: 13px;
         width: 44%;
+    }
+
+    .j_Invite {
+        width: 250px;
+    }
+
+    .j_join_user {
+        height: 30px;
+        width: 30px;
+        padding: 5px;
+        font-size: 14px;
     }
 }
 

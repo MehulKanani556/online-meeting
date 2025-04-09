@@ -183,7 +183,10 @@ function Meeting() {
     }, []);
 
     const allschedule = useSelector((state) => state.schedule.allschedule);
-    // console.log("allschedule", allschedule);
+    console.log("allschedule", allschedule);
+
+    const usersMeetings = allschedule.filter(meeting => meeting.userId === userId);
+    console.log("userMeetings", usersMeetings);
 
     useEffect(() => {
         dispatch(getAllschedule());
@@ -231,7 +234,7 @@ function Meeting() {
                         {/* METTING CARD ALL SECTION */}
 
                         {/* Upcoming Meeting Card */}
-                        {allschedule.map((schedule, index) => {
+                        {usersMeetings.map((schedule, index) => {
                             // console.log(formatDate(schedule.date), formatDate(currentDate))
                             // console.log(formatDate(schedule.date) > formatDate(currentDate));
 
@@ -1733,15 +1736,15 @@ function Meeting() {
         }),
 
         invitees: Yup.array()
-        .of(
-            Yup.object().shape({
-              email: Yup.string().email('Invalid email').required('Email is required'),
+            .of(
+                Yup.object().shape({
+                    email: Yup.string().email('Invalid email').required('Email is required'),
+                })
+            )
+            .test('min-invitees', 'Please add at least one invitee', function (invitees) {
+                const nonHostInvitees = invitees?.filter(invitee => invitee._id !== userId) || [];
+                return nonHostInvitees.length >= 1;
             })
-          )
-          .test('min-invitees', 'Please add at least one invitee', function (invitees) {
-            const nonHostInvitees = invitees?.filter(invitee => invitee._id !== userId) || [];
-            return nonHostInvitees.length >= 1;
-          })
     });
 
     return (
@@ -1871,23 +1874,23 @@ function Meeting() {
                                         reminder: [],
                                         recurringMeeting: '',
                                         customRecurrence: {
-                                          repeatType: '',
-                                          repeatEvery: "1",
-                                          repeatOn: [],
-                                          ends: '0',
-                                          endDate: '',
-                                          Recurrence: '1',
-                                          Monthfirst: '',
+                                            repeatType: '',
+                                            repeatEvery: "1",
+                                            repeatOn: [],
+                                            ends: '0',
+                                            endDate: '',
+                                            Recurrence: '1',
+                                            Monthfirst: '',
                                         },
                                         invitees: []
-                                      }}
+                                    }}
                                     validationSchema={scheduleSchema}
                                     onSubmit={(values, { resetForm }) => {
 
                                         if (!gettoken || !userId) {
                                             alert('Please login to create a schedule');
                                             return;
-                                          }
+                                        }
 
                                         dispatch(createschedule(values)).then((response) => {
                                             if (response.payload?._id) {
@@ -2248,529 +2251,529 @@ function Meeting() {
                                         //     </div>
                                         // </form>
                                         <form onSubmit={handleSubmit}>
-                                        <div className="row B_flex_reverse">
-                                          <div className="col-12 col-lg-8 ps-0 j_schedule_border">
-                                            <div className="mb-3 pt-3">
-                                              <label htmlFor="title" className="form-label text-white j_join_text">Title</label>
-                                              <input
-                                                type="text"
-                                                className="form-control j_input j_join_text"
-                                                id="title"
-                                                name="title"
-                                                value={values.title}
-                                                onChange={handleChange}
-                                                placeholder="Enter title for meeting"
-                                              />
-                                              {touched.title && errors.title && <div style={{ color: '#cd1425', fontSize: '14px' }}>{errors.title}</div>}
-                                            </div>
-                      
-                                            <div className="j_schedule_DnT B_schedule_DnT">
-                                              <div className="mb-3">
-                                                <label htmlFor="date" className="form-label text-white j_join_text">Date</label>
-                                                <input
-                                                  type="date"
-                                                  className="form-control j_input j_join_text B_schedule_input"
-                                                  id="date"
-                                                  name="date"
-                                                  value={values.date}
-                                                  onChange={handleChange}
-                                                />
-                                                {touched.date && errors.date && <div style={{ color: '#cd1425', fontSize: '14px' }}>{errors.date}</div>}
-                                              </div>
-                      
-                                              <div className="mb-3">
-                                                <label htmlFor="startTime" className="form-label text-white j_join_text">Start Time</label>
-                                                <input
-                                                  type="time"
-                                                  className="form-control j_input j_join_text B_schedule_input"
-                                                  id="startTime"
-                                                  name="startTime"
-                                                  value={values.startTime}
-                                                  onChange={handleChange}
-                                                />
-                                                {touched.startTime && errors.startTime && <div style={{ color: '#cd1425', fontSize: '14px' }}>{errors.startTime}</div>}
-                                              </div>
-                      
-                                              <div className="mb-3">
-                                                <label htmlFor="endTime" className="form-label text-white j_join_text">End Time</label>
-                                                <input
-                                                  type="time"
-                                                  className="form-control j_input j_join_text B_schedule_input"
-                                                  id="endTime"
-                                                  name="endTime"
-                                                  value={values.endTime}
-                                                  onChange={handleChange}
-                                                />
-                                                {touched.endTime && errors.endTime && <div style={{ color: '#cd1425', fontSize: '14px' }}>{errors.endTime}</div>}
-                                              </div>
-                                            </div>
-                      
-                                            <div className="mb-3">
-                                              <label htmlFor="meetingLink" className="form-label text-white j_join_text">Meeting Link</label>
-                                              <select
-                                                className="form-select j_select j_join_text"
-                                                id="meetingLink"
-                                                name="meetingLink"
-                                                value={values.meetingLink}
-                                                onChange={handleChange}
-                                              >
-                                                <option value="">Select</option>
-                                                <option value="GenerateaOneTimeMeetingLink">Generate a one time meeting link</option>
-                                                <option value="UseMyPersonalRoomLink">Use my personal room link</option>
-                                              </select>
-                                              {touched.meetingLink && errors.meetingLink && <div style={{ color: '#cd1425', fontSize: '14px' }}>{errors.meetingLink}</div>}
-                                            </div>
-                      
-                                            <div className="mb-3">
-                                              <label htmlFor="description" className="form-label text-white j_join_text">Description</label>
-                                              <textarea
-                                                className="form-control j_input j_join_text"
-                                                id="description"
-                                                name="description"
-                                                rows="3"
-                                                value={values.description}
-                                                onChange={handleChange}
-                                                placeholder="Enter a description for meeting"
-                                              />
-                                              {touched.description && errors.description && <div style={{ color: '#cd1425', fontSize: '14px' }}>{errors.description}</div>}
-                                            </div>
-                      
-                                            <div className="mb-3">
-                                              <label className="form-label text-white j_join_text">Reminder</label>
-                                              <div>
-                                                {['5 min before', '10 min before', '15 min before', '30 min before',
-                                                  '1 hr before', '2 hr before', '1 day before', '2 days before'].map((reminder) => (
-                                                    <button
-                                                      key={reminder}
-                                                      type="button"
-                                                      className={`btn j_schedule_btn ${values.reminder.includes(reminder) ? 'j_schedule_selected_btn' : ''}`}
-                                                      onClick={() => {
-                                                        const newReminders = values.reminder.includes(reminder)
-                                                          ? values.reminder.filter(r => r !== reminder)
-                                                          : [...values.reminder, reminder];
-                                                        setFieldValue('reminder', newReminders);
-                                                      }}
-                                                    >
-                                                      {reminder}
-                                                    </button>
-                                                  ))}
-                                              </div>
-                                              {touched.reminder && errors.reminder && <div style={{ color: '#cd1425', fontSize: '14px' }}>{errors.reminder}</div>}
-                                            </div>
-                      
-                                            <div className="mb-3">
-                                              <label htmlFor="recurringMeeting" className="form-label text-white j_join_text">Recurring Meetings</label>
-                                              <select
-                                                className="form-select j_select j_join_text"
-                                                id="recurringMeeting"
-                                                name="recurringMeeting"
-                                                value={values.recurringMeeting}
-                                                onChange={(e) => {
-                                                  handleChange(e);
-                                                  if (e.target.value === "custom") {
-                                                    // handleCloseScheduleModel();
-                                                    handleShowScheduleCustomModel();
-                                                  }
-                                                }}
-                                              >
-                                                <option value="">select</option>
-                                                <option value="DoesNotRepeat">Does not repeat</option>
-                                                <option value="daily">Daily</option>
-                                                <option value="weekly">Weekly on Monday</option>
-                                                <option value="monthly">Monthly on 3 February</option>
-                                                <option value="custom">Custom</option>
-                                              </select>
-                                              {touched.recurringMeeting && errors.recurringMeeting &&
-                                                <div style={{ color: '#cd1425', fontSize: '14px' }}>{errors.recurringMeeting}</div>}
-                                            </div>
-                      
-                                            <div className="modal-footer j_schedule_footer border-0 p-0 pt-4 pb-3 B_Gap_Button">
-                                              <button
-                                                type="button"
-                                                className="btn btn-outline-light j_home_button B_schedule_btn1 fw-semibold"
-                                                onClick={handleCloseScheduleModel}
-                                              >
-                                                Cancel
-                                              </button>
-                                              <button type="submit" className="btn btn-light j_home_button fw-semibold">
-                                                Schedule
-                                              </button>
-                                            </div>
-                                          </div>
-                      
-                                          <div className="col-12 col-lg-4 pe-0 B_paddingStart">
-                                            <div className="mb-3 pt-3 B_MarGin">
-                                              <p className='mb-0 text-white'>
-                                                Invitees ({values.invitees.length + (userId ? 1 : 0)})
-                                              </p>
-                                              <div className="position-relative mt-1">
-                                                <IoSearch className='position-absolute' style={{ top: "50%", transform: "translateY(-50%)", left: "4px", fontSize: "15px", color: "rgba(255, 255, 255, 0.7)" }} />
-                                                <input
-                                                  ref={searchInputRef}
-                                                  type="search"
-                                                  name="invitees"
-                                                  className="form-control text-white j_input ps-4 j_join_text"
-                                                  placeholder="Add people by name or email..."
-                                                  style={{ borderRadius: '5px', border: 'none', backgroundColor: "#202F41" }}
-                                                  onChange={(e) => {
-                                                    const searchTerm = e.target.value.toLowerCase();
-                                                    const filtered = allusers.filter(user =>
-                                                      user.email.toLowerCase().includes(searchTerm) ||
-                                                      user.name.toLowerCase().includes(searchTerm)
-                                                    );
-                                                    setFilteredUsers(filtered);
-                                                    setShowDropdown(true);
-                                                  }}
-                                                  onFocus={() => setShowDropdown(true)}
-                                                />
-                                              </div>
-                                              {showDropdown && (
-                                                <div
-                                                  ref={dropdownRef}
-                                                  className="position-absolute mt-1 B_suggestion"
-                                                  style={{
-                                                    backgroundColor: "#202F41",
-                                                    borderRadius: '5px',
-                                                    width: '31%',
-                                                    zIndex: 1000,
-                                                    maxHeight: '200px',
-                                                    overflowY: 'auto'
-                                                  }}
-                                                >
-                                                  {filteredUsers.length > 0 ? (
-                                                    filteredUsers
-                                                      .filter(user => user._id !== userId)
-                                                      .map((user) => (
-                                                        <div
-                                                          key={user._id}
-                                                          className="d-flex align-items-center p-2 cursor-pointer hover-bg-dark"
-                                                          style={{ cursor: 'pointer' }}
-                                                          onClick={() => {
-                                                            if (!values.invitees.some(invitee => invitee.email === user.email)) {
-                                                              setFieldValue('invitees', [...values.invitees, {
-                                                                _id: user._id,
-                                                                name: user.name,
-                                                                email: user.email,
-                                                                photo: user.photo
-                                                              }]);
-                                                            }
-                                                            setShowDropdown(false);
-                                                          }}
+                                            <div className="row B_flex_reverse">
+                                                <div className="col-12 col-lg-8 ps-0 j_schedule_border">
+                                                    <div className="mb-3 pt-3">
+                                                        <label htmlFor="title" className="form-label text-white j_join_text">Title</label>
+                                                        <input
+                                                            type="text"
+                                                            className="form-control j_input j_join_text"
+                                                            id="title"
+                                                            name="title"
+                                                            value={values.title}
+                                                            onChange={handleChange}
+                                                            placeholder="Enter title for meeting"
+                                                        />
+                                                        {touched.title && errors.title && <div style={{ color: '#cd1425', fontSize: '14px' }}>{errors.title}</div>}
+                                                    </div>
+
+                                                    <div className="j_schedule_DnT B_schedule_DnT">
+                                                        <div className="mb-3">
+                                                            <label htmlFor="date" className="form-label text-white j_join_text">Date</label>
+                                                            <input
+                                                                type="date"
+                                                                className="form-control j_input j_join_text B_schedule_input"
+                                                                id="date"
+                                                                name="date"
+                                                                value={values.date}
+                                                                onChange={handleChange}
+                                                            />
+                                                            {touched.date && errors.date && <div style={{ color: '#cd1425', fontSize: '14px' }}>{errors.date}</div>}
+                                                        </div>
+
+                                                        <div className="mb-3">
+                                                            <label htmlFor="startTime" className="form-label text-white j_join_text">Start Time</label>
+                                                            <input
+                                                                type="time"
+                                                                className="form-control j_input j_join_text B_schedule_input"
+                                                                id="startTime"
+                                                                name="startTime"
+                                                                value={values.startTime}
+                                                                onChange={handleChange}
+                                                            />
+                                                            {touched.startTime && errors.startTime && <div style={{ color: '#cd1425', fontSize: '14px' }}>{errors.startTime}</div>}
+                                                        </div>
+
+                                                        <div className="mb-3">
+                                                            <label htmlFor="endTime" className="form-label text-white j_join_text">End Time</label>
+                                                            <input
+                                                                type="time"
+                                                                className="form-control j_input j_join_text B_schedule_input"
+                                                                id="endTime"
+                                                                name="endTime"
+                                                                value={values.endTime}
+                                                                onChange={handleChange}
+                                                            />
+                                                            {touched.endTime && errors.endTime && <div style={{ color: '#cd1425', fontSize: '14px' }}>{errors.endTime}</div>}
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="mb-3">
+                                                        <label htmlFor="meetingLink" className="form-label text-white j_join_text">Meeting Link</label>
+                                                        <select
+                                                            className="form-select j_select j_join_text"
+                                                            id="meetingLink"
+                                                            name="meetingLink"
+                                                            value={values.meetingLink}
+                                                            onChange={handleChange}
                                                         >
-                                                          <div className="me-2">
-                                                            {user.photo ? (
-                                                              <img
-                                                                src={`${IMG_URL}${user.photo}`}
-                                                                alt="Profile"
-                                                                className="rounded-circle"
-                                                                style={{ width: '30px', height: '30px', objectFit: 'cover' }}
-                                                              />
-                                                            ) : (
-                                                              <div
-                                                                className="rounded-circle d-flex align-items-center justify-content-center"
-                                                                style={{
-                                                                  width: '30px',
-                                                                  height: '30px',
-                                                                  backgroundColor: '#364758',
-                                                                  color: 'white'
+                                                            <option value="">Select</option>
+                                                            <option value="GenerateaOneTimeMeetingLink">Generate a one time meeting link</option>
+                                                            <option value="UseMyPersonalRoomLink">Use my personal room link</option>
+                                                        </select>
+                                                        {touched.meetingLink && errors.meetingLink && <div style={{ color: '#cd1425', fontSize: '14px' }}>{errors.meetingLink}</div>}
+                                                    </div>
+
+                                                    <div className="mb-3">
+                                                        <label htmlFor="description" className="form-label text-white j_join_text">Description</label>
+                                                        <textarea
+                                                            className="form-control j_input j_join_text"
+                                                            id="description"
+                                                            name="description"
+                                                            rows="3"
+                                                            value={values.description}
+                                                            onChange={handleChange}
+                                                            placeholder="Enter a description for meeting"
+                                                        />
+                                                        {touched.description && errors.description && <div style={{ color: '#cd1425', fontSize: '14px' }}>{errors.description}</div>}
+                                                    </div>
+
+                                                    <div className="mb-3">
+                                                        <label className="form-label text-white j_join_text">Reminder</label>
+                                                        <div>
+                                                            {['5 min before', '10 min before', '15 min before', '30 min before',
+                                                                '1 hr before', '2 hr before', '1 day before', '2 days before'].map((reminder) => (
+                                                                    <button
+                                                                        key={reminder}
+                                                                        type="button"
+                                                                        className={`btn j_schedule_btn ${values.reminder.includes(reminder) ? 'j_schedule_selected_btn' : ''}`}
+                                                                        onClick={() => {
+                                                                            const newReminders = values.reminder.includes(reminder)
+                                                                                ? values.reminder.filter(r => r !== reminder)
+                                                                                : [...values.reminder, reminder];
+                                                                            setFieldValue('reminder', newReminders);
+                                                                        }}
+                                                                    >
+                                                                        {reminder}
+                                                                    </button>
+                                                                ))}
+                                                        </div>
+                                                        {touched.reminder && errors.reminder && <div style={{ color: '#cd1425', fontSize: '14px' }}>{errors.reminder}</div>}
+                                                    </div>
+
+                                                    <div className="mb-3">
+                                                        <label htmlFor="recurringMeeting" className="form-label text-white j_join_text">Recurring Meetings</label>
+                                                        <select
+                                                            className="form-select j_select j_join_text"
+                                                            id="recurringMeeting"
+                                                            name="recurringMeeting"
+                                                            value={values.recurringMeeting}
+                                                            onChange={(e) => {
+                                                                handleChange(e);
+                                                                if (e.target.value === "custom") {
+                                                                    // handleCloseScheduleModel();
+                                                                    handleShowScheduleCustomModel();
+                                                                }
+                                                            }}
+                                                        >
+                                                            <option value="">select</option>
+                                                            <option value="DoesNotRepeat">Does not repeat</option>
+                                                            <option value="daily">Daily</option>
+                                                            <option value="weekly">Weekly on Monday</option>
+                                                            <option value="monthly">Monthly on 3 February</option>
+                                                            <option value="custom">Custom</option>
+                                                        </select>
+                                                        {touched.recurringMeeting && errors.recurringMeeting &&
+                                                            <div style={{ color: '#cd1425', fontSize: '14px' }}>{errors.recurringMeeting}</div>}
+                                                    </div>
+
+                                                    <div className="modal-footer j_schedule_footer border-0 p-0 pt-4 pb-3 B_Gap_Button">
+                                                        <button
+                                                            type="button"
+                                                            className="btn btn-outline-light j_home_button B_schedule_btn1 fw-semibold"
+                                                            onClick={handleCloseScheduleModel}
+                                                        >
+                                                            Cancel
+                                                        </button>
+                                                        <button type="submit" className="btn btn-light j_home_button fw-semibold">
+                                                            Schedule
+                                                        </button>
+                                                    </div>
+                                                </div>
+
+                                                <div className="col-12 col-lg-4 pe-0 B_paddingStart">
+                                                    <div className="mb-3 pt-3 B_MarGin">
+                                                        <p className='mb-0 text-white'>
+                                                            Invitees ({values.invitees.length + (userId ? 1 : 0)})
+                                                        </p>
+                                                        <div className="position-relative mt-1">
+                                                            <IoSearch className='position-absolute' style={{ top: "50%", transform: "translateY(-50%)", left: "4px", fontSize: "15px", color: "rgba(255, 255, 255, 0.7)" }} />
+                                                            <input
+                                                                ref={searchInputRef}
+                                                                type="search"
+                                                                name="invitees"
+                                                                className="form-control text-white j_input ps-4 j_join_text"
+                                                                placeholder="Add people by name or email..."
+                                                                style={{ borderRadius: '5px', border: 'none', backgroundColor: "#202F41" }}
+                                                                onChange={(e) => {
+                                                                    const searchTerm = e.target.value.toLowerCase();
+                                                                    const filtered = allusers.filter(user =>
+                                                                        user.email.toLowerCase().includes(searchTerm) ||
+                                                                        user.name.toLowerCase().includes(searchTerm)
+                                                                    );
+                                                                    setFilteredUsers(filtered);
+                                                                    setShowDropdown(true);
                                                                 }}
-                                                              >
-                                                                {user.name.charAt(0).toUpperCase()}
-                                                              </div>
-                                                            )}
-                                                          </div>
-                                                          <div className="text-white">
-                                                            <div style={{ fontSize: '14px' }}>{user.name}</div>
-                                                            <div style={{ fontSize: '12px', color: '#8B9CAF' }}>{user.email}</div>
-                                                          </div>
-                                                        </div>
-                                                      ))
-                                                  ) : (
-                                                    <div className="p-3 text-center text-white" style={{ fontSize: '14px' }}>
-                                                      No users found
-                                                    </div>
-                                                  )}
-                                                </div>
-                                              )}
-                                              {touched.invitees && errors.invitees && (
-                                                <div style={{ fontSize: '14px', marginTop: '4px', color: '#cd1425' }}>
-                                                  {errors.invitees}
-                                                </div>
-                                              )}
-                                              {(values.invitees.length > 0 || userId) && (
-                                                <div className="mt-2">
-                                                  {allusers
-                                                    .filter(user => user._id === userId)
-                                                    .map(user => (
-                                                      <div key={user._id} className="d-flex align-items-center mb-1">
-                                                        <div className="j_margin_end">
-                                                          {user.photo ? (
-                                                            <img
-                                                              src={`${IMG_URL}${user.photo}`}
-                                                              alt="Profile"
-                                                              className="rounded-circle"
-                                                              style={{ width: '30px', height: '30px', objectFit: 'cover' }}
+                                                                onFocus={() => setShowDropdown(true)}
                                                             />
-                                                          ) : (
+                                                        </div>
+                                                        {showDropdown && (
                                                             <div
-                                                              className="rounded-circle d-flex align-items-center justify-content-center"
-                                                              style={{
-                                                                width: '30px',
-                                                                height: '30px',
-                                                                backgroundColor: '#364758',
-                                                                color: 'white'
-                                                              }}
+                                                                ref={dropdownRef}
+                                                                className="position-absolute mt-1 B_suggestion"
+                                                                style={{
+                                                                    backgroundColor: "#202F41",
+                                                                    borderRadius: '5px',
+                                                                    width: '31%',
+                                                                    zIndex: 1000,
+                                                                    maxHeight: '200px',
+                                                                    overflowY: 'auto'
+                                                                }}
                                                             >
-                                                              {user.name.charAt(0).toUpperCase()}
+                                                                {filteredUsers.length > 0 ? (
+                                                                    filteredUsers
+                                                                        .filter(user => user._id !== userId)
+                                                                        .map((user) => (
+                                                                            <div
+                                                                                key={user._id}
+                                                                                className="d-flex align-items-center p-2 cursor-pointer hover-bg-dark"
+                                                                                style={{ cursor: 'pointer' }}
+                                                                                onClick={() => {
+                                                                                    if (!values.invitees.some(invitee => invitee.email === user.email)) {
+                                                                                        setFieldValue('invitees', [...values.invitees, {
+                                                                                            _id: user._id,
+                                                                                            name: user.name,
+                                                                                            email: user.email,
+                                                                                            photo: user.photo
+                                                                                        }]);
+                                                                                    }
+                                                                                    setShowDropdown(false);
+                                                                                }}
+                                                                            >
+                                                                                <div className="me-2">
+                                                                                    {user.photo ? (
+                                                                                        <img
+                                                                                            src={`${IMG_URL}${user.photo}`}
+                                                                                            alt="Profile"
+                                                                                            className="rounded-circle"
+                                                                                            style={{ width: '30px', height: '30px', objectFit: 'cover' }}
+                                                                                        />
+                                                                                    ) : (
+                                                                                        <div
+                                                                                            className="rounded-circle d-flex align-items-center justify-content-center"
+                                                                                            style={{
+                                                                                                width: '30px',
+                                                                                                height: '30px',
+                                                                                                backgroundColor: '#364758',
+                                                                                                color: 'white'
+                                                                                            }}
+                                                                                        >
+                                                                                            {user.name.charAt(0).toUpperCase()}
+                                                                                        </div>
+                                                                                    )}
+                                                                                </div>
+                                                                                <div className="text-white">
+                                                                                    <div style={{ fontSize: '14px' }}>{user.name}</div>
+                                                                                    <div style={{ fontSize: '12px', color: '#8B9CAF' }}>{user.email}</div>
+                                                                                </div>
+                                                                            </div>
+                                                                        ))
+                                                                ) : (
+                                                                    <div className="p-3 text-center text-white" style={{ fontSize: '14px' }}>
+                                                                        No users found
+                                                                    </div>
+                                                                )}
                                                             </div>
-                                                          )}
-                                                        </div>
-                                                        <div className="ms-2">
-                                                          <span className="text-white" style={{ fontSize: '13.5px' }}>{user.email}</span>
-                                                          <p className="mb-0" style={{ fontSize: '13px', color: '#BFBFBF' }}>Host</p>
-                                                        </div>
-                                                      </div>
-                                                    ))}
-                      
-                                                  {values.invitees.map((invitee, index) => (
-                                                    <div key={index} className="d-flex justify-content-between align-items-center mb-2">
-                                                      <div className="d-flex justify-content-between align-items-center">
-                                                        <div className="j_margin_end">
-                                                          {invitee.photo ? (
-                                                            <img
-                                                              src={`${IMG_URL}${invitee.photo}`}
-                                                              alt="Profile"
-                                                              className="rounded-circle"
-                                                              style={{ width: '30px', height: '30px', objectFit: 'cover' }}
-                                                            />
-                                                          ) : (
-                                                            <div
-                                                              className="rounded-circle d-flex align-items-center justify-content-center"
-                                                              style={{
-                                                                width: '30px',
-                                                                height: '30px',
-                                                                backgroundColor: '#364758',
-                                                                color: 'white'
-                                                              }}
+                                                        )}
+                                                        {touched.invitees && errors.invitees && (
+                                                            <div style={{ fontSize: '14px', marginTop: '4px', color: '#cd1425' }}>
+                                                                {errors.invitees}
+                                                            </div>
+                                                        )}
+                                                        {(values.invitees.length > 0 || userId) && (
+                                                            <div className="mt-2">
+                                                                {allusers
+                                                                    .filter(user => user._id === userId)
+                                                                    .map(user => (
+                                                                        <div key={user._id} className="d-flex align-items-center mb-1">
+                                                                            <div className="j_margin_end">
+                                                                                {user.photo ? (
+                                                                                    <img
+                                                                                        src={`${IMG_URL}${user.photo}`}
+                                                                                        alt="Profile"
+                                                                                        className="rounded-circle"
+                                                                                        style={{ width: '30px', height: '30px', objectFit: 'cover' }}
+                                                                                    />
+                                                                                ) : (
+                                                                                    <div
+                                                                                        className="rounded-circle d-flex align-items-center justify-content-center"
+                                                                                        style={{
+                                                                                            width: '30px',
+                                                                                            height: '30px',
+                                                                                            backgroundColor: '#364758',
+                                                                                            color: 'white'
+                                                                                        }}
+                                                                                    >
+                                                                                        {user.name.charAt(0).toUpperCase()}
+                                                                                    </div>
+                                                                                )}
+                                                                            </div>
+                                                                            <div className="ms-2">
+                                                                                <span className="text-white" style={{ fontSize: '13.5px' }}>{user.email}</span>
+                                                                                <p className="mb-0" style={{ fontSize: '13px', color: '#BFBFBF' }}>Host</p>
+                                                                            </div>
+                                                                        </div>
+                                                                    ))}
+
+                                                                {values.invitees.map((invitee, index) => (
+                                                                    <div key={index} className="d-flex justify-content-between align-items-center mb-2">
+                                                                        <div className="d-flex justify-content-between align-items-center">
+                                                                            <div className="j_margin_end">
+                                                                                {invitee.photo ? (
+                                                                                    <img
+                                                                                        src={`${IMG_URL}${invitee.photo}`}
+                                                                                        alt="Profile"
+                                                                                        className="rounded-circle"
+                                                                                        style={{ width: '30px', height: '30px', objectFit: 'cover' }}
+                                                                                    />
+                                                                                ) : (
+                                                                                    <div
+                                                                                        className="rounded-circle d-flex align-items-center justify-content-center"
+                                                                                        style={{
+                                                                                            width: '30px',
+                                                                                            height: '30px',
+                                                                                            backgroundColor: '#364758',
+                                                                                            color: 'white'
+                                                                                        }}
+                                                                                    >
+                                                                                        {invitee.name.charAt(0).toUpperCase()}
+                                                                                    </div>
+                                                                                )}
+                                                                            </div>
+                                                                            <div className="j_margin_start">
+                                                                                <span className="text-white" style={{ fontSize: '14px' }}>{invitee.email}</span>
+                                                                            </div>
+                                                                        </div>
+                                                                        <button
+                                                                            type="button"
+                                                                            className="btn btn-link text-danger p-0 ms-2"
+                                                                            onClick={() => {
+                                                                                const newInvitees = values.invitees.filter((_, i) => i !== index);
+                                                                                setFieldValue('invitees', newInvitees);
+                                                                            }}
+                                                                        >
+                                                                            <img src={bin} alt="bin" />
+                                                                        </button>
+                                                                    </div>
+                                                                ))}
+                                                            </div>
+                                                        )}
+                                                        {values.invitees.length > 0 && (
+                                                            <button
+                                                                type="button"
+                                                                className="btn btn-link text-white p-0"
+                                                                style={{
+                                                                    fontSize: '14px',
+                                                                    textDecoration: 'underline',
+                                                                    border: 'none',
+                                                                    background: 'none'
+                                                                }}
+                                                                onClick={() => setFieldValue('invitees', [])}
                                                             >
-                                                              {invitee.name.charAt(0).toUpperCase()}
+                                                                Remove all
+                                                            </button>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {/* ============================ Schedule Meeting custom Modal ============================  */}
+                                            <Modal
+                                                show={ScheduleCustomModel}
+                                                onHide={handleCloseScheduleCustomModel}
+                                                centered
+                                                contentClassName="j_modal_join"
+                                            >
+                                                <Modal.Header className="border-0 d-flex justify-content-between align-items-center">
+                                                    <Modal.Title className="text-white j_join_title">Custom Recurrence</Modal.Title>
+                                                    <IoClose
+                                                        style={{ color: '#fff', fontSize: '22px', cursor: 'pointer' }}
+                                                        onClick={handleCloseScheduleCustomModel}
+                                                    />
+                                                </Modal.Header>
+                                                <div className="j_modal_header"></div>
+                                                <Modal.Body>
+                                                    <div className="j_schedule_Repeat">
+                                                        <div className="mb-3 flex-fill me-2 j_select_fill">
+                                                            <label htmlFor="RepeatType" className="form-label text-white j_join_text">Repeat Type</label>
+                                                            <select
+                                                                className="form-select j_select j_join_text"
+                                                                id="RepeatType"
+                                                                name="customRecurrence.repeatType"
+                                                                value={values.customRecurrence.repeatType}
+                                                                onChange={handleChange}
+                                                            >
+                                                                <option value="0">Select</option>
+                                                                <option value="daily">Daily</option>
+                                                                <option value="weekly">Weekly</option>
+                                                                <option value="monthly">Monthly</option>
+                                                                <option value="yearly">Yearly</option>
+                                                            </select>
+                                                        </div>
+                                                        <div className="mb-3 flex-fill j_select_fill">
+                                                            <label htmlFor="RepeatEvery" className="form-label text-white j_join_text">Repeat Every</label>
+                                                            <div className='position-relative'>
+                                                                <input
+                                                                    type="text"
+                                                                    className="form-control j_input j_join_text"
+                                                                    id="RepeatEvery"
+                                                                    name="customRecurrence.repeatEvery"
+                                                                    value={values.customRecurrence.repeatEvery}
+                                                                    onChange={(e) => setFieldValue('customRecurrence.repeatEvery', e.target.value)}
+                                                                />
+                                                                <div className="j_custom_icons">
+                                                                    <FaAngleUp
+                                                                        style={{ color: 'white', fontSize: '12px', cursor: 'pointer' }}
+                                                                        onClick={() => setFieldValue('customRecurrence.repeatEvery', Number(values.customRecurrence.repeatEvery) + 1)}
+                                                                    />
+                                                                    <FaAngleDown
+                                                                        style={{ color: 'white', fontSize: '12px', cursor: 'pointer' }}
+                                                                        onClick={() => setFieldValue('customRecurrence.repeatEvery', Math.max(values.customRecurrence.repeatEvery - 1, 1))}
+                                                                    />
+                                                                </div>
                                                             </div>
-                                                          )}
                                                         </div>
-                                                        <div className="j_margin_start">
-                                                          <span className="text-white" style={{ fontSize: '14px' }}>{invitee.email}</span>
+                                                    </div>
+                                                    {values.customRecurrence.repeatType === 'weekly' && (
+                                                        <div className="mb-3">
+                                                            <label className="form-label text-white j_join_text">Repeat On</label>
+                                                            <div className="d-flex B_Repeat_on_btn">
+                                                                {['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'].map(day => (
+                                                                    <button
+                                                                        key={day}
+                                                                        className={`btn ${values.customRecurrence.repeatOn.includes(day) ? 'j_day_selected_btn' : 'j_day_btn'} me-1`}
+                                                                        onClick={() => {
+                                                                            const newDays = values.customRecurrence.repeatOn.includes(day)
+                                                                                ? values.customRecurrence.repeatOn.filter(d => d !== day)
+                                                                                : [...values.customRecurrence.repeatOn, day];
+                                                                            setFieldValue('customRecurrence.repeatOn', newDays);
+                                                                        }}
+                                                                    >
+                                                                        {day.charAt(0)}
+                                                                    </button>
+                                                                ))}
+                                                            </div>
                                                         </div>
-                                                      </div>
-                                                      <button
-                                                        type="button"
-                                                        className="btn btn-link text-danger p-0 ms-2"
-                                                        onClick={() => {
-                                                          const newInvitees = values.invitees.filter((_, i) => i !== index);
-                                                          setFieldValue('invitees', newInvitees);
-                                                        }}
-                                                      >
-                                                        <img src={bin} alt="bin" />
-                                                      </button>
+                                                    )}
+
+                                                    {values.customRecurrence.repeatType === 'monthly' && (
+                                                        <div className="mb-3">
+                                                            <label className="text-white j_join_text">Every</label>
+                                                            <select
+                                                                className="form-select j_select j_join_text"
+                                                                name="customRecurrence.Monthfirst"
+                                                                value={values.customRecurrence.Monthfirst}
+                                                                onChange={handleChange}
+                                                            >
+                                                                <option value="0">Select</option>
+                                                                <option value="firstmonday">Monthly on first monday</option>
+                                                                <option value="firstday">Monthly on first day</option>
+                                                            </select>
+                                                        </div>
+                                                    )}
+
+                                                    <div className="j_schedule_Repeat">
+                                                        <div className="mb-3 flex-fill me-2  j_select_fill">
+                                                            <label htmlFor="ends" className="form-label text-white j_join_text">Ends</label>
+                                                            <select
+                                                                className="form-select j_select j_join_text"
+                                                                name="customRecurrence.ends"
+                                                                value={values.customRecurrence.ends}
+                                                                onChange={handleChange}
+                                                            >
+                                                                <option value="0">Select</option>
+                                                                <option value="never">Never</option>
+                                                                {values.customRecurrence.repeatType !== 'daily' && <option value="on">On</option>}
+                                                                <option value="after">After</option>
+                                                            </select>
+                                                        </div>
+
+                                                        {values.customRecurrence.ends === "on" && (
+                                                            <div className="mb-3 flex-fill j_select_fill">
+                                                                <label htmlFor="endDate" className="form-label text-white j_join_text"></label>
+                                                                <input
+                                                                    type="date"
+                                                                    className="form-control j_input j_join_text j_special_m"
+                                                                    name="customRecurrence.endDate"
+                                                                    value={values.customRecurrence.endDate}
+                                                                    onChange={handleChange}
+                                                                />
+                                                                {touched.customRecurrence?.endDate && errors.customRecurrence?.endDate && (
+                                                                    <div style={{ color: '#cd1425', fontSize: '14px' }}>{errors.customRecurrence.endDate}</div>
+                                                                )}
+                                                            </div>
+                                                        )}
+
+                                                        {values.customRecurrence.ends === "after" && (
+                                                            console.log(values.customRecurrence.Recurrence),
+
+                                                            <div className="mb-3 flex-fill j_select_fill J_Fill_bottom">
+                                                                <label className="form-label text-white j_join_text"></label>
+                                                                <div className='position-relative'>
+                                                                    <input
+                                                                        type="text"
+                                                                        name='customRecurrence.Recurrence'
+                                                                        className="form-control j_input j_join_text j_special_m"
+                                                                        value={`${values.customRecurrence.Recurrence} Recurrence`}
+                                                                        onChange={(e) => setFieldValue('customRecurrence.Recurrence', e.target.value)}
+                                                                    />
+                                                                    <div className="j_custom_icons">
+                                                                        <FaAngleUp
+                                                                            style={{ color: 'white', fontSize: '12px', cursor: 'pointer' }}
+                                                                            onClick={() => setFieldValue('customRecurrence.Recurrence', Number(values.customRecurrence.Recurrence) + 1)}
+                                                                        />
+                                                                        <FaAngleDown
+                                                                            style={{ color: 'white', fontSize: '12px', cursor: 'pointer' }}
+                                                                            onClick={() => setFieldValue('customRecurrence.Recurrence', Math.max(values.customRecurrence.Recurrence - 1, 1))}
+                                                                        />
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        )}
                                                     </div>
-                                                  ))}
-                                                </div>
-                                              )}
-                                              {values.invitees.length > 0 && (
-                                                <button
-                                                  type="button"
-                                                  className="btn btn-link text-white p-0"
-                                                  style={{
-                                                    fontSize: '14px',
-                                                    textDecoration: 'underline',
-                                                    border: 'none',
-                                                    background: 'none'
-                                                  }}
-                                                  onClick={() => setFieldValue('invitees', [])}
-                                                >
-                                                  Remove all
-                                                </button>
-                                              )}
-                                            </div>
-                                          </div>
-                                        </div>
-                      
-                                        {/* ============================ Schedule Meeting custom Modal ============================  */}
-                                        <Modal
-                                          show={ScheduleCustomModel}
-                                          onHide={handleCloseScheduleCustomModel}
-                                          centered
-                                          contentClassName="j_modal_join"
-                                        >
-                                          <Modal.Header className="border-0 d-flex justify-content-between align-items-center">
-                                            <Modal.Title className="text-white j_join_title">Custom Recurrence</Modal.Title>
-                                            <IoClose
-                                              style={{ color: '#fff', fontSize: '22px', cursor: 'pointer' }}
-                                              onClick={handleCloseScheduleCustomModel}
-                                            />
-                                          </Modal.Header>
-                                          <div className="j_modal_header"></div>
-                                          <Modal.Body>
-                                            <div className="j_schedule_Repeat">
-                                              <div className="mb-3 flex-fill me-2 j_select_fill">
-                                                <label htmlFor="RepeatType" className="form-label text-white j_join_text">Repeat Type</label>
-                                                <select
-                                                  className="form-select j_select j_join_text"
-                                                  id="RepeatType"
-                                                  name="customRecurrence.repeatType"
-                                                  value={values.customRecurrence.repeatType}
-                                                  onChange={handleChange}
-                                                >
-                                                  <option value="0">Select</option>
-                                                  <option value="daily">Daily</option>
-                                                  <option value="weekly">Weekly</option>
-                                                  <option value="monthly">Monthly</option>
-                                                  <option value="yearly">Yearly</option>
-                                                </select>
-                                              </div>
-                                              <div className="mb-3 flex-fill j_select_fill">
-                                                <label htmlFor="RepeatEvery" className="form-label text-white j_join_text">Repeat Every</label>
-                                                <div className='position-relative'>
-                                                  <input
-                                                    type="text"
-                                                    className="form-control j_input j_join_text"
-                                                    id="RepeatEvery"
-                                                    name="customRecurrence.repeatEvery"
-                                                    value={values.customRecurrence.repeatEvery}
-                                                    onChange={(e) => setFieldValue('customRecurrence.repeatEvery', e.target.value)}
-                                                  />
-                                                  <div className="j_custom_icons">
-                                                    <FaAngleUp
-                                                      style={{ color: 'white', fontSize: '12px', cursor: 'pointer' }}
-                                                      onClick={() => setFieldValue('customRecurrence.repeatEvery', Number(values.customRecurrence.repeatEvery) + 1)}
-                                                    />
-                                                    <FaAngleDown
-                                                      style={{ color: 'white', fontSize: '12px', cursor: 'pointer' }}
-                                                      onClick={() => setFieldValue('customRecurrence.repeatEvery', Math.max(values.customRecurrence.repeatEvery - 1, 1))}
-                                                    />
-                                                  </div>
-                                                </div>
-                                              </div>
-                                            </div>
-                                            {values.customRecurrence.repeatType === 'weekly' && (
-                                              <div className="mb-3">
-                                                <label className="form-label text-white j_join_text">Repeat On</label>
-                                                <div className="d-flex B_Repeat_on_btn">
-                                                  {['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'].map(day => (
-                                                    <button
-                                                      key={day}
-                                                      className={`btn ${values.customRecurrence.repeatOn.includes(day) ? 'j_day_selected_btn' : 'j_day_btn'} me-1`}
-                                                      onClick={() => {
-                                                        const newDays = values.customRecurrence.repeatOn.includes(day)
-                                                          ? values.customRecurrence.repeatOn.filter(d => d !== day)
-                                                          : [...values.customRecurrence.repeatOn, day];
-                                                        setFieldValue('customRecurrence.repeatOn', newDays);
-                                                      }}
-                                                    >
-                                                      {day.charAt(0)}
-                                                    </button>
-                                                  ))}
-                                                </div>
-                                              </div>
-                                            )}
-                      
-                                            {values.customRecurrence.repeatType === 'monthly' && (
-                                              <div className="mb-3">
-                                                <label className="text-white j_join_text">Every</label>
-                                                <select
-                                                  className="form-select j_select j_join_text"
-                                                  name="customRecurrence.Monthfirst"
-                                                  value={values.customRecurrence.Monthfirst}
-                                                  onChange={handleChange}
-                                                >
-                                                  <option value="0">Select</option>
-                                                  <option value="firstmonday">Monthly on first monday</option>
-                                                  <option value="firstday">Monthly on first day</option>
-                                                </select>
-                                              </div>
-                                            )}
-                      
-                                            <div className="j_schedule_Repeat">
-                                              <div className="mb-3 flex-fill me-2  j_select_fill">
-                                                <label htmlFor="ends" className="form-label text-white j_join_text">Ends</label>
-                                                <select
-                                                  className="form-select j_select j_join_text"
-                                                  name="customRecurrence.ends"
-                                                  value={values.customRecurrence.ends}
-                                                  onChange={handleChange}
-                                                >
-                                                  <option value="0">Select</option>
-                                                  <option value="never">Never</option>
-                                                  {values.customRecurrence.repeatType !== 'daily' && <option value="on">On</option>}
-                                                  <option value="after">After</option>
-                                                </select>
-                                              </div>
-                      
-                                              {values.customRecurrence.ends === "on" && (
-                                                <div className="mb-3 flex-fill j_select_fill">
-                                                  <label htmlFor="endDate" className="form-label text-white j_join_text"></label>
-                                                  <input
-                                                    type="date"
-                                                    className="form-control j_input j_join_text j_special_m"
-                                                    name="customRecurrence.endDate"
-                                                    value={values.customRecurrence.endDate}
-                                                    onChange={handleChange}
-                                                  />
-                                                  {touched.customRecurrence?.endDate && errors.customRecurrence?.endDate && (
-                                                    <div style={{ color: '#cd1425', fontSize: '14px' }}>{errors.customRecurrence.endDate}</div>
-                                                  )}
-                                                </div>
-                                              )}
-                      
-                                              {values.customRecurrence.ends === "after" && (
-                                                console.log(values.customRecurrence.Recurrence),
-                      
-                                                <div className="mb-3 flex-fill j_select_fill J_Fill_bottom">
-                                                  <label className="form-label text-white j_join_text"></label>
-                                                  <div className='position-relative'>
-                                                    <input
-                                                      type="text"
-                                                      name='customRecurrence.Recurrence'
-                                                      className="form-control j_input j_join_text j_special_m"
-                                                      value={`${values.customRecurrence.Recurrence} Recurrence`}
-                                                      onChange={(e) => setFieldValue('customRecurrence.Recurrence', e.target.value)}
-                                                    />
-                                                    <div className="j_custom_icons">
-                                                      <FaAngleUp
-                                                        style={{ color: 'white', fontSize: '12px', cursor: 'pointer' }}
-                                                        onClick={() => setFieldValue('customRecurrence.Recurrence', Number(values.customRecurrence.Recurrence) + 1)}
-                                                      />
-                                                      <FaAngleDown
-                                                        style={{ color: 'white', fontSize: '12px', cursor: 'pointer' }}
-                                                        onClick={() => setFieldValue('customRecurrence.Recurrence', Math.max(values.customRecurrence.Recurrence - 1, 1))}
-                                                      />
-                                                    </div>
-                                                  </div>
-                                                </div>
-                                              )}
-                                            </div>
-                                            <Modal.Footer className="j_custom_footer border-0 p-0 pt-4 pb-3">
-                                              <Button
-                                                variant="outline-light"
-                                                className="j_custom_button fw-semibold"
-                                                onClick={() => { handleCloseScheduleCustomModel(); handleShowScheduleModel() }}
-                                              >
-                                                Cancel
-                                              </Button>
-                                              <Button
-                                                variant="light"
-                                                className="j_custom_button fw-semibold"
-                                                onClick={() => {
-                                                  console.log("customRecurrence", values.customRecurrence);
-                                                  setFieldValue('customRecurrence', values.customRecurrence);
-                                                  handleCloseScheduleCustomModel();
-                                                }}
-                                              >
-                                                Done
-                                              </Button>
-                                            </Modal.Footer>
-                                          </Modal.Body>
-                                        </Modal>
-                                      </form>
+                                                    <Modal.Footer className="j_custom_footer border-0 p-0 pt-4 pb-3">
+                                                        <Button
+                                                            variant="outline-light"
+                                                            className="j_custom_button fw-semibold"
+                                                            onClick={() => { handleCloseScheduleCustomModel(); handleShowScheduleModel() }}
+                                                        >
+                                                            Cancel
+                                                        </Button>
+                                                        <Button
+                                                            variant="light"
+                                                            className="j_custom_button fw-semibold"
+                                                            onClick={() => {
+                                                                console.log("customRecurrence", values.customRecurrence);
+                                                                setFieldValue('customRecurrence', values.customRecurrence);
+                                                                handleCloseScheduleCustomModel();
+                                                            }}
+                                                        >
+                                                            Done
+                                                        </Button>
+                                                    </Modal.Footer>
+                                                </Modal.Body>
+                                            </Modal>
+                                        </form>
 
                                     )}
 
@@ -3414,7 +3417,7 @@ function Meeting() {
 
                         {/* .......................MODEL END ....................... */}
 
-                    
+
                     </div>
                 </div>
             </section>
