@@ -46,7 +46,7 @@ export const createreview = createAsyncThunk(
             });
             dispatch(setAlert({ text: response.data.message, color: 'success' }));
             dispatch(getAllreview());
-            return response.data.reviews;
+            return response.data;
         } catch (error) {
             return handleErrors(error, dispatch, rejectWithValue);
         }

@@ -58,6 +58,103 @@ function Home() {
 
   const currentUser = allusers.find((id) => id._id === userId)
   // console.log("currentUser", currentUser);
+  const userName = currentUser?.name;
+
+
+
+  const [requestSent, setRequestSent] = useState(false);
+  const [joinRequestStatus, setJoinRequestStatus] = useState('');
+  const [meetingToJoin, setMeetingToJoin] = useState(null);
+
+  const {
+    socket,
+    isConnected,
+    sendJoinRequest,
+    requestApprovalStatus
+  } = useSocket(userId, meetingId, userName);
+
+  useEffect(() => {
+    if (requestApprovalStatus) {
+      if (requestApprovalStatus === 'approved' && meetingToJoin) {
+        // Close modal and navigate to meeting
+        handlejoinclose();
+        navigate(`/screen/${meetingToJoin}`);
+      } else if (requestApprovalStatus === 'denied') {
+        setJoinRequestStatus('Your request to join was denied by the host.');
+        setTimeout(() => {
+          setRequestSent(false);
+          setJoinRequestStatus('');
+        }, 3000);
+      }
+    }
+  }, [requestApprovalStatus, meetingToJoin]);
+
+
+  const handleJoinSubmit = (e) => {
+    e.preventDefault();
+
+    // Validation logic
+    if (!meetingId || !meetingId.trim()) {
+      setError('Please enter a meeting ID');
+      return;
+    }
+
+    // Find meeting in allschedule that matches the entered ID
+    const meeting = allschedule.find(schedule =>
+      schedule.meetingLink.includes(meetingId.trim())
+    );
+
+    if (!meeting) {
+      setError('Invalid meeting ID');
+      return;
+    }
+
+    // Check if current time is within meeting time
+    const meetingDate = new Date(meeting.date);
+    const today = new Date();
+    const startTime = meeting.startTime.split(':');
+    const endTime = meeting.endTime.split(':');
+
+    meetingDate.setHours(parseInt(startTime[0]), parseInt(startTime[1]));
+    const meetingEndDate = new Date(meeting.date);
+    meetingEndDate.setHours(parseInt(endTime[0]), parseInt(endTime[1]));
+
+    // Check if meeting is in progress
+    // if (today < meetingDate) {
+    //   setError('This meeting has not started yet');
+    //   return;
+    // }
+
+    // if (today > meetingEndDate) {
+    //   setError('This meeting has already ended');
+    //   return;
+    // }
+
+    // Check if user is connected
+    if (!socket) {
+      setError('Socket not connect.');
+      return;
+    }
+
+    // Check if user is logged in
+    if (!userName || !userId) {
+      setError('Please log in to join the meeting');
+      return;
+    }
+
+    // Set the meeting to join for later navigation
+    setMeetingToJoin(meetingId);
+
+    // Send join request
+    socket.emit('request-to-join', {
+      roomId: meetingId,
+      userId: userId,
+      userName: userName
+    });
+
+    setRequestSent(true);
+    setJoinRequestStatus('Waiting for Host Approval...');
+  };
 
   useEffect(() => {
     dispatch(getAllschedule());
@@ -211,6 +308,11 @@ function Home() {
     <div>
       <HomeNavBar />
       <section className='j_index_main' style={{ backgroundColor: "#060A11" }}>
+        {requestSent && (
+          <div className="position-fixed top-0 end-0 p-3 m-3 j_Invite text-white" style={{ zIndex: '1', }}>
+            {joinRequestStatus}
+          </div>
+        )}
         <div className="row">
           <div className="col-1 p-0 j_sidebar_width">
             <SideBar />
@@ -871,6 +973,7 @@ function Home() {
         </Modal>
 
         {/* ============================ join Meeting Modal ============================ */}
+        {/* // Step 1: Modify the Join Meeting Modal form submission */}
         <Modal
           show={joinModal}
           onHide={handlejoinclose}
@@ -886,47 +989,54 @@ function Home() {
           </Modal.Header>
           <div className="j_modal_header"></div>
           <Modal.Body>
-            <form onSubmit={(e) => {
-              e.preventDefault();
+            <form onSubmit={(e) => handleJoinSubmit(e)}
+            // onSubmit={(e) => {
+            //   e.preventDefault();
 
-              if (!meetingId.trim()) {
-                setError('Please enter a meeting ID');
-                return;
-              }
+            //   if (!meetingId.trim()) {
+            //     setError('Please enter a meeting ID');
+            //     return;
+            //   }
 
-              // Find meeting in allschedule that matches the entered ID
-              const meeting = allschedule.find(schedule =>
-                schedule.meetingLink.includes(meetingId.trim())
-              );
+            //   // Find meeting in allschedule that matches the entered ID
+            //   const meeting = allschedule.find(schedule =>
+            //     schedule.meetingLink.includes(meetingId.trim())
+            //   );
 
-              if (!meeting) {
-                setError('Invalid meeting ID');
-                return;
-              }
+            //   if (!meeting) {
+            //     setError('Invalid meeting ID');
+            //     return;
+            //   }
 
-              // Check if current time is within meeting time
-              const meetingDate = new Date(meeting.date);
-              const today = new Date();
-              const startTime = meeting.startTime.split(':');
-              const endTime = meeting.endTime.split(':');
+            //   // Check if current time is within meeting time
+            //   const meetingDate = new Date(meeting.date);
+            //   const today = new Date();
+            //   const startTime = meeting.startTime.split(':');
+            //   const endTime = meeting.endTime.split(':');
 
-              meetingDate.setHours(parseInt(startTime[0]), parseInt(startTime[1]));
-              const meetingEndDate = new Date(meeting.date);
-              meetingEndDate.setHours(parseInt(endTime[0]), parseInt(endTime[1]));
+            //   meetingDate.setHours(parseInt(startTime[0]), parseInt(startTime[1]));
+            //   const meetingEndDate = new Date(meeting.date);
+            //   meetingEndDate.setHours(parseInt(endTime[0]), parseInt(endTime[1]));
 
-              // if (today < meetingDate) {
-              //   setError('Meeting has not started yet');
-              //   return;
-              // }
+            //   // Instead of directly navigating to the meeting, send a join request
+            //   if (socket) {
+            //     socket.emit('request-to-join', {
+            //       roomId: meetingId,
+            //       userId: currentUser?._id,
+            //       userName: currentUser?.name
+            //     });
 
-              // if (today > meetingEndDate) {
-              //   setError('Meeting has ended');
-              //   return;
-              // }
+            //     setRequestSent(true);
+            //     setJoinRequestStatus('Waiting for host approval...');
 
-              handlejoinclose();
-              navigate(`/screen/${meetingId}`);
-            }}>
+            //     // Don't close the modal yet, update it to show waiting status
+            //     // handlejoinclose();
+            //     // navigate(`/screen/${meetingId}`);
+            //   } else {
+            //     setError('Connection error. Please try again.');
+            //   }
+            // }}
+            >
               <div className="mb-3">
                 <label htmlFor="meetingId" className="form-label text-white j_join_text">
                   Meeting ID or Personal Link
@@ -954,7 +1064,6 @@ function Home() {
                   type="text"
                   className="form-control j_input j_join_text"
                   id="meetingPassword"
-                  // value={currentUser?.name}
                   placeholder="Enter Password"
                 />
               </div>
@@ -983,8 +1092,9 @@ function Home() {
                   type="submit"
                   variant="light"
                   className="btn btn-light j_join_button m-1"
+                  disabled={requestSent}
                 >
-                  Join
+                  {requestSent ? 'Requesting...' : 'Join'}
                 </Button>
               </Modal.Footer>
             </form>
@@ -998,7 +1108,6 @@ function Home() {
           <div className='j_modal_header'>
           </div>
           <Modal.Body className='B_review_model_body'>
-
             <Formik
               initialValues={{
                 rating: 0,
@@ -1017,7 +1126,7 @@ function Home() {
                   comments: values.comments
                 };
                 dispatch(createreview(reviewData)).then((response) => {
-                  if (response.payload?._id) {
+                  if (response.payload.status == 200 || response.payload.status == 201) {
                     resetForm();
                     setRating(0);
                     setActiveButton([]);

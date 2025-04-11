@@ -12,6 +12,8 @@ export const useSocket = (userId, roomId, userName) => {
     const [unreadMessages, setUnreadMessages] = useState(0);
     const [isChatOpen, setIsChatOpen] = useState(false);
     const [typingUsers, setTypingUsers] = useState([]);
+    const [joinRequests, setJoinRequests] = useState([]);
+    const [requestApprovalStatus, setRequestApprovalStatus] = useState(null);
 
     // Initialize socket connection
     useEffect(() => {
@@ -27,15 +29,18 @@ export const useSocket = (userId, roomId, userName) => {
         // Join room
         socketRef.current.on("connect", () => {
             setIsConnected(true);
-            socketRef.current.emit('join-room', {
-                roomId,
-                userId,
-                userName
-            });
+            console.log("Socket connected:", socketRef.current.id);
+        });
+
+        socketRef.current.emit('join-room', {
+            roomId,
+            userId,
+            userName
         });
 
         // Handle new user connected
         socketRef.current.on('user-connected', (user) => {
+            // console.log("SBGSBfb",user);
             setParticipants(prev => [
                 ...prev,
                 {
@@ -52,7 +57,7 @@ export const useSocket = (userId, roomId, userName) => {
 
         // Get list of room users when joining
         socketRef.current.on('room-users', (roomUsers) => {
-            console.log('Current room users:', roomUsers);
+            // console.log('Current room users:', roomUsers);
             const formattedParticipants = roomUsers.map(user => ({
                 id: user.id,
                 userId: user.userId,
@@ -62,6 +67,7 @@ export const useSocket = (userId, roomId, userName) => {
                 initials: `${user.userName.charAt(0)}${user.userName.split(' ')[1] ? user.userName.split(' ')[1].charAt(0) : ''}`,
                 isHost: user.isHost
             }));
+            // console.log("sxdfghghghghghghghghghgh",formattedParticipants);
             setParticipants(formattedParticipants);
         });
 
@@ -103,6 +109,26 @@ export const useSocket = (userId, roomId, userName) => {
                     p.id === userId ? { ...p, hasVideo, hasAudio } : p
                 )
             );
+        });
+
+        // For users waiting for approval
+        socketRef.current.on('join-request-status', ({ status, requestId }) => {
+            setRequestApprovalStatus(status);
+
+            if (status === 'approved') {
+                // If approved, navigate to meeting room
+                // This needs to be handled in your component using this hook
+                socketRef.current.emit('join-room', {
+                    roomId,
+                    userId,
+                    userName
+                });
+            }
+        });
+
+        // For hosts who receive join requests
+        socketRef.current.on('join-request', (requestData) => {
+            setJoinRequests(prev => [...prev, requestData]);
         });
 
         // Handle user disconnection
@@ -245,6 +271,33 @@ export const useSocket = (userId, roomId, userName) => {
         }
     };
 
+    // Function for host to handle join requests
+    const handleJoinRequest = (requestId, isApproved) => {
+        if (socketRef.current) {
+            socketRef.current.emit('handle-join-request', {
+                requestId,
+                status: isApproved ? 'approved' : 'denied',
+                roomId
+            });
+
+            // Remove the request from the local state
+            setJoinRequests(prev => prev.filter(req => req.requestId !== requestId));
+        }
+    };
+
+    // Function for user to send join request
+    const sendJoinRequest = () => {
+        if (socketRef.current) {
+            const requestId = `${userId}-${Date.now()}`;
+            socketRef.current.emit('request-to-join', {
+                roomId,
+                userId,
+                userName,
+                requestId
+            });
+        }
+    };
+
     return {
         socket: socketRef.current,
         isConnected,
@@ -265,6 +318,10 @@ export const useSocket = (userId, roomId, userName) => {
         setupWebRTCHandlers,
         sendOffer,
         sendAnswer,
-        sendIceCandidate
+        sendIceCandidate,
+        joinRequests,
+        handleJoinRequest,
+        sendJoinRequest,
+        requestApprovalStatus
     };
 }

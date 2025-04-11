@@ -328,7 +328,8 @@
 }
 
 .j_join_button {
-    padding: 10px 80px;
+    padding: 10px 65px;
+    font-weight: 600;
 }
 
 .j_join_title {

@@ -3,7 +3,7 @@ const schedule = require('../models/schedule.modal')
 const onlineUsers = new Map();
 const rooms = {};
 const typingUsers = new Map(); // Store typing status for each room
-// console.log("onlineUsers", onlineUsers);
+const joinRequests = new Map(); // Map of roomId -> array of requests
 
 async function sendReminder(socket) {
     const data = await schedule.find();
@@ -177,6 +177,7 @@ async function initializeSocket(io) {
                     userName,
                     isHost: userId === hostUserId
                 });
+                
 
                 // Send list of all users in the room to the new participant
                 socket.emit('room-users', rooms[roomId]);
@@ -310,6 +311,98 @@ async function initializeSocket(io) {
                     userId: socket.id,
                     hasVideo
                 });
+            }
+        });
+
+        // Handle join requests
+        socket.on('request-to-join', ({ roomId, userId, userName, requestId }) => {
+            try {
+                // Create a unique request ID if not provided
+                const reqId = requestId || `${userId}-${Date.now()}`;
+
+                // Find the room and its host
+                if (!rooms[roomId] || rooms[roomId].length === 0) {
+                    socket.emit('join-request-status', {
+                        status: 'error',
+                        message: 'Meeting not found or no host available.'
+                    });
+                    return;
+                }
+
+                // Find the host of the meeting
+                const host = rooms[roomId].find(user => user.isHost);
+
+                if (!host) {
+                    socket.emit('join-request-status', {
+                        status: 'error',
+                        message: 'No host available for this meeting.'
+                    });
+                    return;
+                }
+
+                // Store the request
+                if (!joinRequests.has(roomId)) {
+                    joinRequests.set(roomId, []);
+                }
+
+                const request = {
+                    requestId: reqId,
+                    userId,
+                    userName,
+                    socketId: socket.id,
+                    timestamp: new Date()
+                };
+
+                joinRequests.get(roomId).push(request);
+
+                // Send join request to the host
+                io.to(host.id).emit('join-request', request);
+
+                // Inform the requester that their request has been sent
+                socket.emit('join-request-status', {
+                    status: 'pending',
+                    requestId: reqId,
+                    message: 'Your request has been sent to the host.'
+                });
+
+            } catch (error) {
+                console.error("Error in request-to-join:", error);
+                socket.emit('join-request-status', {
+                    status: 'error',
+                    message: 'Failed to send join request.'
+                });
+            }
+        });
+
+        // Handle host's response to join requests
+        socket.on('handle-join-request', ({ requestId, status, roomId }) => {
+            try {
+                // Find the request in our stored requests
+                const roomRequests = joinRequests.get(roomId) || [];
+                const requestIndex = roomRequests.findIndex(req => req.requestId === requestId);
+
+                if (requestIndex === -1) {
+                    socket.emit('error', { message: 'Join request not found.' });
+                    return;
+                }
+
+                const request = roomRequests[requestIndex];
+
+                // Send the status to the requester
+                io.to(request.socketId).emit('join-request-status', {
+                    status,
+                    requestId
+                });
+
+                // Remove the request
+                roomRequests.splice(requestIndex, 1);
+                joinRequests.set(roomId, roomRequests);
+
+                console.log(`Join request ${requestId} was ${status} by host in room ${roomId}`);
+
+            } catch (error) {
+                console.error("Error in handle-join-request:", error);
+                socket.emit('error', { message: 'Failed to process join request response.' });
             }
         });
 

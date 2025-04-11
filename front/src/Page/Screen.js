@@ -53,10 +53,10 @@ function Screen() {
         setupWebRTCHandlers,
         sendOffer,
         sendAnswer,
-        sendIceCandidate
+        sendIceCandidate,
+        joinRequests, // New state for join requests
+        handleJoinRequest,// New function to handle requests,
     } = useSocket(userId, roomId, userName);
-
-
 
     // WebRTC State
     const [isMuted, setIsMuted] = useState(false);
@@ -80,6 +80,7 @@ function Screen() {
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedParticipant, setSelectedParticipant] = useState(null);
     const [lastUnreadIndex, setLastUnreadIndex] = useState(-1);
+    const [pendingJoinRequests, setPendingJoinRequests] = useState([]);
 
     // Refs
     const localVideoRef = useRef();
@@ -87,6 +88,21 @@ function Screen() {
     const messageContainerRef = useRef();
     const videoRefsMap = useRef({});
 
+    // Effect to update pending join requests from socket
+    useEffect(() => {
+        if (joinRequests) {
+            setPendingJoinRequests(joinRequests);
+        }
+    }, [joinRequests]);
+
+    // Functions to handle join requests
+    const acceptJoinRequest = (requestId) => {
+        handleJoinRequest(requestId, true);
+    };
+
+    const denyJoinRequest = (requestId) => {
+        handleJoinRequest(requestId, false);
+    };
 
     const handleClose = () => {
         setShow(false);
@@ -768,7 +784,7 @@ function Screen() {
 
     return (
         <>
-            <div className="position-fixed top-0 end-0 p-3 ps-0 pb-0" style={{ zIndex: '1' }}>
+            {/* <div className="position-fixed top-0 end-0 p-3 ps-0 pb-0" style={{ zIndex: '1' }}>
                 <div className="j_Invite text-white p-3">
                     <div className="d-flex align-items-center j_Box_margin">
                         <div className="j_join_user">
@@ -781,11 +797,39 @@ function Screen() {
                         <button className="btn j_accept_button">Accept</button>
                     </div>
                 </div>
+            </div> */}
+            <div className="position-fixed top-0 end-0 p-3 ps-0 pb-0" style={{ zIndex: '1' }}>
+                {pendingJoinRequests.map(request => (
+                    <div key={request.requestId} className="j_Invite text-white p-3 mb-2">
+                        <div className="d-flex align-items-center j_Box_margin">
+                            <div className="j_join_user">
+                                {request.userName.split(' ').map(name => name[0]).join('').toUpperCase()}
+                            </div>
+                            <p className="p-0 m-0">{request.userName} wants to join this meeting.</p>
+                        </div>
+                        <div className="mt-2">
+                            <button
+                                className="btn j_deny_button me-2"
+                                onClick={() => denyJoinRequest(request.requestId)}
+                            >
+                                Deny
+                            </button>
+                            <button
+                                className="btn j_accept_button"
+                                onClick={() => acceptJoinRequest(request.requestId)}
+                            >
+                                Accept
+                            </button>
+                        </div>
+                    </div>
+                ))}
             </div>
             <section className="d_mainsec" style={{
                 marginRight: windowWidth > 768 ? `${mainSectionMargin}px` : 0,
                 transition: 'margin-right 0.3s ease-in-out'
             }} >
+                {console.log(visibleParticipants, remoteStreams)
+                }
                 <div className="d_topbar"></div>
                 <div className="d_mainscreen">
                     <div className={`d_participants-grid ${getGridClass()}`}
