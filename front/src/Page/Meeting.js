@@ -266,10 +266,17 @@ function Meeting() {
                                                                 <button
                                                                     className="dropdown-item text-white px-3 py-1 hover-bg-secondary"
                                                                     style={{ backgroundColor: 'transparent', border: 'none', width: '100%', textAlign: 'left' }}
-                                                                    onClick={() => window.open(schedule.meetingLink, '_blank')}
+                                                                    onClick={() => window.location.href = schedule.meetingLink}
                                                                 >
                                                                     Start
                                                                 </button>
+                                                                {/* <button
+                                                                    className="dropdown-item text-white px-3 py-1 hover-bg-secondary"
+                                                                    style={{ backgroundColor: 'transparent', border: 'none', width: '100%', textAlign: 'left' }}
+                                                                    onClick={() => window.open(schedule.meetingLink, '_blank')}
+                                                                >
+                                                                    Start
+                                                                </button> */}
                                                                 <button
                                                                     className="dropdown-item text-white px-3 py-1 hover-bg-secondary"
                                                                     style={{ backgroundColor: 'transparent', border: 'none', width: '100%', textAlign: 'left' }}

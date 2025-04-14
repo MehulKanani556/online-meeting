@@ -87,6 +87,7 @@ function Screen() {
     const peerConnectionsRef = useRef({});
     const messageContainerRef = useRef();
     const videoRefsMap = useRef({});
+    const pendingIceCandidatesRef = useRef({});
 
     // Effect to update pending join requests from socket
     useEffect(() => {
@@ -223,9 +224,16 @@ function Screen() {
     }, []);
 
     // Helper function to create peer connection 
+    // Helper function to create peer connection
     const createPeerConnection = (peerId) => {
         if (peerConnectionsRef.current[peerId]) {
-            return peerConnectionsRef.current[peerId];
+            // If connection exists but is in a failed state, close it and create a new one
+            if (peerConnectionsRef.current[peerId].connectionState === 'failed' ||
+                peerConnectionsRef.current[peerId].connectionState === 'closed') {
+                peerConnectionsRef.current[peerId].close();
+            } else {
+                return peerConnectionsRef.current[peerId];
+            }
         }
 
         console.log(`Creating new peer connection for ${peerId}`);
@@ -255,32 +263,60 @@ function Screen() {
             }
         };
 
-        // CRITICAL FIX: Completely revised ontrack handler
         pc.ontrack = event => {
             console.log(`Received ${event.track.kind} track from ${peerId}`, event.streams[0]);
 
-            // Always use the first stream from the event
             if (event.streams && event.streams[0]) {
                 const remoteStream = event.streams[0];
 
-                setRemoteStreams(prev => {
-                    // Create a new object to ensure React detects the change
-                    const newRemoteStreams = { ...prev };
-                    newRemoteStreams[peerId] = remoteStream;
-                    return newRemoteStreams;
-                });
+                setRemoteStreams(prev => ({ ...prev, [peerId]: remoteStream }));
 
-                // Force an update to the video ref
                 const videoElement = videoRefsMap.current[peerId];
                 if (videoElement) {
+                    console.log(`Applying stream to existing element for ${peerId}`);
                     videoElement.srcObject = remoteStream;
-                    videoElement.play().catch(e => console.log('Play error in ontrack:', e));
+                    videoElement.autoplay = true;
+                    videoElement.playsInline = true;
+                    videoElement.play().catch(e => console.log(`Play error: ${e.message}`));
                 }
             }
         };
 
+        // Additional connection state logging
+        pc.onconnectionstatechange = () => {
+            console.log(`Connection state changed for ${peerId}: ${pc.connectionState}`);
+            if (pc.connectionState === 'connected') {
+                console.log(`Peer connection with ${peerId} successfully established`);
+            } else if (pc.connectionState === 'failed') {
+                console.log(`Connection with ${peerId} failed. Attempting reconnect...`);
+                // Implement reconnection logic if needed
+            }
+        };
+
+        // ICE connection state monitoring
+        pc.oniceconnectionstatechange = () => {
+            console.log(`ICE connection state changed for ${peerId}: ${pc.iceConnectionState}`);
+        };
+
+        // Signaling state monitoring
+        pc.onsignalingstatechange = () => {
+            console.log(`Signaling state changed for ${peerId}: ${pc.signalingState}`);
+        };
+
         // Store the peer connection
         peerConnectionsRef.current[peerId] = pc;
+
+        // Apply any pending ICE candidates that were received before the peer connection was created
+        if (pendingIceCandidatesRef.current[peerId]) {
+            console.log(`Applying ${pendingIceCandidatesRef.current[peerId].length} pending ICE candidates for ${peerId}`);
+            pendingIceCandidatesRef.current[peerId].forEach(candidate => {
+                pc.addIceCandidate(new RTCIceCandidate(candidate)).catch(error => {
+                    console.error('Error applying pending ICE candidate:', error);
+                });
+            });
+            delete pendingIceCandidatesRef.current[peerId]; // Clear pending candidates
+        }
+
         return pc;
     };
 
@@ -301,10 +337,16 @@ function Screen() {
                 const pc = peerConnectionsRef.current[from];
 
                 try {
-                    await pc.setRemoteDescription(new RTCSessionDescription(offer));
-                    const answer = await pc.createAnswer();
-                    await pc.setLocalDescription(answer);
-                    sendAnswer(from, answer);
+                    // Check connection state before proceeding
+                    if (pc.signalingState === 'stable') {
+                        await pc.setRemoteDescription(new RTCSessionDescription(offer));
+                        const answer = await pc.createAnswer();
+                        await pc.setLocalDescription(answer);
+                        sendAnswer(from, answer);
+                    } else {
+                        console.log(`Cannot process offer - connection not stable: ${pc.signalingState}`);
+                        // Queue or retry mechanism can be implemented here
+                    }
                 } catch (error) {
                     console.error('Error handling offer:', error);
                 }
@@ -316,10 +358,13 @@ function Screen() {
                 const pc = peerConnectionsRef.current[from];
                 if (pc) {
                     try {
-                        // Check if the remote description is already set to avoid errors
-                        if (pc.currentRemoteDescription === null) {
+                        // Only set remote description if in the correct state
+                        if (pc.signalingState === 'have-local-offer') {
                             await pc.setRemoteDescription(new RTCSessionDescription(answer));
                             console.log('Remote description set successfully after answer');
+                        } else {
+                            console.log(`Cannot process answer - wrong state: ${pc.signalingState}`);
+                            // Implement recovery mechanism if needed
                         }
                     } catch (error) {
                         console.error('Error handling answer:', error);
@@ -333,10 +378,27 @@ function Screen() {
                 const pc = peerConnectionsRef.current[from];
                 if (pc) {
                     try {
-                        await pc.addIceCandidate(new RTCIceCandidate(candidate));
+                        // Only add ICE candidate if we have a remote description
+                        if (pc.remoteDescription && pc.remoteDescription.type) {
+                            await pc.addIceCandidate(new RTCIceCandidate(candidate));
+                        } else {
+                            // Store ICE candidate for later
+                            if (!pendingIceCandidatesRef.current[from]) {
+                                pendingIceCandidatesRef.current[from] = [];
+                            }
+                            console.log(`Storing ICE candidate for later - remote description not set yet`);
+                            pendingIceCandidatesRef.current[from].push(candidate);
+                        }
                     } catch (error) {
                         console.error('Error adding ICE candidate:', error);
                     }
+                } else {
+                    // No peer connection yet, store the ICE candidate
+                    if (!pendingIceCandidatesRef.current[from]) {
+                        pendingIceCandidatesRef.current[from] = [];
+                    }
+                    console.log(`Storing ICE candidate for later - no peer connection yet`);
+                    pendingIceCandidatesRef.current[from].push(candidate);
                 }
             }
         });
@@ -349,8 +411,10 @@ function Screen() {
             console.log(`Initializing connections with ${peersToConnect.length} peers`);
 
             for (const peer of peersToConnect) {
-                // Skip if a connection already exists
-                if (peerConnectionsRef.current[peer.id]) {
+                // Skip if a connection already exists and is in a good state
+                if (peerConnectionsRef.current[peer.id] &&
+                    peerConnectionsRef.current[peer.id].connectionState !== 'failed' &&
+                    peerConnectionsRef.current[peer.id].connectionState !== 'closed') {
                     continue;
                 }
 
@@ -358,9 +422,14 @@ function Screen() {
                 const pc = createPeerConnection(peer.id);
 
                 try {
-                    const offer = await pc.createOffer();
-                    await pc.setLocalDescription(offer);
-                    sendOffer(peer.id, offer);
+                    // Only create offer if we're in a stable state
+                    if (pc.signalingState === 'stable') {
+                        const offer = await pc.createOffer();
+                        await pc.setLocalDescription(offer);
+                        sendOffer(peer.id, offer);
+                    } else {
+                        console.log(`Cannot create offer - wrong state: ${pc.signalingState}`);
+                    }
                 } catch (error) {
                     console.error('Error creating offer:', error);
                 }
@@ -376,44 +445,37 @@ function Screen() {
 
     // This effect ensures remote video elements get updated when streams change
     useEffect(() => {
-        Object.entries(remoteStreams).forEach(([peerId, stream]) => {
-            const videoElement = videoRefsMap.current[peerId];
-
-            if (videoElement && stream) {
-                // Only update if the stream has changed
-                if (videoElement.srcObject !== stream) {
-                    console.log(`Setting stream for ${peerId} to video element`);
-
-                    // Store the stream first
+        // This effect ensures remote videos get their streams
+        const applyRemoteStreams = () => {
+            Object.entries(remoteStreams).forEach(([peerId, stream]) => {
+                const videoElement = videoRefsMap.current[peerId];
+                if (videoElement && videoElement.srcObject !== stream) {
+                    console.log(`Reapplying stream for ${peerId} in monitor effect`);
                     videoElement.srcObject = stream;
+                    videoElement.autoplay = true;
+                    videoElement.playsInline = true;
 
-                    // Make sure autoplay works even with browser autoplay restrictions
-                    videoElement.muted = true; // Temporarily mute to help with autoplay
-
-                    // Use play() with catch to handle autoplay restrictions
-                    videoElement.play().catch(err => {
-                        console.log(`Error playing video: ${err.message}`);
-                        // If autoplay is blocked, we can unmute after user interaction
-                        const unmute = () => {
-                            videoElement.muted = false;
-                            document.removeEventListener('click', unmute);
-                        };
-                        document.addEventListener('click', unmute);
-                    });
-
-                    // Listen for the loadedmetadata event
-                    videoElement.onloadedmetadata = () => {
-                        console.log(`Video metadata loaded for peer ${peerId}`);
-                        videoElement.play().catch(e => console.log('Play failed after metadata:', e));
-                    };
+                    if (videoElement.paused) {
+                        videoElement.play().catch(e => console.log(`Play error in monitor: ${e.message}`));
+                    }
                 }
-            } else {
-                console.log(`No video element found for peer ${peerId} or no stream available`);
-            }
-        });
-    }, [remoteStreams]);
+            });
+        };
 
+        // Apply immediately
+        applyRemoteStreams();
 
+        // Also set up a timer to retry a few times
+        const timerId = setInterval(applyRemoteStreams, 1000);
+
+        // Clear after a few seconds - remote streams should be connected by then
+        const cleanupId = setTimeout(() => clearInterval(timerId), 5000);
+
+        return () => {
+            clearInterval(timerId);
+            clearTimeout(cleanupId);
+        };
+    }, []);
 
     // Force local video connection when ref changes
     useEffect(() => {
@@ -426,22 +488,7 @@ function Screen() {
         }
     }, [localStream, localVideoRef.current]);
 
-
-    // Toggle audio
-    const toggleAudio = () => {
-        if (localStream) {
-            const audioTrack = localStream.getAudioTracks()[0];
-            if (audioTrack) {
-                audioTrack.enabled = !audioTrack.enabled;
-                setIsMuted(!audioTrack.enabled);
-                updateMediaState('audio', audioTrack.enabled);
-            }
-        } else {
-            setIsMuted(!isMuted);
-        }
-    };
-
-    // Update your toggleVideo function:
+    // Toggle video
     const toggleVideo = () => {
         if (localStream) {
             const videoTrack = localStream.getVideoTracks()[0];
@@ -461,24 +508,38 @@ function Screen() {
         }
     };
 
+    // Video ref setup - CRITICAL FIX
     const setVideoRef = (peerId) => (element) => {
         if (element) {
-            // Store the element reference
+            console.log(`Video ref set for peer ${peerId}`);
+            // Store the reference
             videoRefsMap.current[peerId] = element;
 
-            // Get the stream if available
+            // Get the stream if available - IMPORTANT: Use state directly, not a stale closure
             const stream = remoteStreams[peerId];
 
-            // Apply the stream to the video element if it exists
+            // Only apply if stream exists and is different
             if (stream && element.srcObject !== stream) {
-                console.log(`Setting stream for ${peerId} in ref callback`);
+                console.log(`Applying stream for ${peerId} in ref callback`);
                 element.srcObject = stream;
-
-                // Force play with error handling
-                element.play().catch(err => {
-                    console.log(`Error playing video in ref callback: ${err.message}`);
-                });
+                element.autoplay = true;
+                element.playsInline = true;
+                element.muted = false;
             }
+        }
+    };
+
+    // Toggle audio
+    const toggleAudio = () => {
+        if (localStream) {
+            const audioTrack = localStream.getAudioTracks()[0];
+            if (audioTrack) {
+                audioTrack.enabled = !audioTrack.enabled;
+                setIsMuted(!audioTrack.enabled);
+                updateMediaState('audio', audioTrack.enabled);
+            }
+        } else {
+            setIsMuted(!isMuted);
         }
     };
 

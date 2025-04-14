@@ -29,7 +29,7 @@ export const useSocket = (userId, roomId, userName) => {
         // Join room
         socketRef.current.on("connect", () => {
             setIsConnected(true);
-            console.log("Socket connected:", socketRef.current.id);
+            // console.log("Socket connected:", socketRef.current.id);
         });
 
         socketRef.current.emit('join-room', {
