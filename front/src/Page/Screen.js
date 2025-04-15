@@ -543,6 +543,66 @@ function Screen() {
         }
     };
 
+    // Separate function to stop screen sharing and restore camera
+    const stopScreenSharing = async () => {
+        try {
+            // Get all screen share tracks and stop them
+            const screenTracks = localStream.getVideoTracks();
+            screenTracks.forEach(track => track.stop());
+
+            // Get a new video stream from camera
+            const newStream = await navigator.mediaDevices.getUserMedia({ video: true });
+            const videoTrack = newStream.getVideoTracks()[0];
+
+            // Replace video track in all peer connections
+            Object.values(peerConnectionsRef.current).forEach(pc => {
+                const senders = pc.getSenders();
+                const sender = senders.find(s =>
+                    s.track && s.track.kind === 'video'
+                );
+
+                if (sender) {
+                    sender.replaceTrack(videoTrack);
+                }
+            });
+
+            // Update the local video reference
+            if (localVideoRef.current) {
+                // Create a combined stream with existing audio and new video
+                const combinedStream = new MediaStream();
+
+                // Add existing audio tracks if any
+                localStream.getAudioTracks().forEach(track => {
+                    combinedStream.addTrack(track);
+                });
+
+                // Add the new video track
+                combinedStream.addTrack(videoTrack);
+
+                // Set this combined stream to the video element
+                localVideoRef.current.srcObject = combinedStream;
+
+                // Also update the localStream reference
+                localStream.getVideoTracks().forEach(track => {
+                    localStream.removeTrack(track);
+                });
+                localStream.addTrack(videoTrack);
+            }
+
+            setIsScreenSharing(false);
+
+            // Notify peers about screen sharing status
+            if (socket) {
+                socket.emit('screen-share-status', {
+                    roomId,
+                    isScreenSharing: false
+                });
+            }
+        } catch (error) {
+            console.error('Error returning to camera:', error);
+        }
+    };
+
     // Share screen
     const toggleScreenShare = async () => {
         if (!isScreenSharing) {
@@ -551,8 +611,20 @@ function Screen() {
                     video: true
                 });
 
+                // Save reference to original video track to restore later
+                const originalVideoTrack = localStream.getVideoTracks()[0];
+                if (originalVideoTrack) {
+                    // Store the original track to restore later
+                    localStream._originalVideoTrack = originalVideoTrack;
+                }
+
                 // Replace video track in all peer connections
                 const videoTrack = screenStream.getVideoTracks()[0];
+
+                // Add event listener for when user stops sharing via browser UI
+                videoTrack.onended = async () => {
+                    await stopScreenSharing();
+                };
 
                 Object.values(peerConnectionsRef.current).forEach(pc => {
                     const senders = pc.getSenders();
@@ -570,57 +642,27 @@ function Screen() {
                     localVideoRef.current.srcObject = screenStream;
                 }
 
-                // Listen for end of screen sharing
-                videoTrack.onended = () => {
-                    toggleScreenShare();
-                };
+                // Update local stream
+                if (localStream.getVideoTracks().length > 0) {
+                    localStream.removeTrack(localStream.getVideoTracks()[0]);
+                }
+                localStream.addTrack(videoTrack);
 
                 setIsScreenSharing(true);
 
-                // Save reference to stop later
-                const oldVideoTrack = localStream.getVideoTracks()[0];
-                localStream.removeTrack(oldVideoTrack);
-                localStream.addTrack(videoTrack);
+                // Notify peers about screen sharing status
+                if (socket) {
+                    socket.emit('screen-share-status', {
+                        roomId,
+                        isScreenSharing: true
+                    });
+                }
 
             } catch (error) {
                 console.error('Error sharing screen:', error);
             }
         } else {
-            // Stop screen sharing
-            try {
-                const newStream = await navigator.mediaDevices.getUserMedia({ video: true });
-                const videoTrack = newStream.getVideoTracks()[0];
-
-                // Replace video track in all peer connections
-                Object.values(peerConnectionsRef.current).forEach(pc => {
-                    const senders = pc.getSenders();
-                    const sender = senders.find(s =>
-                        s.track && s.track.kind === 'video'
-                    );
-
-                    if (sender) {
-                        sender.replaceTrack(videoTrack);
-                    }
-                });
-
-                // Show camera in local video
-                if (localVideoRef.current) {
-                    localVideoRef.current.srcObject = newStream;
-                }
-
-                // Update local stream
-                const oldVideoTrack = localStream.getVideoTracks()[0];
-                if (oldVideoTrack) {
-                    oldVideoTrack.stop();
-                    localStream.removeTrack(oldVideoTrack);
-                }
-                localStream.addTrack(videoTrack);
-
-                setIsScreenSharing(false);
-                updateMediaState('video', true);
-            } catch (error) {
-                console.error('Error returning to camera:', error);
-            }
+            await stopScreenSharing();
         }
     };
 

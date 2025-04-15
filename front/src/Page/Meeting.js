@@ -213,9 +213,13 @@ function Meeting() {
     };
 
     const [ScheduleData, setScheduleData] = useState()
-    console.log(ScheduleData);
     const handleEdit = (data) => {
         setScheduleData(data)
+    }
+
+    const [inviteData, setInviteData] = useState()
+    const handleInvite = (data) => {
+        setInviteData(data)
     }
 
 
@@ -283,7 +287,7 @@ function Meeting() {
                                                                 </button>
                                                                 <button className="dropdown-item text-white px-3 py-1 hover-bg-secondary"
                                                                     style={{ backgroundColor: 'transparent', border: 'none', width: '100%', textAlign: 'left' }}
-                                                                    onClick={handleShowInviteModel}
+                                                                    onClick={() => { handleShowInviteModel(); handleInvite(schedule) }}
                                                                 >
                                                                     Invite People
                                                                 </button>
@@ -1821,7 +1825,7 @@ function Meeting() {
                                 </div>
 
                                 <div className='d-flex gap-4'>
-                                    <button className="btn btn-outline-light B_metting_btn" onClick={() => {
+                                    <button className="btn btn-outline-light B_metting_btn fw-semibold" onClick={() => {
                                         if (!gettoken || !userId) {
                                             alert('Please login to create a schedule');
                                             return;
@@ -1830,7 +1834,7 @@ function Meeting() {
                                     }}>
                                         Schedule
                                     </button>
-                                    <button className="btn btn-outline-light B_metting_btn">Meet Now</button>
+                                    <button className="btn btn-outline-light B_metting_btn fw-semibold">Meet Now</button>
                                 </div>
                             </div>
                         </div>
@@ -1845,7 +1849,7 @@ function Meeting() {
                         {renderMeetingCards()}
                         {/* .......................MEETING CARDS END ....................... */}
 
-                        
+
                         {/* ============================create Schedule Meeting Modal ============================ */}
 
                         <Modal
@@ -2441,8 +2445,6 @@ function Meeting() {
                                 </Formik>
                             </Modal.Body>
                         </Modal>
-
-                        {/* .......................MODEL START ....................... */}
 
                         {/* ============================ update Schedule Meeting Modal ============================ */}
 
@@ -3091,6 +3093,7 @@ function Meeting() {
                         </Modal>
 
                         {/* ============================ Invite People Modal ============================ */}
+                        {console.log("inviteData", inviteData)}
 
                         <Modal
                             show={InviteModel}
@@ -3112,24 +3115,24 @@ function Meeting() {
                             <Modal.Body className="p-4 B_invite_people_body">
                                 <div>
                                     <div className="d-flex align-items-center mb-3 B_invite_people_text_flex">
-                                        <span className='B_invite_people_text_span' style={{ color: '#B3AEAE', width: '120px' }}>Title</span>
-                                        <span className="text-white B_invite_people_text">: Online Meeting</span>
+                                        <span className='B_invite_people_text_span' style={{ color: '#B3AEAE', width: '100px' }}>Title</span>
+                                        <span className="text-white B_invite_people_text">: {inviteData?.title}</span>
                                     </div>
                                     <div className="d-flex align-items-center mb-3 B_invite_people_text_flex">
-                                        <span className='B_invite_people_text_span' style={{ color: '#B3AEAE', width: '120px' }}>Time</span>
-                                        <span className="text-white B_invite_people_text">: 11:00 AM</span>
+                                        <span className='B_invite_people_text_span' style={{ color: '#B3AEAE', width: '100px' }}>Time</span>
+                                        <span className="text-white B_invite_people_text">: {inviteData?.startTime}</span>
                                     </div>
                                     <div className="d-flex align-items-center mb-3 B_invite_people_text_flex">
-                                        <span className='B_invite_people_text_span' style={{ color: '#B3AEAE', width: '120px' }}>Duration</span>
-                                        <span className="text-white B_invite_people_text">: 0h 30m</span>
+                                        <span className='B_invite_people_text_span' style={{ color: '#B3AEAE', width: '100px' }}>Duration</span>
+                                        <span className="text-white B_invite_people_text">: {calculateDuration(inviteData?.startTime, inviteData?.endTime)}</span>
                                     </div>
                                     <div className="d-flex align-items-center mb-3 B_invite_people_text_flex">
-                                        <span className='B_invite_people_text_span' style={{ color: '#B3AEAE', width: '120px' }}>Meeting ID</span>
-                                        <span className="text-white B_invite_people_text">: https://googlemeet.123/57809</span>
+                                        <span className='B_invite_people_text_span' style={{ color: '#B3AEAE', width: '100px' }}>Meeting ID</span>
+                                        <span className="text-white B_invite_people_text">: {inviteData?.meetingLink}</span>
                                     </div>
                                     <div className="d-flex align-items-center mb-3 B_invite_people_text_flex">
-                                        <span className='B_invite_people_text_span' style={{ color: '#B3AEAE', width: '120px' }}>Password</span>
-                                        <span className="text-white B_invite_people_text">: fverf54cf</span>
+                                        <span className='B_invite_people_text_span' style={{ color: '#B3AEAE', width: '100px' }}>Password</span>
+                                        <span className="text-white B_invite_people_text">: {inviteData?.password || "N/A"}</span>
 
                                     </div>
                                 </div>
@@ -3151,7 +3154,7 @@ function Meeting() {
                                             className="B_invite_people_btn1"
                                             onClick={() => {
 
-                                                navigator.clipboard.writeText("https://googlemeet.123/57809")
+                                                navigator.clipboard.writeText(`${inviteData?.meetingLink}`)
                                                     .then(() => {
                                                         setLinkCopied(true);
                                                         setTimeout(() => setLinkCopied(false), 2000);
