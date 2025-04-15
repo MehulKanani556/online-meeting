@@ -48,7 +48,7 @@ const scheduleSchema = mongoose.Schema({
             type: String,
             enum: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
         }],
-        Monthfirst:[{
+        Monthfirst: [{
             type: String,
             enum: ['firstmonday', 'firstday']
         }],
@@ -62,6 +62,9 @@ const scheduleSchema = mongoose.Schema({
     },
     invitees: [{
         email: {
+            type: String
+        },
+        name: {
             type: String
         },
         userId: {

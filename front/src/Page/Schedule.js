@@ -406,7 +406,7 @@ function Schedule() {
                 // }
                 dispatch(createschedule(values)).then((response) => {
                   // console.log("Response from API:", response);
-                  if (response.payload?._id) {
+                  if (response.payload?.status === 200) {
                     resetForm();
                     handleScheduleclose();
                   }

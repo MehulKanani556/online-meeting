@@ -43,7 +43,7 @@ export const createschedule = createAsyncThunk(
             // Transform invitees data to only include emails
             const transformedData = {
                 ...data,
-                invitees: data.invitees.map(invitee => ({ email: invitee.email, userId: invitee._id })),
+                invitees: data.invitees.map(invitee => ({ email: invitee.email, userId: invitee._id, name: invitee.name })),
             };
 
             const response = await axios.post(BASE_URL + '/createschedule', transformedData, {
@@ -53,7 +53,7 @@ export const createschedule = createAsyncThunk(
             });
             dispatch(setAlert({ text: response.data.message, color: 'success' }));
             dispatch(getAllschedule());
-            return response.data.schedules;
+            return response.data;
         } catch (error) {
             return handleErrors(error, dispatch, rejectWithValue);
         }
@@ -82,16 +82,18 @@ export const deleteschedule = createAsyncThunk(
 export const updateschedule = createAsyncThunk(
     'schedules/update',
     async (data, { dispatch, rejectWithValue }) => {
+        console.log("update data", data);
+
         try {
             const token = await sessionStorage.getItem("token");
-            const response = await axios.put(BASE_URL + '/schedulesUpdate', data, {
+            const response = await axios.put(`${BASE_URL}/scheduleUpdate/${data._id}`, data, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
             });
             dispatch(setAlert({ text: response.data.message, color: 'success' }));
             dispatch(getAllschedule());
-            return response.data.schedules;
+            return response.data;
         } catch (error) {
             return handleErrors(error, dispatch, rejectWithValue);
         }
