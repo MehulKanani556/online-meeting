@@ -177,7 +177,6 @@ async function initializeSocket(io) {
                     userName,
                     isHost: userId === hostUserId
                 });
-                
 
                 // Send list of all users in the room to the new participant
                 socket.emit('room-users', rooms[roomId]);
@@ -433,6 +432,15 @@ async function initializeSocket(io) {
             }
 
             console.log('User disconnected:', socket.id);
+        });
+
+        // Handle recording status updates
+        socket.on('recording-status-change', ({ roomId, isRecording }) => {
+            // Broadcast recording status to all users in the room except sender
+            socket.to(roomId).emit('recording-status-change', {
+                userId: socket.id,
+                isRecording
+            });
         });
 
         // Handle disconnection

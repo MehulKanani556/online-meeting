@@ -5,7 +5,7 @@ import offmicrophone from '../Image/d_offmicrophone.svg';
 import oncamera from '../Image/d_oncamera.svg';
 import offcamera from '../Image/d_offcamera.svg';
 import upload from '../Image/d_upload.svg';
-import target from '../Image/d_target.svg';
+import recording from '../Image/d_target.svg';
 import smile from '../Image/d_smile.svg';
 import podcast from '../Image/d_podcast.svg';
 import hand from '../Image/d_hand.svg';
@@ -36,6 +36,8 @@ function Screen() {
     const {
         socket,
         isConnected,
+        isVideoOff,
+        setIsVideoOff,
         participants,
         setParticipants,
         messages,
@@ -60,7 +62,6 @@ function Screen() {
 
     // WebRTC State
     const [isMuted, setIsMuted] = useState(false);
-    const [isVideoOff, setIsVideoOff] = useState(false);
     const [isScreenSharing, setIsScreenSharing] = useState(false);
     const [newMessage, setNewMessage] = useState('');
     const [showViewMoreDropdown, setShowViewMoreDropdown] = useState(false);
@@ -81,6 +82,8 @@ function Screen() {
     const [selectedParticipant, setSelectedParticipant] = useState(null);
     const [lastUnreadIndex, setLastUnreadIndex] = useState(-1);
     const [pendingJoinRequests, setPendingJoinRequests] = useState([]);
+    const [isRecording, setIsRecording] = useState(false);
+    const [recordedChunks, setRecordedChunks] = useState([]);
 
     // Refs
     const localVideoRef = useRef();
@@ -88,6 +91,7 @@ function Screen() {
     const messageContainerRef = useRef();
     const videoRefsMap = useRef({});
     const pendingIceCandidatesRef = useRef({});
+    const mediaRecorderRef = useRef(null);
 
     // Effect to update pending join requests from socket
     useEffect(() => {
@@ -368,7 +372,7 @@ function Screen() {
                         }
                     } catch (error) {
                         console.error('Error handling answer:', error);
-                    }
+                    }       
                 }
             },
 
@@ -408,7 +412,7 @@ function Screen() {
             // Filter out ourselves
             const peersToConnect = participants.filter(p => p.id !== socket.id);
 
-            console.log(`Initializing connections with ${peersToConnect.length} peers`);
+            // console.log(`Initializing connections with ${peersToConnect.length} peers`);
 
             for (const peer of peersToConnect) {
                 // Skip if a connection already exists and is in a good state
@@ -487,6 +491,32 @@ function Screen() {
             }
         }
     }, [localStream, localVideoRef.current]);
+
+    // Toggle video
+    // const toggleVideo = () => {
+    //     if (localStream) {
+    //         const videoTrack = localStream.getVideoTracks()[0];
+    //         if (videoTrack) {
+    //             // If the video is currently off, turn it on
+    //             if (videoTrack.enabled === false) {
+    //                 videoTrack.enabled = true; // Turn on the camera
+    //                 setIsVideoOff(false); // Update state to reflect that video is on
+    //                 console.log(`Video turned on.`);
+    //             } else {
+    //                 // If the video is currently on, turn it off
+    //                 videoTrack.enabled = false; // Turn off the camera
+    //                 setIsVideoOff(true); // Update state to reflect that video is off
+    //                 console.log(`Video turned off.`);
+    //             }
+
+    //             // Update all peers about our video state
+    //             updateMediaState('video', videoTrack.enabled);
+    //         }
+    //     } else {
+    //         // If localStream is not available, set video state to on
+    //         setIsVideoOff(false);
+    //     }
+    // };
 
     // Toggle video
     const toggleVideo = () => {
@@ -681,8 +711,40 @@ function Screen() {
     };
 
     // End meeting
+    // const endMeeting = () => {
+    //     // Stop all media tracks
+    //     if (localStream) {
+    //         localStream.getTracks().forEach(track => track.stop());
+    //     }
+
+    //     // Close all peer connections
+    //     Object.values(peerConnectionsRef.current).forEach(pc => {
+    //         pc.close();
+    //     });
+
+    //     sessionStorage.setItem('openReviewModal', 'true');
+    //     navigate("/home");
+    // };
+    let isEndingMeeting = false;
     const endMeeting = () => {
+        if (isEndingMeeting) return; // Prevent further calls
+        isEndingMeeting = true;
+        console.log("endMeeting called");
+
         // Stop all media tracks
+        if (isRecording) {
+            if (mediaRecorderRef.current) {
+                mediaRecorderRef.current.stop();
+                setIsRecording(false);
+            }
+        }
+
+        // Ensure originalEndMeeting does not call endMeeting again
+        if (typeof originalEndMeeting === 'function') {
+            console.log("Calling originalEndMeeting");
+            originalEndMeeting(); // Call the original function safely
+        }
+
         if (localStream) {
             localStream.getTracks().forEach(track => track.stop());
         }
@@ -694,7 +756,35 @@ function Screen() {
 
         sessionStorage.setItem('openReviewModal', 'true');
         navigate("/home");
+
+        // Reset the flag after the meeting ends
+        isEndingMeeting = false;
     };
+    // const endMeeting = () => {
+    //     // Stop all media tracks
+
+    //     if (isRecording) {
+    //         if (mediaRecorderRef.current) {
+    //             mediaRecorderRef.current.stop();
+    //             setIsRecording(false);
+    //         }
+    //     }
+
+    //     // Then proceed with the original function
+    //     originalEndMeeting();
+
+    //     if (localStream) {
+    //         localStream.getTracks().forEach(track => track.stop());
+    //     }
+
+    //     // Close all peer connections
+    //     Object.values(peerConnectionsRef.current).forEach(pc => {
+    //         pc.close();
+    //     });
+
+    //     sessionStorage.setItem('openReviewModal', 'true');
+    //     navigate("/home");
+    // };
 
     // Calculate grid columns based on participant count
     const getGridColumns = () => {
@@ -885,6 +975,191 @@ function Screen() {
         e.target.style.height = Math.min(120, e.target.scrollHeight) + 'px';
     };
 
+    // record video
+    const toggleRecording = async () => {
+        if (isRecording) {
+            // Stop recording
+            if (mediaRecorderRef.current) {
+                mediaRecorderRef.current.stop();
+                setIsRecording(false);
+            }
+        } else {
+            try {
+                // Get streams to record - combine local and remote streams
+                const streamsToRecord = [];
+
+                // Add local stream
+                if (localStream) {
+                    streamsToRecord.push(localStream);
+                }
+
+                // Add all remote streams
+                Object.values(remoteStreams).forEach(stream => {
+                    streamsToRecord.push(stream);
+                });
+
+                // Add screen share stream if active
+                if (isScreenSharing) {
+                    const screenStream = localVideoRef.current.srcObject; // Assuming localVideoRef holds the screen share stream
+                    if (screenStream) {
+                        streamsToRecord.push(screenStream);
+                    }
+                }
+
+                if (streamsToRecord.length === 0) {
+                    console.error('No streams available to record');
+                    return;
+                }
+
+                // Create a canvas to combine all video streams
+                const canvas = document.createElement('canvas');
+                canvas.width = 1280;  // HD width
+                canvas.height = 720;  // HD height
+                const ctx = canvas.getContext('2d');
+
+                // Create a combined audio context
+                const audioContext = new AudioContext();
+                const audioDestination = audioContext.createMediaStreamDestination();
+
+                // Add all audio tracks to the audio destination
+                streamsToRecord.forEach(stream => {
+                    const audioTracks = stream.getAudioTracks();
+                    if (audioTracks.length > 0) {
+                        const audioSource = audioContext.createMediaStreamSource(new MediaStream([audioTracks[0]]));
+                        audioSource.connect(audioDestination);
+                    }
+                });
+
+                // Create a function to draw all videos on the canvas
+                const drawVideos = () => {
+                    // Clear the canvas
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                    // Draw the current video frame
+                    ctx.drawImage(localVideoRef.current, 0, 0, canvas.width, canvas.height);
+
+                    // Call this function again to keep updating
+                    requestAnimationFrame(drawVideos);
+                };
+
+                // Start drawing
+                drawVideos();
+
+                // Create a stream from the canvas
+                const canvasStream = canvas.captureStream(30); // 30 FPS
+
+                // Add audio tracks to the canvas stream
+                audioDestination.stream.getAudioTracks().forEach(track => {
+                    canvasStream.addTrack(track);
+                });
+
+                // Create MediaRecorder with MP4 compatible options
+                const options = { mimeType: 'video/mp4; codecs=avc1.42E01E, mp4a.40.2' }; // Change to MP4
+                mediaRecorderRef.current = new MediaRecorder(canvasStream, options);
+
+                setRecordedChunks([]);
+
+                // Set up event handlers
+                mediaRecorderRef.current.ondataavailable = (event) => {
+                    console.log('Data available:', event.data.size); // Log the size of the data
+                    if (event.data.size > 0) {
+                        setRecordedChunks(prevChunks => {
+                            const newChunks = [...prevChunks, event.data];
+                            console.log('Updated recorded chunks:', newChunks); // Log the updated chunks
+                            return newChunks;
+                        });
+                    }
+                };
+
+
+                mediaRecorderRef.current.onstop = () => {
+                    // Use a local variable to hold the current chunks
+                    const chunksToSave = [...recordedChunks]; // Copy the current state
+                    console.log('Recorded chunks:', chunksToSave); // Log the recorded chunks
+
+                    if (chunksToSave.length > 0) {
+                        const blob = new Blob(chunksToSave, { type: 'video/mp4' });
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = `meeting-recording-${roomId}.mp4`;
+                        document.body.appendChild(a);
+                        a.click();
+                        window.URL.revokeObjectURL(url);
+                        document.body.removeChild(a);
+                        setRecordedChunks([]); // Clear the chunks after saving
+                    } else {
+                        console.error('No recorded chunks available to save.');
+                    }
+                };
+
+                // Start recording with 1 second chunks
+                mediaRecorderRef.current.start();
+                setIsRecording(true);
+
+                // If using Socket.io, notify others that recording has started
+                if (socket) {
+                    socket.emit('recording-status-change', {
+                        roomId,
+                        isRecording: true
+                    });
+                }
+
+            } catch (error) {
+                console.error('Error starting recording:', error);
+            }
+        }
+    };
+
+    useEffect(() => {
+        if (recordedChunks.length > 0 && !isRecording) {
+            // The recording has stopped and we have chunks
+            const blob = new Blob(recordedChunks, {
+                type: 'video/mp4'
+            });
+
+            // Create a URL for the blob
+            const url = URL.createObjectURL(blob);
+
+            // Create a download link
+            const a = document.createElement('a');
+            document.body.appendChild(a);
+            a.style = 'display: none';
+            a.href = url;
+            a.download = `meeting-recording-${new Date().toISOString()}.mp4`;
+            a.click();
+
+            // Clean up
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+            setRecordedChunks([]);
+        }
+    }, [recordedChunks, isRecording]);
+
+    // Add a socket handler to your useEffect that sets up WebRTC handlers
+    useEffect(() => {
+        if (!socket || !isConnected) return;
+
+        // Add socket event listener for recording status changes
+        socket.on('recording-status-change', ({ userId, isRecording }) => {
+            // Update UI to show recording status for the specific user
+            setParticipants(prev =>
+                prev.map(p =>
+                    p.id === userId ? { ...p, isRecording } : p
+                )
+            );
+        });
+
+        return () => {
+            if (socket) {
+                socket.off('recording-status-change');
+            }
+        };
+    }, [socket, isConnected]);
+
+    const originalStopScreenSharing = stopScreenSharing;
+    const originalEndMeeting = endMeeting;
+
     return (
         <>
             {/* <div className="position-fixed top-0 end-0 p-3 ps-0 pb-0" style={{ zIndex: '1' }}>
@@ -931,8 +1206,7 @@ function Screen() {
                 marginRight: windowWidth > 768 ? `${mainSectionMargin}px` : 0,
                 transition: 'margin-right 0.3s ease-in-out'
             }} >
-                {console.log(visibleParticipants, remoteStreams)
-                }
+                {/* {console.log(visibleParticipants, remoteStreams)} */}
                 <div className="d_topbar"></div>
                 <div className="d_mainscreen">
                     <div className={`d_participants-grid ${getGridClass()}`}
@@ -1055,8 +1329,30 @@ function Screen() {
                                     <div className="d_box me-sm-3 mb-2 mb-sm-0" onClick={toggleScreenShare}>
                                         <img src={upload} alt="" />
                                     </div>
-                                    <div className="d_box me-sm-3">
+                                    {/* <div className="d_box me-sm-3">
                                         <img src={target} alt="" />
+                                    </div> */}
+                                    <div
+                                        className="d_box me-sm-3"
+                                        onClick={toggleRecording}
+                                        style={{
+                                            backgroundColor: isRecording ? '#E12B2D' : 'transparent',
+                                            transition: 'background-color 0.3s'
+                                        }}
+                                    >
+                                        <img src={recording} alt="" />
+                                        {isRecording && (
+                                            <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill"
+                                                style={{
+                                                    padding: '3px',
+                                                    width: '12px',
+                                                    height: '12px',
+                                                    border: '2px solid #12161C',
+                                                    background: '#E12B2D',
+                                                    animation: 'pulse 1.5s infinite'
+                                                }}>
+                                            </span>
+                                        )}
                                     </div>
                                 </div>
                             </div>
@@ -1087,7 +1383,7 @@ function Screen() {
                                             <span>Share Screen</span>
                                         </div>
                                         <div className="d-flex align-items-center p-2">
-                                            <img src={target} alt="" className="me-2" />
+                                            <img src={recording} alt="" className="me-2" />
                                             <span>Record</span>
                                         </div>
                                         <div className="d-flex align-items-center p-2 position-relative" onClick={() => setshowEmojis(!showEmojis)}>

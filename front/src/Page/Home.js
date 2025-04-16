@@ -1251,10 +1251,10 @@ function Home() {
                     )}
                   </div>
                   <div className=' BB_margin_home gap-5' style={{ display: 'flex', justifyContent: 'center', marginTop: '40px', marginBottom: "20px" }}>
-                    <button className='B_hover_bttn' onClick={handleCloseReviewModel}
+                    <div className='B_hover_bttn' onClick={handleCloseReviewModel}
                     >
                       Back To Home
-                    </button>
+                    </div>
 
                     <button
                       type="submit"

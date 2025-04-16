@@ -14,6 +14,8 @@ export const useSocket = (userId, roomId, userName) => {
     const [typingUsers, setTypingUsers] = useState([]);
     const [joinRequests, setJoinRequests] = useState([]);
     const [requestApprovalStatus, setRequestApprovalStatus] = useState(null);
+    const [isVideoOff, setIsVideoOff] = useState(false);
+
 
     // Initialize socket connection
     useEffect(() => {
@@ -215,6 +217,11 @@ export const useSocket = (userId, roomId, userName) => {
                     p.id === socketRef.current.id ? { ...p, ...stateUpdate } : p
                 )
             );
+
+            // Set video state to off initially
+            if (mediaType === 'video' && !isEnabled) {
+                setIsVideoOff(true);
+            }
         }
     };
 
@@ -322,6 +329,8 @@ export const useSocket = (userId, roomId, userName) => {
         joinRequests,
         handleJoinRequest,
         sendJoinRequest,
-        requestApprovalStatus
+        requestApprovalStatus,
+        isVideoOff,
+        setIsVideoOff
     };
 }

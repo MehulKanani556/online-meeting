@@ -382,6 +382,15 @@
     margin-bottom: 24px;
 }
 
+.B_radio_input {
+    --bs-form-check-bg: transparent !important;
+}
+
+.form-check-input:focus {
+    box-shadow: none;
+    border-color: white;
+}
+
 .j_mobile_containet_emoji {
     position: absolute;
     width: 250px;
@@ -391,6 +400,23 @@
     padding: 10px;
     border-radius: 5px;
     z-index: 1000;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(225, 43, 45, 0.7);
+    }
+
+    70% {
+        transform: scale(1);
+        box-shadow: 0 0 0 10px rgba(225, 43, 45, 0);
+    }
+
+    100% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(225, 43, 45, 0);
+    }
 }
 
 /* Responsive design */
