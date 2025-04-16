@@ -44,6 +44,18 @@ exports.createNewschedule = async (req, res) => {
             scheduleData.meetingLink = `http://localhost:3000/screen/${uniqueId}`;
         }
 
+        if (meetingLink === "UseMyPersonalRoomLink") {
+            const uniqueId = Math.floor(100000000000 + Math.random() * 900000000000).toString(); // Generate a 12-digit random number
+            const password = crypto.randomBytes(4).toString('hex'); // Generate a password (8 characters)
+            // const password = crypto.randomBytes(8).toString('base64')
+            // .replace(/[+/]/g, '')
+            // .slice(0, 12)
+            // .replace(/(.{3})/g, '$1-')
+            // .slice(0, -1);
+            scheduleData.meetingLink = uniqueId;
+            scheduleData.password = password;
+        }
+
         // Add email sending functionality
         if (invitees && invitees.length > 0) {
             const emailPromises = invitees.map(invitee => {
@@ -57,6 +69,7 @@ exports.createNewschedule = async (req, res) => {
                         <p><strong>Time:</strong> ${startTime} - ${endTime}</p>
                         <p><strong>Description:</strong> ${description}</p>
                         <p><strong>Meeting Link:</strong> <a href="${scheduleData.meetingLink}">${scheduleData.meetingLink}</a></p>
+                        <p><strong>Password:</strong> ${scheduleData.password || "N/A"}</p>
                     `
                 };
                 return transporter.sendMail(mailOptions);

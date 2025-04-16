@@ -2508,7 +2508,6 @@ function Meeting() {
                                 >
 
                                     {({ values, errors, touched, handleSubmit, handleChange, setFieldValue }) => (
-                                        console.log(formatDate(values.date)),
                                         <form onSubmit={handleSubmit}>
                                             <div className="row B_flex_reverse">
                                                 <div className="col-12 col-lg-8 ps-0 j_schedule_border">
@@ -2528,6 +2527,7 @@ function Meeting() {
 
                                                     <div className="j_schedule_DnT B_schedule_DnT">
                                                         <div className="mb-3">
+                                                            {console.log("values.date", formatDate(values.date))}
                                                             <label htmlFor="date" className="form-label text-white j_join_text">Date</label>
                                                             <input
                                                                 type="date"

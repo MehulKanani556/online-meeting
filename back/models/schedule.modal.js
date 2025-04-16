@@ -20,6 +20,9 @@ const scheduleSchema = mongoose.Schema({
     meetingLink: {
         type: String,
     },
+    password: {
+        type: String,
+    },
     description: {
         type: String
     },

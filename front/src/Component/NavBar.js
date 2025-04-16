@@ -77,13 +77,13 @@ function NavBar() {
 
                         {isAuthenticated ? (
                             <Link to={'/home'}>
-                                <button className="btn btn-outline-light px-4 py-2">
+                                <button className="btn btn-outline-light px-4 py-2 fw-semibold">
                                     Get Started
                                 </button>
                             </Link>
                         ) : (
                             <Link to={'/login'}>
-                                <button className="btn btn-outline-light px-4 py-2">
+                                <button className="btn btn-outline-light px-4 py-2 fw-semibold">
                                     Log In
                                 </button>
                             </Link>
