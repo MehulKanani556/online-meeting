@@ -214,23 +214,38 @@ async function initializeSocket(io) {
                 const userIndex = rooms[roomId].findIndex(user => user.id === socket.id);
 
                 if (userIndex !== -1) {
-                    // Update the user's media state
+                    // Update ONLY the properties that were sent
+                    const updatedUser = { ...rooms[roomId][userIndex] };
+
                     if (hasVideo !== undefined) {
-                        rooms[roomId][userIndex].hasVideo = hasVideo;
+                        updatedUser.hasVideo = hasVideo;
                     }
 
                     if (hasAudio !== undefined) {
-                        rooms[roomId][userIndex].hasAudio = hasAudio;
+                        updatedUser.hasAudio = hasAudio;
                     }
 
-                    // Broadcast to everyone else in the room
-                    socket.to(roomId).emit('media-state-change', {
-                        userId: socket.id,
-                        hasVideo: rooms[roomId][userIndex].hasVideo,
-                        hasAudio: rooms[roomId][userIndex].hasAudio
-                    });
+                    // Update the user in the rooms array
+                    rooms[roomId][userIndex] = updatedUser;
 
-                    console.log(`User ${socket.id} media state updated: video=${rooms[roomId][userIndex].hasVideo}, audio=${rooms[roomId][userIndex].hasAudio}`);
+                    // Broadcast to everyone else in the room - sending ONLY what changed
+                    const updatePayload = {
+                        userId: socket.id
+                    };
+
+                    if (hasVideo !== undefined) {
+                        updatePayload.hasVideo = hasVideo;
+                    }
+
+                    if (hasAudio !== undefined) {
+                        updatePayload.hasAudio = hasAudio;
+                    }
+
+                    socket.to(roomId).emit('media-state-change', updatePayload);
+
+                    console.log(`User ${socket.id} media state updated:`,
+                        hasVideo !== undefined ? `video=${hasVideo}` : '',
+                        hasAudio !== undefined ? `audio=${hasAudio}` : '');
                 }
             }
         });

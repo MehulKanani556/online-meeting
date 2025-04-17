@@ -189,29 +189,35 @@ function Screen() {
                     video: true,
                     audio: true
                 });
-
+        
                 if (stream) {
                     // Store the stream
                     setLocalStream(stream);
-
+        
                     // Initial state for tracks
                     const audioTrack = stream.getAudioTracks()[0];
                     const videoTrack = stream.getVideoTracks()[0];
-
+        
+                    // Ensure audio track is enabled/disabled according to current state
                     if (audioTrack) {
                         audioTrack.enabled = !isMuted;
                     }
-
+        
+                    // Ensure video track is enabled/disabled according to current state
                     if (videoTrack) {
                         videoTrack.enabled = !isVideoOff;
                     }
-
+        
                     // Apply to video element with a slight delay to ensure DOM is ready
                     setTimeout(() => {
                         if (localVideoRef.current) {
                             localVideoRef.current.srcObject = stream;
                         }
                     }, 100);
+                    
+                    // Let others know about our initial media state
+                    updateMediaState('video', !isVideoOff);
+                    updateMediaState('audio', !isMuted);
                 }
             } catch (error) {
                 console.error('Error accessing media devices:', error);
@@ -524,15 +530,15 @@ function Screen() {
         if (localStream) {
             const videoTrack = localStream.getVideoTracks()[0];
             if (videoTrack) {
-                const newState = !videoTrack.enabled;
-                videoTrack.enabled = newState;
-                setIsVideoOff(!newState);
-
-                // Log the state and force stream reconnection
-                console.log(`Video toggled. Enabled: ${newState}`);
-
-                // Update all peers about our video state
-                updateMediaState('video', newState);
+                // Toggle the video track's enabled property
+                const newVideoState = !videoTrack.enabled;
+                videoTrack.enabled = newVideoState;
+                setIsVideoOff(!newVideoState);
+                
+                // Update all peers about our video state ONLY
+                updateMediaState('video', newVideoState);
+                
+                console.log(`Video toggled. Enabled: ${newVideoState}`);
             }
         } else {
             setIsVideoOff(!isVideoOff);
@@ -565,15 +571,15 @@ function Screen() {
         if (localStream) {
             const audioTrack = localStream.getAudioTracks()[0];
             if (audioTrack) {
-                const newState = !audioTrack.enabled;
-                audioTrack.enabled = newState;
-                setIsMuted(!newState);
-
-                // Log the state and force stream reconnection
-                console.log(`Audio toggled. Enabled: ${newState}`);
-
-                // Update all peers about our video state
-                updateMediaState('audio', newState);
+                // Toggle the audio track's enabled property
+                const newAudioState = !audioTrack.enabled;
+                audioTrack.enabled = newAudioState;
+                setIsMuted(!newAudioState);
+                
+                // Update all peers about our audio state ONLY - make sure only audio property is sent
+                updateMediaState('audio', newAudioState);
+                
+                console.log(`Audio toggled. Enabled: ${newAudioState}`);
             }
         } else {
             setIsMuted(!isMuted);
@@ -641,11 +647,13 @@ function Screen() {
     };
 
     // Share screen
-    const toggleScreenShare = async () => {
+      // Share screen
+      const toggleScreenShare = async () => {
         if (!isScreenSharing) {
             try {
                 const screenStream = await navigator.mediaDevices.getDisplayMedia({
-                    video: true
+                    video: true,
+                    audio: true
                 });
 
                 // Save reference to original video track to restore later
@@ -983,6 +991,7 @@ function Screen() {
     };
 
     // record video
+    // record video
     const toggleRecording = async () => {
         if (isRecording) {
             // Stop recording
@@ -992,36 +1001,36 @@ function Screen() {
             }
         } else {
             try {
-                // Get streams to record - combine local and remote streams
-                const streamsToRecord = [];
+                // Get streams to record - collect all streams
+                const streamsToRecord = new Map();
 
-                // Add local stream
-                if (localStream) {
-                    streamsToRecord.push(localStream);
+                // Add local stream with ID
+                if (localStream && socket) {
+                    streamsToRecord.set(socket.id, localStream);
                 }
 
-                // Add all remote streams
-                Object.values(remoteStreams).forEach(stream => {
-                    streamsToRecord.push(stream);
+                // Add all remote streams with their participant IDs
+                Object.entries(remoteStreams).forEach(([peerId, stream]) => {
+                    streamsToRecord.set(peerId, stream);
                 });
 
-                // Add screen share stream if active
-                if (isScreenSharing) {
-                    const screenStream = localVideoRef.current.srcObject; // Assuming localVideoRef holds the screen share stream
+                // Check if screen sharing is active and add the screen stream
+                if (isScreenSharing && localVideoRef.current) {
+                    const screenStream = localVideoRef.current.srcObject;
                     if (screenStream) {
-                        streamsToRecord.push(screenStream);
+                        streamsToRecord.set('screen', screenStream);
                     }
                 }
 
-                if (streamsToRecord.length === 0) {
+                if (streamsToRecord.size === 0) {
                     console.error('No streams available to record');
                     return;
                 }
 
                 // Create a canvas to combine all video streams
                 const canvas = document.createElement('canvas');
-                canvas.width = 1280;  // HD width
-                canvas.height = 720;  // HD height
+                canvas.width = 1920;  // HD width
+                canvas.height = 1080;  // HD height
                 const ctx = canvas.getContext('2d');
 
                 // Create a combined audio context
@@ -1029,7 +1038,7 @@ function Screen() {
                 const audioDestination = audioContext.createMediaStreamDestination();
 
                 // Add all audio tracks to the audio destination
-                streamsToRecord.forEach(stream => {
+                streamsToRecord.forEach((stream) => {
                     const audioTracks = stream.getAudioTracks();
                     if (audioTracks.length > 0) {
                         const audioSource = audioContext.createMediaStreamSource(new MediaStream([audioTracks[0]]));
@@ -1037,13 +1046,96 @@ function Screen() {
                     }
                 });
 
-                // Create a function to draw all videos on the canvas
+                // Create a function to draw all videos on the canvas in a grid layout
                 const drawVideos = () => {
                     // Clear the canvas
-                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    ctx.fillStyle = 'transparent'; // Match the dark background of your app
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-                    // Draw the current video frame
-                    ctx.drawImage(localVideoRef.current, 0, 0, canvas.width, canvas.height);
+                    // Get all participant videos
+                    const videoElements = [];
+
+                    // Add local video
+                    if (localVideoRef.current) {
+                        videoElements.push({
+                            id: socket?.id,
+                            element: localVideoRef.current,
+                            hasVideo: !isVideoOff
+                        });
+                    }
+
+                    // Add remote videos
+                    participants.forEach(participant => {
+                        if (participant.id !== socket?.id) { // Skip local participant
+                            const videoElement = videoRefsMap.current[participant.id];
+                            if (videoElement) {
+                                videoElements.push({
+                                    id: participant.id,
+                                    element: videoElement,
+                                    hasVideo: participant.hasVideo !== false
+                                });
+                            }
+                        }
+                    });
+
+                    // Check if screen sharing is active and add it to the video elements
+                    if (isScreenSharing && localVideoRef.current) {
+                        videoElements.push({
+                            id: 'screen',
+                            element: localVideoRef.current,
+                            hasVideo: true // Assuming screen sharing is active
+                        });
+                    }
+
+                    // Calculate grid dimensions
+                    const count = videoElements.length;
+                    let cols = 1;
+                    if (count > 1) cols = 2;
+                    if (count > 4) cols = 3;
+                    if (count > 9) cols = 4;
+
+                    const rows = Math.ceil(count / cols);
+                    const cellWidth = (canvas.width / cols) - 20; // Subtracting for gaps
+                    const cellHeight = (canvas.height / rows) - 20; // Subtracting for gaps
+
+                    // Draw each video
+                    videoElements.forEach((video, index) => {
+                        const col = index % cols;
+                        const row = Math.floor(index / cols);
+                        const x = col * (cellWidth + 20); // Adding gap
+                        const y = row * (cellHeight + 20); // Adding gap
+
+                        if (video.hasVideo && video.element.srcObject) {
+                            // Draw the video element
+                            ctx.drawImage(video.element, x, y, cellWidth, cellHeight);
+                        } else {
+                            // Draw a placeholder with avatar
+                            ctx.fillStyle = `hsl(${video.id.charCodeAt(0) * 60}, 70%, 45%)`;
+                            ctx.fillRect(x, y, cellWidth, cellHeight);
+
+                            // Draw user initials
+                            const participant = participants.find(p => p.id === video.id);
+                            if (participant) {
+                                ctx.fillStyle = 'white';
+                                ctx.font = `${cellWidth * 0.2}px Arial`;
+                                ctx.textAlign = 'center';
+                                ctx.textBaseline = 'middle';
+                                ctx.fillText(participant.initials, x + cellWidth / 2, y + cellHeight / 2);
+                            }
+                        }
+
+                        // Draw participant name
+                        const participant = participants.find(p => p.id === video.id);
+                        if (participant) {
+                            ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+                            ctx.fillRect(x, y + cellHeight - 30, cellWidth, 30);
+
+                            ctx.fillStyle = 'white';
+                            ctx.font = '16px Arial';
+                            ctx.textAlign = 'left';
+                            ctx.fillText(participant.name + (participant.isHost ? ' (Host)' : ''), x + 10, y + cellHeight - 10);
+                        }
+                    });
 
                     // Call this function again to keep updating
                     requestAnimationFrame(drawVideos);
@@ -1061,28 +1153,27 @@ function Screen() {
                 });
 
                 // Create MediaRecorder with MP4 compatible options
-                const options = { mimeType: 'video/mp4; codecs=avc1.42E01E, mp4a.40.2' }; // Change to MP4
+                const options = { mimeType: 'video/webm; codecs=vp9,opus' }; // Use webm which is more widely supported
                 mediaRecorderRef.current = new MediaRecorder(canvasStream, options);
 
                 setRecordedChunks([]);
 
                 // Set up event handlers
                 mediaRecorderRef.current.ondataavailable = (event) => {
-                    console.log('Data available:', event.data.size); // Log the size of the data
+                    console.log('Data available:', event.data.size);
                     if (event.data.size > 0) {
                         setRecordedChunks(prevChunks => {
                             const newChunks = [...prevChunks, event.data];
-                            console.log('Updated recorded chunks:', newChunks); // Log the updated chunks
+                            console.log('Updated recorded chunks:', newChunks);
                             return newChunks;
                         });
                     }
                 };
 
-
                 mediaRecorderRef.current.onstop = () => {
                     // Use a local variable to hold the current chunks
                     const chunksToSave = [...recordedChunks]; // Copy the current state
-                    console.log('Recorded chunks:', chunksToSave); // Log the recorded chunks
+                    console.log('Recorded chunks:', chunksToSave);
 
                     if (chunksToSave.length > 0) {
                         const blob = new Blob(chunksToSave, { type: 'video/mp4' });
@@ -1226,7 +1317,6 @@ function Screen() {
                                 <div className="d_avatar-container">
                                     {participant.id === socket?.id ? (
                                         // Local user video
-                                        console.log("local", localVideoRef),
                                         !isVideoOff ? (
                                             <video
                                                 ref={localVideoRef}
@@ -1236,6 +1326,15 @@ function Screen() {
                                                 playsInline
                                             />
                                         ) : (
+                                            <>
+                                            <video
+                                                ref={localVideoRef}
+                                                className="d_video-element"
+                                                autoPlay
+                                                muted
+                                                playsInline
+                                                style={{display: 'none'}}
+                                            />
                                             <div className="d_avatar-circle"
                                                 style={{
                                                     textTransform: 'uppercase',
@@ -1243,6 +1342,7 @@ function Screen() {
                                                 }}>
                                                 {participant.initials}
                                             </div>
+                                                    </>
                                         )
                                     ) : (
                                         // Remote participant video - fixed version
@@ -1255,6 +1355,15 @@ function Screen() {
                                                 playsInline
                                             />
                                         ) : (
+                                            <>
+                                            <video
+                                            ref={setVideoRef(participant.id)}
+                                            id={`video-${participant.id}`}
+                                            className="d_video-element"
+                                            autoPlay
+                                            playsInline
+                                            style={{display: 'none'}}
+                                        />
                                             <div className="d_avatar-circle"
                                                 style={{
                                                     textTransform: 'uppercase',
@@ -1262,6 +1371,7 @@ function Screen() {
                                                 }}>
                                                 {participant.initials}
                                             </div>
+                                            </>
                                         )
                                     )}
                                     <div className="d_controls-top">

@@ -200,31 +200,37 @@ export const useSocket = (userId, roomId, userName) => {
 
     // Update media state for local user
     const updateMediaState = (mediaType, isEnabled) => {
-        if (socketRef.current) {
-            const stateUpdate = mediaType === 'video'
-                ? { hasVideo: isEnabled }
-                : { hasAudio: isEnabled };
+        console.log("mediaType", mediaType, "enabled:", isEnabled);
 
+        if (socketRef.current) {
+            // Create an update object with ONLY the property being changed
+            const stateUpdate = {};
+
+            if (mediaType === 'video') {
+                stateUpdate.hasVideo = isEnabled;
+            } else if (mediaType === 'audio') {
+                stateUpdate.hasAudio = isEnabled;
+            }
+
+            // Make sure we're ONLY sending the changed property to the server
             socketRef.current.emit('media-state-change', {
                 roomId,
                 userId: socketRef.current.id,
-                ...stateUpdate
+                ...stateUpdate  // This spreads ONLY hasVideo OR hasAudio, not both
             });
 
-            // Update local state immediately
+            // Update local participants state with ONLY the changed property
             setParticipants(prev =>
                 prev.map(p =>
                     p.id === socketRef.current.id ? { ...p, ...stateUpdate } : p
                 )
             );
 
-            // Set video state to off initially
-            if (mediaType === 'video' && !isEnabled) {
-                setIsVideoOff(true);
-            }
-            // Set video state to off initially
-            if (mediaType === 'audio' && !isEnabled) {
-                setIsMuted(true);
+            // Update local state flags if needed
+            if (mediaType === 'video') {
+                setIsVideoOff(!isEnabled);
+            } else if (mediaType === 'audio') {
+                setIsMuted(!isEnabled);
             }
         }
     };
