@@ -38,6 +38,8 @@ function Screen() {
         isConnected,
         isVideoOff,
         setIsVideoOff,
+        isMuted,
+        setIsMuted,
         participants,
         setParticipants,
         messages,
@@ -61,7 +63,6 @@ function Screen() {
     } = useSocket(userId, roomId, userName);
 
     // WebRTC State
-    const [isMuted, setIsMuted] = useState(false);
     const [isScreenSharing, setIsScreenSharing] = useState(false);
     const [newMessage, setNewMessage] = useState('');
     const [showViewMoreDropdown, setShowViewMoreDropdown] = useState(false);
@@ -372,7 +373,7 @@ function Screen() {
                         }
                     } catch (error) {
                         console.error('Error handling answer:', error);
-                    }       
+                    }
                 }
             },
 
@@ -564,9 +565,15 @@ function Screen() {
         if (localStream) {
             const audioTrack = localStream.getAudioTracks()[0];
             if (audioTrack) {
-                audioTrack.enabled = !audioTrack.enabled;
-                setIsMuted(!audioTrack.enabled);
-                updateMediaState('audio', audioTrack.enabled);
+                const newState = !audioTrack.enabled;
+                audioTrack.enabled = newState;
+                setIsMuted(!newState);
+
+                // Log the state and force stream reconnection
+                console.log(`Audio toggled. Enabled: ${newState}`);
+
+                // Update all peers about our video state
+                updateMediaState('audio', newState);
             }
         } else {
             setIsMuted(!isMuted);
