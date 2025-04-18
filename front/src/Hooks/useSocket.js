@@ -1,7 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { io } from 'socket.io-client';
 
-const SOCKET_SERVER_URL = "http://localhost:5000"; // Move to environment variable in production
+const SOCKET_SERVER_URL = "http://localhost:4000"; // Move to environment variable in production
+// const SOCKET_SERVER_URL = "https://online-meeting-backend-le8t.onrender.com"; // Move to environment variable in production
 
 export const useSocket = (userId, roomId, userName) => {
     const socketRef = useRef(null);
@@ -200,7 +201,7 @@ export const useSocket = (userId, roomId, userName) => {
 
     // Update media state for local user
     const updateMediaState = (mediaType, isEnabled) => {
-        console.log("mediaType", mediaType, "enabled:", isEnabled);
+        // console.log("mediaType", mediaType, "enabled:", isEnabled);
 
         if (socketRef.current) {
             // Create an update object with ONLY the property being changed

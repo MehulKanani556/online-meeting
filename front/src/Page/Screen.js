@@ -93,6 +93,7 @@ function Screen() {
     const videoRefsMap = useRef({});
     const pendingIceCandidatesRef = useRef({});
     const mediaRecorderRef = useRef(null);
+    const recordingTimerRef = useRef(null);
 
     // Effect to update pending join requests from socket
     useEffect(() => {
@@ -189,32 +190,32 @@ function Screen() {
                     video: true,
                     audio: true
                 });
-        
+
                 if (stream) {
                     // Store the stream
                     setLocalStream(stream);
-        
+
                     // Initial state for tracks
                     const audioTrack = stream.getAudioTracks()[0];
                     const videoTrack = stream.getVideoTracks()[0];
-        
+
                     // Ensure audio track is enabled/disabled according to current state
                     if (audioTrack) {
                         audioTrack.enabled = !isMuted;
                     }
-        
+
                     // Ensure video track is enabled/disabled according to current state
                     if (videoTrack) {
                         videoTrack.enabled = !isVideoOff;
                     }
-        
+
                     // Apply to video element with a slight delay to ensure DOM is ready
                     setTimeout(() => {
                         if (localVideoRef.current) {
                             localVideoRef.current.srcObject = stream;
                         }
                     }, 100);
-                    
+
                     // Let others know about our initial media state
                     updateMediaState('video', !isVideoOff);
                     updateMediaState('audio', !isMuted);
@@ -534,10 +535,10 @@ function Screen() {
                 const newVideoState = !videoTrack.enabled;
                 videoTrack.enabled = newVideoState;
                 setIsVideoOff(!newVideoState);
-                
+
                 // Update all peers about our video state ONLY
                 updateMediaState('video', newVideoState);
-                
+
                 console.log(`Video toggled. Enabled: ${newVideoState}`);
             }
         } else {
@@ -575,10 +576,10 @@ function Screen() {
                 const newAudioState = !audioTrack.enabled;
                 audioTrack.enabled = newAudioState;
                 setIsMuted(!newAudioState);
-                
+
                 // Update all peers about our audio state ONLY - make sure only audio property is sent
                 updateMediaState('audio', newAudioState);
-                
+
                 console.log(`Audio toggled. Enabled: ${newAudioState}`);
             }
         } else {
@@ -647,8 +648,7 @@ function Screen() {
     };
 
     // Share screen
-      // Share screen
-      const toggleScreenShare = async () => {
+    const toggleScreenShare = async () => {
         if (!isScreenSharing) {
             try {
                 const screenStream = await navigator.mediaDevices.getDisplayMedia({
@@ -751,6 +751,9 @@ function Screen() {
             if (mediaRecorderRef.current) {
                 mediaRecorderRef.current.stop();
                 setIsRecording(false);
+                // Clear the recording timer
+                clearInterval(recordingTimerRef.current);
+                recordingTimerRef.current = null; // Set to null
             }
         }
 
@@ -991,13 +994,15 @@ function Screen() {
     };
 
     // record video
-    // record video
     const toggleRecording = async () => {
         if (isRecording) {
             // Stop recording
             if (mediaRecorderRef.current) {
                 mediaRecorderRef.current.stop();
                 setIsRecording(false);
+                // Clear the recording timer
+                clearInterval(recordingTimerRef.current);
+                recordingTimerRef.current = null; // Set to null
             }
         } else {
             try {
@@ -1030,7 +1035,7 @@ function Screen() {
                 // Create a canvas to combine all video streams
                 const canvas = document.createElement('canvas');
                 canvas.width = 1920;  // HD width
-                canvas.height = 1080;  // HD height
+                canvas.height = 1080;// HD height
                 const ctx = canvas.getContext('2d');
 
                 // Create a combined audio context
@@ -1068,7 +1073,7 @@ function Screen() {
                     participants.forEach(participant => {
                         if (participant.id !== socket?.id) { // Skip local participant
                             const videoElement = videoRefsMap.current[participant.id];
-                            if (videoElement) {
+                            if (videoElement) {  
                                 videoElements.push({
                                     id: participant.id,
                                     element: videoElement,
@@ -1110,7 +1115,7 @@ function Screen() {
                             ctx.drawImage(video.element, x, y, cellWidth, cellHeight);
                         } else {
                             // Draw a placeholder with avatar
-                            ctx.fillStyle = `hsl(${video.id.charCodeAt(0) * 60}, 70%, 45%)`;
+                            ctx.fillStyle = `hsl(${video?.id?.charCodeAt(0) * 60}, 70%, 45%)`;
                             ctx.fillRect(x, y, cellWidth, cellHeight);
 
                             // Draw user initials
@@ -1160,11 +1165,11 @@ function Screen() {
 
                 // Set up event handlers
                 mediaRecorderRef.current.ondataavailable = (event) => {
-                    console.log('Data available:', event.data.size);
+                    // console.log('Data available:', event.data.size);
                     if (event.data.size > 0) {
                         setRecordedChunks(prevChunks => {
                             const newChunks = [...prevChunks, event.data];
-                            console.log('Updated recorded chunks:', newChunks);
+                            // console.log('Updated recorded chunks:', newChunks);
                             return newChunks;
                         });
                     }
@@ -1173,27 +1178,30 @@ function Screen() {
                 mediaRecorderRef.current.onstop = () => {
                     // Use a local variable to hold the current chunks
                     const chunksToSave = [...recordedChunks]; // Copy the current state
-                    console.log('Recorded chunks:', chunksToSave);
+                    // console.log('Recorded chunks:', chunksToSave);
 
                     if (chunksToSave.length > 0) {
                         const blob = new Blob(chunksToSave, { type: 'video/mp4' });
                         const url = URL.createObjectURL(blob);
                         const a = document.createElement('a');
                         a.href = url;
-                        a.download = `meeting-recording-${roomId}.mp4`;
+                        a.download = `meeting-recording-${roomId}-${new Date().toLocaleDateString('en-GB')}.mp4`;
                         document.body.appendChild(a);
                         a.click();
                         window.URL.revokeObjectURL(url);
                         document.body.removeChild(a);
                         setRecordedChunks([]); // Clear the chunks after saving
-                    } else {
-                        console.error('No recorded chunks available to save.');
                     }
                 };
 
                 // Start recording with 1 second chunks
-                mediaRecorderRef.current.start();
+                mediaRecorderRef.current.start(1000);
                 setIsRecording(true);
+
+                // Start timer
+                recordingTimerRef.current = setInterval(() => {
+                    setRecordingTime(prev => prev + 1);
+                }, 1000);
 
                 // If using Socket.io, notify others that recording has started
                 if (socket) {
@@ -1224,7 +1232,7 @@ function Screen() {
             document.body.appendChild(a);
             a.style = 'display: none';
             a.href = url;
-            a.download = `meeting-recording-${new Date().toISOString()}.mp4`;
+            a.download = `meeting-recording-${roomId}-${new Date().toLocaleDateString('en-GB')}.mp4`;
             a.click();
 
             // Clean up
@@ -1258,8 +1266,23 @@ function Screen() {
     const originalStopScreenSharing = stopScreenSharing;
     const originalEndMeeting = endMeeting;
 
+    const [recordingTime, setRecordingTime] = useState(0);
+
+
+    const formatRecordingTime = (seconds) => {
+        const hrs = Math.floor(seconds / 3600);
+        const mins = Math.floor((seconds % 3600) / 60);
+        const secs = seconds % 60;
+
+        return [
+            hrs > 0 ? String(hrs).padStart(2, '0') : null,
+            String(mins).padStart(2, '0'),
+            String(secs).padStart(2, '0')
+        ].filter(Boolean).join(':');
+    };
+
     return (
-        <>
+        <div className='j_record'>
             {/* <div className="position-fixed top-0 end-0 p-3 ps-0 pb-0" style={{ zIndex: '1' }}>
                 <div className="j_Invite text-white p-3">
                     <div className="d-flex align-items-center j_Box_margin">
@@ -1299,20 +1322,24 @@ function Screen() {
                         </div>
                     </div>
                 ))}
+
+                {/* {isRecording && (
+                    <div className="j_recording_indicator">
+                        <span className="j_recording_dot"></span>
+                        Recording: {formatRecordingTime(recordingTime)}
+                    </div>
+                )} */}
             </div>
             <section className="d_mainsec" style={{
                 marginRight: windowWidth > 768 ? `${mainSectionMargin}px` : 0,
                 transition: 'margin-right 0.3s ease-in-out'
-            }} >
-                {/* {console.log(visibleParticipants, remoteStreams)} */}
+            }}>
                 <div className="d_topbar"></div>
                 <div className="d_mainscreen">
                     <div className={`d_participants-grid ${getGridClass()}`}
                         style={{ gridTemplateColumns: `repeat(${getGridColumns()}, 1fr)` }}>
-                        {/* Map all participants including local user */}
                         {visibleParticipants.map((participant, index) => (
                             // console.log("participant", participant),
-
                             <div key={participant.id} className="d_grid-item">
                                 <div className="d_avatar-container">
                                     {participant.id === socket?.id ? (
@@ -1327,22 +1354,22 @@ function Screen() {
                                             />
                                         ) : (
                                             <>
-                                            <video
-                                                ref={localVideoRef}
-                                                className="d_video-element"
-                                                autoPlay
-                                                muted
-                                                playsInline
-                                                style={{display: 'none'}}
-                                            />
-                                            <div className="d_avatar-circle"
-                                                style={{
-                                                    textTransform: 'uppercase',
-                                                    backgroundColor: `hsl(${participant.id.charCodeAt(0) * 60}, 70%, 45%)`
-                                                }}>
-                                                {participant.initials}
-                                            </div>
-                                                    </>
+                                                <video
+                                                    ref={localVideoRef}
+                                                    className="d_video-element"
+                                                    autoPlay
+                                                    muted
+                                                    playsInline
+                                                    style={{ display: 'none' }}
+                                                />
+                                                <div className="d_avatar-circle"
+                                                    style={{
+                                                        textTransform: 'uppercase',
+                                                        backgroundColor: `hsl(${participant.id.charCodeAt(0) * 60}, 70%, 45%)`
+                                                    }}>
+                                                    {participant.initials}
+                                                </div>
+                                            </>
                                         )
                                     ) : (
                                         // Remote participant video - fixed version
@@ -1356,21 +1383,21 @@ function Screen() {
                                             />
                                         ) : (
                                             <>
-                                            <video
-                                            ref={setVideoRef(participant.id)}
-                                            id={`video-${participant.id}`}
-                                            className="d_video-element"
-                                            autoPlay
-                                            playsInline
-                                            style={{display: 'none'}}
-                                        />
-                                            <div className="d_avatar-circle"
-                                                style={{
-                                                    textTransform: 'uppercase',
-                                                    backgroundColor: `hsl(${participant.id.charCodeAt(0) * 60}, 70%, 45%)`
-                                                }}>
-                                                {participant.initials}
-                                            </div>
+                                                <video
+                                                    ref={setVideoRef(participant.id)}
+                                                    id={`video-${participant.id}`}
+                                                    className="d_video-element"
+                                                    autoPlay
+                                                    playsInline
+                                                    style={{ display: 'none' }}
+                                                />
+                                                <div className="d_avatar-circle"
+                                                    style={{
+                                                        textTransform: 'uppercase',
+                                                        backgroundColor: `hsl(${participant.id.charCodeAt(0) * 60}, 70%, 45%)`
+                                                    }}>
+                                                    {participant.initials}
+                                                </div>
                                             </>
                                         )
                                     )}
@@ -1950,7 +1977,7 @@ function Screen() {
                 )}
 
             </Offcanvas>
-        </>
+        </div>
     );
 }
 
