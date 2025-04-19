@@ -55,6 +55,7 @@ function Meeting() {
     const [showDropdown, setShowDropdown] = useState(false);
     const [filteredUsers, setFilteredUsers] = useState([]);
     const [activeButton, setActiveButton] = useState([]);
+    const [searchTerm, setSearchTerm] = useState('');
     const IMG_URL = IMAGE_URL
     const dispatch = useDispatch();
     const dropdownRef = useRef(null);
@@ -232,7 +233,16 @@ function Meeting() {
                         {/* METTING CARD ALL SECTION */}
 
                         {/* Upcoming Meeting Card */}
-                        {usersMeetings.map((schedule, index) => {
+                        {usersMeetings.filter(schedule => {
+                            const duration = calculateDuration(schedule.startTime, schedule.endTime);
+                            const date = formatDate(schedule.date)
+                            return (
+                                schedule.title.includes(searchTerm) ||
+                                date.includes(searchTerm) ||
+                                schedule.startTime.includes(searchTerm) ||
+                                duration.includes(searchTerm)
+                            );
+                        }).map((schedule, index) => {
                             return (
                                 <div className=" col-xl-3 col-lg-4 col-md-6 col-12">
                                     <div className="B_meeting_card" style={{ backgroundColor: '#0A1119', borderRadius: '6px' }}>
@@ -1817,7 +1827,8 @@ function Meeting() {
                                 <div className="position-relative">
                                     <input type="text" className="form-control B_Meeting_search"
                                         style={{ paddingRight: '60px', paddingLeft: '35px', backgroundColor: '#202F41', color: "rgb(179, 174, 174)" }}
-                                        placeholder="Search..." aria-label="First name" />
+                                        placeholder="Search..." value={searchTerm}
+                                        onChange={(e) => setSearchTerm(e.target.value)} />
 
                                     <div className='position-absolute B_Meeting_search_icon text-white'>
                                         <IoSearchSharp style={{ color: 'rgb(179, 174, 174)' }} />
