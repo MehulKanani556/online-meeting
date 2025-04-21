@@ -214,24 +214,8 @@ async function initializeSocket(io) {
                 const userIndex = rooms[roomId].findIndex(user => user.id === socket.id);
 
                 if (userIndex !== -1) {
-                    // Update ONLY the properties that were sent
-                    const updatedUser = { ...rooms[roomId][userIndex] };
-
-                    if (hasVideo !== undefined) {
-                        updatedUser.hasVideo = hasVideo;
-                    }
-
-                    if (hasAudio !== undefined) {
-                        updatedUser.hasAudio = hasAudio;
-                    }
-
-                    // Update the user in the rooms array
-                    rooms[roomId][userIndex] = updatedUser;
-
-                    // Broadcast to everyone else in the room - sending ONLY what changed
-                    const updatePayload = {
-                        userId: socket.id
-                    };
+                    // Create update object with only the properties that were sent
+                    const updatePayload = {};
 
                     if (hasVideo !== undefined) {
                         updatePayload.hasVideo = hasVideo;
@@ -241,11 +225,19 @@ async function initializeSocket(io) {
                         updatePayload.hasAudio = hasAudio;
                     }
 
-                    socket.to(roomId).emit('media-state-change', updatePayload);
+                    // Update the user with only the changed properties
+                    rooms[roomId][userIndex] = {
+                        ...rooms[roomId][userIndex],
+                        ...updatePayload
+                    };
 
-                    console.log(`User ${socket.id} media state updated:`,
-                        hasVideo !== undefined ? `video=${hasVideo}` : '',
-                        hasAudio !== undefined ? `audio=${hasAudio}` : '');
+                    // Broadcast to everyone else in the room
+                    socket.to(roomId).emit('media-state-change', {
+                        userId: socket.id,
+                        ...updatePayload  // Only send what changed
+                    });
+
+                    console.log(`User ${socket.id} media state updated:`, updatePayload);
                 }
             }
         });

@@ -106,12 +106,30 @@ export const useSocket = (userId, roomId, userName) => {
         });
 
         // Handle media state changes
-        socketRef.current.on('media-state-change', ({ userId, hasVideo, hasAudio }) => {
+        socketRef.current.on('media-state-change', (update) => {
+            const { userId, hasVideo, hasAudio } = update;
+
             setParticipants(prev =>
-                prev.map(p =>
-                    p.id === userId ? { ...p, hasVideo, hasAudio } : p
-                )
+                prev.map(p => {
+                    if (p.id === userId) {
+                        // Create new participant object with only updated properties
+                        const updatedParticipant = { ...p };
+
+                        if (hasVideo !== undefined) {
+                            updatedParticipant.hasVideo = hasVideo;
+                        }
+
+                        if (hasAudio !== undefined) {
+                            updatedParticipant.hasAudio = hasAudio;
+                        }
+
+                        return updatedParticipant;
+                    }
+                    return p;
+                })
             );
+
+            console.log("Received media state update:", update);
         });
 
         // For users waiting for approval

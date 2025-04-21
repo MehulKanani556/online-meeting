@@ -235,7 +235,6 @@ function Screen() {
         };
     }, []);
 
-    // Helper function to create peer connection 
     // Helper function to create peer connection
     const createPeerConnection = (peerId) => {
         if (peerConnectionsRef.current[peerId]) {
@@ -248,7 +247,7 @@ function Screen() {
             }
         }
 
-        console.log(`Creating new peer connection for ${peerId}`);
+        // console.log(`Creating new peer connection for ${peerId}`);
 
         const configuration = {
             iceServers: [
@@ -262,7 +261,7 @@ function Screen() {
         // Add local tracks to the peer connection
         if (localStream) {
             localStream.getTracks().forEach(track => {
-                console.log(`Adding ${track.kind} track to peer connection for ${peerId}`);
+                // console.log(`Adding ${track.kind} track to peer connection for ${peerId}`);
                 pc.addTrack(track, localStream);
             });
         }
@@ -270,13 +269,13 @@ function Screen() {
         // Handle ICE candidates
         pc.onicecandidate = event => {
             if (event.candidate) {
-                console.log(`Sending ICE candidate to ${peerId}`);
+                // console.log(`Sending ICE candidate to ${peerId}`);
                 sendIceCandidate(peerId, event.candidate);
             }
         };
 
         pc.ontrack = event => {
-            console.log(`Received ${event.track.kind} track from ${peerId}`, event.streams[0]);
+            // console.log(`Received ${event.track.kind} track from ${peerId}`, event.streams[0]);
 
             if (event.streams && event.streams[0]) {
                 const remoteStream = event.streams[0];
@@ -285,7 +284,7 @@ function Screen() {
 
                 const videoElement = videoRefsMap.current[peerId];
                 if (videoElement) {
-                    console.log(`Applying stream to existing element for ${peerId}`);
+                    // console.log(`Applying stream to existing element for ${peerId}`);
                     videoElement.srcObject = remoteStream;
                     videoElement.autoplay = true;
                     videoElement.playsInline = true;
@@ -296,7 +295,7 @@ function Screen() {
 
         // Additional connection state logging
         pc.onconnectionstatechange = () => {
-            console.log(`Connection state changed for ${peerId}: ${pc.connectionState}`);
+            // console.log(`Connection state changed for ${peerId}: ${pc.connectionState}`);
             if (pc.connectionState === 'connected') {
                 console.log(`Peer connection with ${peerId} successfully established`);
             } else if (pc.connectionState === 'failed') {
@@ -320,7 +319,7 @@ function Screen() {
 
         // Apply any pending ICE candidates that were received before the peer connection was created
         if (pendingIceCandidatesRef.current[peerId]) {
-            console.log(`Applying ${pendingIceCandidatesRef.current[peerId].length} pending ICE candidates for ${peerId}`);
+            // console.log(`Applying ${pendingIceCandidatesRef.current[peerId].length} pending ICE candidates for ${peerId}`);
             pendingIceCandidatesRef.current[peerId].forEach(candidate => {
                 pc.addIceCandidate(new RTCIceCandidate(candidate)).catch(error => {
                     console.error('Error applying pending ICE candidate:', error);
@@ -339,7 +338,7 @@ function Screen() {
         // Set up WebRTC handlers for signaling
         setupWebRTCHandlers({
             handleOffer: async (from, offer) => {
-                console.log('Received offer from:', from);
+                // console.log('Received offer from:', from);
 
                 // Create a new RTCPeerConnection if it doesn't exist
                 if (!peerConnectionsRef.current[from]) {
@@ -365,7 +364,7 @@ function Screen() {
             },
 
             handleAnswer: async (from, answer) => {
-                console.log('Received answer from:', from);
+                // console.log('Received answer from:', from);
 
                 const pc = peerConnectionsRef.current[from];
                 if (pc) {
@@ -373,7 +372,7 @@ function Screen() {
                         // Only set remote description if in the correct state
                         if (pc.signalingState === 'have-local-offer') {
                             await pc.setRemoteDescription(new RTCSessionDescription(answer));
-                            console.log('Remote description set successfully after answer');
+                            // console.log('Remote description set successfully after answer');
                         } else {
                             console.log(`Cannot process answer - wrong state: ${pc.signalingState}`);
                             // Implement recovery mechanism if needed
@@ -385,7 +384,7 @@ function Screen() {
             },
 
             handleIceCandidate: async (from, candidate) => {
-                console.log('Received ICE candidate from:', from);
+                // console.log('Received ICE candidate from:', from);
 
                 const pc = peerConnectionsRef.current[from];
                 if (pc) {
@@ -398,7 +397,7 @@ function Screen() {
                             if (!pendingIceCandidatesRef.current[from]) {
                                 pendingIceCandidatesRef.current[from] = [];
                             }
-                            console.log(`Storing ICE candidate for later - remote description not set yet`);
+                            // console.log(`Storing ICE candidate for later - remote description not set yet`);
                             pendingIceCandidatesRef.current[from].push(candidate);
                         }
                     } catch (error) {
@@ -409,7 +408,7 @@ function Screen() {
                     if (!pendingIceCandidatesRef.current[from]) {
                         pendingIceCandidatesRef.current[from] = [];
                     }
-                    console.log(`Storing ICE candidate for later - no peer connection yet`);
+                    // console.log(`Storing ICE candidate for later - no peer connection yet`);
                     pendingIceCandidatesRef.current[from].push(candidate);
                 }
             }
@@ -430,13 +429,19 @@ function Screen() {
                     continue;
                 }
 
-                console.log('Creating new connection with:', peer.id);
+                // console.log('Creating new connection with:', peer.id);
                 const pc = createPeerConnection(peer.id);
 
                 try {
+                    // Wait a bit before creating offer to ensure connection is initialized
+                    await new Promise(resolve => setTimeout(resolve, 500));
+
                     // Only create offer if we're in a stable state
                     if (pc.signalingState === 'stable') {
-                        const offer = await pc.createOffer();
+                        const offer = await pc.createOffer({
+                            offerToReceiveAudio: true,
+                            offerToReceiveVideo: true
+                        });
                         await pc.setLocalDescription(offer);
                         sendOffer(peer.id, offer);
                     } else {
@@ -455,44 +460,86 @@ function Screen() {
         };
     }, [socket, participants, localStream, isConnected]);
 
-    // This effect ensures remote video elements get updated when streams change
+    // This effect ensures remote videos remain connected
     useEffect(() => {
-        // This effect ensures remote videos get their streams
-        const applyRemoteStreams = () => {
-            Object.entries(remoteStreams).forEach(([peerId, stream]) => {
-                const videoElement = videoRefsMap.current[peerId];
-                if (videoElement && videoElement.srcObject !== stream) {
-                    console.log(`Reapplying stream for ${peerId} in monitor effect`);
-                    videoElement.srcObject = stream;
-                    videoElement.autoplay = true;
-                    videoElement.playsInline = true;
+        // Monitor function to periodically check and fix stream connections
+        const monitorRemoteStreams = () => {
+            participants.forEach(participant => {
+                if (participant.id === socket?.id) return; // Skip self
 
-                    if (videoElement.paused) {
-                        videoElement.play().catch(e => console.log(`Play error in monitor: ${e.message}`));
+                const videoElement = videoRefsMap.current[participant.id];
+                const remoteStream = remoteStreams[participant.id];
+
+                if (videoElement && remoteStream) {
+                    // If video doesn't have the right stream
+                    if (!videoElement.srcObject || videoElement.srcObject !== remoteStream) {
+                        // console.log(`Reapplying stream for ${participant.id} in monitor`);
+                        videoElement.srcObject = remoteStream;
+                        videoElement.autoplay = true;
+                        videoElement.playsInline = true;
+
+                        // Ensure video is playing
+                        if (videoElement.paused) {
+                            videoElement.play().catch(e => console.log(`Play error: ${e.message}`));
+                        }
+                    }
+
+                    // Check if track is active but not showing
+                    const videoTrack = remoteStream.getVideoTracks()[0];
+                    if (videoTrack && videoTrack.enabled && participant.hasVideo) {
+                        // Force video display if it should be showing
+                        videoElement.style.display = '';
                     }
                 }
             });
         };
 
-        // Apply immediately
-        applyRemoteStreams();
+        // Run immediately and then every 2 seconds
+        monitorRemoteStreams();
+        const intervalId = setInterval(monitorRemoteStreams, 2000);
 
-        // Also set up a timer to retry a few times
-        const timerId = setInterval(applyRemoteStreams, 1000);
+        return () => clearInterval(intervalId);
+    }, [participants, remoteStreams]);
 
-        // Clear after a few seconds - remote streams should be connected by then
-        const cleanupId = setTimeout(() => clearInterval(timerId), 5000);
+    // This effect ensures remote video elements get updated when streams change
+    // Add this effect to ensure remote videos stay connected
+    useEffect(() => {
+        // Function to apply remote streams to video elements
+        const applyRemoteStreams = () => {
+            participants.forEach(participant => {
+                if (participant.id === socket?.id) return; // Skip self
 
-        return () => {
-            clearInterval(timerId);
-            clearTimeout(cleanupId);
+                const videoElement = videoRefsMap.current[participant.id];
+                const remoteStream = remoteStreams[participant.id];
+
+                if (videoElement && remoteStream) {
+                    // Set stream if it's not already set
+                    if (videoElement.srcObject !== remoteStream) {
+                        videoElement.srcObject = remoteStream;
+                        videoElement.autoplay = true;
+                        videoElement.playsInline = true;
+                        videoElement.play().catch(e => console.log(`Play error: ${e.message}`));
+                    }
+
+                    // Make sure video is visible if participant has video on
+                    if (participant.hasVideo) {
+                        videoElement.style.display = '';
+                    }
+                }
+            });
         };
-    }, []);
+
+        // Apply immediately and set interval for continuous checking
+        applyRemoteStreams();
+        const intervalId = setInterval(applyRemoteStreams, 1000);
+
+        return () => clearInterval(intervalId);
+    }, [participants, remoteStreams]);
 
     // Force local video connection when ref changes
     useEffect(() => {
         if (localStream && localVideoRef.current) {
-            console.log("Setting local video stream to ref");
+            // console.log("Setting local video stream to ref");
             // Only update if different
             if (localVideoRef.current.srcObject !== localStream) {
                 localVideoRef.current.srcObject = localStream;
@@ -539,7 +586,7 @@ function Screen() {
                 // Update all peers about our video state ONLY
                 updateMediaState('video', newVideoState);
 
-                console.log(`Video toggled. Enabled: ${newVideoState}`);
+                // console.log(`Video toggled. New state - hasVideo: ${newVideoState}`);
             }
         } else {
             setIsVideoOff(!isVideoOff);
@@ -547,25 +594,65 @@ function Screen() {
     };
 
     // Video ref setup - CRITICAL FIX
+    // Improve the setVideoRef function
     const setVideoRef = (peerId) => (element) => {
         if (element) {
-            console.log(`Video ref set for peer ${peerId}`);
             // Store the reference
             videoRefsMap.current[peerId] = element;
 
-            // Get the stream if available - IMPORTANT: Use state directly, not a stale closure
+            // Get the stream if available
             const stream = remoteStreams[peerId];
 
-            // Only apply if stream exists and is different
-            if (stream && element.srcObject !== stream) {
-                console.log(`Applying stream for ${peerId} in ref callback`);
+            // Apply stream and ensure video plays
+            if (stream) {
                 element.srcObject = stream;
                 element.autoplay = true;
                 element.playsInline = true;
-                element.muted = false;
+
+                // Force play with retry mechanism
+                const playVideo = () => {
+                    element.play().catch(e => {
+                        setTimeout(playVideo, 1000);
+                    });
+                };
+                playVideo();
             }
         }
     };
+
+    // Detect when a participant reconnects (same userId but different socketId)
+    useEffect(() => {
+        const reconnectingParticipants = participants.filter(p => {
+            // Find participants with same userId but different socketId
+            const duplicates = participants.filter(p2 =>
+                p2.userId === p.userId && p2.id !== p.id
+            );
+            return duplicates.length > 0;
+        });
+
+        if (reconnectingParticipants.length > 0) {
+            // console.log("Detected reconnecting participants:", reconnectingParticipants);
+
+            // For each reconnecting participant, close old connections and establish new ones
+            reconnectingParticipants.forEach(participant => {
+                // Find old connection with same userId
+                const oldConnections = Object.entries(peerConnectionsRef.current)
+                    .filter(([peerId, pc]) => {
+                        const peerParticipant = participants.find(p => p.id === peerId);
+                        return peerParticipant && peerParticipant.userId === participant.userId;
+                    });
+
+                // Close old connections
+                oldConnections.forEach(([peerId, pc]) => {
+                    // console.log(`Closing old connection for reconnecting user: ${peerId}`);
+                    pc.close();
+                    delete peerConnectionsRef.current[peerId];
+                });
+
+                // The new connection will be established in the main connection effect
+            });
+        }
+    }, [participants]);
 
     // Toggle audio
     const toggleAudio = () => {
@@ -580,7 +667,7 @@ function Screen() {
                 // Update all peers about our audio state ONLY - make sure only audio property is sent
                 updateMediaState('audio', newAudioState);
 
-                console.log(`Audio toggled. Enabled: ${newAudioState}`);
+                // console.log(`Audio toggled. Enabled: ${newAudioState}`);
             }
         } else {
             setIsMuted(!isMuted);
@@ -744,7 +831,7 @@ function Screen() {
     const endMeeting = () => {
         if (isEndingMeeting) return; // Prevent further calls
         isEndingMeeting = true;
-        console.log("endMeeting called");
+        // console.log("endMeeting called");
 
         // Stop all media tracks
         if (isRecording) {
@@ -759,7 +846,7 @@ function Screen() {
 
         // Ensure originalEndMeeting does not call endMeeting again
         if (typeof originalEndMeeting === 'function') {
-            console.log("Calling originalEndMeeting");
+            // console.log("Calling originalEndMeeting");
             originalEndMeeting(); // Call the original function safely
         }
 
@@ -1073,7 +1160,7 @@ function Screen() {
                     participants.forEach(participant => {
                         if (participant.id !== socket?.id) { // Skip local participant
                             const videoElement = videoRefsMap.current[participant.id];
-                            if (videoElement) {  
+                            if (videoElement) {
                                 videoElements.push({
                                     id: participant.id,
                                     element: videoElement,
@@ -1339,7 +1426,6 @@ function Screen() {
                     <div className={`d_participants-grid ${getGridClass()}`}
                         style={{ gridTemplateColumns: `repeat(${getGridColumns()}, 1fr)` }}>
                         {visibleParticipants.map((participant, index) => (
-                            // console.log("participant", participant),
                             <div key={participant.id} className="d_grid-item">
                                 <div className="d_avatar-container">
                                     {participant.id === socket?.id ? (
@@ -1721,7 +1807,6 @@ function Screen() {
                                 <div className="list-group B_screen_offcanvas " style={{ height: "82%", overflowY: "auto" }}>
                                     {filteredParticipants.length > 0 ? (
                                         filteredParticipants.map((participant) => (
-                                            console.log("participant", participant),
                                             <div key={participant.id} className="list-group-item d-flex align-items-center">
                                                 <div className="rounded-circle B_circle d-flex justify-content-center align-items-center me-3"
                                                     style={{
