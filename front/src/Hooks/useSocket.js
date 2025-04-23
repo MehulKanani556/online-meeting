@@ -105,6 +105,41 @@ export const useSocket = (userId, roomId, userName) => {
             setTypingUsers(users);
         });
 
+        // Handle host changes
+        socketRef.current.on('host-updated', ({ newHostId }) => {
+            setParticipants(prev => prev.map(participant => ({
+                ...participant,
+                isHost: participant.id === newHostId,
+                isCohost: participant.id === newHostId ? false : participant.isCohost
+            })));
+        });
+
+        // Handle co-host changes
+        socketRef.current.on('cohost-updated', ({ newCohostId }) => {
+            setParticipants(prev => prev.map(participant => ({
+                ...participant,
+                isCohost: participant.id === newCohostId
+            })));
+        });
+
+        // Handle participant rename
+        socketRef.current.on('participant-renamed', ({ participantId, newName }) => {
+            setParticipants(prev => prev.map(participant =>
+                participant.id === participantId
+                    ? {
+                        ...participant,
+                        name: newName,
+                        initials: `${newName.charAt(0)}${newName.split(' ')[1] ? newName.split(' ')[1].charAt(0) : ''}`
+                    }
+                    : participant
+            ));
+        });
+
+        // Handle participant removal
+        socketRef.current.on('participant-removed', ({ participantId }) => {
+            setParticipants(prev => prev.filter(participant => participant.id !== participantId));
+        });
+
         // Handle media state changes
         socketRef.current.on('media-state-change', (update) => {
             const { userId, hasVideo, hasAudio } = update;

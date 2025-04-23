@@ -13,6 +13,7 @@
     "bootstrap": "^5.3.3",
     "date-fns": "^4.1.0",
     "formik": "^2.4.6",
+    "html2canvas": "^1.4.1",
     "js-cookie": "^3.0.5",
     "jwt-decode": "^4.0.0",
     "langs": "^2.0.0",

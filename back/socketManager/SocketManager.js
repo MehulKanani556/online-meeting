@@ -412,6 +412,27 @@ async function initializeSocket(io) {
             }
         });
 
+        socket.on('make-host', ({ roomId, newHostId }) => {
+            io.to(roomId).emit('host-updated', { newHostId });
+        });
+
+        socket.on('make-cohost', ({ roomId, newCohostId }) => {
+            io.to(roomId).emit('cohost-updated', { newCohostId });
+        });
+
+        socket.on('rename-participant', ({ roomId, participantId, newName }) => {
+            io.to(roomId).emit('participant-renamed', { participantId, newName });
+        });
+
+        socket.on('remove-participant', ({ roomId, participantId }) => {
+            io.to(roomId).emit('participant-removed', { participantId });
+            // Also disconnect the removed user's socket
+            const userSocket = io.sockets.sockets.get(participantId);
+            if (userSocket) {
+                userSocket.disconnect();
+            }
+        });
+
         // User disconnects
         socket.on('disconnect', () => {
             const user = onlineUsers[socket.id]; // Changed from users to onlineUsers
