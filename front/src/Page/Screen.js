@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import './../CSS/darshan.css';
 import onmicrophone from '../Image/d_onmicrophone.svg';
 import offmicrophone from '../Image/d_offmicrophone.svg';
+import endcall from '../Image/endcall.svg';
 import oncamera from '../Image/d_oncamera.svg';
 import offcamera from '../Image/d_offcamera.svg';
 import upload from '../Image/d_upload.svg';
@@ -150,11 +151,11 @@ const BottomBar = React.memo(({
             {/* 1st div */}
             <div className='d-none d-sm-block'>
                 <div className="d-flex align-items-center d_resposive">
-                    <div className="d_box me-sm-3 mb-2 mb-sm-0" onClick={toggleAudio}>
-                        <img src={isMuted ? offmicrophone : onmicrophone} alt="" />
+                    <div className="d_box me-sm-3 mb-2 mb-sm-0" style={{ cursor: 'pointer' }} onClick={toggleAudio}>
+                        <img src={isMuted ? offmicrophone : onmicrophone} alt="microphone" />
                     </div>
-                    <div className="d_box" onClick={toggleVideo}>
-                        <img src={isVideoOff ? offcamera : oncamera} alt="" />
+                    <div className="d_box" style={{ cursor: 'pointer' }} onClick={toggleVideo}>
+                        <img src={isVideoOff ? offcamera : oncamera} alt="camera" />
                     </div>
                 </div>
             </div>
@@ -163,8 +164,8 @@ const BottomBar = React.memo(({
             <div className="d-flex align-items-center">
                 <div className='d-none d-sm-block'>
                     <div className='d-flex d_resposive'>
-                        <div className="d_box me-sm-3 mb-2 mb-sm-0" onClick={toggleScreenShare}>
-                            <img src={upload} alt="" />
+                        <div className="d_box me-sm-3 mb-2 mb-sm-0" style={{ cursor: 'pointer' }} onClick={toggleScreenShare}>
+                            <img src={upload} alt="screen share" />
                         </div>
                         {/* <div className="d_box me-sm-3">
                     <img src={target} alt="" />
@@ -173,11 +174,12 @@ const BottomBar = React.memo(({
                             className="d_box me-sm-3"
                             onClick={toggleRecording}
                             style={{
+                                cursor: 'pointer',
                                 backgroundColor: isRecording ? '#E12B2D' : 'transparent',
                                 transition: 'background-color 0.3s'
                             }}
                         >
-                            <img src={recording} alt="" />
+                            <img src={recording} alt="recording" />
                             {isRecording && (
                                 <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill"
                                     style={{
@@ -208,19 +210,19 @@ const BottomBar = React.memo(({
                         <div className="d_dropdown position-absolute bottom-100 start-50 translate-middle-x mb-2 rounded shadow-lg p-2"
                             style={{ minWidth: '200px', zIndex: 1000 }}>
                             <div className="d-flex align-items-center p-2" onClick={toggleAudio}>
-                                <img src={isMuted ? offmicrophone : onmicrophone} className="me-2" alt="" />
+                                <img src={isMuted ? offmicrophone : onmicrophone} className="me-2" alt="Microphone" />
                                 <span>Microphone</span>
                             </div>
                             <div className="d-flex align-items-center p-2" onClick={toggleVideo}>
-                                <img src={isVideoOff ? offcamera : oncamera} className="me-2" alt="" />
+                                <img src={isVideoOff ? offcamera : oncamera} className="me-2" alt="Camera" />
                                 <span>Camera</span>
                             </div>
                             <div className="d-flex align-items-center p-2" onClick={toggleScreenShare}>
-                                <img src={upload} alt="" className="me-2" />
+                                <img src={upload} alt="Share Screen" className="me-2" />
                                 <span>Share Screen</span>
                             </div>
                             <div className="d-flex align-items-center p-2" onClick={toggleRecording}>
-                                <img src={recording} alt="" className="me-2" />
+                                <img src={recording} alt="recording" className="me-2" />
                                 <span>Record</span>
                             </div>
                             <div className="d-flex align-items-center p-2 position-relative" onClick={() => setshowEmojis(!showEmojis)}>
@@ -241,7 +243,7 @@ const BottomBar = React.memo(({
                                 )}
                             </div>
                             <div className="d-flex align-items-center p-2" onClick={PictureInPicture}>
-                                <img src={podcast} alt="" className="me-2" />
+                                <img src={podcast} alt="Picture in Picture" className="me-2" />
                                 <span>Picture in Picture</span>
                             </div>
                             <div className="d-flex align-items-center p-2"
@@ -254,7 +256,7 @@ const BottomBar = React.memo(({
                                 <span>Raise Hand</span>
                             </div>
                             <div className="d-flex align-items-center p-2" onClick={(e) => handleShow(e)}>
-                                <img src={bar} alt="" className="me-2" />
+                                <img src={bar} alt="Bar" className="me-2" />
                                 <span>Chat</span>
                                 {unreadMessages > 0 && (
                                     <span className="ms-2 badge rounded-pill" style={{
@@ -274,6 +276,7 @@ const BottomBar = React.memo(({
                 <div className='d-none d-sm-block'>
                     <div className='d-flex d_resposive'>
                         <div className="d_box me-sm-3 mb-2 mb-sm-0 position-relative" onClick={() => setshowEmojis(!showEmojis)} style={{
+                            cursor: 'pointer',
                             backgroundColor: showEmojis ? '#202F41' : 'transparent',
                             transition: 'background-color 0.3s'
                         }}>
@@ -292,8 +295,8 @@ const BottomBar = React.memo(({
                                 </div>
                             )}
                         </div>
-                        <div className="d_box me-sm-3" onClick={PictureInPicture}>
-                            <img src={podcast} alt="" />
+                        <div className="d_box me-sm-3" style={{ cursor: 'pointer' }} onClick={PictureInPicture}>
+                            <img src={podcast} alt="Picture In Picture" />
                         </div>
                     </div>
                 </div>
@@ -304,16 +307,18 @@ const BottomBar = React.memo(({
                     <div className="d_box me-sm-3 mb-2 mb-sm-0"
                         onClick={toggleHandRaise}
                         style={{
+                            cursor: 'pointer',
                             backgroundColor: isHandRaised ? '#202F41' : 'transparent',
                             transition: 'background-color 0.3s'
                         }}>
                         <img src={hand} alt="Raise hand" />
                     </div>
                     <div className="d_box position-relative" onClick={(e) => handleShow(e)} style={{
+                        cursor: 'pointer',
                         backgroundColor: show ? '#202F41' : 'transparent',
                         transition: 'background-color 0.3s'
                     }}>
-                        <img src={bar} alt="" />
+                        <img src={bar} alt="Bar" />
                         {unreadMessages > 0 && (
                             <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill"
                                 style={{
@@ -1317,16 +1322,6 @@ function Screen() {
         );
     };
 
-    // Function to toggle participant's microphone
-    const toggleMicrophone = (participantId) => {
-        if (!socket) return;
-        socket.emit('toggle-participant-audio', {
-            roomId,
-            participantId,
-            isMuted: !participants.find(p => p.id === participantId)?.hasAudio
-        });
-    };
-
     // Function to make a participant host
     const makeHost = (newHostId) => {
         if (!socket) return;
@@ -1564,6 +1559,269 @@ function Screen() {
     };
 
     // picture in picture
+    // const togglePictureInPicture = async () => {
+    //     try {
+    //         // First check if PiP is supported
+    //         if (!document.pictureInPictureEnabled) {
+    //             console.warn('Picture-in-Picture not supported by this browser');
+    //             return;
+    //         }
+
+    //         // If already in PiP mode, exit it
+    //         if (document.pictureInPictureElement) {
+    //             await document.exitPictureInPicture();
+    //             return;
+    //         }
+
+    //         // Determine which video source to use
+    //         let sourceStream = null;
+
+    //         // Check for an active speaker first
+    //         const activeSpeakerParticipant = participants.find(p =>
+    //             p.id !== socket?.id && remoteStreams[p.id] && p.hasVideo !== false
+    //         );
+
+    //         if (activeSpeakerParticipant && remoteStreams[activeSpeakerParticipant.id]) {
+    //             sourceStream = remoteStreams[activeSpeakerParticipant.id];
+    //         } else if (localStream && !isVideoOff) {
+    //             sourceStream = localStream;
+    //         } else {
+    //             for (const participant of participants) {
+    //                 if (participant.id !== socket?.id && participant.hasVideo !== false) {
+    //                     if (remoteStreams[participant.id]) {
+    //                         sourceStream = remoteStreams[participant.id];
+    //                         break;
+    //                     }
+    //                 }
+    //             }
+    //         }
+
+    //         if (!sourceStream) {
+    //             console.warn('No video source available for PiP');
+    //             return;
+    //         }
+
+    //         // Create a video element to use for PiP
+    //         const pipVideo = document.createElement('video');
+    //         pipVideo.muted = true;
+    //         pipVideo.autoplay = true;
+    //         pipVideo.srcObject = sourceStream;
+
+    //         // Play the video and enter PiP mode
+    //         await pipVideo.play();
+    //         await pipVideo.requestPictureInPicture();
+
+    //         // Create a floating control panel in the main window
+    //         const controlPanel = document.createElement('div');
+    //         controlPanel.style.position = 'fixed';
+    //         controlPanel.style.bottom = '20px';
+    //         controlPanel.style.right = '20px';
+    //         controlPanel.style.backgroundColor = '#212121';
+    //         controlPanel.style.padding = '10px';
+    //         controlPanel.style.borderRadius = '8px';
+    //         controlPanel.style.zIndex = '9999';
+    //         controlPanel.style.display = 'flex';
+    //         controlPanel.style.gap = '15px';
+
+    //         // Add control buttons
+    //         const createButton = (emoji, label, action) => {
+    //             const button = document.createElement('button');
+    //             button.innerHTML = emoji;
+    //             button.title = label;
+    //             button.style.width = '40px';
+    //             button.style.height = '40px';
+    //             button.style.borderRadius = '50%';
+    //             button.style.border = 'none';
+    //             button.style.fontSize = '18px';
+    //             button.style.cursor = 'pointer';
+    //             button.onclick = action;
+    //             return button;
+    //         };
+
+    //         // Handle mute toggle
+    //         const micButton = createButton('🎤', 'Toggle Microphone', () => {
+    //             toggleAudio();
+    //             micButton.style.backgroundColor = isMuted ? '#4c4c4c' : '#e12b2d';
+    //         });
+    //         controlPanel.appendChild(micButton);
+
+    //         // Handle video toggle
+    //         const videoButton = createButton('📹', 'Toggle Video', () => {
+    //             toggleVideo();
+    //             videoButton.style.backgroundColor = isVideoOff ? '#4c4c4c' : '#e12b2d';
+    //         });
+    //         controlPanel.appendChild(videoButton);
+
+    //         // Handle hand raise toggle
+    //         const handButton = createButton('✋', 'Raise Hand', () => {
+    //             toggleHandRaise();
+    //             handButton.style.backgroundColor = isHandRaised ? '#e12b2d' : '#4c4c4c';
+    //         });
+    //         controlPanel.appendChild(handButton);
+
+    //         // End call button
+    //         const endButton = createButton('📞', 'End Call', endMeeting);
+    //         controlPanel.appendChild(endButton);
+
+    //         // Emoji button to open emoji selection
+    //         const emojiButton = createButton('😊', 'Select Emoji', () => {
+    //             emojiContainer.style.display = emojiContainer.style.display === 'none' ? 'block' : 'none';
+    //         });
+    //         controlPanel.appendChild(emojiButton);
+
+    //         // Create emoji selection container
+    //         const emojiContainer = document.createElement('div');
+    //         emojiContainer.style.position = 'absolute';
+    //         emojiContainer.style.bottom = '60px'; // Adjust position as needed
+    //         emojiContainer.style.right = '0';
+    //         emojiContainer.style.backgroundColor = '#12161C';
+    //         emojiContainer.style.border = '1px solid #202f41';
+    //         emojiContainer.style.padding = '10px';
+    //         emojiContainer.style.borderRadius = '5px';
+    //         emojiContainer.style.zIndex = '1000';
+    //         emojiContainer.style.display = 'none'; // Initially hidden
+
+    //         // Add emojis to the container
+    //         ['❤️', '😃', '😮', '🙌', '😂', '🎉', '👏', '💥', '😉', '🔥', '👍', '👎', '▶️', '✨'].forEach(emoji => {
+    //             const emojiSpan = document.createElement('span');
+    //             emojiSpan.innerText = emoji;
+    //             emojiSpan.style.cursor = 'pointer';
+    //             emojiSpan.style.fontSize = '24px';
+    //             emojiSpan.style.margin = '5px';
+    //             emojiSpan.style.color = 'white';
+    //             emojiSpan.onclick = () => {
+    //                 sendEmoji(emoji); // Send the selected emoji
+    //                 emojiContainer.style.display = 'none'; // Hide the container after selection
+    //             };
+    //             emojiContainer.appendChild(emojiSpan);
+    //         });
+
+    //         controlPanel.appendChild(emojiContainer);
+    //         document.body.appendChild(controlPanel);
+
+    //         // Clean up when PiP is closed
+    //         pipVideo.addEventListener('leavepictureinpicture', () => {
+    //             if (document.body.contains(controlPanel)) {
+    //                 document.body.removeChild(controlPanel);
+    //             }
+    //         }, { once: true });
+
+    //     } catch (error) {
+    //         console.error('Failed to enter Picture-in-Picture mode:', error);
+    //     }
+    // };
+
+    // picture in picture without controls
+    // const togglePictureInPicture = async () => {
+    //     try {
+    //         // First check if PiP is supported
+    //         if (!document.pictureInPictureEnabled) {
+    //             console.warn('Picture-in-Picture not supported by this browser');
+    //             return;
+    //         }
+
+    //         // If already in PiP mode, exit it
+    //         if (document.pictureInPictureElement) {
+    //             await document.exitPictureInPicture();
+    //             return;
+    //         }
+
+    //         // Determine which video to use for PiP
+    //         // Priority: 1. Active speaker's video 2. Local video 3. First remote video
+    //         let pipVideo = null;
+
+    //         // Check for an active speaker first
+    //         const activeSpeakerParticipant = participants.find(p =>
+    //             p.id !== socket?.id && remoteStreams[p.id] && p.hasVideo !== false
+    //         );
+
+    //         if (activeSpeakerParticipant && videoRefsMap.current[activeSpeakerParticipant.id]) {
+    //             pipVideo = videoRefsMap.current[activeSpeakerParticipant.id];
+    //         }
+    //         // Fallback to local video if no active speaker
+    //         else if (localVideoRef.current && localStream && !isVideoOff) {
+    //             pipVideo = localVideoRef.current;
+    //         }
+    //         // Final fallback: use first remote video that's enabled
+    //         else {
+    //             for (const participant of participants) {
+    //                 if (participant.id !== socket?.id && participant.hasVideo !== false) {
+    //                     const videoRef = videoRefsMap.current[participant.id];
+    //                     if (videoRef && videoRef.srcObject) {
+    //                         pipVideo = videoRef;
+    //                         break;
+    //                     }
+    //                 }
+    //             }
+    //         }
+
+    //         // If we have a valid video element, request PiP
+    //         if (pipVideo) {
+    //             await pipVideo.requestPictureInPicture();
+
+    //             // Add event listener for when PiP window is closed
+    //             pipVideo.addEventListener('leavepictureinpicture', () => {
+    //                 console.log('Picture-in-Picture mode closed');
+    //             }, { once: true });
+    //         } else {
+    //             console.warn('No suitable video found for Picture-in-Picture');
+
+    //             // If no video is available, create a temporary one with meeting info
+    //             const tempVideo = document.createElement('video');
+    //             tempVideo.srcObject = createInfoStream();
+    //             tempVideo.autoplay = true;
+    //             tempVideo.muted = true;
+    //             document.body.appendChild(tempVideo);
+
+    //             try {
+    //                 await tempVideo.play();
+    //                 await tempVideo.requestPictureInPicture();
+
+    //                 tempVideo.addEventListener('leavepictureinpicture', () => {
+    //                     document.body.removeChild(tempVideo);
+    //                 }, { once: true });
+    //             } catch (err) {
+    //                 console.error('Failed to create temporary PiP:', err);
+    //                 document.body.removeChild(tempVideo);
+    //             }
+    //         }
+    //     } catch (error) {
+    //         console.error('Failed to enter Picture-in-Picture mode:', error);
+    //     }
+    // };
+
+    // Helper function to create a canvas stream with meeting info when no video is available
+    // const createInfoStream = () => {
+    //     const canvas = document.createElement('canvas');
+    //     canvas.width = 640;
+    //     canvas.height = 360;
+
+    //     const ctx = canvas.getContext('2d');
+
+    //     // Draw background
+    //     ctx.fillStyle = '#1a1a1a';
+    //     ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    //     // Draw meeting info
+    //     ctx.fillStyle = '#ffffff';
+    //     ctx.font = '24px Arial';
+    //     ctx.textAlign = 'center';
+    //     ctx.fillText(`Meeting ID: ${roomId}`, canvas.width / 2, canvas.height / 2 - 20);
+    //     ctx.fillText(`Participants: ${participants.length}`, canvas.width / 2, canvas.height / 2 + 20);
+
+    //     // Create animation to keep the stream active
+    //     const updateCanvas = () => {
+    //         // Update timestamp
+    //         ctx.clearRect(0, canvas.width - 200, 200, 30);
+    //         ctx.fillText(new Date().toLocaleTimeString(), canvas.width / 2, canvas.height - 30);
+    //         requestAnimationFrame(updateCanvas);
+    //     };
+    //     requestAnimationFrame(updateCanvas);
+
+    //     // Get stream from canvas
+    //     return canvas.captureStream();
+    // };
+
     const togglePictureInPicture = async () => {
         try {
             // First check if PiP is supported
@@ -1578,100 +1836,110 @@ function Screen() {
                 return;
             }
 
-            // Determine which video to use for PiP
-            // Priority: 1. Active speaker's video 2. Local video 3. First remote video
-            let pipVideo = null;
+            // Determine which video source to use
+            let sourceStream = null;
 
             // Check for an active speaker first
             const activeSpeakerParticipant = participants.find(p =>
                 p.id !== socket?.id && remoteStreams[p.id] && p.hasVideo !== false
             );
 
-            if (activeSpeakerParticipant && videoRefsMap.current[activeSpeakerParticipant.id]) {
-                pipVideo = videoRefsMap.current[activeSpeakerParticipant.id];
-            }
-            // Fallback to local video if no active speaker
-            else if (localVideoRef.current && localStream && !isVideoOff) {
-                pipVideo = localVideoRef.current;
-            }
-            // Final fallback: use first remote video that's enabled
-            else {
+            if (activeSpeakerParticipant && remoteStreams[activeSpeakerParticipant.id]) {
+                sourceStream = remoteStreams[activeSpeakerParticipant.id];
+            } else if (localStream && !isVideoOff) {
+                sourceStream = localStream;
+            } else {
                 for (const participant of participants) {
                     if (participant.id !== socket?.id && participant.hasVideo !== false) {
-                        const videoRef = videoRefsMap.current[participant.id];
-                        if (videoRef && videoRef.srcObject) {
-                            pipVideo = videoRef;
+                        if (remoteStreams[participant.id]) {
+                            sourceStream = remoteStreams[participant.id];
                             break;
                         }
                     }
                 }
             }
 
-            // If we have a valid video element, request PiP
-            if (pipVideo) {
-                await pipVideo.requestPictureInPicture();
-
-                // Add event listener for when PiP window is closed
-                pipVideo.addEventListener('leavepictureinpicture', () => {
-                    console.log('Picture-in-Picture mode closed');
-                }, { once: true });
-            } else {
-                console.warn('No suitable video found for Picture-in-Picture');
-
-                // If no video is available, create a temporary one with meeting info
-                const tempVideo = document.createElement('video');
-                tempVideo.srcObject = createInfoStream();
-                tempVideo.autoplay = true;
-                tempVideo.muted = true;
-                document.body.appendChild(tempVideo);
-
-                try {
-                    await tempVideo.play();
-                    await tempVideo.requestPictureInPicture();
-
-                    tempVideo.addEventListener('leavepictureinpicture', () => {
-                        document.body.removeChild(tempVideo);
-                    }, { once: true });
-                } catch (err) {
-                    console.error('Failed to create temporary PiP:', err);
-                    document.body.removeChild(tempVideo);
-                }
+            if (!sourceStream) {
+                console.warn('No video source available for PiP');
+                return;
             }
+
+            // Create a video element to use for PiP
+            const pipVideo = document.createElement('video');
+            pipVideo.muted = true;
+            pipVideo.autoplay = true;
+            pipVideo.srcObject = sourceStream;
+
+            // Play the video and enter PiP mode
+            await pipVideo.play();
+            await pipVideo.requestPictureInPicture();
+
+            // Create a floating control panel in the main window
+            const controlPanel = document.createElement('div');
+            controlPanel.style.position = 'fixed';
+            controlPanel.style.bottom = '20px';
+            controlPanel.style.right = '20px';
+            controlPanel.style.backgroundColor = '#212121';
+            controlPanel.style.padding = '10px';
+            controlPanel.style.borderRadius = '8px';
+            controlPanel.style.zIndex = '9999';
+            controlPanel.style.display = 'flex';
+            controlPanel.style.gap = '15px';
+
+            // Function to create image buttons
+            const createImageButton = (src, label, action) => {
+                const button = document.createElement('button');
+                button.style.width = '40px';
+                button.style.height = '40px';
+                button.style.backgroundColor = 'transparent';
+                button.style.border = '1px solid #fff';
+                button.style.borderRadius = '50%';
+                button.style.cursor = 'pointer';
+                button.onclick = action;
+
+                const img = document.createElement('img');
+                img.src = src;
+                img.alt = label;
+                img.style.width = '18px';
+                img.style.height = '18px';
+
+                button.appendChild(img);
+                return button;
+            };
+
+            // Create buttons with actual image paths
+            const micButton = createImageButton(isMuted ? offmicrophone : onmicrophone, 'Toggle Microphone', () => {
+                toggleAudio();
+                micButton.firstChild.src = isMuted ? onmicrophone : offmicrophone;
+            });
+            controlPanel.appendChild(micButton);
+
+            const videoButton = createImageButton(isVideoOff ? offcamera : oncamera, 'Toggle Video', () => {
+                toggleVideo();
+                videoButton.firstChild.src = isVideoOff ? oncamera : offcamera;
+            });
+            controlPanel.appendChild(videoButton);
+
+            const handButton = createImageButton(hand, 'Raise Hand', () => {
+                toggleHandRaise();
+            });
+            controlPanel.appendChild(handButton);
+
+            const endButton = createImageButton(endcall, 'End Call', endMeeting);
+            controlPanel.appendChild(endButton);
+
+            document.body.appendChild(controlPanel);
+
+            // Clean up when PiP is closed
+            pipVideo.addEventListener('leavepictureinpicture', () => {
+                if (document.body.contains(controlPanel)) {
+                    document.body.removeChild(controlPanel);
+                }
+            }, { once: true });
+
         } catch (error) {
             console.error('Failed to enter Picture-in-Picture mode:', error);
         }
-    };
-
-    // Helper function to create a canvas stream with meeting info when no video is available
-    const createInfoStream = () => {
-        const canvas = document.createElement('canvas');
-        canvas.width = 640;
-        canvas.height = 360;
-
-        const ctx = canvas.getContext('2d');
-
-        // Draw background
-        ctx.fillStyle = '#1a1a1a';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-        // Draw meeting info
-        ctx.fillStyle = '#ffffff';
-        ctx.font = '24px Arial';
-        ctx.textAlign = 'center';
-        ctx.fillText(`Meeting ID: ${roomId}`, canvas.width / 2, canvas.height / 2 - 20);
-        ctx.fillText(`Participants: ${participants.length}`, canvas.width / 2, canvas.height / 2 + 20);
-
-        // Create animation to keep the stream active
-        const updateCanvas = () => {
-            // Update timestamp
-            ctx.clearRect(0, canvas.width - 200, 200, 30);
-            ctx.fillText(new Date().toLocaleTimeString(), canvas.width / 2, canvas.height - 30);
-            requestAnimationFrame(updateCanvas);
-        };
-        requestAnimationFrame(updateCanvas);
-
-        // Get stream from canvas
-        return canvas.captureStream();
     };
 
     return (
@@ -1761,7 +2029,7 @@ function Screen() {
                     </div>
                 </div>
                 <div className="d_bottombar" style={{
-                    cursor: "pointer", width: windowWidth > 768 && show ? `calc(100% - ${mainSectionMargin}px)` : '100%',
+                    width: windowWidth > 768 && show ? `calc(100% - ${mainSectionMargin}px)` : '100%',
                     transition: 'width 0.3s ease-in-out'
                 }}>
                     <BottomBar
@@ -1899,7 +2167,6 @@ function Screen() {
 
                                                 <div className="d-flex align-items-center">
                                                     <div className="d_box me-sm-3 mb-2 mb-sm-0"
-                                                        onClick={() => toggleMicrophone(participant.id)}
                                                         style={{ cursor: "pointer" }}>
                                                         <img src={participant.isMicrophoneOn ? onmicrophone : offmicrophone} alt="" />
                                                     </div>
@@ -1925,6 +2192,7 @@ function Screen() {
                                                                     cursor: "pointer "
                                                                 }}
                                                             >
+                                                                
                                                                 {!participant.isHost && (
                                                                     <div
                                                                         className="px-3 py-2 hover-bg-secondary cursor-pointer"
@@ -1947,9 +2215,7 @@ function Screen() {
                                                                     Rename
                                                                 </div>
 
-                                                                <div className="px-3 py-2 hover-bg-secondary cursor-pointer"
-                                                                    onClick={() => toggleMicrophone(participant.id)}
-                                                                >
+                                                                <div className="px-3 py-2 hover-bg-secondary cursor-pointer">
                                                                     {
                                                                         participant.isMicrophoneOn ? "Mute" : "Unmute"
                                                                     }
@@ -2008,6 +2274,7 @@ function Screen() {
                                                             style={{
                                                                 border: '1px solid rgba(255, 255, 255, 0.2)',
                                                                 borderRadius: '4px',
+                                                                fontWeight: 600,
                                                                 backgroundColor: 'transparent',
                                                                 color: 'white'
                                                             }}
@@ -2018,6 +2285,7 @@ function Screen() {
                                                             className="btn btn-light flex-grow-1 py-2"
                                                             onClick={saveNewName}
                                                             style={{
+                                                                fontWeight: 600,
                                                                 borderRadius: '4px',
                                                                 backgroundColor: 'white',
                                                                 color: 'black'
