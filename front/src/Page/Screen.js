@@ -142,7 +142,8 @@ const BottomBar = React.memo(({
     isHandRaised,
     handleShow,
     unreadMessages,
-    show
+    show,
+    PictureInPicture
 }) => {
     return (
         <div className="d-flex justify-content-sm-between justify-content-center align-items-center">
@@ -218,7 +219,7 @@ const BottomBar = React.memo(({
                                 <img src={upload} alt="" className="me-2" />
                                 <span>Share Screen</span>
                             </div>
-                            <div className="d-flex align-items-center p-2">
+                            <div className="d-flex align-items-center p-2" onClick={toggleRecording}>
                                 <img src={recording} alt="" className="me-2" />
                                 <span>Record</span>
                             </div>
@@ -239,9 +240,9 @@ const BottomBar = React.memo(({
                                     </div>
                                 )}
                             </div>
-                            <div className="d-flex align-items-center p-2">
+                            <div className="d-flex align-items-center p-2" onClick={PictureInPicture}>
                                 <img src={podcast} alt="" className="me-2" />
-                                <span>Audio Settings</span>
+                                <span>Picture in Picture</span>
                             </div>
                             <div className="d-flex align-items-center p-2"
                                 onClick={toggleHandRaise}
@@ -291,7 +292,7 @@ const BottomBar = React.memo(({
                                 </div>
                             )}
                         </div>
-                        <div className="d_box me-sm-3">
+                        <div className="d_box me-sm-3" onClick={PictureInPicture}>
                             <img src={podcast} alt="" />
                         </div>
                     </div>
@@ -398,7 +399,7 @@ function Screen() {
     const [lastUnreadIndex, setLastUnreadIndex] = useState(-1);
     const [pendingJoinRequests, setPendingJoinRequests] = useState([]);
     const [isRecording, setIsRecording] = useState(false);
-    const [recordedChunks, setRecordedChunks] = useState([]);
+
 
     // Refs
     const localVideoRef = useRef();
@@ -409,6 +410,8 @@ function Screen() {
     const mediaRecorderRef = useRef(null);
     const recordingTimerRef = useRef(null);
     const recordingDivRef = useRef(null);
+    const frameCaptureIntervalRef = useRef(null);
+    const canvasRef = useRef(null);
 
     // Effect to update pending join requests from socket
     useEffect(() => {
@@ -1399,45 +1402,46 @@ function Screen() {
                 mediaRecorderRef.current.stop();
                 setIsRecording(false);
                 clearInterval(recordingTimerRef.current);
+                clearInterval(frameCaptureIntervalRef.current); // Stop canvas updates
                 recordingTimerRef.current = null;
-                // Don't clear recordedChunks here - let the onstop handler deal with them
+
+                if (socket) {
+                    socket.emit('recording-status-change', {
+                        roomId,
+                        isRecording: false
+                    });
+                }
             }
         } else {
             try {
-                // Get the recording div element
                 const recordingDiv = recordingDivRef.current;
                 if (!recordingDiv) {
                     console.error('Recording div not found');
                     return;
                 }
 
-                // Create a canvas with the same dimensions as the recording div
                 const canvas = document.createElement('canvas');
                 const rect = recordingDiv.getBoundingClientRect();
                 canvas.width = rect.width;
                 canvas.height = rect.height;
                 const ctx = canvas.getContext('2d');
+                canvasRef.current = canvas;
 
-                // Create audio context for all audio streams
                 const audioContext = new AudioContext();
                 const audioDestination = audioContext.createMediaStreamDestination();
 
-                // Add all audio tracks to the audio destination
                 if (localStream) {
-                    const audioTracks = localStream.getAudioTracks();
-                    if (audioTracks.length > 0) {
-                        const audioSource = audioContext.createMediaStreamSource(new MediaStream([audioTracks[0]]));
-                        audioSource.connect(audioDestination);
-                    }
+                    localStream.getAudioTracks().forEach(track => {
+                        const source = audioContext.createMediaStreamSource(new MediaStream([track]));
+                        source.connect(audioDestination);
+                    });
                 }
 
-                // Add remote audio streams
                 Object.values(remoteStreams).forEach(stream => {
-                    const audioTracks = stream.getAudioTracks();
-                    if (audioTracks.length > 0) {
-                        const audioSource = audioContext.createMediaStreamSource(new MediaStream([audioTracks[0]]));
-                        audioSource.connect(audioDestination);
-                    }
+                    stream.getAudioTracks().forEach(track => {
+                        const source = audioContext.createMediaStreamSource(new MediaStream([track]));
+                        source.connect(audioDestination);
+                    });
                 });
 
                 let lastCapturedImage = null;
@@ -1446,137 +1450,79 @@ function Screen() {
                     if (!recordingDiv) return;
 
                     try {
-                        const capturedCanvas = await html2canvas(recordingDiv, {
+                        const snapshot = await html2canvas(recordingDiv, {
                             backgroundColor: null,
                             useCORS: true,
                             scale: window.devicePixelRatio || 1,
                         });
-
-                        lastCapturedImage = capturedCanvas;
+                        lastCapturedImage = snapshot;
                     } catch (err) {
                         console.error("Failed to capture html2canvas", err);
                     }
                 };
 
-                // Refresh screenshot every 1s
-                setInterval(() => {
-                    captureHtmlToCanvas();
-                }, 1000);
-
-                // Draw the last captured image every frame
                 const drawScreen = () => {
-                    ctx.fillStyle = '#12161C';
-                    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
                     if (lastCapturedImage) {
                         ctx.drawImage(lastCapturedImage, 0, 0, canvas.width, canvas.height);
                     }
-
                     requestAnimationFrame(drawScreen);
                 };
 
-                drawScreen();
+                drawScreen(); // Kick off animation
 
-                // Create a stream from the canvas
-                const canvasStream = canvas.captureStream(30); // 30 FPS
+                // ⏱️ Update canvas content at 30fps
+                const frameCaptureInterval = setInterval(captureHtmlToCanvas, 33);
+                frameCaptureIntervalRef.current = frameCaptureInterval;
 
-                // Add audio tracks to the canvas stream
+                const canvasStream = canvas.captureStream(30);
                 audioDestination.stream.getAudioTracks().forEach(track => {
                     canvasStream.addTrack(track);
                 });
 
-                // Set up chunks array before recording starts
                 const chunks = [];
-
-                // Try WebM first as it has better browser support
-                const options = { mimeType: 'video/webm; codecs=vp9,opus' };
-                mediaRecorderRef.current = new MediaRecorder(canvasStream, options);
+                mediaRecorderRef.current = new MediaRecorder(canvasStream, { mimeType: 'video/webm' });
 
                 mediaRecorderRef.current.ondataavailable = (event) => {
-                    if (event.data.size > 0) {
-                        chunks.push(event.data);
-                        console.log("Chunk added, size:", event.data.size);
-                    }
+                    if (event.data.size > 0) chunks.push(event.data);
                 };
 
                 mediaRecorderRef.current.onstop = () => {
-                    console.log("Recording stopped, total chunks:", chunks.length);
                     if (chunks.length > 0) {
-                        // First save as WebM
                         const blob = new Blob(chunks, { type: 'video/webm' });
-
-                        // Create a URL for the blob
                         const url = URL.createObjectURL(blob);
-
-                        // Create a download link and trigger it
                         const a = document.createElement('a');
-                        a.style.display = 'none';
                         a.href = url;
-                        a.download = `meeting-recording-${roomId}-${new Date().toLocaleDateString('en-GB')}.mp4`;
+                        a.download = `meeting-recording-${roomId}-${new Date().toLocaleDateString('en-GB')}.webm`;
+                        a.style.display = 'none';
                         document.body.appendChild(a);
-                        console.log("Download link created");
                         a.click();
-                        console.log("Download triggered");
-
-                        // Clean up
                         setTimeout(() => {
                             document.body.removeChild(a);
-                            window.URL.revokeObjectURL(url);
-                            console.log("Cleanup done");
+                            URL.revokeObjectURL(url);
                         }, 100);
-                    } else {
-                        console.warn("No chunks available for download");
                     }
                 };
 
-                // Start recording with 1 second chunks
-                mediaRecorderRef.current.start(1000);
+                mediaRecorderRef.current.start();
                 setIsRecording(true);
-                setRecordedChunks([]); // Reset recorded chunks
+                // setRecordedChunks([]);
 
-                // Start timer
                 recordingTimerRef.current = setInterval(() => {
                     setRecordingTime(prev => prev + 1);
                 }, 1000);
 
-                // Notify others that recording has started
                 if (socket) {
                     socket.emit('recording-status-change', {
                         roomId,
                         isRecording: true
                     });
                 }
-
             } catch (error) {
                 console.error('Error starting recording:', error);
             }
         }
     };
-
-    // useEffect(() => {
-    //     if (recordedChunks.length > 0 && !isRecording) {
-    //         // The recording has stopped and we have chunks
-    //         const blob = new Blob(recordedChunks, {
-    //             type: 'video/mp4'
-    //         });
-
-    //         // Create a URL for the blob
-    //         const url = URL.createObjectURL(blob);
-
-    //         // Create a download link
-    //         const a = document.createElement('a');
-    //         document.body.appendChild(a);
-    //         a.style = 'display: none';
-    //         a.href = url;
-    //         a.download = `meeting-recording-${roomId}-${new Date().toLocaleDateString('en-GB')}.mp4`;
-    //         a.click();
-
-    //         // Clean up
-    //         window.URL.revokeObjectURL(url);
-    //         document.body.removeChild(a);
-    //         setRecordedChunks([]);
-    //     }
-    // }, [recordedChunks, isRecording]);
 
     // Add a socket handler to your useEffect that sets up WebRTC handlers
     useEffect(() => {
@@ -1615,6 +1561,117 @@ function Screen() {
             String(mins).padStart(2, '0'),
             String(secs).padStart(2, '0')
         ].filter(Boolean).join(':');
+    };
+
+    // picture in picture
+    const togglePictureInPicture = async () => {
+        try {
+            // First check if PiP is supported
+            if (!document.pictureInPictureEnabled) {
+                console.warn('Picture-in-Picture not supported by this browser');
+                return;
+            }
+
+            // If already in PiP mode, exit it
+            if (document.pictureInPictureElement) {
+                await document.exitPictureInPicture();
+                return;
+            }
+
+            // Determine which video to use for PiP
+            // Priority: 1. Active speaker's video 2. Local video 3. First remote video
+            let pipVideo = null;
+
+            // Check for an active speaker first
+            const activeSpeakerParticipant = participants.find(p =>
+                p.id !== socket?.id && remoteStreams[p.id] && p.hasVideo !== false
+            );
+
+            if (activeSpeakerParticipant && videoRefsMap.current[activeSpeakerParticipant.id]) {
+                pipVideo = videoRefsMap.current[activeSpeakerParticipant.id];
+            }
+            // Fallback to local video if no active speaker
+            else if (localVideoRef.current && localStream && !isVideoOff) {
+                pipVideo = localVideoRef.current;
+            }
+            // Final fallback: use first remote video that's enabled
+            else {
+                for (const participant of participants) {
+                    if (participant.id !== socket?.id && participant.hasVideo !== false) {
+                        const videoRef = videoRefsMap.current[participant.id];
+                        if (videoRef && videoRef.srcObject) {
+                            pipVideo = videoRef;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            // If we have a valid video element, request PiP
+            if (pipVideo) {
+                await pipVideo.requestPictureInPicture();
+
+                // Add event listener for when PiP window is closed
+                pipVideo.addEventListener('leavepictureinpicture', () => {
+                    console.log('Picture-in-Picture mode closed');
+                }, { once: true });
+            } else {
+                console.warn('No suitable video found for Picture-in-Picture');
+
+                // If no video is available, create a temporary one with meeting info
+                const tempVideo = document.createElement('video');
+                tempVideo.srcObject = createInfoStream();
+                tempVideo.autoplay = true;
+                tempVideo.muted = true;
+                document.body.appendChild(tempVideo);
+
+                try {
+                    await tempVideo.play();
+                    await tempVideo.requestPictureInPicture();
+
+                    tempVideo.addEventListener('leavepictureinpicture', () => {
+                        document.body.removeChild(tempVideo);
+                    }, { once: true });
+                } catch (err) {
+                    console.error('Failed to create temporary PiP:', err);
+                    document.body.removeChild(tempVideo);
+                }
+            }
+        } catch (error) {
+            console.error('Failed to enter Picture-in-Picture mode:', error);
+        }
+    };
+
+    // Helper function to create a canvas stream with meeting info when no video is available
+    const createInfoStream = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = 640;
+        canvas.height = 360;
+
+        const ctx = canvas.getContext('2d');
+
+        // Draw background
+        ctx.fillStyle = '#1a1a1a';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Draw meeting info
+        ctx.fillStyle = '#ffffff';
+        ctx.font = '24px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText(`Meeting ID: ${roomId}`, canvas.width / 2, canvas.height / 2 - 20);
+        ctx.fillText(`Participants: ${participants.length}`, canvas.width / 2, canvas.height / 2 + 20);
+
+        // Create animation to keep the stream active
+        const updateCanvas = () => {
+            // Update timestamp
+            ctx.clearRect(0, canvas.width - 200, 200, 30);
+            ctx.fillText(new Date().toLocaleTimeString(), canvas.width / 2, canvas.height - 30);
+            requestAnimationFrame(updateCanvas);
+        };
+        requestAnimationFrame(updateCanvas);
+
+        // Get stream from canvas
+        return canvas.captureStream();
     };
 
     return (
@@ -1659,12 +1716,12 @@ function Screen() {
                     </div>
                 ))}
 
-                {isRecording && (
+                {/* {isRecording && (
                     <div className="j_recording_indicator">
                         <span className="j_recording_dot"></span>
                         Recording: {formatRecordingTime(recordingTime)}
                     </div>
-                )}
+                )} */}
             </div>
             <section className="d_mainsec" style={{
                 marginRight: windowWidth > 768 ? `${mainSectionMargin}px` : 0,
@@ -1726,6 +1783,7 @@ function Screen() {
                         handleShow={handleShow}
                         unreadMessages={unreadMessages}
                         show={show}
+                        PictureInPicture={togglePictureInPicture}
                     />
                 </div>
             </section>
