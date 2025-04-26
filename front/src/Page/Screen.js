@@ -1,5 +1,9 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { FaChevronLeft } from 'react-icons/fa';
+import { ImCross } from 'react-icons/im';
 import './../CSS/darshan.css';
+import search from '../Image/Search.png';
+import left from '../Image/left.svg';
 import onmicrophone from '../Image/d_onmicrophone.svg';
 import offmicrophone from '../Image/d_offmicrophone.svg';
 import endcall from '../Image/endcall.svg';
@@ -350,7 +354,7 @@ function Screen() {
     const userId = sessionStorage.getItem('userId');
     const currUser = useSelector((state) => state.user.currUser);
     const userInitials = currUser?.name ? `${currUser.name.charAt(0)}${currUser.name.split(' ')[1] ? currUser.name.split(' ')[1].charAt(0) : ''}` : 'U';
-    const userName = currUser?.name || 'User';
+    const userName = currUser?.name;
 
     // Use the socket hook
     const {
@@ -378,8 +382,8 @@ function Screen() {
         sendOffer,
         sendAnswer,
         sendIceCandidate,
-        joinRequests, // New state for join requests
-        handleJoinRequest,// New function to handle requests,
+        joinRequests,
+        handleJoinRequest,
     } = useSocket(userId, roomId, userName);
 
     // WebRTC State
@@ -393,7 +397,7 @@ function Screen() {
     const [localStream, setLocalStream] = useState(null);
     const [remoteStreams, setRemoteStreams] = useState({});
     const [maxVisibleParticipants, setMaxVisibleParticipants] = useState(9);
-    const [billingCycle, setBillingCycle] = useState('Messages');
+    const [messageUser, setmessageUser] = useState('Messages');
     const [activeDropdown, setActiveDropdown] = useState(null);
     const [mainSectionMargin, setMainSectionMargin] = useState(0);
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
@@ -404,7 +408,15 @@ function Screen() {
     const [lastUnreadIndex, setLastUnreadIndex] = useState(-1);
     const [pendingJoinRequests, setPendingJoinRequests] = useState([]);
     const [isRecording, setIsRecording] = useState(false);
+    const [isHost, setIsHost] = useState(false);
+    const [InvitePeople, setInvitePeople] = useState(false)
 
+
+    useEffect(() => {
+        const currentUserId = currUser?._id;
+        const currentUserIsHost = participants.some(participant => participant.userId === currentUserId && participant.isHost);
+        setIsHost(currentUserIsHost);
+    }, [participants, currUser]);
 
     // Refs
     const localVideoRef = useRef();
@@ -1381,7 +1393,7 @@ function Screen() {
 
     // Add this function to filter participants
     const filteredParticipants = participants.filter(participant =>
-        participant.name.toLowerCase().includes(searchTerm.toLowerCase())
+        participant.name?.toLowerCase()?.includes(searchTerm?.toLowerCase())
     );
 
     const handleTextareaResize = (e) => {
@@ -2078,317 +2090,366 @@ function Screen() {
                 }}
 
             >
-
-                <Offcanvas.Header className='d-flex justify-content-between align-items-center' >
-                    <div className='d-flex justify-content-center ms-3 py-2' >
-                        <div className='d-flex' style={{ backgroundColor: '#101924', padding: '6px', borderRadius: '8px' }}>
-                            <button
-                                type="button"
-                                className=" B_screen_button border-0 rounded"
-                                style={{
-                                    minWidth: '100px',
-                                    backgroundColor: billingCycle === 'Messages' ? '#2A323B' : 'transparent',
-                                    color: billingCycle === 'Messages' ? '#ffffff' : '#87898B'
-                                }}
-                                onClick={() => setBillingCycle('Messages')}
-                            >
-                                Messages ({messages.length})
-                            </button>
-                            <button
-                                type="button"
-                                className=" B_screen_button border-0 rounded"
-                                style={{
-                                    minWidth: '100px',
-                                    backgroundColor: billingCycle === 'Participants' ? '#2A323B' : 'transparent',
-                                    color: billingCycle === 'Participants' ? '#ffffff' : '#87898B'
-                                }}
-                                onClick={() => setBillingCycle('Participants')}
-                            >
-                                Participants ({participants.length})
-                            </button>
+                {InvitePeople ? (
+                    <div
+                        className="j_invite_people_Div w-100 h-100 position-relative"
+                        style={{
+                            boxShadow: "inset 0 0 5px 0 rgba(0, 0, 0, 0.1)",
+                        }}
+                    >
+                        <div className="d-flex justify-content-between align-items-center pb-2 p-4">
+                            <div className="d-flex gap-2 align-items-center">
+                                <button
+                                    onClick={() => setInvitePeople(false)}
+                                    className="btn j_invite_Btn p-0"
+                                >
+                                    <img src={left} alt="Left" />
+                                </button>
+                                <h2 className="j_invite_people mb-0">
+                                    Invite people
+                                </h2>
+                            </div>
                         </div>
                     </div>
+                ) : (
+                    <>
 
-                    <IoClose
-                        style={{ color: '#fff', fontSize: '20px', marginBottom: "20px", cursor: 'pointer' }}
-                        onClick={handleClose}
-                    />
-                </Offcanvas.Header>
-                <div className='mx-2 mb-4' style={{ borderBottom: "1px solid #3f464e" }}></div>
-
-
-                {billingCycle === 'Participants' ? (
-                    <Offcanvas.Body className='B_Ofcanvasbody' >
-                        <>
-                            <div className='d-flex flex-column h-100 '>
-                                <div className="B_search-container  mb-3" >
-                                    <div className="position-relative B_input_search B_input_search11  mx-auto">
-                                        <IoSearch className=' position-absolute' style={{ top: "50%", transform: "translateY(-50%)", left: "15px", fontSize: "20px", color: "rgba(255, 255, 255, 0.7)" }} />
-                                        <input
-                                            type="text"
-                                            className="form-control text-white j_search_Input ps-5"
-                                            placeholder="Search..."
-                                            value={searchTerm}
-                                            onChange={(e) => setSearchTerm(e.target.value)}
-                                            style={{ borderRadius: '5px', border: 'none', backgroundColor: "#202F41" }}
-                                        />
-                                    </div>
+                        <Offcanvas.Header className='d-flex justify-content-between align-items-center' >
+                            <div className='d-flex justify-content-center ms-3 py-2' >
+                                <div className='d-flex' style={{ backgroundColor: '#101924', padding: '6px', borderRadius: '8px' }}>
+                                    <button
+                                        type="button"
+                                        className=" B_screen_button border-0 rounded"
+                                        style={{
+                                            minWidth: '100px',
+                                            backgroundColor: messageUser === 'Messages' ? '#2A323B' : 'transparent',
+                                            color: messageUser === 'Messages' ? '#ffffff' : '#87898B'
+                                        }}
+                                        onClick={() => setmessageUser('Messages')}
+                                    >
+                                        Messages ({messages.length})
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className=" B_screen_button border-0 rounded"
+                                        style={{
+                                            minWidth: '100px',
+                                            backgroundColor: messageUser === 'Participants' ? '#2A323B' : 'transparent',
+                                            color: messageUser === 'Participants' ? '#ffffff' : '#87898B'
+                                        }}
+                                        onClick={() => setmessageUser('Participants')}
+                                    >
+                                        Participants ({participants.length})
+                                    </button>
                                 </div>
-                                <div className="list-group B_screen_offcanvas " style={{ height: "82%", overflowY: "auto" }}>
-                                    {filteredParticipants.length > 0 ? (
-                                        filteredParticipants.map((participant) => (
-                                            <div key={participant.id} className="list-group-item d-flex align-items-center">
-                                                <div className="rounded-circle B_circle d-flex justify-content-center align-items-center me-3"
-                                                    style={{
-                                                        width: "40px",
-                                                        height: "40px",
-                                                        backgroundColor: `hsl(${participant.id.charCodeAt(0) * 60}, 70%, 45%)`,
-                                                        color: 'white',
-                                                        textTransform: 'uppercase'
-                                                    }}>
-                                                    {participant.initials}
-                                                </div>
-                                                <div className="flex-grow-1 B_participateName">
-                                                    <div>{participant.name}</div>
-                                                </div>
+                            </div>
 
-                                                {/* Display Host or Cohost label */}
-                                                {(participant.isHost || participant.isCohost) && (
-                                                    <div className="me-3">
-                                                        <span className="px-3 py-1 rounded-pill text-white"
+                            <IoClose
+                                style={{ color: '#fff', fontSize: '20px', marginBottom: "20px", cursor: 'pointer' }}
+                                onClick={handleClose}
+                            />
+                        </Offcanvas.Header>
+                        <div className='mx-2 mb-4' style={{ borderBottom: "1px solid #3f464e" }}></div>
+
+
+                        {messageUser === 'Participants' ? (
+                            <Offcanvas.Body className='B_Ofcanvasbody' >
+                                <>
+                                    <div className='d-flex flex-column h-100 '>
+                                        <div className="B_search-container  mb-3" >
+                                            <div className="position-relative">
+                                                <IoSearch className=' position-absolute' style={{ top: "50%", transform: "translateY(-50%)", left: "15px", fontSize: "20px", color: "rgba(255, 255, 255, 0.7)" }} />
+                                                <input
+                                                    type="text"
+                                                    className="form-control text-white j_search_Input ps-5"
+                                                    placeholder="Search people.."
+                                                    value={searchTerm}
+                                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                                    style={{ padding: '12px', borderRadius: '5px', border: 'none', backgroundColor: "#202F41" }}
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="list-group B_screen_offcanvas " style={{ height: "82%", overflowY: "auto" }}>
+                                            {filteredParticipants.length > 0 ? (
+                                                filteredParticipants.map((participant, index) => (
+                                                    <div key={participant.id} className="list-group-item d-flex align-items-center">
+                                                        <div className="rounded-circle B_circle d-flex justify-content-center align-items-center me-3"
                                                             style={{
-                                                                backgroundColor: "rgba(255, 255, 255, 0.2)",
-                                                                fontSize: "0.8rem"
+                                                                width: "40px",
+                                                                height: "40px",
+                                                                backgroundColor: `hsl(${participant.id.charCodeAt(0) * 60}, 70%, 45%)`,
+                                                                color: 'white',
+                                                                textTransform: 'uppercase'
                                                             }}>
-                                                            {participant.isHost ? "Host" : "Cohost"}
-                                                        </span>
-                                                    </div>
-                                                )}
+                                                            {participant.initials}
+                                                        </div>
+                                                        <div className="flex-grow-1 B_participateName">
+                                                            <div>{participant.name}</div>
+                                                        </div>
 
-                                                <div className="d-flex align-items-center">
-                                                    <div className="d_box me-sm-3 mb-2 mb-sm-0"
-                                                        style={{ cursor: "pointer" }}>
-                                                        <img src={participant.isMicrophoneOn ? onmicrophone : offmicrophone} alt="" />
-                                                    </div>
-
-                                                    <div className="position-relative">
-                                                        <HiOutlineDotsVertical
-                                                            className='mt-1 cursor-pointer B_vertical'
-                                                            style={{ cursor: "pointer" }}
-                                                            onClick={(e) => {
-                                                                e.stopPropagation();
-                                                                setActiveDropdown(activeDropdown === participant.id ? null : participant.id);
-                                                            }}
-                                                        />
-
-                                                        {activeDropdown === participant.id && (
-                                                            <div
-                                                                className="position-absolute end-0 bg-dark text-white rounded shadow py-2"
-                                                                style={{
-                                                                    zIndex: 1000,
-                                                                    width: '150px',
-                                                                    top: '100%',
-                                                                    right: 0,
-                                                                    cursor: "pointer "
-                                                                }}
-                                                            >
-                                                                
-                                                                {!participant.isHost && (
-                                                                    <div
-                                                                        className="px-3 py-2 hover-bg-secondary cursor-pointer"
-                                                                        onClick={() => makeHost(participant.id)}
-                                                                    >
-                                                                        Make host
-                                                                    </div>
-                                                                )}
-                                                                {!participant.isCohost && !participant.isHost && (
-                                                                    <div
-                                                                        className="px-3 py-2 hover-bg-secondary cursor-pointer"
-                                                                        onClick={() => makeCohost(participant.id)}
-                                                                    >
-                                                                        Make cohost
-                                                                    </div>
-                                                                )}
-                                                                <div
-                                                                    className="px-3 py-2 hover-bg-secondary cursor-pointer"
-                                                                    onClick={() => openRenameModal(participant)}>
-                                                                    Rename
-                                                                </div>
-
-                                                                <div className="px-3 py-2 hover-bg-secondary cursor-pointer">
-                                                                    {
-                                                                        participant.isMicrophoneOn ? "Mute" : "Unmute"
-                                                                    }
-                                                                </div>
-
-                                                                <div
-                                                                    className="px-3 py-2 hover-bg-secondary cursor-pointer"
-                                                                    onClick={() => removeParticipant(participant.id)}
-                                                                >
-                                                                    Remove
-                                                                </div>
+                                                        {/* Display Host or Cohost label */}
+                                                        {(participant.isHost || participant.isCohost) && (
+                                                            <div className="me-3">
+                                                                <span className="px-3 py-1 rounded-pill text-white"
+                                                                    style={{
+                                                                        backgroundColor: "rgba(255, 255, 255, 0.2)",
+                                                                        fontSize: "0.8rem"
+                                                                    }}>
+                                                                    {participant.isHost ? "Host" : "Cohost"}
+                                                                </span>
                                                             </div>
                                                         )}
+
+                                                        <div className="d-flex align-items-center">
+                                                            {participant.hasRaisedHand && (
+                                                                <img
+                                                                    src={hand}
+                                                                    className="d_control-icon me-1 mt-1"
+                                                                    alt="Hand raised"
+                                                                    style={{
+                                                                        animation: 'd_handWave 1s infinite',
+                                                                        transform: 'translateY(-2px)'
+                                                                    }}
+                                                                />
+                                                            )}
+                                                            <div className="d_box me-sm-3 mb-2 mb-sm-0"
+                                                                style={{ cursor: "pointer" }}>
+                                                                <img src={participant.hasAudio ? onmicrophone : offmicrophone} alt="MicroPhone" />
+                                                            </div>
+
+                                                            <div className="position-relative">
+                                                                <HiOutlineDotsVertical
+                                                                    className='mt-1 cursor-pointer B_vertical'
+                                                                    style={{ cursor: "pointer" }}
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        setActiveDropdown(activeDropdown === participant.id ? null : participant.id);
+                                                                    }}
+                                                                />
+
+                                                                {activeDropdown === participant.id && (
+                                                                    <div
+                                                                        className="position-absolute end-0 bg-dark text-white rounded shadow py-2"
+                                                                        style={{
+                                                                            zIndex: 1000,
+                                                                            width: '150px',
+                                                                            top: '100%',
+                                                                            right: 0,
+                                                                            cursor: "pointer "
+                                                                        }}
+                                                                    >
+                                                                        {isHost ? ( // Show all options if current user is host
+                                                                            <>
+                                                                                {/* <div className="px-3 py-2 hover-bg-secondary cursor-pointer" onClick={() => makeHost(participant.id)}>
+                                                                                                Make host
+                                                                                            </div>
+                                                                                            <div className="px-3 py-2 hover-bg-secondary cursor-pointer" onClick={() => makeCohost(participant.id)}>
+                                                                                                Make cohost
+                                                                                            </div> */}
+                                                                                {!participant.isHost && (
+                                                                                    <div
+                                                                                        className="px-3 py-2 hover-bg-secondary cursor-pointer"
+                                                                                        onClick={() => makeHost(participant.id)}
+                                                                                    >
+                                                                                        Make host
+                                                                                    </div>
+                                                                                )}
+                                                                                {!participant.isCohost && !participant.isHost && (
+                                                                                    <div
+                                                                                        className="px-3 py-2 hover-bg-secondary cursor-pointer"
+                                                                                        onClick={() => makeCohost(participant.id)}
+                                                                                    >
+                                                                                        Make cohost
+                                                                                    </div>
+                                                                                )}
+                                                                                <div className="px-3 py-2 hover-bg-secondary cursor-pointer" onClick={() => openRenameModal(participant)}>
+                                                                                    Rename
+                                                                                </div>
+                                                                                <div className="px-3 py-2 hover-bg-secondary cursor-pointer" onClick={toggleAudio}>
+                                                                                    {participant.hasAudio ? "Mute" : "Unmute"}
+                                                                                </div>
+                                                                                <div className="px-3 py-2 hover-bg-secondary cursor-pointer" onClick={() => removeParticipant(participant.id)}>
+                                                                                    Remove
+                                                                                </div>
+                                                                            </>
+                                                                        ) : ( // Show limited options if current user is not host
+                                                                            <>
+                                                                                <div className="px-3 py-2 hover-bg-secondary cursor-pointer" onClick={() => openRenameModal(participant)}>
+                                                                                    Rename
+                                                                                </div>
+                                                                                <div className="px-3 py-2 hover-bg-secondary cursor-pointer" onClick={toggleAudio}>
+                                                                                    {participant.hasAudio ? "Mute" : "Unmute"}
+                                                                                </div>
+                                                                            </>
+                                                                        )}
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        </div>
                                                     </div>
-                                                </div>
-                                            </div>
-                                        ))
-                                    ) : (
-                                        <div className="text-center py-4">
-                                            <p className="text-white-50 mb-0">
-                                                {searchTerm ? 'No users found' : 'No participants in the meeting'}
-                                            </p>
-                                        </div>
-                                    )}
-
-                                    {showRenameModal && (
-                                        <div className="position-fixed top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center"
-                                            style={{ backgroundColor: 'rgba(0, 0, 0, 0.7)', zIndex: 1050 }}>
-                                            <div className=" text-white rounded" style={{ width: '430px', maxWidth: '90%', backgroundColor: "#12161C" }}>
-                                                <div className="d-flex justify-content-between align-items-center p-3 border-bottom border-secondary">
-                                                    <h6 className="m-0 B_EditName" >Edit display name</h6>
-                                                    <button
-                                                        type="button"
-                                                        className="btn-close btn-close-white"
-                                                        onClick={() => setShowRenameModal(false)}
-                                                        aria-label="Close"
-                                                    ></button>
-                                                </div>
-
-                                                <div className="p-4 B_screen_Pad">
-                                                    <div className="mb-3">
-                                                        <label className="form-label small mb-2 text-white-50 mb-2  ">Name</label>
-                                                        <input
-                                                            type="text"
-                                                            className="form-control j_search_Input text-white border-0"
-                                                            value={newName}
-                                                            onChange={(e) => setNewName(e.target.value)}
-                                                            style={{ padding: '10px', backgroundColor: "#202F41" }}
-                                                        />
+                                                ))
+                                            ) : (
+                                                <>
+                                                    {/* <p className='text-white mb-0'>Search results</p> */}
+                                                    <div className="text-center py-4">
+                                                        <img src={search} alt="Search" className='j_no_users' />
+                                                        <p className="text-white mb-0">
+                                                            {searchTerm ? 'No result found' : 'No participants in the meeting'}
+                                                        </p>
                                                     </div>
+                                                </>
+                                            )}
 
-                                                    <div className="d-flex justify-content-between gap-3 mt-5 B_screen_Margin">
-                                                        <button
-                                                            className="btn flex-grow-1 py-2"
-                                                            onClick={() => setShowRenameModal(false)}
-                                                            style={{
-                                                                border: '1px solid rgba(255, 255, 255, 0.2)',
-                                                                borderRadius: '4px',
-                                                                fontWeight: 600,
-                                                                backgroundColor: 'transparent',
-                                                                color: 'white'
-                                                            }}
-                                                        >
-                                                            Cancel
-                                                        </button>
-                                                        <button
-                                                            className="btn btn-light flex-grow-1 py-2"
-                                                            onClick={saveNewName}
-                                                            style={{
-                                                                fontWeight: 600,
-                                                                borderRadius: '4px',
-                                                                backgroundColor: 'white',
-                                                                color: 'black'
-                                                            }}
-                                                        >
-                                                            Save
-                                                        </button>
+                                            {showRenameModal && (
+                                                <div className="position-fixed top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center"
+                                                    style={{ backgroundColor: 'rgba(0, 0, 0, 0.7)', zIndex: 1050 }}>
+                                                    <div className=" text-white rounded" style={{ width: '430px', maxWidth: '90%', backgroundColor: "#12161C" }}>
+                                                        <div className="d-flex justify-content-between align-items-center p-3 border-bottom border-secondary">
+                                                            <h6 className="m-0 B_EditName" >Edit display name</h6>
+                                                            <button
+                                                                type="button"
+                                                                className="btn-close btn-close-white"
+                                                                onClick={() => setShowRenameModal(false)}
+                                                                aria-label="Close"
+                                                            ></button>
+                                                        </div>
+
+                                                        <div className="p-4 B_screen_Pad">
+                                                            <div className="mb-3">
+                                                                <label className="form-label small mb-2 text-white-50 mb-2  ">Name</label>
+                                                                <input
+                                                                    type="text"
+                                                                    className="form-control j_search_Input text-white border-0"
+                                                                    value={newName}
+                                                                    onChange={(e) => setNewName(e.target.value)}
+                                                                    style={{ padding: '10px', backgroundColor: "#202F41" }}
+                                                                />
+                                                            </div>
+
+                                                            <div className="d-flex justify-content-between gap-3 mt-5 B_screen_Margin">
+                                                                <button
+                                                                    className="btn flex-grow-1 py-2"
+                                                                    onClick={() => setShowRenameModal(false)}
+                                                                    style={{
+                                                                        border: '1px solid rgba(255, 255, 255, 0.2)',
+                                                                        borderRadius: '4px',
+                                                                        fontWeight: 600,
+                                                                        backgroundColor: 'transparent',
+                                                                        color: 'white'
+                                                                    }}
+                                                                >
+                                                                    Cancel
+                                                                </button>
+                                                                <button
+                                                                    className="btn btn-light flex-grow-1 py-2"
+                                                                    onClick={saveNewName}
+                                                                    style={{
+                                                                        fontWeight: 600,
+                                                                        borderRadius: '4px',
+                                                                        backgroundColor: 'white',
+                                                                        color: 'black'
+                                                                    }}
+                                                                >
+                                                                    Save
+                                                                </button>
+                                                            </div>
+                                                        </div>
                                                     </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
-
-                                <div className='d-flex justify-content-center mb-3 mt-auto' >
-                                    <Button className='B_screen_btn fw-semibold p-2'> <HiOutlineUserPlus className='fw-bold' style={{ fontSize: "20px" }} /> Invite people </Button>
-                                    <Button className='B_screen_btn fw-semibold p-2'> Mute all </Button>
-                                </div>
-
-                            </div>
-                        </>
-
-
-                    </Offcanvas.Body>
-                ) : (
-                    <Offcanvas.Body >
-                        <>
-                            <div className="chat-container h-100 d-flex flex-column">
-                                <div className="chat-messages flex-grow-1" ref={messageContainerRef} style={{ overflowY: 'auto' }}>
-                                    {messages.map((msg, index) => (
-                                        <div key={index}
-                                            className={`d-flex align-items-start me-2 mb-3 ${index === lastUnreadIndex ? 'first-unread' : ''}`}
-                                        >
-                                            {msg.sender !== userName && (
-                                                <div className="chat-avatar me-2" style={{
-                                                    backgroundColor: msg.sender === userName ? '#2B7982' : '#4A90E2',
-                                                    width: '32px',
-                                                    height: '32px',
-                                                    borderRadius: '50%',
-                                                    display: 'flex',
-                                                    alignItems: 'center',
-                                                    justifyContent: 'center',
-                                                    textTransform: 'uppercase'
-                                                }}>
-                                                    <span style={{ color: '#fff' }}>{msg.sender.charAt(0)}</span>
                                                 </div>
                                             )}
-                                            <div className="chat-message" style={{ marginLeft: msg.sender === userName ? 'auto' : '0' }}>
-                                                <div className="small" style={{ color: msg.sender === userName ? 'white' : '#b3aeae', textAlign: msg.sender === userName ? 'end' : 'start' }}>
-                                                    {msg.sender === userName ? 'You' : msg.sender}
-                                                </div>
-                                                <div style={{
-                                                    backgroundColor: msg.sender === userName ? '#2A323B' : '#1E242B',
-                                                    color: msg.sender === userName ? 'white' : '#b3aeae',
-                                                    padding: '8px 12px',
-                                                    borderRadius: '8px',
-                                                    maxWidth: '250px',
-                                                    wordBreak: 'break-word',
-                                                    whiteSpace: 'pre-wrap'
-                                                }}>{msg.message}</div>
-                                            </div>
                                         </div>
-                                    ))}
-                                    {lastUnreadIndex >= 0 && (
-                                        <div className="unread-messages-divider">
-                                            <span>Unread Messages</span>
+
+                                        <div className='d-flex justify-content-center mb-3 mt-auto' >
+                                            <Button className='B_screen_btn fw-semibold p-2' onClick={() => setInvitePeople(true)}> <HiOutlineUserPlus className='fw-bold' style={{ fontSize: "20px" }} /> Invite people </Button>
+                                            <Button className='B_screen_btn fw-semibold p-2'> Mute all </Button>
                                         </div>
-                                    )}
-                                </div>
 
-                                {renderTypingIndicator()}
-
-                                <div className="B_search-container  mb-3" >
-                                    <div className="position-relative B_input_search B_input_search22  mx-auto">
-                                        <form onSubmit={handleSendMessage} className="mt-3 d-flex">
-                                            <div className='B_send_msginput j_search_Input'>
-                                                <textarea
-                                                    type="text"
-                                                    className="form-control text-white d_foucscolor B_send_msginput j_search_Input ps-3"
-                                                    value={newMessage}
-                                                    onChange={(e) => {
-                                                        handleMessageInput(e);
-                                                        handleTextareaResize(e);
-                                                    }}
-                                                    onInput={handleTextareaResize}
-                                                    onScroll={(e) => {
-                                                        e.target.style.paddingRight = '30px';
-                                                    }}
-                                                    style={{
-                                                        paddingRight: '50px',
-                                                    }}
-                                                    placeholder="Write a message..."
-                                                />
-                                                <button type="submit" className="position-absolute B_sendMsg">
-                                                    <IoMdSend />
-                                                </button>
-                                            </div>
-                                        </form>
                                     </div>
-                                </div>
-                            </div>
-                        </>
-                    </Offcanvas.Body>
+                                </>
+
+
+                            </Offcanvas.Body>
+                        ) : (
+                            <Offcanvas.Body >
+                                <>
+                                    <div className="chat-container h-100 d-flex flex-column">
+                                        <div className="chat-messages flex-grow-1" ref={messageContainerRef} style={{ overflowY: 'auto' }}>
+                                            {messages.map((msg, index) => (
+                                                <div key={index}
+                                                    className={`d-flex align-items-start me-2 mb-3 ${index === lastUnreadIndex ? 'first-unread' : ''}`}
+                                                >
+                                                    {msg.sender !== userName && (
+                                                        <div className="chat-avatar me-2" style={{
+                                                            backgroundColor: msg.sender === userName ? '#2B7982' : '#4A90E2',
+                                                            width: '32px',
+                                                            height: '32px',
+                                                            borderRadius: '50%',
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            justifyContent: 'center',
+                                                            textTransform: 'uppercase'
+                                                        }}>
+                                                            <span style={{ color: '#fff' }}>{msg.sender.charAt(0)}</span>
+                                                        </div>
+                                                    )}
+                                                    <div className="chat-message" style={{ marginLeft: msg.sender === userName ? 'auto' : '0' }}>
+                                                        <div className="small" style={{ color: msg.sender === userName ? 'white' : '#b3aeae', textAlign: msg.sender === userName ? 'end' : 'start' }}>
+                                                            {msg.sender === userName ? 'You' : msg.sender}
+                                                        </div>
+                                                        <div style={{
+                                                            backgroundColor: msg.sender === userName ? '#2A323B' : '#1E242B',
+                                                            color: msg.sender === userName ? 'white' : '#b3aeae',
+                                                            padding: '8px 12px',
+                                                            borderRadius: '8px',
+                                                            maxWidth: '250px',
+                                                            wordBreak: 'break-word',
+                                                            whiteSpace: 'pre-wrap'
+                                                        }}>{msg.message}</div>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                            {lastUnreadIndex >= 0 && (
+                                                <div className="unread-messages-divider">
+                                                    <span>Unread Messages</span>
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        {renderTypingIndicator()}
+
+                                        <div className="B_search-container  mb-3" >
+                                            <div className="position-relative B_input_search B_input_search22  mx-auto">
+                                                <form onSubmit={handleSendMessage} className="mt-3 d-flex">
+                                                    <div className='B_send_msginput j_search_Input'>
+                                                        <textarea
+                                                            type="text"
+                                                            className="form-control text-white d_foucscolor B_send_msginput j_search_Input ps-3"
+                                                            value={newMessage}
+                                                            onChange={(e) => {
+                                                                handleMessageInput(e);
+                                                                handleTextareaResize(e);
+                                                            }}
+                                                            onInput={handleTextareaResize}
+                                                            onScroll={(e) => {
+                                                                e.target.style.paddingRight = '30px';
+                                                            }}
+                                                            style={{
+                                                                paddingRight: '50px',
+                                                            }}
+                                                            placeholder="Write a message..."
+                                                        />
+                                                        <button type="submit" className="position-absolute B_sendMsg">
+                                                            <IoMdSend />
+                                                        </button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </>
+                            </Offcanvas.Body>
+                        )}
+                    </>
                 )}
 
             </Offcanvas>

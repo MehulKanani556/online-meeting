@@ -52,7 +52,7 @@ export const useSocket = (userId, roomId, userName) => {
                     name: user.userName,
                     hasVideo: true,
                     hasAudio: true,
-                    initials: `${user.userName.charAt(0)}${user.userName.split(' ')[1] ? user.userName.split(' ')[1].charAt(0) : ''}`,
+                    initials: `${user.userName?.charAt(0)}${user.userName?.split(' ')[1] ? user.userName?.split(' ')[1]?.charAt(0) : ''}`,
                     isHost: user.isHost
                 }
             ]);
@@ -67,7 +67,7 @@ export const useSocket = (userId, roomId, userName) => {
                 name: user.userName,
                 hasVideo: true,
                 hasAudio: true,
-                initials: `${user.userName.charAt(0)}${user.userName.split(' ')[1] ? user.userName.split(' ')[1].charAt(0) : ''}`,
+                initials: `${user.userName?.charAt(0)}${user.userName?.split(' ')[1] ? user.userName?.split(' ')[1]?.charAt(0) : ''}`,
                 isHost: user.isHost
             }));
             // console.log("sxdfghghghghghghghghghgh",formattedParticipants);

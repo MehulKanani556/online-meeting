@@ -208,6 +208,33 @@
     align-items: center;
 }
 
+.j_no_users {
+    height: 85px;
+    width: 85px;
+}
+
+.j_invite_people {
+    font-weight: 600;
+    font-size: 16px;
+    line-height: 24px;
+}
+
+/* 
+.j_invite_Btn {
+    width: 15px;
+    height: 15px;
+    color: white;
+
+} */
+.j_invite_Btn:active {
+    border: none;
+}
+
+
+.j_invite_people_Div {
+    background-color: #12161C;
+}
+
 .d_control-icon {
     width: 20px;
     height: 20px;
@@ -258,6 +285,7 @@
     background-color: #FFF;
     color: #000000;
     border: none;
+    transition: all 0.5s;
     border-radius: 2 0px;
 }
 
@@ -286,7 +314,7 @@
 .B_send_msginput {
     border-radius: 5px;
     border: none;
-    background-color: #202F41;
+    background-color: #080E14;
     color: #fff;
     min-height: 45px;
     max-height: 120px;
@@ -308,7 +336,7 @@
 }
 
 .d_foucscolor:focus {
-    background-color: #202F41;
+    background-color: #080E14;
     color: #fff;
 }
 
