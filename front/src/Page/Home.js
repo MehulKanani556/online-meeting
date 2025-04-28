@@ -435,7 +435,7 @@ function Home() {
                 // }
                 dispatch(createschedule(values)).then((response) => {
                   // console.log("Response from API:", response);
-                  if (response.payload?.status === 200)  {
+                  if (response.payload?.status === 200) {
                     resetForm();
                     handleScheduleclose();
                   }
@@ -665,13 +665,16 @@ function Home() {
                                         <div
                                           className="rounded-circle d-flex align-items-center justify-content-center"
                                           style={{
+                                            fontSize: '12px',
                                             width: '30px',
                                             height: '30px',
-                                            backgroundColor: '#364758',
+                                            // backgroundColor: '#364758',
+                                            backgroundColor: `hsl(${Array.from(user._id || user.email || user.name || '').reduce((acc, char) => acc + char.charCodeAt(0), 0) % 360}, 70%, 45%)`,
                                             color: 'white'
                                           }}
                                         >
-                                          {user.name.charAt(0).toUpperCase()}
+                                          {/* {user.name.charAt(0).toUpperCase()} */}
+                                          {user.name?.charAt(0).toUpperCase()}{user.name?.split(' ')[1] ? user.name?.split(' ')[1]?.charAt(0).toUpperCase() : ''}
                                         </div>
                                       )}
                                     </div>
@@ -711,13 +714,15 @@ function Home() {
                                       <div
                                         className="rounded-circle d-flex align-items-center justify-content-center"
                                         style={{
+                                          fontSize: '12px',
                                           width: '30px',
                                           height: '30px',
-                                          backgroundColor: '#364758',
+                                          backgroundColor: `hsl(${Array.from(user._id || user.email || user.name || '').reduce((acc, char) => acc + char.charCodeAt(0), 0) % 360}, 70%, 45%)`,
                                           color: 'white'
                                         }}
                                       >
-                                        {user.name.charAt(0).toUpperCase()}
+                                        {/* {user.name.charAt(0).toUpperCase()} */}
+                                        {user.name?.charAt(0).toUpperCase()}{user.name?.split(' ')[1] ? user.name?.split(' ')[1]?.charAt(0).toUpperCase() : ''}
                                       </div>
                                     )}
                                   </div>
@@ -743,13 +748,16 @@ function Home() {
                                       <div
                                         className="rounded-circle d-flex align-items-center justify-content-center"
                                         style={{
+                                          fontSize: '12px',
                                           width: '30px',
                                           height: '30px',
-                                          backgroundColor: '#364758',
+                                          // backgroundColor: '#364758',
+                                          backgroundColor: `hsl(${Array.from(invitee._id || invitee.email || invitee.name || '').reduce((acc, char) => acc + char.charCodeAt(0), 0) % 360}, 70%, 45%)`,
                                           color: 'white'
                                         }}
                                       >
-                                        {invitee.name.charAt(0).toUpperCase()}
+                                        {/* {invitee.name.charAt(0).toUpperCase()} */}
+                                        {invitee.name?.charAt(0).toUpperCase()}{invitee.name?.split(' ')[1] ? invitee.name?.split(' ')[1]?.charAt(0).toUpperCase() : ''}
                                       </div>
                                     )}
                                   </div>
