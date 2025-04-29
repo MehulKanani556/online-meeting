@@ -1,9 +1,69 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
+import { useFormik } from 'formik'
+import * as Yup from 'yup'
+import { useDispatch, useSelector } from 'react-redux'
 import HomeNavBar from '../Component/HomeNavBar'
 import SideBar from '../Component/SideBar'
+import { updateUser, getUserById } from '../Redux/Slice/user.slice'
 
 function Setting() {
+    const dispatch = useDispatch()
     const [settingformat, setsettingformat] = useState('general')
+    const userId = sessionStorage.getItem("userId")
+    const currentUser = useSelector((state) => state.user.currUser);
+
+    useEffect(() => {
+        if (userId) {
+            dispatch(getUserById(userId))
+        }
+    }, [dispatch, userId])
+
+    const validationSchema = Yup.object({
+        originalaudio: Yup.boolean(),
+        GoogleCalendar: Yup.boolean(),
+        Chatnotification: Yup.boolean(),
+        Joinnotification: Yup.boolean(),
+        joinwithouthost: Yup.boolean(),
+        participantsNameandVideo: Yup.boolean(),
+        videomuted: Yup.boolean(),
+        sharescreen: Yup.boolean(),
+        Autorecord: Yup.boolean(),
+        Recordinglayout: Yup.string().oneOf(['videowithscharescreen', 'activespeakerscreenshare', '0'])
+    })
+
+    const formik = useFormik({
+        initialValues: {
+            originalaudio: currentUser?.originalaudio || false,
+            GoogleCalendar: currentUser?.GoogleCalendar || false,
+            Chatnotification: currentUser?.Chatnotification || false,
+            Joinnotification: currentUser?.Joinnotification || false,
+            joinwithouthost: currentUser?.joinwithouthost || false,
+            participantsNameandVideo: currentUser?.participantsNameandVideo || false,
+            videomuted: currentUser?.videomuted || false,
+            sharescreen: currentUser?.sharescreen || false,
+            Autorecord: currentUser?.Autorecord || false,
+            Recordinglayout: currentUser?.Recordinglayout || '0'
+        },
+        validationSchema,
+        enableReinitialize: true,
+        onSubmit: (values) => {
+            dispatch(updateUser({ id: userId, values }))
+        }
+    })
+
+    // Handle checkbox changes with automatic save
+    const handleSettingChange = (fieldName) => {
+        const newValue = !formik.values[fieldName]
+        formik.setFieldValue(fieldName, newValue)
+        formik.submitForm() // This will trigger the update API call
+    }
+
+    // Handle select change with automatic save
+    const handleSelectChange = (e) => {
+        formik.setFieldValue('Recordinglayout', e.target.value)
+        formik.submitForm()
+    }
+
     return (
         <div>
             <HomeNavBar />
@@ -55,28 +115,50 @@ function Setting() {
                                 <div className="j_general_settings">
                                     <h5 className='text-white j_margin_setting pt-3 pb-2'>Use original audio</h5>
                                     <p className='d-flex align-items-center'>
-                                        <input type="checkbox" className='form-check-input j_setting_check' defaultChecked />
-                                        <label className='ms-2 '>
-                                            Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's stan
+                                        <input
+                                            type="checkbox"
+                                            className='form-check-input j_setting_check'
+                                            checked={formik.values.originalaudio}
+                                            onChange={() => handleSettingChange('originalaudio')}
+                                        />
+                                        <label className='ms-2'>
+                                            It only allow original audio. No edited audio will be allowed.
                                         </label>
                                     </p>
                                     <h5 className='text-white j_margin_setting py-2'>Add to Google Calendar</h5>
                                     <p className='d-flex align-items-center'>
-                                        <input type="checkbox" className='form-check-input j_setting_check' />
+                                        <input
+                                            type="checkbox"
+                                            className='form-check-input j_setting_check'
+                                            checked={formik.values.GoogleCalendar}
+                                            onChange={() => handleSettingChange('GoogleCalendar')}
+                                        />
                                         <label className='ms-2'>
-                                            Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's stan Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's stan
+                                            This feature helps to join meeting in calendar. If meeting is scheduled then automatically
+                                            it get added in the calender as a event.It helps to remember date and time of meeting
+                                            easliy and also provide remainder for meeting.
                                         </label>
                                     </p>
                                     <h5 className='text-white j_margin_setting py-2'>Chat notification</h5>
                                     <p className='d-flex align-items-center'>
-                                        <input type="checkbox" className='form-check-input j_setting_check' />
+                                        <input
+                                            type="checkbox"
+                                            className='form-check-input j_setting_check'
+                                            checked={formik.values.Chatnotification}
+                                            onChange={() => handleSettingChange('Chatnotification')}
+                                        />
                                         <label className='ms-2'>
                                             Display a chat and play a sound whenever a new chat arrives.
                                         </label>
                                     </p>
                                     <h5 className='text-white j_margin_setting py-2'>Join notification</h5>
                                     <p className='d-flex align-items-center'>
-                                        <input type="checkbox" className='form-check-input j_setting_check' defaultChecked />
+                                        <input
+                                            type="checkbox"
+                                            className='form-check-input j_setting_check'
+                                            checked={formik.values.Joinnotification}
+                                            onChange={() => handleSettingChange('Joinnotification')}
+                                        />
                                         <label className='ms-2'>
                                             Play a sound notification when a participants joined or leave the meeting.
                                         </label>
@@ -87,15 +169,25 @@ function Setting() {
                                 <div className="j_general_settings">
                                     <h5 className='text-white j_margin_setting py-2'>Allow participants to join before the host</h5>
                                     <p className='d-flex align-items-center'>
-                                        <input type="checkbox" className='form-check-input j_setting_check' defaultChecked />
-                                        <label className='ms-2 '>
+                                        <input
+                                            type="checkbox"
+                                            className='form-check-input j_setting_check'
+                                            checked={formik.values.joinwithouthost}
+                                            onChange={() => handleSettingChange('joinwithouthost')}
+                                        />
+                                        <label className='ms-2'>
                                             Enable the participant to join a meeting without for the host.
                                             Note: Participants can enter the meeting without the host, starting from the host, starting from one hour before the schedule time
                                         </label>
                                     </p>
                                     <h5 className='text-white j_margin_setting pt-3'>Display a participants name on their video</h5>
                                     <p className='d-flex align-items-center'>
-                                        <input type="checkbox" className='form-check-input j_setting_check' />
+                                        <input
+                                            type="checkbox"
+                                            className='form-check-input j_setting_check'
+                                            checked={formik.values.participantsNameandVideo}
+                                            onChange={() => handleSettingChange('participantsNameandVideo')}
+                                        />
                                         <label className='ms-2'>
                                             Enable the participant to join a meeting without for the host.
                                             Note: Participants can enter the meeting without the host, starting from the host, starting from one hour before the schedule time
@@ -103,14 +195,24 @@ function Setting() {
                                     </p>
                                     <h5 className='text-white j_margin_setting pt-3'>View video muted participants</h5>
                                     <p className='d-flex align-items-center'>
-                                        <input type="checkbox" className='form-check-input j_setting_check' defaultChecked />
+                                        <input
+                                            type="checkbox"
+                                            className='form-check-input j_setting_check'
+                                            checked={formik.values.videomuted}
+                                            onChange={() => handleSettingChange('videomuted')}
+                                        />
                                         <label className='ms-2'>
                                             Display a user profile picture in the video feed when their video is turned off.
                                         </label>
                                     </p>
                                     <h5 className='text-white j_margin_setting pt-3'>All participants to share screen</h5>
                                     <p className='d-flex align-items-center'>
-                                        <input type="checkbox" className='form-check-input j_setting_check' />
+                                        <input
+                                            type="checkbox"
+                                            className='form-check-input j_setting_check'
+                                            checked={formik.values.sharescreen}
+                                            onChange={() => handleSettingChange('sharescreen')}
+                                        />
                                         <label className='ms-2'>
                                             Allow all participants to share their screen.
                                         </label>
@@ -121,24 +223,32 @@ function Setting() {
                                 <div className="j_general_settings">
                                     <h5 className='text-white j_margin_setting pt-3'>Auto record meeting</h5>
                                     <p className='d-flex align-items-center'>
-                                        <input type="checkbox" className='form-check-input j_setting_check' defaultChecked />
-                                        <label className='ms-2 '>
+                                        <input
+                                            type="checkbox"
+                                            className='form-check-input j_setting_check'
+                                            checked={formik.values.Autorecord}
+                                            onChange={() => handleSettingChange('Autorecord')}
+                                        />
+                                        <label className='ms-2'>
                                             Enable automatic recording all meetings you created
                                         </label>
                                     </p>
                                     <h5 className='text-white j_margin_setting pt-3'>Recording layout for meeting</h5>
-                                    <select class="form-select j_select" aria-label="Default select example">
+                                    <select
+                                        className="form-select j_select"
+                                        value={formik.values.Recordinglayout}
+                                        onChange={handleSelectChange}
+                                    >
                                         <option value="0">Select</option>
-                                        <option value="1">All video feed with shared screen</option>
-                                        <option value="2">Active speaker with shared screen</option>
+                                        <option value="videowithscharescreen">All video feed with shared screen</option>
+                                        <option value="activespeakerscreenshare">Active speaker with shared screen</option>
                                     </select>
                                 </div>
                             )}
-
                         </section>
                     </div>
                 </div>
-            </section >
+            </section>
         </div>
     )
 }

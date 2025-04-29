@@ -2,9 +2,10 @@ const reviews = require('../models/review.modal');
 
 exports.createNewreviews = async (req, res) => {
     try {
-        let { rating, trouble, comments } = req.body;
+        let { rating, trouble, comments, userId } = req.body;
 
         let chekreviews = await reviews.create({
+            userId,
             rating,
             trouble,
             comments
@@ -22,7 +23,17 @@ exports.getAllreviews = async (req, res) => {
     try {
         let paginatedreviews;
 
-        paginatedreviews = await reviews.find()
+        // paginatedreviews = await reviews.find()
+        paginatedreviews = await reviews.aggregate([
+            {
+                $lookup: {
+                    from: 'users',
+                    localField: 'userId',
+                    foreignField: '_id',
+                    as: 'userData'
+                }
+            }
+        ]);
 
         let count = paginatedreviews.length;
 

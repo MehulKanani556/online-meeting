@@ -1118,6 +1118,7 @@ function Home() {
           <Modal.Body className='B_review_model_body'>
             <Formik
               initialValues={{
+                userId: userId,
                 rating: 0,
                 trouble: [],
                 comments: ''
@@ -1129,6 +1130,7 @@ function Home() {
               onSubmit={(values, { resetForm }) => {
                 const troubleArray = activeButton.map(item => ({ [item]: item }));
                 const reviewData = {
+                  userId: userId,
                   rating: rating,
                   trouble: troubleArray,
                   comments: values.comments

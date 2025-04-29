@@ -1271,7 +1271,7 @@ function Meeting() {
                                         <span className='B_ROOM_DETAILS_span' style={{ color: '#B3AEAE', width: '120px' }}>Invite Link</span>
                                         <div className="d-flex flex-column">
                                             <div className="d-flex align-items-center">
-                                                <span className="text-white">: https://googlemeet.123/
+                                                <span className="text-white">: http://localhost:3000/screen/
                                                     {isEditingLink ? (
                                                         <input
                                                             type="text"

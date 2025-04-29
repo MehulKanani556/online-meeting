@@ -19,12 +19,20 @@ import Footer from '../Component/Footer'
 import { Link } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import { setauth } from '../Redux/Slice/auth.slice'
+import { getAllreview } from '../Redux/Slice/reviews.slice'
+import { IMAGE_URL } from '../Utils/baseUrl'
 
 
 function Index() {
 
     const dispatch = useDispatch();
     const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
+    const allreviews = useSelector((state) => state.review.allreview)
+    const img_url = IMAGE_URL
+
+    useEffect(() => {
+        dispatch(getAllreview())
+    }, [dispatch])
 
     useEffect(() => {
         const token = sessionStorage.getItem('token');
@@ -107,6 +115,17 @@ function Index() {
                 ))}
             </div>
         );
+    };
+
+    const truncateText = (text, maxLines = 5) => {
+        const words = text.split(' ');
+        const averageWordsPerLine = 5; // Approximate number of words per line
+        const maxWords = averageWordsPerLine * maxLines;
+
+        if (words.length > maxWords) {
+            return words.slice(0, maxWords).join(' ') + '...';
+        }
+        return text;
     };
 
     return (
@@ -287,23 +306,35 @@ function Index() {
                         </div>
                     </div>
 
-                    <OwlCarousel className='owl-theme  text-white' {...options}>
-                        {testimonials.map(testimonial => (
-                            <div className='item' key={testimonial.id}>
-                                <div className='testimonial-card'>
-                                    <img src={testimonial.img} alt={testimonial.name} className='testimonial-image mt-2' />
-                                    <h6>{testimonial.name}</h6>
-                                    <p className='B_Slider_text1' style={{ color: "#87898B" }}>{testimonial.position}</p>
-                                    {renderStars(testimonial.rating)}
-                                    <p className='B_testimonial_text' style={{ color: "#d9dde1" }} >
-                                        {testimonial.text}
-                                    </p>
-                                </div>
-                            </div>
-                        ))}
-                    </OwlCarousel>
+                    {allreviews && allreviews.length > 0 ? (
+                        <OwlCarousel className='owl-theme  text-white' {...options}>
+                            {allreviews.map((testimonial, index) => {
+                                return (
+                                    <div className='item' key={index} >
+                                        <div className='testimonial-card'>
+                                            {testimonial.userData[0].photo ?
+                                                <img src={`${img_url}${testimonial.userData[0].photo}`} alt={testimonial.name} className='testimonial-image mt-2' /> :
+                                                <p className="testimonial_name">
+                                                    {`${testimonial.userData[0].name?.charAt(0)?.toUpperCase()}${testimonial.userData[0].name?.split(' ')[1] ? testimonial.userData[0].name?.split(' ')[1]?.charAt(0)?.toUpperCase() : ''}`}
+                                                </p>
+                                            }
+                                            <h6>{testimonial.userData[0].name}</h6>
+                                            <p className='B_Slider_text1' style={{ color: "#87898B" }}>{testimonial.position}</p>
+                                            {renderStars(testimonial.rating)}
+                                            <p className='B_testimonial_text' style={{ color: "#d9dde1" }} >
+                                                {truncateText(testimonial.comments)}
+                                            </p>
+                                        </div>
+                                    </div>
+                                )
+                            }
+                            )}
+                        </OwlCarousel>
+                    ) : (
+                        <div className="text-white text-center">Loading Review...</div>
+                    )}
                 </div>
-            </section>
+            </section >
 
             {/* Slider Section End.............. */}
 

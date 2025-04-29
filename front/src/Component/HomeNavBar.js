@@ -412,6 +412,8 @@ function HomeNavBar() {
                             }
                             if (!values.newPassword) {
                                 errors.newPassword = 'Required';
+                            } else if (values.newPassword.length < 8) {
+                                errors.newPassword = 'Password must be at least 8 characters';
                             } else if (values.newPassword !== values.confirmNewPassword) {
                                 errors.confirmNewPassword = 'Password and Confirm Password not match';
                             }

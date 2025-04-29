@@ -4,7 +4,8 @@ const jwt = require('jsonwebtoken');
 
 exports.createNewUser = async (req, res) => {
     try {
-        let { name, email, password, timeZone, language, photo } = req.body;
+        let { name, email, password, timeZone, language, photo, originalaudio, GoogleCalendar, Chatnotification, Joinnotification, joinwithouthost, participantsNameandVideo, videomuted, sharescreen, Autorecord, Recordinglayout
+        } = req.body;
 
         let chekUser = await user.findOne({ email: req.body.email });
 
@@ -20,7 +21,17 @@ exports.createNewUser = async (req, res) => {
             email,
             password: hashPassword,
             timeZone,
-            language
+            language,
+            originalaudio,
+            GoogleCalendar,
+            Chatnotification,
+            Joinnotification,
+            joinwithouthost,
+            participantsNameandVideo,
+            videomuted,
+            sharescreen,
+            Autorecord,
+            Recordinglayout
         });
 
         let token = await jwt.sign(

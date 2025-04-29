@@ -14,9 +14,58 @@ export const useSocket = (userId, roomId, userName) => {
     const [isChatOpen, setIsChatOpen] = useState(false);
     const [typingUsers, setTypingUsers] = useState([]);
     const [joinRequests, setJoinRequests] = useState([]);
+    const [systemMessages, setSystemMessages] = useState([]);
     const [requestApprovalStatus, setRequestApprovalStatus] = useState(null);
     const [isVideoOff, setIsVideoOff] = useState(false);
     const [isMuted, setIsMuted] = useState(false);
+
+    const [notificationPermission, setNotificationPermission] = useState(
+        Notification.permission
+    );
+
+    useEffect(() => {
+        if (Notification.permission === "default") {
+            requestNotificationPermission();
+        }
+    }, []);
+    // Function to request notification permission
+    const requestNotificationPermission = async () => {
+        try {
+            const permission = await Notification.requestPermission();
+            setNotificationPermission(permission);
+            console.log("Notification permission:", permission);
+        } catch (error) {
+            console.error("Error requesting notification permission:", error);
+        }
+    };
+
+    // Function to show notification for new message
+    const showMessageNotification = (message, senderName) => {
+        if (notificationPermission !== "granted") return;
+
+        // Create notification content
+        let notificationTitle = senderName || "New Message";
+        let notificationBody = message;
+
+        // Create and show the notification
+        const notification = new Notification(notificationTitle, {
+            body: notificationBody,
+            icon: "/Image/logo.svg", // Use your app's icon
+            requireInteraction: true, // Prevents the notification from closing automatically
+            silent: false, // Allows the notification to make a sound
+            vibrate: [200, 100, 200], // Vibrates the device for the specified duration
+            tag: "new-message", // Identifies the notification
+            renotify: true, // Allows the notification to be re-shown if it's already active
+            dir: "auto", // Sets the direction of the text
+            lang: "en-US", // Sets the language of the notification
+            timestamp: new Date().getTime(), // Sets the timestamp of the notification
+        });
+
+        // Close notification after 5 seconds
+        setTimeout(() => {
+            notification.close();
+        }, 5000);
+    };
 
     // Initialize socket connection
     useEffect(() => {
@@ -41,9 +90,37 @@ export const useSocket = (userId, roomId, userName) => {
             userName
         });
 
+        // Get list of room users when joining
+        socketRef.current.on('room-users', (roomUsers) => {
+            const formattedParticipants = roomUsers.map(user => ({
+                id: user.id,
+                userId: user.userId,
+                name: user.userName,
+                hasVideo: true,
+                hasAudio: true,
+                initials: `${user.userName?.charAt(0)}${user.userName?.split(' ')[1] ? user.userName?.split(' ')[1]?.charAt(0) : ''}`,
+                isHost: user.isHost
+            }));
+            setParticipants(formattedParticipants);
+            // Remove any existing system messages when room is first loaded
+            setSystemMessages([]);
+        });
+
         // Handle new user connected
         socketRef.current.on('user-connected', (user) => {
-            // console.log("SBGSBfb",user);
+            // Only add system message if:
+            // 1. User data is valid (has userName)
+            // 2. User is not the host
+            // 3. User is not the current user (to avoid showing message on refresh)
+            if (user.userName && !user.isHost && user.userId !== userId) {
+                setSystemMessages(prev => [...prev, {
+                    type: 'join',
+                    userName: user.userName,
+                    timestamp: new Date().toISOString()
+                }]);
+            }
+
+            // Add participant
             setParticipants(prev => [
                 ...prev,
                 {
@@ -58,27 +135,14 @@ export const useSocket = (userId, roomId, userName) => {
             ]);
         });
 
-        // Get list of room users when joining
-        socketRef.current.on('room-users', (roomUsers) => {
-            // console.log('Current room users:', roomUsers);
-            const formattedParticipants = roomUsers.map(user => ({
-                id: user.id,
-                userId: user.userId,
-                name: user.userName,
-                hasVideo: true,
-                hasAudio: true,
-                initials: `${user.userName?.charAt(0)}${user.userName?.split(' ')[1] ? user.userName?.split(' ')[1]?.charAt(0) : ''}`,
-                isHost: user.isHost
-            }));
-            // console.log("sxdfghghghghghghghghghgh",formattedParticipants);
-            setParticipants(formattedParticipants);
-        });
-
         // Handle chat messages
         socketRef.current.on('receive-message', (message) => {
             setMessages(prev => [...prev, message]);
             if (!isChatOpen && message.sender !== userName) {
                 setUnreadMessages(prev => prev + 1);
+            }
+            if (message.sender !== userName) {
+                showMessageNotification(message.message, message.sender)
             }
         });
 
@@ -189,6 +253,21 @@ export const useSocket = (userId, roomId, userName) => {
 
         // Handle user disconnection
         socketRef.current.on('user-disconnected', (socketId) => {
+            // Find the user who disconnected to get their name
+            const disconnectedUser = participants.find(p => p.id === socketId);
+
+            // Only show leave message if:
+            // 1. We found the user
+            // 2. User is not the host
+            // 3. User is not the current user
+            if (disconnectedUser && !disconnectedUser.isHost && disconnectedUser.userId !== userId) {
+                setSystemMessages(prev => [...prev, {
+                    type: 'leave',
+                    userName: disconnectedUser.name,
+                    timestamp: new Date().toISOString()
+                }]);
+            }
+
             setParticipants(prev =>
                 prev.filter(participant => participant.id !== socketId)
             );
@@ -397,6 +476,7 @@ export const useSocket = (userId, roomId, userName) => {
         isVideoOff,
         setIsVideoOff,
         isMuted,
-        setIsMuted
+        setIsMuted,
+        systemMessages
     };
 }

@@ -385,6 +385,7 @@ function Screen() {
         sendIceCandidate,
         joinRequests,
         handleJoinRequest,
+        systemMessages,
     } = useSocket(userId, roomId, userName);
 
     // WebRTC State
@@ -2042,6 +2043,26 @@ function Screen() {
                     </div>
                 ))}
 
+                {systemMessages.slice(-3).map((message, index) => (
+                    <div key={`${message.type}-${message.timestamp}`}
+                        className="j_system_message text-white p-3 mb-2"
+                        style={{
+                            animation: 'fadeOut 5s forwards',
+                            animationDelay: '3s'
+                        }}>
+                        <div className="d-flex align-items-center">
+                            <div className={`j_${message.type}_icon me-2`}>
+                                {message.type === 'join' ? '👋' : '🤚'}
+                            </div>
+                            <p className="p-0 m-0">
+                                {message.type === 'join'
+                                    ? `${message.userName} joined the meeting`
+                                    : `${message.userName} left the meeting`}
+                            </p>
+                        </div>
+                    </div>
+                ))}
+
                 {/* {isRecording && (
                     <div className="j_recording_indicator">
                         <span className="j_recording_dot"></span>
@@ -2666,6 +2687,13 @@ function Screen() {
                                                                             handleMessageInput(e);
                                                                             handleTextareaResize(e);
                                                                         }}
+                                                                        // onKeyDown={(e) => {
+                                                                        //     if (e.key === 'Enter' && !e.shiftKey) {
+                                                                        //         e.preventDefault(); // Prevent new line
+                                                                        //         handleSendMessage(e); // Send message
+                                                                        //         handleTextareaResize(e)
+                                                                        //     }
+                                                                        // }}
                                                                         onInput={handleTextareaResize}
                                                                         onScroll={(e) => {
                                                                             e.target.style.paddingRight = '30px';

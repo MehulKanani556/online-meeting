@@ -29,6 +29,46 @@ const userSchema = mongoose.Schema({
     },
     timeZone: {
         type: String,
+    },
+    originalaudio: {
+        type: Boolean,
+        default: false
+    },
+    GoogleCalendar: {
+        type: Boolean,
+        default: false
+    },
+    Chatnotification: {
+        type: Boolean,
+        default: true
+    },
+    Joinnotification: {
+        type: Boolean,
+        default: false
+    },
+    joinwithouthost: {
+        type: Boolean,
+        default: false
+    },
+    participantsNameandVideo: {
+        type: Boolean,
+        default: true
+    },
+    videomuted: {
+        type: Boolean,
+        default: false
+    },
+    sharescreen: {
+        type: Boolean,
+        default: false
+    },
+    Autorecord: {
+        type: Boolean,
+        default: false
+    },
+    Recordinglayout: {
+        type: String,
+        enum: ['0', 'videowithscharescreen', 'activespeakerscreenshare']
     }
 }, {
     timestamps: true,

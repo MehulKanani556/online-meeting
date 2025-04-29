@@ -120,6 +120,22 @@ img {
   display: block;
 }
 
+.B_Owl .owl-carousel .owl-item .testimonial_name {
+  border-radius: 50%;
+  text-align: center;
+  background-color: #202F41;
+  font-size: 24px;
+  padding: 8px;
+  width: 56px;
+  height: 56px;
+  margin: 0 auto 15px;
+  display: block;
+}
+
+.owl-theme .owl-nav [class*='owl-']:hover {
+  background-color: #111924 !important;
+}
+
 .B_Owl .owl-carousel .owl-item.active.center {
   opacity: 1;
   transform: scale(1.1);

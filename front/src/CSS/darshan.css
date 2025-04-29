@@ -240,6 +240,36 @@
     transition: all 0.5s,
 }
 
+.j_system_message {
+    background-color: rgba(0, 0, 0, 0.7);
+    border-radius: 8px;
+    margin-left: 8px;
+    backdrop-filter: blur(10px);
+    opacity: 1;
+}
+
+@keyframes fadeOut {
+    0% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 0;
+        visibility: hidden;
+    }
+}
+
+.j_join_icon,
+.j_leave_icon {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
 .B_screen_btn:hover .j_invite_user_icon {
     filter: invert(1);
 }
