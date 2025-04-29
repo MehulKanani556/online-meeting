@@ -312,13 +312,14 @@ function Index() {
                                 return (
                                     <div className='item' key={index} >
                                         <div className='testimonial-card'>
-                                            {testimonial.userData[0].photo ?
-                                                <img src={`${img_url}${testimonial.userData[0].photo}`} alt={testimonial.name} className='testimonial-image mt-2' /> :
+                                            {testimonial.userData?.[0]?.photo ?
+                                                <img src={`${img_url}${testimonial.userData?.[0]?.photo}`} alt={testimonial.userData?.[0]?.name} className='testimonial-image mt-2' />
+                                                :
                                                 <p className="testimonial_name">
-                                                    {`${testimonial.userData[0].name?.charAt(0)?.toUpperCase()}${testimonial.userData[0].name?.split(' ')[1] ? testimonial.userData[0].name?.split(' ')[1]?.charAt(0)?.toUpperCase() : ''}`}
+                                                    {`${testimonial.userData?.[0]?.name?.charAt(0)?.toUpperCase()}${testimonial.userData?.[0]?.name?.split(' ')[1] ? testimonial.userData?.[0]?.name?.split(' ')[1]?.charAt(0)?.toUpperCase() : ''}`}
                                                 </p>
                                             }
-                                            <h6>{testimonial.userData[0].name}</h6>
+                                            <h6>{testimonial.userData?.[0]?.name}</h6>
                                             <p className='B_Slider_text1' style={{ color: "#87898B" }}>{testimonial.position}</p>
                                             {renderStars(testimonial.rating)}
                                             <p className='B_testimonial_text' style={{ color: "#d9dde1" }} >
