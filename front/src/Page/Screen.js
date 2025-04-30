@@ -39,8 +39,13 @@ const ParticipantVideo = React.memo(({
     oncamera,
     offcamera,
     onmicrophone,
-    offmicrophone
+    offmicrophone,
+    imgpath
 }) => {
+    const allUser = useSelector((state) => state.user.allusers);
+
+    const singleuser = allUser.find(u => u._id == participant.userId);
+
     return (
         <div className="d_avatar-container">
             {isLocal ? (
@@ -61,7 +66,10 @@ const ParticipantVideo = React.memo(({
                             textTransform: 'uppercase',
                             backgroundColor: `hsl(${participant.id.charCodeAt(0) * 60}, 70%, 45%)`
                         }}>
-                        {participant.initials}
+                        {singleuser.photo ?
+                            <img src={`${imgpath}${singleuser.photo}`} alt="userphoto" style={{ borderRadius: '50%' }} />
+                            : `${participant.initials}`
+                        }
                     </div>
                 </>
             ) : (
@@ -84,7 +92,10 @@ const ParticipantVideo = React.memo(({
                             textTransform: 'uppercase',
                             backgroundColor: `hsl(${participant.id.charCodeAt(0) * 60}, 70%, 45%)`
                         }}>
-                        {participant.initials}
+                        {singleuser.photo ?
+                            <img src={`${imgpath}${singleuser.photo}`} alt="userphoto" style={{ borderRadius: '50%' }} />
+                            : `${participant.initials}`
+                        }
                     </div>
                 </>
             )}
@@ -356,6 +367,7 @@ function Screen() {
     const currUser = useSelector((state) => state.user.currUser);
     const userInitials = currUser?.name ? `${currUser.name.charAt(0)}${currUser.name.split(' ')[1] ? currUser.name.split(' ')[1].charAt(0) : ''}` : 'U';
     const userName = currUser?.name;
+    const userphoto = currUser?.photo;
 
     // Use the socket hook
     const {
@@ -2092,6 +2104,7 @@ function Screen() {
                                     offcamera={offcamera}
                                     onmicrophone={onmicrophone}
                                     offmicrophone={offmicrophone}
+                                    imgpath={IMG_URL}
                                 />
 
                                 {/* Display extra participants indicator */}

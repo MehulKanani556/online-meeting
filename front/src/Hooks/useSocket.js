@@ -50,15 +50,39 @@ export const useSocket = (userId, roomId, userName) => {
         // Create and show the notification
         const notification = new Notification(notificationTitle, {
             body: notificationBody,
-            icon: "/Image/logo.svg", // Use your app's icon
-            requireInteraction: true, // Prevents the notification from closing automatically
-            silent: false, // Allows the notification to make a sound
-            vibrate: [200, 100, 200], // Vibrates the device for the specified duration
-            tag: "new-message", // Identifies the notification
-            renotify: true, // Allows the notification to be re-shown if it's already active
-            dir: "auto", // Sets the direction of the text
-            lang: "en-US", // Sets the language of the notification
-            timestamp: new Date().getTime(), // Sets the timestamp of the notification
+            icon: "/Image/logo.svg",
+            requireInteraction: true,
+            silent: false,
+            vibrate: [200, 100, 200],
+            tag: "new-message",
+            renotify: true,
+            dir: "auto",
+            lang: "en-US",
+            timestamp: new Date().getTime(),
+        });
+
+        // Close notification after 5 seconds
+        setTimeout(() => {
+            notification.close();
+        }, 5000);
+    };
+
+    // Function to show notification for new joining
+    const showJoinNotification = (userName) => {
+        if (notificationPermission !== "granted") return;
+
+        // Create and show the notification
+        const notification = new Notification("New Join", {
+            body: `${userName} has joined the meeting`,
+            icon: "/Image/logo.svg",
+            requireInteraction: true,
+            silent: false,
+            vibrate: [200, 100, 200],
+            tag: "user-join",
+            renotify: true,
+            dir: "auto",
+            lang: "en-US",
+            timestamp: new Date().getTime(),
         });
 
         // Close notification after 5 seconds
@@ -83,7 +107,6 @@ export const useSocket = (userId, roomId, userName) => {
             setIsConnected(true);
             // console.log("Socket connected:", socketRef.current.id);
         });
-
         socketRef.current.emit('join-room', {
             roomId,
             userId,
@@ -108,10 +131,6 @@ export const useSocket = (userId, roomId, userName) => {
 
         // Handle new user connected
         socketRef.current.on('user-connected', (user) => {
-            // Only add system message if:
-            // 1. User data is valid (has userName)
-            // 2. User is not the host
-            // 3. User is not the current user (to avoid showing message on refresh)
             if (user.userName && !user.isHost && user.userId !== userId) {
                 setSystemMessages(prev => [...prev, {
                     type: 'join',
@@ -236,8 +255,8 @@ export const useSocket = (userId, roomId, userName) => {
             setRequestApprovalStatus(status);
 
             if (status === 'approved') {
+                showJoinNotification(userName);
                 // If approved, navigate to meeting room
-                // This needs to be handled in your component using this hook
                 socketRef.current.emit('join-room', {
                     roomId,
                     userId,
