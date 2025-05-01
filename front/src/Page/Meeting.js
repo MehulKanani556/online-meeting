@@ -8,80 +8,87 @@ import { FaAngleUp, FaAngleDown, FaDiceSix, FaDiceTwo, FaStar } from "react-icon
 import MeetingCanlander from '../Image/MeeringCalander.svg'
 import MeetingUser from '../Image/MeetingUSer.svg'
 import MeetingMultiUser from '../Image/MeetingMultiUser.svg'
-import MeetingAudio from '../Image/B_Audioo.svg'
-import MeetingVideo from '../Image/B_Videoo.svg'
-import MeetingConnection from '../Image/B_shearing.svg'
 import { Button, Modal, Offcanvas, Form } from 'react-bootstrap';
 import BEdit from '../Image/BEdit.svg'
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import * as Yup from 'yup';
 import { Formik } from 'formik';
-import { createreview } from '../Redux/Slice/reviews.slice';
 import { useDispatch, useSelector } from 'react-redux';
 import { createschedule, getAllschedule, updateschedule } from '../Redux/Slice/schedule.slice';
 import { getAllUsers } from '../Redux/Slice/user.slice';
 import bin from '../Image/j_bin.svg'
 import { IMAGE_URL } from '../Utils/baseUrl';
-import { current } from '@reduxjs/toolkit';
-
-
 
 function Meeting() {
+
+    // Function to generate a random meeting ID of specified length
+    const generateMeetingId = (length) => {
+        const array = new Uint8Array(length / 2);
+        window.crypto.getRandomValues(array);
+        return Array.from(array, byte => ('0' + byte.toString(16)).slice(-2)).join('');
+    };
+
+    const generatePassword = () => {
+        const uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        const lowercase = 'abcdefghijklmnopqrstuvwxyz';
+        const numbers = '0123456789';
+        const length = 12;
+
+        let chars = uppercase + lowercase + numbers;
+        let password = '';
+
+        password += uppercase[Math.floor(Math.random() * uppercase.length)];
+        password += lowercase[Math.floor(Math.random() * lowercase.length)];
+        password += numbers[Math.floor(Math.random() * numbers.length)];
+
+        for (let i = password.length; i < length; i++) {
+            password += chars[Math.floor(Math.random() * chars.length)];
+        }
+
+        password = password.split('').sort(() => Math.random() - 0.5).join('');
+        return password;
+    };
+
     const [isSelectedMeetingCancelled, setIsSelectedMeetingCancelled] = useState(false);
     const [isEditingPassword, setIsEditingPassword] = useState(false);
     const [isLinkRotating, setIsLinkRotating] = useState(false);
     const [isEditingLink, setIsEditingLink] = useState(false);
     const [linkCopied, setLinkCopied] = useState(false);
     const [isRotating, setIsRotating] = useState(false);
-    const [selectedReminders, setSelectedReminders] = useState([]);
     const [openDropdownId, setOpenDropdownId] = useState(null);
-    const [selectedDays, setSelectedDays] = useState([]);
-    const [rating, setRating] = useState(0);
-    const [RepeatEvery1, setRepeatEvery1] = useState(1);
-    const [RepeatEvery, setRepeatEvery] = useState(1);
     const [billingCycle, setBillingCycle] = useState('Meeting Details');
     const [meetingFilter, setMeetingFilter] = useState("All Meetings");
     const [securityType, setSecurityType] = useState('alwaysLocked');
     const [meetingType, setMeetingType] = useState("All Meetings");
-    const [password, setPassword] = useState('5163YHV8ujui');
-    const [linkNumber, setLinkNumber] = useState('57809');
+    const [password, setPassword] = useState(generatePassword());
     const [passwordError, setPasswordError] = useState('');
     const [linkError, setLinkError] = useState('');
-    const [repeatType, setRepeatType] = useState('0');
-    const [endsSelection, setEndsSelection] = useState('0');
     const userId = sessionStorage.getItem('userId');
     const gettoken = sessionStorage.getItem('token');
     const allusers = useSelector((state) => state.user.allusers);
     const [showDropdown, setShowDropdown] = useState(false);
     const [filteredUsers, setFilteredUsers] = useState([]);
-    const [activeButton, setActiveButton] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
     const IMG_URL = IMAGE_URL
     const dispatch = useDispatch();
     const dropdownRef = useRef(null);
     const searchInputRef = useRef(null);
-
+    const navigate = useNavigate()
+    const FRONT_URL = 'localhost:3000'
+    const singleuser = allusers.find(u => u._id === userId);
+    const [linkNumber, setLinkNumber] = useState(generateMeetingId(20));
 
     const handleLinkDiceClick = () => {
         setIsLinkRotating(true);
         setTimeout(() => {
             setIsLinkRotating(false);
-            setLinkNumber(generateLinkNumber());
+            setLinkNumber(generateMeetingId(20));
         }, 1000);
     };
 
     useEffect(() => {
         dispatch(getAllUsers());
     }, [dispatch]);
-
-
-    const generateLinkNumber = () => {
-        let number = '';
-        for (let i = 0; i < 5; i++) {
-            number += Math.floor(Math.random() * 10);
-        }
-        return number;
-    };
 
     useEffect(() => {
         function handleClickOutside(event) {
@@ -97,26 +104,18 @@ function Meeting() {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-
     const validateLink = (value) => {
-        if (value.length < 5) {
-            setLinkError('Number must be minimum 5 characters');
+        if (value.length < 20) {
+            setLinkError('Number must be minimum 20 characters');
             return false;
         }
-        if (value.length > 5) {
-            setLinkError('Number must be maximum 5 characters');
+        if (value.length > 20) {
+            setLinkError('Number must be maximum 20 characters');
             return false;
         }
-
-        if (!/^\d+$/.test(value)) {
-            setLinkError('Please enter numbers only');
-            return false;
-        }
-
         setLinkError('');
         return true;
     };
-
 
     const handleLinkChange = (e) => {
         const newValue = e.target.value;
@@ -132,45 +131,10 @@ function Meeting() {
         }
     };
 
-    const toggleDay = (day) => {
-        setSelectedDays((prevSelectedDays) => {
-            if (prevSelectedDays.includes(day)) {
-                return prevSelectedDays.filter((d) => d !== day);
-            } else {
-                return [...prevSelectedDays, day];
-            }
-        });
-    };
-
     const handleDotsClick = (meetingId, event) => {
         event.stopPropagation();
         setOpenDropdownId(openDropdownId === meetingId ? null : meetingId);
     };
-
-    const toggleReminder = (reminder) => {
-        setSelectedReminders(prev =>
-            prev.includes(reminder)
-                ? prev.filter(r => r !== reminder)
-                : [...prev, reminder]
-        )
-    }
-
-    const handleIncrement = () => {
-        setRepeatEvery(prev => prev + 1);
-    }
-
-    const handleDecrement = () => {
-        setRepeatEvery(prev => Math.max(prev - 1, 1));
-    }
-
-    const handleIncrement1 = () => {
-        setRepeatEvery1(prev => prev + 1);
-    }
-
-    const handleDecrement1 = () => {
-        setRepeatEvery1(prev => Math.max(prev - 1, 1));
-    }
-
 
     useEffect(() => {
         const handleClickOutside = () => {
@@ -1258,233 +1222,254 @@ function Meeting() {
                         <div className="col-lg-5 col-12 B_col_form">
                             <div className="mb-4 mt-5 B_top_margin">
                                 <h5 className="text-white mb-4">Room Details</h5>
-                                <div className='B_ROOM_DETAILS' style={{ borderRadius: '6px', padding: '20px' }}>
-                                    <div className="d-flex align-items-center mb-4">
-                                        <span className='B_ROOM_DETAILS_span' style={{ color: '#B3AEAE', width: '120px' }}>Name</span>
-                                        <span className="text-white">: John Kumar's Meeting Room</span>
-                                    </div>
-                                    <div className="d-flex align-items-center mb-4">
-                                        <span className='B_ROOM_DETAILS_span' style={{ color: '#B3AEAE', width: '120px' }}>Meeting ID</span>
-                                        <span className="text-white">: 16846118749463</span>
-                                    </div>
-                                    <div className="d-flex align-items-center mb-4 B_invite_link_Column">
-                                        <span className='B_ROOM_DETAILS_span' style={{ color: '#B3AEAE', width: '120px' }}>Invite Link</span>
-                                        <div className="d-flex flex-column">
-                                            <div className="d-flex align-items-center">
-                                                <span className="text-white">: http://localhost:3000/screen/
-                                                    {isEditingLink ? (
-                                                        <input
-                                                            type="text"
-                                                            value={linkNumber}
-                                                            onChange={handleLinkChange}
-                                                            onKeyDown={handleLinkEdit}
-                                                            className='B_Link_input'
-                                                            autoFocus
-                                                            style={{
-                                                                background: 'transparent',
-                                                                border: '1px solid #474e58',
-                                                                color: 'white',
-                                                                width: '120px',
-                                                                borderRadius: '4px',
-                                                                padding: '2px 5px'
-                                                            }}
-                                                        />
-                                                    ) : (
-                                                        <span>{linkNumber}</span>
-                                                    )}
-                                                </span>
-                                                {isEditingLink ? (
-                                                    <>
-                                                        <button
-                                                            className="btn btn-link p-0 ms-2"
-                                                            style={{ color: '#fff' }}
-                                                            onClick={() => {
-                                                                if (validateLink(linkNumber)) {
-                                                                    setIsEditingLink(false);
-                                                                }
-                                                            }}
-                                                        >
-                                                            <IoCheckmark size={18} />
-                                                        </button>
-                                                        <button
-                                                            className="btn btn-link p-0 ms-2"
-                                                            style={{ color: '#fff' }}
-                                                            onClick={() => {
-                                                                setLinkNumber('57809');
-                                                                setLinkError('');
-                                                                setIsEditingLink(false);
-                                                            }}
-                                                        >
-                                                            <IoClose size={18} />
-                                                        </button>
-                                                    </>
-                                                ) : (
-                                                    <>
-                                                        <span
-                                                            className='ms-2'
-                                                            style={{ cursor: 'pointer' }}
-                                                            onClick={() => setIsEditingLink(true)}
-                                                        >
-                                                            <img src={BEdit} alt="Edit" />
-                                                        </span>
-                                                        <span
-                                                            className='ms-2'
-                                                            style={{
-                                                                color: '#fff',
-                                                                cursor: 'pointer',
-                                                                display: 'inline-block',
-                                                                transform: isLinkRotating ? 'rotate(60deg)' : 'rotate(0deg)',
-                                                                transition: 'transform 0.5s ease',
-                                                                transformOrigin: 'center center'
-                                                            }}
-                                                            onClick={handleLinkDiceClick}
-                                                        >
-                                                            <FaDiceTwo size={18} />
-                                                        </span>
-
-                                                    </>
-                                                )}
+                                <Formik
+                                    initialValues={{
+                                        userId: userId,
+                                        name: singleuser.name,
+                                        MeetingID: linkNumber,
+                                        InviteLink: `${FRONT_URL}/screen/${linkNumber}`,
+                                        Security: '',
+                                        password: password,
+                                    }}
+                                    onSubmit={(values) => {
+                                        console.log("values", values);
+                                    }}
+                                >
+                                    <Form>
+                                        <div className='B_ROOM_DETAILS' style={{ borderRadius: '6px', padding: '20px' }}>
+                                            <div className="d-flex align-items-center mb-4">
+                                                <span className='B_ROOM_DETAILS_span' style={{ color: '#B3AEAE', width: '120px' }}>Name</span>
+                                                <span className="text-white">: {`${singleuser.name}'s`} Meeting Room</span>
                                             </div>
-                                            {isEditingLink && linkError && (
-                                                <small style={{ color: '#dc3545', fontSize: '12px', marginTop: '4px' }}>
-                                                    {linkError}
-                                                </small>
-                                            )}
-                                        </div>
-                                    </div>
-                                    <div className="d-flex align-items-center mb-4">
-                                        <span className='B_ROOM_DETAILS_span' style={{ color: '#B3AEAE', width: '120px' }}>Security</span>
-                                        <div className="d-flex align-items-center gap-3">
-                                            <div className="form-check">
-                                                <input
-                                                    className="form-check-input B_radio_input"
-                                                    type="radio"
-                                                    style={{ cursor: "pointer" }}
-                                                    name="security"
-                                                    id="alwaysLocked"
-                                                    checked={securityType === 'alwaysLocked'}
-                                                    onChange={() => handleSecurityChange('alwaysLocked')}
-                                                />
-                                                <label className="form-check-label B_ROOM_DETAILS_label text-white" htmlFor="alwaysLocked">
-                                                    Always locked
-                                                </label>
+                                            <div className="d-flex align-items-center mb-4">
+                                                <span className='B_ROOM_DETAILS_span' style={{ color: '#B3AEAE', width: '120px' }}>Meeting ID</span>
+                                                <span className="text-white">: {`${linkNumber}`}</span>
                                             </div>
-                                            <div className="form-check">
-                                                <input
-                                                    className="form-check-input B_radio_input"
-                                                    type="radio"
-                                                    name="security"
-                                                    id="passwordProtected"
-                                                    checked={securityType === 'passwordProtected'}
-                                                    onChange={() => handleSecurityChange('passwordProtected')}
-                                                />
-                                                <label className="form-check-label B_ROOM_DETAILS_label  text-white" htmlFor="passwordProtected">
-                                                    Password Protected
-                                                </label>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div className="d-flex align-items-center">
-                                        <span className='B_ROOM_DETAILS_span' style={{ color: '#B3AEAE', width: '120px' }}>Password</span>
-                                        <div className="d-flex flex-column">
-                                            <div className="d-flex align-items-center">
-                                                <span className="text-white">: {
-                                                    isEditingPassword ? (
-                                                        <input
-                                                            type="text"
-                                                            value={password}
-                                                            onChange={handlePasswordChange}
-                                                            onKeyDown={handlePasswordEdit}
-                                                            className='B_password_input'
-                                                            autoFocus
-                                                            style={{
-                                                                background: 'transparent',
-                                                                border: '1px solid #474e58',
-                                                                color: 'white',
-                                                                width: '120px',
-                                                                borderRadius: '4px',
-                                                                padding: '2px 5px'
-                                                            }}
-                                                        />
-                                                    ) : (
-                                                        <span>{password}</span>
-                                                    )
-                                                }</span>
-                                                {isEditingPassword ? (
-                                                    <>
-                                                        <button
-                                                            className="btn btn-link p-0 ms-2"
-                                                            style={{ color: '#fff' }}
-                                                            onClick={() => {
-                                                                if (validatePassword(password)) {
-                                                                    setIsEditingPassword(false);
-                                                                }
-                                                            }}
-                                                        >
-                                                            <IoCheckmark size={18} />
-                                                        </button>
-                                                        <button
-                                                            className="btn btn-link p-0 ms-2"
-                                                            style={{ color: '#fff' }}
-                                                            onClick={() => {
-                                                                setPassword('5163YHV8ujui');
-                                                                setPasswordError('');
-                                                                setIsEditingPassword(false);
-                                                            }}
-                                                        >
-                                                            <IoClose size={18} />
-                                                        </button>
-                                                    </>
-                                                ) : (
-                                                    <>
-                                                        <span
-                                                            className='ms-2'
-                                                            style={{ cursor: 'pointer' }}
-                                                            onClick={() => setIsEditingPassword(true)}
-                                                        >
-                                                            <img src={BEdit} alt="Edit" />
-                                                        </span>
-                                                        <span
-                                                            className='ms-2'
-                                                            style={{
-                                                                cursor: 'pointer',
-                                                                color: '#fff',
-                                                                display: 'inline-block',
-                                                                transform: isRotating ? 'rotate3d(1, 1, 1, 360deg)' : 'rotate3d(1, 1, 1, 0deg)',
-                                                                transition: 'transform 1s cubic-bezier(0.68, -0.55, 0.265, 1.55)',
-                                                                transformStyle: 'preserve-3d',
-                                                                perspective: '1000px'
-                                                            }}
-                                                            onClick={handleDiceClick}
-                                                        >
-                                                            <FaDiceSix size={18} />
-                                                        </span>
-                                                        <div className="d-flex flex-column align-items-center"> {/* Container for button and message */}
-                                                            <button className="btn btn-link p-0 ms-2" style={{ color: '#fff' }}>
-                                                                <i className="fas fa-copy"></i>
-                                                            </button>
-                                                            {linkCopied && ( // Conditionally render the copied message
-                                                                <div className="text-success mt-2">
-                                                                    Link is copied!
-                                                                </div>
+                                            <div className="d-flex align-items-center mb-4 B_invite_link_Column">
+                                                <span className='B_ROOM_DETAILS_span' style={{ color: '#B3AEAE', width: '120px' }}>Invite Link</span>
+                                                <div className="d-flex flex-column">
+                                                    <div className="d-flex align-items-center">
+                                                        <span className="text-white">: {`${FRONT_URL}/screen/`}
+                                                            {isEditingLink ? (
+                                                                <input
+                                                                    type="text"
+                                                                    value={linkNumber}
+                                                                    onChange={handleLinkChange}
+                                                                    onKeyDown={handleLinkEdit}
+                                                                    className='B_Link_input'
+                                                                    style={{
+                                                                        background: 'transparent',
+                                                                        borderBottom: '1px solid #fff',
+                                                                        borderTop: 'none',
+                                                                        borderRight: 'none',
+                                                                        borderLeft: 'none',
+                                                                        color: 'white',
+                                                                        // width: '120px',
+                                                                        borderRadius: '4px',
+                                                                        padding: '2px 5px'
+                                                                    }}
+                                                                />
+                                                            ) : (
+                                                                <span>{linkNumber}</span>
                                                             )}
-                                                        </div>
-                                                    </>
-                                                )}
+                                                        </span>
+                                                        {isEditingLink ? (
+                                                            <>
+                                                                <button
+                                                                    className="btn btn-link p-0 ms-2"
+                                                                    style={{ color: '#fff' }}
+                                                                    onClick={() => {
+                                                                        if (validateLink(linkNumber)) {
+                                                                            setIsEditingLink(false);
+                                                                        }
+                                                                    }}
+                                                                >
+                                                                    <IoCheckmark size={18} />
+                                                                </button>
+                                                                <button
+                                                                    className="btn btn-link p-0 ms-2"
+                                                                    style={{ color: '#fff' }}
+                                                                    onClick={() => {
+                                                                        setLinkNumber(linkNumber);
+                                                                        setLinkError('');
+                                                                        setIsEditingLink(false);
+                                                                    }}
+                                                                >
+                                                                    <IoClose size={18} />
+                                                                </button>
+                                                            </>
+                                                        ) : (
+                                                            <>
+                                                                <span
+                                                                    className='ms-2'
+                                                                    style={{ cursor: 'pointer' }}
+                                                                    onClick={() => setIsEditingLink(true)}
+                                                                >
+                                                                    <img src={BEdit} alt="Edit" />
+                                                                </span>
+                                                                <span
+                                                                    className='ms-2'
+                                                                    style={{
+                                                                        color: '#fff',
+                                                                        cursor: 'pointer',
+                                                                        display: 'inline-block',
+                                                                        transform: isLinkRotating ? 'rotate(60deg)' : 'rotate(0deg)',
+                                                                        transition: 'transform 0.5s ease',
+                                                                        transformOrigin: 'center center'
+                                                                    }}
+                                                                    onClick={handleLinkDiceClick}
+                                                                >
+                                                                    <FaDiceTwo size={18} />
+                                                                </span>
+                                                            </>
+                                                        )}
+                                                    </div>
+                                                    {isEditingLink && linkError && (
+                                                        <small style={{ color: '#dc3545', fontSize: '12px', marginTop: '4px' }}>
+                                                            {linkError}
+                                                        </small>
+                                                    )}
+                                                </div>
                                             </div>
-                                            {isEditingPassword && passwordError && (
-                                                <small style={{ color: '#dc3545', fontSize: '12px', marginTop: '4px' }}>
-                                                    {passwordError}
-                                                </small>
-                                            )}
+                                            <div className="d-flex align-items-center mb-4">
+                                                <span className='B_ROOM_DETAILS_span' style={{ color: '#B3AEAE', width: '120px' }}>Security</span>
+                                                <div className="d-flex align-items-center gap-3">
+                                                    <div className="form-check">
+                                                        <input
+                                                            className="form-check-input B_radio_input"
+                                                            type="radio"
+                                                            style={{ cursor: "pointer" }}
+                                                            name="security"
+                                                            id="alwaysLocked"
+                                                            checked={securityType === 'alwaysLocked'}
+                                                            onChange={() => handleSecurityChange('alwaysLocked')}
+                                                        />
+                                                        <label className="form-check-label B_ROOM_DETAILS_label text-white" htmlFor="alwaysLocked">
+                                                            Always locked
+                                                        </label>
+                                                    </div>
+                                                    <div className="form-check">
+                                                        <input
+                                                            className="form-check-input B_radio_input"
+                                                            type="radio"
+                                                            style={{ cursor: "pointer" }}
+                                                            name="security"
+                                                            id="passwordProtected"
+                                                            checked={securityType === 'passwordProtected'}
+                                                            onChange={() => handleSecurityChange('passwordProtected')}
+                                                        />
+                                                        <label className="form-check-label B_ROOM_DETAILS_label  text-white" htmlFor="passwordProtected">
+                                                            Password Protected
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div className="d-flex align-items-center">
+                                                <span className='B_ROOM_DETAILS_span' style={{ color: '#B3AEAE', width: '120px' }}>Password</span>
+                                                <div className="d-flex flex-column">
+                                                    <div className="d-flex align-items-center">
+                                                        <span className="text-white">: {
+                                                            isEditingPassword ? (
+                                                                <input
+                                                                    type="text"
+                                                                    value={password}
+                                                                    onChange={handlePasswordChange}
+                                                                    onKeyDown={handlePasswordEdit}
+                                                                    className='B_password_input'
+                                                                    autoFocus
+                                                                    style={{
+                                                                        background: 'transparent',
+                                                                        borderBottom: '1px solid #fff',
+                                                                        borderTop: 'none',
+                                                                        borderRight: 'none',
+                                                                        borderLeft: 'none',
+                                                                        color: 'white',
+                                                                        // width: '120px',
+                                                                        borderRadius: '4px',
+                                                                        padding: '2px 5px'
+                                                                    }}
+                                                                />
+                                                            ) : (
+                                                                <span>{password}</span>
+                                                            )
+                                                        }</span>
+                                                        {isEditingPassword ? (
+                                                            <>
+                                                                <button
+                                                                    className="btn btn-link p-0 ms-2"
+                                                                    style={{ color: '#fff' }}
+                                                                    onClick={() => {
+                                                                        if (validatePassword(password)) {
+                                                                            setIsEditingPassword(false);
+                                                                        }
+                                                                    }}
+                                                                >
+                                                                    <IoCheckmark size={18} />
+                                                                </button>
+                                                                <button
+                                                                    className="btn btn-link p-0 ms-2"
+                                                                    style={{ color: '#fff' }}
+                                                                    onClick={() => {
+                                                                        setPassword(password);
+                                                                        setPasswordError('');
+                                                                        setIsEditingPassword(false);
+                                                                    }}
+                                                                >
+                                                                    <IoClose size={18} />
+                                                                </button>
+                                                            </>
+                                                        ) : (
+                                                            <>
+                                                                <span
+                                                                    className='ms-2'
+                                                                    style={{ cursor: 'pointer' }}
+                                                                    onClick={() => setIsEditingPassword(true)}
+                                                                >
+                                                                    <img src={BEdit} alt="Edit" />
+                                                                </span>
+                                                                <span
+                                                                    className='ms-2'
+                                                                    style={{
+                                                                        cursor: 'pointer',
+                                                                        color: '#fff',
+                                                                        display: 'inline-block',
+                                                                        transform: isRotating ? 'rotate(60deg)' : 'rotate(0deg)',
+                                                                        transition: 'transform 1s cubic-bezier(0.68, -0.55, 0.265, 1.55)',
+                                                                        transformStyle: 'preserve-3d',
+                                                                        perspective: '1000px'
+                                                                    }}
+                                                                    onClick={handleDiceClick}
+                                                                >
+                                                                    <FaDiceSix size={18} />
+                                                                </span>
+                                                                <div className="d-flex flex-column align-items-center">
+                                                                    <button className="btn btn-link p-0 ms-2" style={{ color: '#fff' }}>
+                                                                        <i className="fas fa-copy"></i>
+                                                                    </button>
+                                                                    {linkCopied && (
+                                                                        <div className="text-success mt-2">
+                                                                            Link is copied!
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+                                                            </>
+                                                        )}
+                                                    </div>
+                                                    {isEditingPassword && passwordError && (
+                                                        <small style={{ color: '#dc3545', fontSize: '12px', marginTop: '4px' }}>
+                                                            {passwordError}
+                                                        </small>
+                                                    )}
+                                                </div>
+                                            </div>
+                                            <div className="mt-5">
+                                                <button className="btn btn-light fw-semibold B_ROOM_DETAILS_btn" style={{ padding: '8px 30px' }}>
+                                                    Start Meeting
+                                                </button>
+                                            </div>
                                         </div>
-                                    </div>
-                                    <div className="mt-5">
-                                        <button className="btn btn-light fw-semibold B_ROOM_DETAILS_btn" style={{ padding: '8px 30px' }}>
-                                            Start Meeting
-                                        </button>
-                                    </div>
-                                </div>
+                                    </Form>
+                                </Formik>
                             </div>
                         </div>
 
@@ -1494,16 +1479,22 @@ function Meeting() {
                                 <div className='B_meeting_note_div' style={{ backgroundColor: '#0A1119', borderRadius: '6px', padding: '30px 50px 30px 30px' }}>
                                     <h5 className="text-white mb-4 ">Note:</h5>
                                     <p style={{ color: '#d3d3d3', marginBottom: '15px' }}>
-                                        Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's stan Lorem Ipsum is simply dummy text of the printing and typesetting industry.
+                                        This room is created for private and secure online meetings. Please use the provided link and credentials only for intended sessions. Sharing access outside of authorized participants is discouraged.
                                     </p>
                                     <p style={{ color: '#d3d3d3', marginBottom: '15px' }}>
-                                        Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's stan Lorem Ipsum is simply.
+                                        This room is configured for recurring meetings. You may reuse the link and password for all scheduled sessions unless notified otherwise. Always check for updates in the meeting invite.
                                     </p>
                                     <p style={{ color: '#d3d3d3', marginBottom: '15px' }}>
-                                        Lorem Ipsum is simply dummy text of the printing and typesetting industry.
+                                        This meeting room is locked by default to ensure privacy. Participants must enter the password to join unless access is pre-authorized. Do not disclose the password publicly.
+                                    </p>
+                                    <p style={{ color: '#d3d3d3', marginBottom: '15px' }}>
+                                        For the best experience, please join the meeting using a stable internet connection and a supported browser. If you face issues accessing the link, contact the host directly.
+                                    </p>
+                                    <p style={{ color: '#d3d3d3', marginBottom: '15px' }}>
+                                        If you're unable to access the room using the provided link, wait 5 minutes and try again. If the issue persists, a new link will be issued by the host and shared via email or message.
                                     </p>
                                     <p style={{ color: '#d3d3d3', marginBottom: '0' }}>
-                                        Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's stan Lorem Ipsum is simply.
+                                        Please note: This meeting may be recorded for internal use. By joining, you consent to audio and/or video recording. If you do not agree, kindly inform the host in advance.
                                     </p>
                                 </div>
                             </div>
@@ -1536,8 +1527,6 @@ function Meeting() {
     const [DeleteModel, setDeleteModel] = useState(false);
     const handleCloseDeleteModel = () => setDeleteModel(false);
     const handleShowDeleteModel = () => setDeleteModel(true);
-
-
 
     const [OffcanvasModel, setOffcanvasModel] = useState(false);
     const handleCloseOffcanvasModel = () => {
@@ -1592,28 +1581,6 @@ function Meeting() {
     };
 
 
-    const generatePassword = () => {
-        const uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-        const lowercase = 'abcdefghijklmnopqrstuvwxyz';
-        const numbers = '0123456789';
-        const length = 12;
-
-        let chars = uppercase + lowercase + numbers;
-        let password = '';
-
-        password += uppercase[Math.floor(Math.random() * uppercase.length)];
-        password += lowercase[Math.floor(Math.random() * lowercase.length)];
-        password += numbers[Math.floor(Math.random() * numbers.length)];
-
-        for (let i = password.length; i < length; i++) {
-            password += chars[Math.floor(Math.random() * chars.length)];
-        }
-
-        password = password.split('').sort(() => Math.random() - 0.5).join('');
-
-        return password;
-    };
-
     const handleDiceClick = () => {
         setIsRotating(true);
         setTimeout(() => {
@@ -1621,57 +1588,6 @@ function Meeting() {
             setPassword(generatePassword());
         }, 1000);
     };
-
-
-    // const reviewSchema = Yup.object().shape({
-    //     rating: Yup.string().required("rating is required"),
-    //     comments: Yup.string().required("comments is required"),
-    // });
-
-    // const handleButtonClick = (button) => {
-    //     setActiveButton(button);
-    // };
-
-    const handleRating = (value) => {
-
-        if (value === rating) {
-            setRating(rating - 1);
-        } else {
-            setRating(value);
-        }
-    };
-
-    // const handleRating = (star) => {
-    //     if (star === rating) {
-    //         // If clicking the last filled star, decrease rating by 1
-    //         setRating(rating - 1);
-    //     } else {
-    //         // Otherwise set to clicked star value
-    //         setRating(star);
-    //     }
-    // }
-
-
-    const handleButtonClick = (button) => {
-        setActiveButton((prev) => {
-            if (prev.includes(button)) {
-                return prev.filter((b) => b !== button);
-            } else {
-                return [...prev, button];
-            }
-        });
-    };
-
-    // const handleButtonClick = (button) => {
-    //     setActiveButton((prev) => {
-    //         if (prev.includes(button)) {
-    //             return prev.filter((b) => b !== button); // Deselect if already selected
-    //         } else {
-    //             return [...prev, button]; // Select if not already selected
-    //         }
-    //     });
-    // };
-
 
     const scheduleSchema = Yup.object().shape({
         title: Yup.string().required('Title is required'),
@@ -1845,7 +1761,11 @@ function Meeting() {
                                     }}>
                                         Schedule
                                     </button>
-                                    <button className="btn btn-outline-light B_metting_btn fw-semibold">Meet Now</button>
+                                    <button className="btn btn-outline-light B_metting_btn fw-semibold" onClick={() => {
+                                        const newMeetingId = generateMeetingId(20);
+                                        const meetingLink = `${FRONT_URL}/screen/${newMeetingId}`;
+                                        navigate(`/screen/${newMeetingId}`, { state: { meetingLink } });
+                                    }}>Meet Now</button>
                                 </div>
                             </div>
                         </div>
@@ -3104,7 +3024,6 @@ function Meeting() {
                         </Modal>
 
                         {/* ============================ Invite People Modal ============================ */}
-                        {console.log("inviteData", inviteData)}
 
                         <Modal
                             show={InviteModel}

@@ -14,6 +14,7 @@ import { IMAGE_URL } from '../Utils/baseUrl';
 import { useDispatch, useSelector } from 'react-redux';
 import { createschedule, getAllschedule } from '../Redux/Slice/schedule.slice';
 import { getAllUsers } from '../Redux/Slice/user.slice';
+import { useNavigate } from 'react-router-dom';
 
 
 const localizer = momentLocalizer(moment);
@@ -32,8 +33,6 @@ const CustomToolbar = (toolbar) => {
     toolbar.onNavigate('NEXT');
   };
 
-
-
   const label = () => {
     const date = moment(toolbar.date);
     switch (toolbar.view) {
@@ -49,6 +48,15 @@ const CustomToolbar = (toolbar) => {
     }
   };
 
+  const navigate = useNavigate()
+  const FRONT_URL = 'localhost:3000'
+
+  // Function to generate a random meeting ID of specified length
+  const generateMeetingId = (length) => {
+    const array = new Uint8Array(length / 2); // Create a byte array
+    window.crypto.getRandomValues(array); // Fill it with random values
+    return Array.from(array, byte => ('0' + byte.toString(16)).slice(-2)).join(''); // Convert to hex string
+  };
 
 
   return (
@@ -96,7 +104,11 @@ const CustomToolbar = (toolbar) => {
         <button className="btn btn-outline-light j_nav_btn" onClick={toolbar.onScheduleShow}>
           Schedule Now
         </button>
-        <button className="btn btn-outline-light j_nav_btn">
+        <button className="btn btn-outline-light j_nav_btn" onClick={() => {
+          const newMeetingId = generateMeetingId(20);
+          const meetingLink = `${FRONT_URL}/screen/${newMeetingId}`; // Create the meeting link
+          navigate(`/screen/${newMeetingId}`, { state: { meetingLink } }); // Pass the meeting link as state
+        }}>
           Meet Now
         </button>
       </div>

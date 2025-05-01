@@ -7,7 +7,7 @@ import OTP from '../Image/OTP.png'
 import forgetpassword from '../Image/forgetpassword.png'
 import * as Yup from 'yup';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { forgotPassword, googleLogin, loginuser, resetPassword, verifyOtp } from '../Redux/Slice/auth.slice';
 import { createUser } from '../Redux/Slice/user.slice';
@@ -178,6 +178,10 @@ function Login() {
     });
   };
 
+  const location = useLocation()
+  console.log("location", location);
+
+
   return (
     <div>
       {forgotPasswordStep === 0 && (
@@ -197,7 +201,13 @@ function Login() {
                       validationSchema={signInSchema}
                       onSubmit={(values) => {
                         dispatch(loginuser(values)).then((response) => {
-                          if (response.payload.status == 200) navigate('/');
+                          if (response.payload.status == 200) {
+                            if (location.state != null) {
+                              navigate(location.state.from)
+                            } else {
+                              navigate('/');
+                            }
+                          }
                         });
                       }}
                     >

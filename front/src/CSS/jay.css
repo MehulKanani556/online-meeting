@@ -811,6 +811,30 @@
     }
 }
 
+.j_bottom_left_modal {
+    position: fixed;
+    width: 400px !important;
+    bottom: 80px;
+    left: 20px;
+    background-color: #12161C;
+    color: white;
+    margin: 0;
+    transform: none !important;
+}
+
+.j_bottom_left_modal {
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+}
+
+.j_meeting_title {
+    font-size: 20px;
+}
+
+.B_Link_input:focus-visible,
+.B_password_input:focus-visible {
+    outline: none !important;
+}
 
 /* ====================================== start calendar ======================================== */
 

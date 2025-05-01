@@ -5,6 +5,7 @@ import authSlice from "./Slice/auth.slice";
 import contactsSlice from "./Slice/contactus.slice";
 import reviewSlice from "./Slice/reviews.slice";
 import scheduleSlice from "./Slice/schedule.slice";
+import personalroomSlice from "./Slice/personalroom.slice";
 
 export const rootReducer = combineReducers({
     alert: alertSlice,
@@ -13,4 +14,5 @@ export const rootReducer = combineReducers({
     contact: contactsSlice,
     review: reviewSlice,
     schedule: scheduleSlice,
+    personalroom: personalroomSlice,
 });

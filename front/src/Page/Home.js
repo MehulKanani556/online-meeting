@@ -54,10 +54,8 @@ function Home() {
   const gettoken = sessionStorage.getItem('token')
   const allusers = useSelector((state) => state.user.allusers);
   const allschedule = useSelector((state) => state.schedule.allschedule);
-  // console.log("allschedule", allschedule);
 
   const currentUser = allusers.find((id) => id._id === userId)
-  // console.log("currentUser", currentUser);
   const userName = currentUser?.name;
 
 
@@ -65,6 +63,7 @@ function Home() {
   const [requestSent, setRequestSent] = useState(false);
   const [joinRequestStatus, setJoinRequestStatus] = useState('');
   const [meetingToJoin, setMeetingToJoin] = useState(null);
+
 
   const {
     socket,
@@ -304,6 +303,15 @@ function Home() {
       })
   });
 
+  const FRONT_URL = 'localhost:3000'
+
+  // Function to generate a random meeting ID of specified length
+  const generateMeetingId = (length) => {
+    const array = new Uint8Array(length / 2); // Create a byte array
+    window.crypto.getRandomValues(array); // Fill it with random values
+    return Array.from(array, byte => ('0' + byte.toString(16)).slice(-2)).join(''); // Convert to hex string
+  };
+
   return (
     <div>
       <HomeNavBar />
@@ -324,7 +332,12 @@ function Home() {
             <div className="row justify-content-center j_flex_direction">
               <div className="col-4 g-5 ">
                 <div className="j_home_cards"
-                  onClick={() => setActiveItem('New Meeting')}
+                  onClick={() => {
+                    setActiveItem('New Meeting');
+                    const newMeetingId = generateMeetingId(20);
+                    const meetingLink = `${FRONT_URL}/screen/${newMeetingId}`; // Create the meeting link
+                    navigate(`/screen/${newMeetingId}`, { state: { meetingLink } }); // Pass the meeting link as state
+                  }}
                   style={{
                     border: activeItem === 'New Meeting' ? '2px solid #bfbfbf' : 'none',
                   }}>
@@ -1261,14 +1274,14 @@ function Home() {
                     )}
                   </div>
                   <div className=' BB_margin_home gap-5' style={{ display: 'flex', justifyContent: 'center', marginTop: '40px', marginBottom: "20px" }}>
-                    <div className='B_hover_bttn' onClick={handleCloseReviewModel}
+                    <div className='B_hover_bttn fw-semibold' onClick={handleCloseReviewModel}
                     >
                       Back To Home
                     </div>
 
                     <button
                       type="submit"
-                      className='B_lastbtn'
+                      className='B_lastbtn fw-semibold'
                       style={{
                         backgroundColor: '#FFFFFF',
                         border: 'none',

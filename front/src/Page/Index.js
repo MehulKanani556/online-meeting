@@ -29,6 +29,7 @@ function Index() {
     const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
     const allreviews = useSelector((state) => state.review.allreview)
     const img_url = IMAGE_URL
+    const [errorMessage, setErrorMessage] = useState('');
 
     useEffect(() => {
         dispatch(getAllreview())
@@ -149,10 +150,10 @@ function Index() {
                                     Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's stan
                                 </p>
                                 <div className='B_Btn_center'>
-                                    <Link to={'/home'}>
-                                        <button className="btn btn-light B_Button_text" >
-                                            See how it works
-                                            <span style={{ marginLeft: "8px", }}><BsArrowRight /></span>
+                                    <Link to={isAuthenticated ? '/home' : '/login'}>
+                                        <button className="btn btn-light B_Button_text " >
+                                            {isAuthenticated ? 'See how it works' : 'Please log in to continue.'}
+                                            {isAuthenticated && <span style={{ marginLeft: "8px", }}><BsArrowRight /></span>}
                                         </button>
                                     </Link>
                                 </div>

@@ -6,6 +6,7 @@ const { userLogin, googleLogin, forgotPassword, verifyOtp, changePassword, userL
 const { getAllcontact, getcontactById, updatecontact, removecontact, createNewcontact } = require('../controller/contactus.controller');
 const { createNewreviews, getAllreviews, getreviewsById, updatereviews, removereviews } = require('../controller/review.controller');
 const { createNewschedule, getAllschedule, getscheduleById, updateschedule, removeschedule } = require('../controller/schedule.controller');
+const { createNewpersonalroom, getAllpersonalroom, getpersonalroomById, updatepersonalroom, removepersonalroom } = require('../controller/personalroom.controller');
 
 // auth Routes
 
@@ -49,5 +50,13 @@ indexRoutes.get('/allschedules', getAllschedule);
 indexRoutes.get('/getscheduleById/:id', getscheduleById);
 indexRoutes.put('/scheduleUpdate/:id', updateschedule);
 indexRoutes.delete('/deleteschedule/:id', removeschedule);
+
+// personal room Routes 
+
+indexRoutes.post('/createpersonalroom', createNewpersonalroom);
+indexRoutes.get('/allpersonalroom', getAllpersonalroom);
+indexRoutes.get('/getpersonalroomById/:id', getpersonalroomById);
+indexRoutes.put('/personalroomUpdate/:id', updatepersonalroom);
+indexRoutes.delete('/deletepersonalroom/:id', removepersonalroom);
 
 module.exports = indexRoutes
