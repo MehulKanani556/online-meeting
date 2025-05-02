@@ -46,7 +46,7 @@ export const createpersonalroom = createAsyncThunk(
             });
             dispatch(setAlert({ text: response.data.message, color: 'success' }));
             dispatch(getAllpersonalroom());
-            return response.data.personalroom;
+            return response.data;
         } catch (error) {
             return handleErrors(error, dispatch, rejectWithValue);
         }

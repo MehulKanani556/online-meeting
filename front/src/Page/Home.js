@@ -336,7 +336,7 @@ function Home() {
                     setActiveItem('New Meeting');
                     const newMeetingId = generateMeetingId(20);
                     const meetingLink = `${FRONT_URL}/screen/${newMeetingId}`; // Create the meeting link
-                    navigate(`/screen/${newMeetingId}`, { state: { meetingLink } }); // Pass the meeting link as state
+                    navigate(`/screen/${newMeetingId}`, { state: { meetingLink, status: true } }); // Pass the meeting link as state
                   }}
                   style={{
                     border: activeItem === 'New Meeting' ? '2px solid #bfbfbf' : 'none',

@@ -2040,49 +2040,51 @@ function Screen() {
 
     return (
         <div className='j_record' ref={recordingDivRef}>
-            <Modal
-                contentClassName="j_bottom_left_modal"
-                backdrop={false}
-                show={showMeetingLinkModal}
-                onHide={handleclose}
-            >
-                <Modal.Header className="border-0 d-flex justify-content-between align-items-center">
-                    <Modal.Title className='j_meeting_title'>Your Meeting's Ready</Modal.Title>
-                    <IoClose
-                        style={{ color: '#fff', fontSize: '22px', cursor: 'pointer' }}
-                        onClick={handleclose}
-                    />
-                </Modal.Header>
-                <Modal.Body>
-                    <p>Or share this meeting link with others you want in the meeting:</p>
-                    <div className='position-relative'>
-                        <input
-                            type="text"
-                            className='form-control j_search_Input text-white'
-                            value={meetingLink}
-                            readOnly
-                            // style={{ width: '100%', marginBottom: '10px' }}
-                            style={{ padding: '12px', borderRadius: '5px', border: 'none', fontSize: '15px', backgroundColor: "#080E14" }}
+            {location?.state?.status && (
+                <Modal
+                    contentClassName="j_bottom_left_modal"
+                    backdrop={false}
+                    show={showMeetingLinkModal}
+                    onHide={handleclose}
+                >
+                    <Modal.Header className="border-0 d-flex justify-content-between align-items-center">
+                        <Modal.Title className='j_meeting_title'>Your Meeting's Ready</Modal.Title>
+                        <IoClose
+                            style={{ color: '#fff', fontSize: '22px', cursor: 'pointer' }}
+                            onClick={handleclose}
                         />
-                        <div className="position-absolute" style={{ top: "20%", right: "4%", cursor: 'pointer' }}>
-                            <img src={copytext} alt="copytext-icon" style={{ height: '15px', width: '15px' }} onClick={() => {
-                                navigator.clipboard.writeText(meetingLink).then(() => {
-                                    setLinkCopiedmodal(true);
-                                    setTimeout(() => setLinkCopiedmodal(false), 2000);
-                                })
-                                    .catch(err => {
-                                        console.error("Failed to copy: ", err);
-                                    });
-                            }} />
-                        </div>
-                        {linkCopiedmodal && (
-                            <div className="text-success text-end">
-                                Link is copied!
+                    </Modal.Header>
+                    <Modal.Body>
+                        <p>Or share this meeting link with others you want in the meeting:</p>
+                        <div className='position-relative'>
+                            <input
+                                type="text"
+                                className='form-control j_search_Input text-white'
+                                value={meetingLink}
+                                readOnly
+                                // style={{ width: '100%', marginBottom: '10px' }}
+                                style={{ padding: '12px', borderRadius: '5px', border: 'none', fontSize: '15px', backgroundColor: "#080E14" }}
+                            />
+                            <div className="position-absolute" style={{ top: "20%", right: "4%", cursor: 'pointer' }}>
+                                <img src={copytext} alt="copytext-icon" style={{ height: '15px', width: '15px' }} onClick={() => {
+                                    navigator.clipboard.writeText(meetingLink).then(() => {
+                                        setLinkCopiedmodal(true);
+                                        setTimeout(() => setLinkCopiedmodal(false), 2000);
+                                    })
+                                        .catch(err => {
+                                            console.error("Failed to copy: ", err);
+                                        });
+                                }} />
                             </div>
-                        )}
-                    </div>
-                </Modal.Body>
-            </Modal>
+                            {linkCopiedmodal && (
+                                <div className="text-success text-end">
+                                    Link is copied!
+                                </div>
+                            )}
+                        </div>
+                    </Modal.Body>
+                </Modal>
+            )}
             {/* <div className="position-fixed top-0 end-0 p-3 ps-0 pb-0" style={{ zIndex: '1' }}>
                 <div className="j_Invite text-white p-3">
                     <div className="d-flex align-items-center j_Box_margin">

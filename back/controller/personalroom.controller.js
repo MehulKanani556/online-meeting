@@ -4,13 +4,13 @@ exports.createNewpersonalroom = async (req, res) => {
     try {
         let { userId, name, MeetingID, InviteLink, Security, Password } = req.body;
 
-        let existingRoom = await personalroom.findOne({ MeetingID });
+        let chekpersonalroom = await personalroom.findOne({ MeetingID: req.body.MeetingID });
 
-        if (existingRoom) {
+        if (chekpersonalroom) {
             return res.json({ status: 400, message: "A personal room already exists." });
         }
 
-        let chekpersonalroom = await personalroom.create({
+        chekpersonalroom = await personalroom.create({
             userId,
             name,
             MeetingID,

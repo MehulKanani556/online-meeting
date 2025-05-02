@@ -18,6 +18,7 @@ import { createschedule, getAllschedule, updateschedule } from '../Redux/Slice/s
 import { getAllUsers } from '../Redux/Slice/user.slice';
 import bin from '../Image/j_bin.svg'
 import { IMAGE_URL } from '../Utils/baseUrl';
+import { createpersonalroom } from '../Redux/Slice/personalroom.slice';
 
 function Meeting() {
 
@@ -58,7 +59,7 @@ function Meeting() {
     const [openDropdownId, setOpenDropdownId] = useState(null);
     const [billingCycle, setBillingCycle] = useState('Meeting Details');
     const [meetingFilter, setMeetingFilter] = useState("All Meetings");
-    const [securityType, setSecurityType] = useState('');
+    const [securityType, setSecurityType] = useState('alwaysLocked');
     const [meetingType, setMeetingType] = useState("All Meetings");
     const [password, setPassword] = useState(generatePassword());
     const [passwordError, setPasswordError] = useState('');
@@ -77,9 +78,6 @@ function Meeting() {
     const FRONT_URL = 'localhost:3000'
     const singleuser = allusers.find(u => u._id === userId);
     const [linkNumber, setLinkNumber] = useState(generateMeetingId(20));
-
-    console.log("securityType :", securityType);
-
 
     const handleLinkDiceClick = () => {
         setIsLinkRotating(true);
@@ -189,18 +187,6 @@ function Meeting() {
     const handleInvite = (data) => {
         setInviteData(data)
     }
-
-    const RoomSchema = Yup.object().shape({
-        name: Yup.string().required('Name is required'),
-        MeetingID: Yup.string().required('Meeting ID is required'),
-        InviteLink: Yup.string().required('Invite link is required'),
-        Security: Yup.string().required('Security option is required'),
-        Password: Yup.string().when('Security', {
-            is: 'Password Protected',
-            then: Yup.string().required('Password is required'),
-            otherwise: Yup.string()
-        }),
-    });
 
     const renderMeetingCards = () => {
 
@@ -1239,15 +1225,22 @@ function Meeting() {
                                 <Formik
                                     initialValues={{
                                         userId: userId,
-                                        name: singleuser.name,
+                                        name: singleuser?.name,
                                         MeetingID: linkNumber,
-                                        InviteLink: `${FRONT_URL}/screen/`,
+                                        InviteLink: `/screen/`,
                                         Security: securityType,
                                         password: password,
                                     }}
-                                    // validationSchema={RoomSchema}
-                                    onSubmit={(values) => {
-                                        console.log("values", values);
+                                    onSubmit={(values, { resetForm }) => {
+                                        // console.log("values", values);
+                                        dispatch(createpersonalroom(values)).then((response) => {
+                                            // console.log("response", response);
+                                            if (response.payload.status == 200) {
+                                                const { InviteLink, MeetingID } = response.payload.personalroom;
+                                                navigate(`${InviteLink}${MeetingID}`);
+                                                resetForm();
+                                            }
+                                        });
                                     }}
                                 >
                                     {({ values, errors, touched, handleSubmit, handleChange, setFieldValue }) => (
@@ -1265,7 +1258,7 @@ function Meeting() {
                                                     <span className='B_ROOM_DETAILS_span' style={{ color: '#B3AEAE', width: '120px' }}>Invite Link</span>
                                                     <div className="d-flex flex-column">
                                                         <div className="d-flex align-items-center">
-                                                            <span className="text-white">: {`${values.InviteLink}`}
+                                                            <span className="text-white">: {`${FRONT_URL}${values.InviteLink}`}
                                                                 {isEditingLink ? (
                                                                     <input
                                                                         type="text"
@@ -1306,7 +1299,7 @@ function Meeting() {
                                                                         className="btn btn-link p-0 ms-2"
                                                                         style={{ color: '#fff' }}
                                                                         onClick={() => {
-                                                                            setLinkNumber(linkNumber);
+                                                                            setLinkNumber(values.MeetingID);
                                                                             setLinkError('');
                                                                             setIsEditingLink(false);
                                                                         }}

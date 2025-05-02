@@ -16,7 +16,6 @@ const personalroomSchema = mongoose.Schema({
     },
     Security: {
         type: String,
-        enum: ['0', 'Always locked', 'Password Protected']
     },
     Password: {
         type: String,
