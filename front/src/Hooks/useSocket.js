@@ -6,6 +6,7 @@ const SOCKET_SERVER_URL = "http://localhost:4000"; // Move to environment variab
 
 export const useSocket = (userId, roomId, userName) => {
     const socketRef = useRef(null);
+    const [reminders, setReminders] = useState([]); // State to hold reminders 
     const [isConnected, setIsConnected] = useState(false);
     const [participants, setParticipants] = useState([]);
     const [messages, setMessages] = useState([]);
@@ -93,7 +94,8 @@ export const useSocket = (userId, roomId, userName) => {
 
     // Initialize socket connection
     useEffect(() => {
-        if (!userId || !roomId) return;
+
+        if (!userId) return;
 
         // Clear any existing connection
         if (socketRef.current && isConnected) {
@@ -104,13 +106,25 @@ export const useSocket = (userId, roomId, userName) => {
 
         // Join room
         socketRef.current.on("connect", () => {
+            // console.log("Socket connected:", socketRef.current);
             setIsConnected(true);
-            // console.log("Socket connected:", socketRef.current.id);
+            // Emit user-login after connection
+            socketRef.current.emit("user-login", userId);
         });
+
         socketRef.current.emit('join-room', {
             roomId,
             userId,
             userName
+        });
+
+        socketRef.current.on("user-status-changed", (onlineUserIds) => {
+            // console.log("Online users updated:", onlineUserIds);
+        });
+
+        socketRef.current.on('reminder', (data) => {
+            console.log("ddddd", data);
+            setReminders(prevReminders => [...prevReminders, data.message]); // Add new reminder to state
         });
 
         // Get list of room users when joining
@@ -470,6 +484,7 @@ export const useSocket = (userId, roomId, userName) => {
     return {
         socket: socketRef.current,
         isConnected,
+        reminders, // Return reminders state
         participants,
         setParticipants,
         messages,

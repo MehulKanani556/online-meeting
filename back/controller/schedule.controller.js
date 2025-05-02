@@ -52,7 +52,7 @@ exports.createNewschedule = async (req, res) => {
             // .slice(0, 12)
             // .replace(/(.{3})/g, '$1-')
             // .slice(0, -1);
-            scheduleData.meetingLink = uniqueId;
+            scheduleData.meetingLink = `http://localhost:3000/screen/${uniqueId}`;
             scheduleData.password = password;
         }
 

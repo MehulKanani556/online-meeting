@@ -650,11 +650,13 @@ function Schedule() {
                                           style={{
                                             width: '30px',
                                             height: '30px',
-                                            backgroundColor: '#364758',
+                                            // backgroundColor: '#364758',
+                                            backgroundColor: `hsl(${Array.from(user._id || user.email || user.name || '').reduce((acc, char) => acc + char.charCodeAt(0), 0) % 360}, 70%, 45%)`,
                                             color: 'white'
                                           }}
                                         >
-                                          {user.name.charAt(0).toUpperCase()}
+                                          {/* {user.name.charAt(0).toUpperCase()} */}
+                                          {user.name.charAt(0).toUpperCase()}{user.name.split(' ')[1] ? user.name.split(' ')[1].charAt(0).toUpperCase() : ''}
                                         </div>
                                       )}
                                     </div>
@@ -696,11 +698,13 @@ function Schedule() {
                                         style={{
                                           width: '30px',
                                           height: '30px',
-                                          backgroundColor: '#364758',
+                                          // backgroundColor: '#364758',
+                                          backgroundColor: `hsl(${Array.from(user._id || user.email || user.name || '').reduce((acc, char) => acc + char.charCodeAt(0), 0) % 360}, 70%, 45%)`,
                                           color: 'white'
                                         }}
                                       >
-                                        {user.name.charAt(0).toUpperCase()}
+                                        {/* {user.name.charAt(0).toUpperCase()} */}
+                                        {user.name.charAt(0).toUpperCase()}{user.name.split(' ')[1] ? user.name.split(' ')[1].charAt(0).toUpperCase() : ''}
                                       </div>
                                     )}
                                   </div>

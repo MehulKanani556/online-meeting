@@ -40,10 +40,7 @@ function HomeNavBar() {
     const {
         socket,
         reminders
-    } = useSocket(userId, null, currUser?.name);
-
-    console.log(reminders);
-
+    } = useSocket(userId);
 
     const handleCloseProfilePicOptions = () => setshowProfilePicOptions(false)
     const handlechangeprofileClose = () => setchangeprofileshow(false);
