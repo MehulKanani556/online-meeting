@@ -476,7 +476,7 @@ export const useSocket = (userId, roomId, userName) => {
                 roomId,
                 userId,
                 userName,
-                requestId
+                requestId,
             });
         }
     };

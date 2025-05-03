@@ -23,7 +23,11 @@ import Demo from './Page/Demo';
 function App() {
   const { store, persistor } = configureStore();
   return (
-    <SnackbarProvider autoHideDuration={3000}>
+    // <SnackbarProvider autoHideDuration={3000}>
+    <SnackbarProvider
+      maxSnack={3}
+      autoHideDuration={3000}
+    >
       <Provider store={store}>
         <Alert />
         <Routes>

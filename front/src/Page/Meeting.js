@@ -79,13 +79,13 @@ function Meeting() {
     const singleuser = allusers.find(u => u._id === userId);
     const [linkNumber, setLinkNumber] = useState(generateMeetingId(20));
 
-    const handleLinkDiceClick = () => {
-        setIsLinkRotating(true);
-        setTimeout(() => {
-            setIsLinkRotating(false);
-            setLinkNumber(generateMeetingId(20));
-        }, 1000);
-    };
+    // const handleLinkDiceClick = () => {
+    //     setIsLinkRotating(true);
+    //     setTimeout(() => {
+    //         setIsLinkRotating(false);
+    //         setLinkNumber(generateMeetingId(20));
+    //     }, 1000);
+    // };
 
     useEffect(() => {
         dispatch(getAllUsers());
@@ -118,11 +118,11 @@ function Meeting() {
         return true;
     };
 
-    const handleLinkChange = (e) => {
-        const newValue = e.target.value;
-        setLinkNumber(newValue);
-        validateLink(newValue);
-    };
+    // const handleLinkChange = (e) => {
+    //     const newValue = e.target.value;
+    //     setLinkNumber(newValue);
+    //     validateLink(newValue);
+    // };
 
     const handleLinkEdit = (e) => {
         if (e.key === 'Enter') {
@@ -1231,6 +1231,16 @@ function Meeting() {
                                         Security: securityType,
                                         password: password,
                                     }}
+                                    validate={values => {
+                                        const errors = {};
+                                        if (!validateLink(values.MeetingID)) {
+                                            errors.MeetingID = linkError;
+                                        }
+                                        if (!validatePassword(values.password)) {
+                                            errors.password = passwordError;
+                                        }
+                                        return errors;
+                                    }}
                                     onSubmit={(values, { resetForm }) => {
                                         // console.log("values", values);
                                         dispatch(createpersonalroom(values)).then((response) => {
@@ -1243,250 +1253,287 @@ function Meeting() {
                                         });
                                     }}
                                 >
-                                    {({ values, errors, touched, handleSubmit, handleChange, setFieldValue }) => (
-                                        <form onSubmit={handleSubmit}>
-                                            <div className='B_ROOM_DETAILS' style={{ borderRadius: '6px', padding: '20px' }}>
-                                                <div className="d-flex align-items-center mb-4">
-                                                    <span className='B_ROOM_DETAILS_span' style={{ color: '#B3AEAE', width: '120px' }}>Name</span>
-                                                    <span className="text-white">: {`${values.name}'s`} Meeting Room</span>
-                                                </div>
-                                                <div className="d-flex align-items-center mb-4">
-                                                    <span className='B_ROOM_DETAILS_span' style={{ color: '#B3AEAE', width: '120px' }}>Meeting ID</span>
-                                                    <span className="text-white">: {`${values.MeetingID}`}</span>
-                                                </div>
-                                                <div className="d-flex align-items-center mb-4 B_invite_link_Column">
-                                                    <span className='B_ROOM_DETAILS_span' style={{ color: '#B3AEAE', width: '120px' }}>Invite Link</span>
-                                                    <div className="d-flex flex-column">
-                                                        <div className="d-flex align-items-center">
-                                                            <span className="text-white">: {`${FRONT_URL}${values.InviteLink}`}
+                                    {({ values, errors, touched, handleSubmit, handleChange, setFieldValue }) => {
+
+                                        const handleLinkDiceClick = () => {
+                                            setIsLinkRotating(true);
+                                            setTimeout(() => {
+                                                setIsLinkRotating(false);
+                                                const newMeetingId = generateMeetingId(20);
+                                                setLinkNumber(newMeetingId);
+                                                setFieldValue('MeetingID', newMeetingId);
+                                            }, 1000);
+                                        };
+
+                                        const handlepasswordDice = () => {
+                                            setIsRotating(true);
+                                            setTimeout(() => {
+                                                setIsRotating(false);
+                                                const newPassword = generatePassword();
+                                                setPassword(newPassword);
+                                                setFieldValue('password', newPassword)
+                                            }, 1000);
+                                        };
+
+                                        const handleLinkChange = (e) => {
+                                            const newValue = e.target.value;
+                                            setLinkNumber(newValue);
+                                            setFieldValue('MeetingID', newValue);
+                                            validateLink(newValue);
+                                        };
+
+                                        const handlePasswordChange = (e) => {
+                                            const newValue = e.target.value;
+                                            setPassword(newValue);
+                                            setFieldValue('password', newValue)
+                                            validatePassword(newValue);
+                                        };
+
+                                        return (
+                                            <form onSubmit={handleSubmit}>
+                                                <div className='B_ROOM_DETAILS' style={{ borderRadius: '6px', padding: '20px' }}>
+                                                    <div className="d-flex align-items-center mb-4">
+                                                        <span className='B_ROOM_DETAILS_span' style={{ color: '#B3AEAE', width: '120px' }}>Name</span>
+                                                        <span className="text-white">: {`${values.name}'s`} Meeting Room</span>
+                                                    </div>
+                                                    <div className="d-flex align-items-center mb-4">
+                                                        <span className='B_ROOM_DETAILS_span' style={{ color: '#B3AEAE', width: '120px' }}>Meeting ID</span>
+                                                        <span className="text-white">: {`${values.MeetingID}`}</span>
+                                                    </div>
+                                                    <div className="d-flex align-items-center mb-4 B_invite_link_Column">
+                                                        <span className='B_ROOM_DETAILS_span' style={{ color: '#B3AEAE', width: '120px' }}>Invite Link</span>
+                                                        <div className="d-flex flex-column">
+                                                            <div className="d-flex align-items-center">
+                                                                <span className="text-white">: {`${FRONT_URL}${values.InviteLink}`}
+                                                                    {isEditingLink ? (
+                                                                        <input
+                                                                            type="text"
+                                                                            value={values.MeetingID}
+                                                                            onChange={handleLinkChange}
+                                                                            onKeyDown={handleLinkEdit}
+                                                                            className='B_Link_input'
+                                                                            style={{
+                                                                                background: 'transparent',
+                                                                                borderBottom: '1px solid #fff',
+                                                                                borderTop: 'none',
+                                                                                borderRight: 'none',
+                                                                                borderLeft: 'none',
+                                                                                color: 'white',
+                                                                                // width: '120px',
+                                                                                borderRadius: '4px',
+                                                                                padding: '2px 5px'
+                                                                            }}
+                                                                        />
+                                                                    ) : (
+                                                                        <span>{values.MeetingID}</span>
+                                                                    )}
+                                                                </span>
                                                                 {isEditingLink ? (
-                                                                    <input
-                                                                        type="text"
-                                                                        value={values.MeetingID}
-                                                                        onChange={handleLinkChange}
-                                                                        onKeyDown={handleLinkEdit}
-                                                                        className='B_Link_input'
-                                                                        style={{
-                                                                            background: 'transparent',
-                                                                            borderBottom: '1px solid #fff',
-                                                                            borderTop: 'none',
-                                                                            borderRight: 'none',
-                                                                            borderLeft: 'none',
-                                                                            color: 'white',
-                                                                            // width: '120px',
-                                                                            borderRadius: '4px',
-                                                                            padding: '2px 5px'
-                                                                        }}
-                                                                    />
-                                                                ) : (
-                                                                    <span>{values.MeetingID}</span>
-                                                                )}
-                                                            </span>
-                                                            {isEditingLink ? (
-                                                                <>
-                                                                    <button
-                                                                        className="btn btn-link p-0 ms-2"
-                                                                        style={{ color: '#fff' }}
-                                                                        onClick={() => {
-                                                                            if (validateLink(values.MeetingID)) {
-                                                                                setIsEditingLink(false);
-                                                                            }
-                                                                        }}
-                                                                    >
-                                                                        <IoCheckmark size={18} />
-                                                                    </button>
-                                                                    <button
-                                                                        className="btn btn-link p-0 ms-2"
-                                                                        style={{ color: '#fff' }}
-                                                                        onClick={() => {
-                                                                            setLinkNumber(values.MeetingID);
-                                                                            setLinkError('');
-                                                                            setIsEditingLink(false);
-                                                                        }}
-                                                                    >
-                                                                        <IoClose size={18} />
-                                                                    </button>
-                                                                </>
-                                                            ) : (
-                                                                <>
-                                                                    <span
-                                                                        className='ms-2'
-                                                                        style={{ cursor: 'pointer' }}
-                                                                        onClick={() => setIsEditingLink(true)}
-                                                                    >
-                                                                        <img src={BEdit} alt="Edit" />
-                                                                    </span>
-                                                                    <span
-                                                                        className='ms-2'
-                                                                        style={{
-                                                                            color: '#fff',
-                                                                            cursor: 'pointer',
-                                                                            display: 'inline-block',
-                                                                            transform: isLinkRotating ? 'rotate(60deg)' : 'rotate(0deg)',
-                                                                            transition: 'transform 0.5s ease',
-                                                                            transformOrigin: 'center center'
-                                                                        }}
-                                                                        onClick={handleLinkDiceClick}
-                                                                    >
-                                                                        <FaDiceTwo size={18} />
-                                                                    </span>
-                                                                </>
-                                                            )}
-                                                        </div>
-                                                        {isEditingLink && linkError && (
-                                                            <small style={{ color: '#dc3545', fontSize: '12px', marginTop: '4px' }}>
-                                                                {linkError}
-                                                            </small>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                                <div className="d-flex align-items-center mb-4">
-                                                    <span className='B_ROOM_DETAILS_span' style={{ color: '#B3AEAE', width: '120px' }}>Security</span>
-                                                    <div className="d-flex align-items-center gap-3">
-                                                        <div className="form-check">
-                                                            <input
-                                                                className="form-check-input B_radio_input"
-                                                                type="radio"
-                                                                style={{ cursor: "pointer" }}
-                                                                name="security"
-                                                                id="alwaysLocked"
-                                                                value={values.Security}
-                                                                checked={securityType === 'alwaysLocked'}
-                                                                onChange={() => {
-                                                                    handleSecurityChange('alwaysLocked');
-                                                                    setFieldValue('Security', 'alwaysLocked')
-                                                                }}
-                                                            />
-                                                            <label className="form-check-label B_ROOM_DETAILS_label text-white" htmlFor="alwaysLocked">
-                                                                Always locked
-                                                            </label>
-                                                        </div>
-                                                        <div className="form-check">
-                                                            <input
-                                                                className="form-check-input B_radio_input"
-                                                                type="radio"
-                                                                style={{ cursor: "pointer" }}
-                                                                name="security"
-                                                                id="passwordProtected"
-                                                                checked={securityType === 'passwordProtected'}
-                                                                value={values.Security}
-                                                                onChange={() => {
-                                                                    handleSecurityChange('passwordProtected');
-                                                                    setFieldValue('Security', 'passwordProtected')
-                                                                }}
-                                                            />
-                                                            <label className="form-check-label B_ROOM_DETAILS_label  text-white" htmlFor="passwordProtected">
-                                                                Password Protected
-                                                            </label>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div className="d-flex align-items-center">
-                                                    <span className='B_ROOM_DETAILS_span' style={{ color: '#B3AEAE', width: '120px' }}>Password</span>
-                                                    <div className="d-flex flex-column">
-                                                        <div className="d-flex align-items-center">
-                                                            <span className="text-white">: {
-                                                                isEditingPassword ? (
-                                                                    <input
-                                                                        type="text"
-                                                                        value={values.password}
-                                                                        onChange={handlePasswordChange}
-                                                                        onKeyDown={handlePasswordEdit}
-                                                                        className='B_password_input'
-                                                                        autoFocus
-                                                                        style={{
-                                                                            background: 'transparent',
-                                                                            borderBottom: '1px solid #fff',
-                                                                            borderTop: 'none',
-                                                                            borderRight: 'none',
-                                                                            borderLeft: 'none',
-                                                                            color: 'white',
-                                                                            // width: '120px',
-                                                                            borderRadius: '4px',
-                                                                            padding: '2px 5px'
-                                                                        }}
-                                                                    />
-                                                                ) : (
-                                                                    <span>{values.password}</span>
-                                                                )
-                                                            }</span>
-                                                            {isEditingPassword ? (
-                                                                <>
-                                                                    <button
-                                                                        className="btn btn-link p-0 ms-2"
-                                                                        style={{ color: '#fff' }}
-                                                                        onClick={() => {
-                                                                            if (validatePassword(values.password)) {
-                                                                                setIsEditingPassword(false);
-                                                                            }
-                                                                        }}
-                                                                    >
-                                                                        <IoCheckmark size={18} />
-                                                                    </button>
-                                                                    <button
-                                                                        className="btn btn-link p-0 ms-2"
-                                                                        style={{ color: '#fff' }}
-                                                                        onClick={() => {
-                                                                            setPassword(values.password);
-                                                                            setPasswordError('');
-                                                                            setIsEditingPassword(false);
-                                                                        }}
-                                                                    >
-                                                                        <IoClose size={18} />
-                                                                    </button>
-                                                                </>
-                                                            ) : (
-                                                                <>
-                                                                    <span
-                                                                        className='ms-2'
-                                                                        style={{ cursor: 'pointer' }}
-                                                                        onClick={() => setIsEditingPassword(true)}
-                                                                    >
-                                                                        <img src={BEdit} alt="Edit" />
-                                                                    </span>
-                                                                    <span
-                                                                        className='ms-2'
-                                                                        style={{
-                                                                            cursor: 'pointer',
-                                                                            color: '#fff',
-                                                                            display: 'inline-block',
-                                                                            transform: isRotating ? 'rotate(60deg)' : 'rotate(0deg)',
-                                                                            transition: 'transform 1s cubic-bezier(0.68, -0.55, 0.265, 1.55)',
-                                                                            transformStyle: 'preserve-3d',
-                                                                            perspective: '1000px'
-                                                                        }}
-                                                                        onClick={handleDiceClick}
-                                                                    >
-                                                                        <FaDiceSix size={18} />
-                                                                    </span>
-                                                                    <div className="d-flex flex-column align-items-center">
-                                                                        <button className="btn btn-link p-0 ms-2" style={{ color: '#fff' }}>
-                                                                            <i className="fas fa-copy"></i>
+                                                                    <>
+                                                                        <button
+                                                                            className="btn btn-link p-0 ms-2"
+                                                                            style={{ color: '#fff' }}
+                                                                            onClick={() => {
+                                                                                if (validateLink(values.MeetingID)) {
+                                                                                    setIsEditingLink(false);
+                                                                                }
+                                                                            }}
+                                                                        >
+                                                                            <IoCheckmark size={18} />
                                                                         </button>
-                                                                        {linkCopied && (
-                                                                            <div className="text-success mt-2">
-                                                                                Link is copied!
-                                                                            </div>
-                                                                        )}
-                                                                    </div>
-                                                                </>
+                                                                        <button
+                                                                            className="btn btn-link p-0 ms-2"
+                                                                            style={{ color: '#fff' }}
+                                                                            onClick={() => {
+                                                                                setLinkNumber(values.MeetingID);
+                                                                                setLinkError('');
+                                                                                setIsEditingLink(false);
+                                                                            }}
+                                                                        >
+                                                                            <IoClose size={18} />
+                                                                        </button>
+                                                                    </>
+                                                                ) : (
+                                                                    <>
+                                                                        <span
+                                                                            className='ms-2'
+                                                                            style={{ cursor: 'pointer' }}
+                                                                            onClick={() => setIsEditingLink(true)}
+                                                                        >
+                                                                            <img src={BEdit} alt="Edit" />
+                                                                        </span>
+                                                                        <span
+                                                                            className='ms-2'
+                                                                            style={{
+                                                                                color: '#fff',
+                                                                                cursor: 'pointer',
+                                                                                display: 'inline-block',
+                                                                                transform: isLinkRotating ? 'rotate(60deg)' : 'rotate(0deg)',
+                                                                                transition: 'transform 0.5s ease',
+                                                                                transformOrigin: 'center center'
+                                                                            }}
+                                                                            onClick={handleLinkDiceClick}
+                                                                        >
+                                                                            <FaDiceTwo size={18} />
+                                                                        </span>
+                                                                    </>
+                                                                )}
+                                                            </div>
+                                                            {isEditingLink && linkError && (
+                                                                <small style={{ color: '#dc3545', fontSize: '12px', marginTop: '4px' }}>
+                                                                    {linkError}
+                                                                </small>
                                                             )}
                                                         </div>
-                                                        {isEditingPassword && passwordError && (
-                                                            <small style={{ color: '#dc3545', fontSize: '12px', marginTop: '4px' }}>
-                                                                {passwordError}
-                                                            </small>
-                                                        )}
+                                                    </div>
+                                                    <div className="d-flex align-items-center mb-4">
+                                                        <span className='B_ROOM_DETAILS_span' style={{ color: '#B3AEAE', width: '120px' }}>Security</span>
+                                                        <div className="d-flex align-items-center gap-3">
+                                                            <div className="form-check">
+                                                                <input
+                                                                    className="form-check-input B_radio_input"
+                                                                    type="radio"
+                                                                    style={{ cursor: "pointer" }}
+                                                                    name="security"
+                                                                    id="alwaysLocked"
+                                                                    value={values.Security}
+                                                                    checked={securityType === 'alwaysLocked'}
+                                                                    onChange={() => {
+                                                                        handleSecurityChange('alwaysLocked');
+                                                                        setFieldValue('Security', 'alwaysLocked')
+                                                                    }}
+                                                                />
+                                                                <label className="form-check-label B_ROOM_DETAILS_label text-white" htmlFor="alwaysLocked">
+                                                                    Always locked
+                                                                </label>
+                                                            </div>
+                                                            <div className="form-check">
+                                                                <input
+                                                                    className="form-check-input B_radio_input"
+                                                                    type="radio"
+                                                                    style={{ cursor: "pointer" }}
+                                                                    name="security"
+                                                                    id="passwordProtected"
+                                                                    checked={securityType === 'passwordProtected'}
+                                                                    value={values.Security}
+                                                                    onChange={() => {
+                                                                        handleSecurityChange('passwordProtected');
+                                                                        setFieldValue('Security', 'passwordProtected')
+                                                                    }}
+                                                                />
+                                                                <label className="form-check-label B_ROOM_DETAILS_label  text-white" htmlFor="passwordProtected">
+                                                                    Password Protected
+                                                                </label>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div className="d-flex align-items-center">
+                                                        <span className='B_ROOM_DETAILS_span' style={{ color: '#B3AEAE', width: '120px' }}>Password</span>
+                                                        <div className="d-flex flex-column">
+                                                            <div className="d-flex align-items-center">
+                                                                <span className="text-white">: {
+                                                                    isEditingPassword ? (
+                                                                        <input
+                                                                            type="text"
+                                                                            value={values.password}
+                                                                            onChange={handlePasswordChange}
+                                                                            onKeyDown={handlePasswordEdit}
+                                                                            className='B_password_input'
+                                                                            autoFocus
+                                                                            style={{
+                                                                                background: 'transparent',
+                                                                                borderBottom: '1px solid #fff',
+                                                                                borderTop: 'none',
+                                                                                borderRight: 'none',
+                                                                                borderLeft: 'none',
+                                                                                color: 'white',
+                                                                                // width: '120px',
+                                                                                borderRadius: '4px',
+                                                                                padding: '2px 5px'
+                                                                            }}
+                                                                        />
+                                                                    ) : (
+                                                                        <span>{values.password}</span>
+                                                                    )
+                                                                }</span>
+                                                                {isEditingPassword ? (
+                                                                    <>
+                                                                        <button
+                                                                            className="btn btn-link p-0 ms-2"
+                                                                            style={{ color: '#fff' }}
+                                                                            onClick={() => {
+                                                                                if (validatePassword(values.password)) {
+                                                                                    setIsEditingPassword(false);
+                                                                                }
+                                                                            }}
+                                                                        >
+                                                                            <IoCheckmark size={18} />
+                                                                        </button>
+                                                                        <button
+                                                                            className="btn btn-link p-0 ms-2"
+                                                                            style={{ color: '#fff' }}
+                                                                            onClick={() => {
+                                                                                setPassword(values.password);
+                                                                                setPasswordError('');
+                                                                                setIsEditingPassword(false);
+                                                                            }}
+                                                                        >
+                                                                            <IoClose size={18} />
+                                                                        </button>
+                                                                    </>
+                                                                ) : (
+                                                                    <>
+                                                                        <span
+                                                                            className='ms-2'
+                                                                            style={{ cursor: 'pointer' }}
+                                                                            onClick={() => setIsEditingPassword(true)}
+                                                                        >
+                                                                            <img src={BEdit} alt="Edit" />
+                                                                        </span>
+                                                                        <span
+                                                                            className='ms-2'
+                                                                            style={{
+                                                                                cursor: 'pointer',
+                                                                                color: '#fff',
+                                                                                display: 'inline-block',
+                                                                                transform: isRotating ? 'rotate(60deg)' : 'rotate(0deg)',
+                                                                                transition: 'transform 1s cubic-bezier(0.68, -0.55, 0.265, 1.55)',
+                                                                                transformStyle: 'preserve-3d',
+                                                                                perspective: '1000px'
+                                                                            }}
+                                                                            onClick={handlepasswordDice}
+                                                                        >
+                                                                            <FaDiceSix size={18} />
+                                                                        </span>
+                                                                        <div className="d-flex flex-column align-items-center">
+                                                                            <button className="btn btn-link p-0 ms-2" style={{ color: '#fff' }}>
+                                                                                <i className="fas fa-copy"></i>
+                                                                            </button>
+                                                                            {linkCopied && (
+                                                                                <div className="text-success mt-2">
+                                                                                    Link is copied!
+                                                                                </div>
+                                                                            )}
+                                                                        </div>
+                                                                    </>
+                                                                )}
+                                                            </div>
+                                                            {isEditingPassword && passwordError && (
+                                                                <small style={{ color: '#dc3545', fontSize: '12px', marginTop: '4px' }}>
+                                                                    {passwordError}
+                                                                </small>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                    <div className="mt-5">
+                                                        <button type='submit' className="btn btn-light fw-semibold B_ROOM_DETAILS_btn" style={{ padding: '8px 30px' }}>
+                                                            Start Meeting
+                                                        </button>
                                                     </div>
                                                 </div>
-                                                <div className="mt-5">
-                                                    <button type='submit' className="btn btn-light fw-semibold B_ROOM_DETAILS_btn" style={{ padding: '8px 30px' }}>
-                                                        Start Meeting
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </form>
-                                    )}
+                                            </form>
+                                        )
+                                    }}
                                 </Formik>
                             </div>
                         </div>
@@ -1584,11 +1631,11 @@ function Meeting() {
         return true;
     };
 
-    const handlePasswordChange = (e) => {
-        const newValue = e.target.value;
-        setPassword(newValue);
-        validatePassword(newValue);
-    };
+    // const handlePasswordChange = (e) => {
+    //     const newValue = e.target.value;
+    //     setPassword(newValue);
+    //     validatePassword(newValue);
+    // };
 
     const handlePasswordEdit = (e) => {
         if (e.key === 'Enter') {
@@ -1598,14 +1645,13 @@ function Meeting() {
         }
     };
 
-
-    const handleDiceClick = () => {
-        setIsRotating(true);
-        setTimeout(() => {
-            setIsRotating(false);
-            setPassword(generatePassword());
-        }, 1000);
-    };
+    // const handlepasswordDice = () => {
+    //     setIsRotating(true);
+    //     setTimeout(() => {
+    //         setIsRotating(false);
+    //         setPassword(generatePassword());
+    //     }, 1000);
+    // };
 
     const scheduleSchema = Yup.object().shape({
         title: Yup.string().required('Title is required'),

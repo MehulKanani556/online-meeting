@@ -21,7 +21,7 @@ import { FaStar } from 'react-icons/fa6';
 import MeetingAudio from '../Image/B_Audioo.svg'
 import MeetingVideo from '../Image/B_Videoo.svg'
 import MeetingConnection from '../Image/B_shearing.svg'
-
+import { useSnackbar } from 'notistack';
 
 function Home() {
   const dispatch = useDispatch()
@@ -39,7 +39,7 @@ function Home() {
   const [error, setError] = useState('');
   const navigate = useNavigate();
   const [activeButton, setActiveButton] = useState([]);
-
+  const { enqueueSnackbar } = useSnackbar();
   const handleCloseReviewModel = () => setReviewModel(false);
   const handleShowReviewModel = () => setReviewModel(true);
   const handleScheduleclose = () => setScheduleModal(false)
@@ -141,6 +141,13 @@ function Home() {
       return;
     }
 
+    // Check if meetingId is numeric and password is required
+    const password = document?.getElementById('meetingPassword')?.value;
+    if (/^\d+$/.test(meetingId) && meeting.password && !password) {
+      setError('Please enter the password to join the meeting');
+      return;
+    }
+
     // Set the meeting to join for later navigation
     setMeetingToJoin(meetingId);
 
@@ -148,11 +155,23 @@ function Home() {
     socket.emit('request-to-join', {
       roomId: meetingId,
       userId: userId,
-      userName: userName
+      userName: userName,
+      password: password
     });
 
     setRequestSent(true);
     setJoinRequestStatus('Waiting for Host Approval...');
+
+    // Listen for the response from the server
+    socket.on('join-request-status', (response) => {
+      if (response.status === 'error') {
+        setError(response.message); // Show error message if password is incorrect
+        setRequestSent(false);
+      } else if (response.status === 'approved') {
+        handlejoinclose();
+        navigate(`/screen/${meetingId}`);
+      }
+    });
   };
 
   useEffect(() => {
@@ -335,8 +354,8 @@ function Home() {
                   onClick={() => {
                     setActiveItem('New Meeting');
                     const newMeetingId = generateMeetingId(20);
-                    const meetingLink = `${FRONT_URL}/screen/${newMeetingId}`; // Create the meeting link
-                    navigate(`/screen/${newMeetingId}`, { state: { meetingLink, status: true } }); // Pass the meeting link as state
+                    const meetingLink = `${FRONT_URL}/screen/${newMeetingId}`;
+                    navigate(`/screen/${newMeetingId}`, { state: { meetingLink, status: true } });
                   }}
                   style={{
                     border: activeItem === 'New Meeting' ? '2px solid #bfbfbf' : 'none',
@@ -352,8 +371,13 @@ function Home() {
               <div className="col-4 g-5 ">
                 <div className="j_home_cards" type="button"
                   onClick={() => {
-                    if (!gettoken || !userId) {
-                      alert('Please login to schedule a meeting');
+                    if (!gettoken && !userId) {
+                      enqueueSnackbar('Please login to schedule a meeting', {
+                        variant: 'error', autoHideDuration: 3000, anchorOrigin: {
+                          vertical: 'top', // Position at the top
+                          horizontal: 'right', // Position on the right
+                        }
+                      });
                       return;
                     }
                     setActiveItem('Schedule Meeting');
@@ -372,9 +396,22 @@ function Home() {
               </div>
               <div className="col-4 g-5 ">
                 <div className="j_home_cards" type="button"
+                  // onClick={() => {
+                  //   if (!gettoken || !userId) {
+                  //     alert('Please login to Join a meeting');
+                  //     return;
+                  //   }
+                  //   setActiveItem('Join Meeting');
+                  //   handlejoinshow()
+                  // }}
                   onClick={() => {
-                    if (!gettoken || !userId) {
-                      alert('Please login to Join a meeting');
+                    if (!gettoken && !userId) {
+                      enqueueSnackbar('Please login to Join a meeting', {
+                        variant: 'error', autoHideDuration: 3000, anchorOrigin: {
+                          vertical: 'top', // Position at the top
+                          horizontal: 'right', // Position on the right
+                        }
+                      });
                       return;
                     }
                     setActiveItem('Join Meeting');
@@ -1077,7 +1114,7 @@ function Home() {
                   <div style={{ color: '#cd1425', fontSize: '14px' }}>{error}</div>
                 )}
               </div>
-              <div className="mb-3">
+              {/* <div className="mb-3">
                 <label htmlFor="meetingPassword" className="form-label text-white j_join_text">
                   Password
                 </label>
@@ -1087,7 +1124,20 @@ function Home() {
                   id="meetingPassword"
                   placeholder="Enter Password"
                 />
-              </div>
+              </div> */}
+              {/^\d+$/.test(meetingId) && (
+                <div className="mb-3">
+                  <label htmlFor="meetingPassword" className="form-label text-white j_join_text">
+                    Password
+                  </label>
+                  <input
+                    type="text"
+                    className="form-control j_input j_join_text"
+                    id="meetingPassword"
+                    placeholder="Enter Password"
+                  />
+                </div>
+              )}
               <div className="mb-3">
                 <label htmlFor="meetingName" className="form-label text-white j_join_text">
                   Name

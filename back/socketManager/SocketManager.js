@@ -321,8 +321,30 @@ async function initializeSocket(io) {
         });
 
         // Handle join requests
-        socket.on('request-to-join', ({ roomId, userId, userName, requestId }) => {
+        socket.on('request-to-join', async ({ roomId, userId, userName, password, requestId }) => {
             try {
+                // Find the meeting details from the database
+                const meetingDetails = await schedule.findOne({
+                    meetingLink: { $regex: roomId }
+                });
+
+                if (!meetingDetails) {
+                    socket.emit('join-request-status', {
+                        status: 'error',
+                        message: 'Meeting not found.'
+                    });
+                    return;
+                }
+
+                // Check if the password is required and validate it
+                if (meetingDetails.password && meetingDetails.password !== password) {
+                    socket.emit('join-request-status', {
+                        status: 'error',
+                        message: 'Incorrect password.'
+                    });
+                    return;
+                }
+
                 // Create a unique request ID if not provided
                 const reqId = requestId || `${userId}-${Date.now()}`;
 

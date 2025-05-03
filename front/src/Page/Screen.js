@@ -2022,13 +2022,11 @@ function Screen() {
 
     // Formik state
     const usersValues = {
-        invitees: [] // Initialize invitees as an empty array
+        invitees: []
     };
 
     useEffect(() => {
-        // Check if user is logged in
         if (!userId) {
-            // Redirect to login page if not logged in
             navigate('/login', { state: { from: `/screen/${roomId}` } });
         }
     }, [userId, navigate, roomId]);
@@ -2244,211 +2242,215 @@ function Screen() {
                     initialValues={usersValues}
                     onSubmit={(values) => {
                         // Handle form submission if needed
+                        console.log("values", values);
+
                     }}
                 >
-                    {({ values, setFieldValue }) => (
+                    {({ values, setFieldValue, handleSubmit }) => (
                         <>
                             {InvitePeople ? (
-                                <div
-                                    className="j_invite_people_Div w-100 h-100 position-relative"
-                                    style={{
-                                        boxShadow: "inset 0 0 5px 0 rgba(0, 0, 0, 0.1)",
-                                    }}
-                                >
-                                    <div className="d-flex justify-content-between align-items-center p-4">
-                                        <div className="d-flex gap-2 align-items-center">
-                                            <img src={left} alt="Left" onClick={() => setInvitePeople(false)}
-                                                className="btn j_invite_Btn p-0" />
-                                            <h2 className="j_invite_people mb-0">
-                                                Invite people
-                                            </h2>
+                                <form onSubmit={handleSubmit}>
+                                    <div
+                                        className="j_invite_people_Div w-100 h-100 position-relative"
+                                        style={{
+                                            boxShadow: "inset 0 0 5px 0 rgba(0, 0, 0, 0.1)",
+                                        }}
+                                    >
+                                        <div className="d-flex justify-content-between align-items-center p-4">
+                                            <div className="d-flex gap-2 align-items-center">
+                                                <img src={left} alt="Left" onClick={() => setInvitePeople(false)}
+                                                    className="btn j_invite_Btn p-0" />
+                                                <h2 className="j_invite_people mb-0">
+                                                    Invite people
+                                                </h2>
+                                            </div>
                                         </div>
-                                    </div>
-                                    <div className="B_search-container px-4 mb-3" >
-                                        <div className="position-relative">
-                                            <IoSearch className=' position-absolute' style={{ top: "50%", transform: "translateY(-50%)", left: "15px", fontSize: "20px", color: "rgba(255, 255, 255, 0.7)" }} />
-                                            <input
-                                                type="search"
-                                                className="form-control text-white j_search_Input ps-5"
-                                                placeholder="Search email or name"
-                                                ref={searchInputRef}
-                                                // value={searchTerm}
-                                                onChange={(e) => {
-                                                    const searchusers = e.target.value.toLowerCase();
-                                                    const filtered = allusers.filter(user =>
-                                                        user.email.toLowerCase().includes(searchusers) ||
-                                                        user.name.toLowerCase().includes(searchusers)
-                                                    );
-                                                    setFilteredUsers(filtered);
-                                                    setShowDropdown(true);
-                                                }}
-                                                onFocus={() => setShowDropdown(true)}
-                                                style={{ padding: '12px', borderRadius: '5px', border: 'none', backgroundColor: "#202F41" }}
-                                            />
-                                        </div>
-                                        <p className='text-white my-2 fw-semibold'>Search results</p>
+                                        <div className="B_search-container px-4 mb-3" >
+                                            <div className="position-relative">
+                                                <IoSearch className=' position-absolute' style={{ top: "50%", transform: "translateY(-50%)", left: "15px", fontSize: "20px", color: "rgba(255, 255, 255, 0.7)" }} />
+                                                <input
+                                                    type="search"
+                                                    className="form-control text-white j_search_Input ps-5"
+                                                    placeholder="Search email or name"
+                                                    ref={searchInputRef}
+                                                    // value={searchTerm}
+                                                    onChange={(e) => {
+                                                        const searchusers = e.target.value.toLowerCase();
+                                                        const filtered = allusers.filter(user =>
+                                                            user.email.toLowerCase().includes(searchusers) ||
+                                                            user.name.toLowerCase().includes(searchusers)
+                                                        );
+                                                        setFilteredUsers(filtered);
+                                                        setShowDropdown(true);
+                                                    }}
+                                                    onFocus={() => setShowDropdown(true)}
+                                                    style={{ padding: '12px', borderRadius: '5px', border: 'none', backgroundColor: "#202F41" }}
+                                                />
+                                            </div>
+                                            <p className='text-white my-2 fw-semibold'>Search results</p>
 
-                                        {showDropdown && (
-                                            <div
-                                                ref={dropdownRef}
-                                                className="position-absolute mt-1 B_suggestion"
-                                                style={{
-                                                    backgroundColor: "#202F41",
-                                                    borderRadius: '5px',
-                                                    width: '88%',
-                                                    zIndex: 1000,
-                                                    maxHeight: '275px',
-                                                    overflowY: 'auto'
-                                                }}
-                                            >
-                                                {filteredUsers.length > 0 ? (
-                                                    filteredUsers
-                                                        .filter(user => user._id !== userId)
-                                                        .map((user) => {
-                                                            const isSelected = selectedUsers.some(selected => selected._id === user._id);
-                                                            return (
+                                            {showDropdown && (
+                                                <div
+                                                    ref={dropdownRef}
+                                                    className="position-absolute mt-1 B_suggestion"
+                                                    style={{
+                                                        backgroundColor: "#202F41",
+                                                        borderRadius: '5px',
+                                                        width: '88%',
+                                                        zIndex: 1000,
+                                                        maxHeight: '275px',
+                                                        overflowY: 'auto'
+                                                    }}
+                                                >
+                                                    {filteredUsers.length > 0 ? (
+                                                        filteredUsers
+                                                            .filter(user => user._id !== userId)
+                                                            .map((user) => {
+                                                                const isSelected = selectedUsers.some(selected => selected._id === user._id);
+                                                                return (
+                                                                    <div
+                                                                        key={user._id}
+                                                                        className={`d-flex align-items-center p-2 cursor-pointer ${isSelected && 'j_invite_selected'}`}
+                                                                        style={{ cursor: 'pointer' }}
+                                                                        onClick={() => {
+                                                                            // Toggle selection
+                                                                            if (isSelected) {
+                                                                                setSelectedUsers(selectedUsers.filter(selected => selected._id !== user._id));
+                                                                            } else {
+                                                                                setSelectedUsers([...selectedUsers, user]);
+                                                                            }
+                                                                        }}
+                                                                    >
+                                                                        <div className="me-2">
+                                                                            {user.photo ? (
+                                                                                <img
+                                                                                    src={`${IMG_URL}${user.photo}`}
+                                                                                    alt="Profile"
+                                                                                    className="rounded-circle"
+                                                                                    style={{ width: '30px', height: '30px', objectFit: 'cover' }}
+                                                                                />
+                                                                            ) : (
+                                                                                <div
+                                                                                    className="rounded-circle d-flex align-items-center justify-content-center"
+                                                                                    style={{
+                                                                                        fontSize: '12px',
+                                                                                        width: '30px',
+                                                                                        height: '30px',
+                                                                                        backgroundColor: `hsl(${Array.from(user._id || user.email || user.name || '').reduce((acc, char) => acc + char.charCodeAt(0), 0) % 360}, 70%, 45%)`,
+                                                                                        color: 'white'
+                                                                                    }}
+                                                                                >
+                                                                                    {user.name?.charAt(0).toUpperCase()}{user.name?.split(' ')[1] ? user.name?.split(' ')[1]?.charAt(0).toUpperCase() : ''}
+                                                                                </div>
+                                                                            )}
+                                                                        </div>
+                                                                        <div className="text-white">
+                                                                            <div style={{ fontSize: '14px' }}>{user.name}</div>
+                                                                            <div style={{ fontSize: '12px', color: '#8B9CAF' }}>{user.email}</div>
+                                                                        </div>
+                                                                    </div>
+                                                                )
+                                                            })
+                                                    ) : (
+                                                        <div className="p-3 text-center text-white" style={{ fontSize: '14px' }}>
+                                                            No users found
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            )}
+
+                                            <div className="invitees-list" style={{ height: 'calc(100vh - 300px)' }}>
+                                                {values.invitees.length > 0 ? (
+                                                    values.invitees.map(invitee => (
+                                                        <div key={invitee._id} className="invitee-item d-flex align-items-center mb-2">
+                                                            {invitee.photo ? (
+                                                                <img
+                                                                    src={`${IMG_URL}${invitee.photo}`}
+                                                                    alt="Profile"
+                                                                    className="rounded-circle"
+                                                                    style={{ width: '30px', height: '30px', objectFit: 'cover', marginRight: '10px' }}
+                                                                />
+                                                            ) : (
                                                                 <div
-                                                                    key={user._id}
-                                                                    className={`d-flex align-items-center p-2 cursor-pointer ${isSelected && 'j_invite_selected'}`}
-                                                                    style={{ cursor: 'pointer' }}
-                                                                    onClick={() => {
-                                                                        // Toggle selection
-                                                                        if (isSelected) {
-                                                                            setSelectedUsers(selectedUsers.filter(selected => selected._id !== user._id));
-                                                                        } else {
-                                                                            setSelectedUsers([...selectedUsers, user]);
-                                                                        }
+                                                                    className="rounded-circle d-flex align-items-center justify-content-center"
+                                                                    style={{
+                                                                        fontSize: '12px',
+                                                                        width: '30px',
+                                                                        height: '30px',
+                                                                        backgroundColor: `hsl(${Array.from(invitee._id || invitee.email || invitee.name || '').reduce((acc, char) => acc + char.charCodeAt(0), 0) % 360}, 70%, 45%)`,
+                                                                        color: 'white',
+                                                                        marginRight: '10px'
                                                                     }}
                                                                 >
-                                                                    <div className="me-2">
-                                                                        {user.photo ? (
-                                                                            <img
-                                                                                src={`${IMG_URL}${user.photo}`}
-                                                                                alt="Profile"
-                                                                                className="rounded-circle"
-                                                                                style={{ width: '30px', height: '30px', objectFit: 'cover' }}
-                                                                            />
-                                                                        ) : (
-                                                                            <div
-                                                                                className="rounded-circle d-flex align-items-center justify-content-center"
-                                                                                style={{
-                                                                                    fontSize: '12px',
-                                                                                    width: '30px',
-                                                                                    height: '30px',
-                                                                                    backgroundColor: `hsl(${Array.from(user._id || user.email || user.name || '').reduce((acc, char) => acc + char.charCodeAt(0), 0) % 360}, 70%, 45%)`,
-                                                                                    color: 'white'
-                                                                                }}
-                                                                            >
-                                                                                {user.name?.charAt(0).toUpperCase()}{user.name?.split(' ')[1] ? user.name?.split(' ')[1]?.charAt(0).toUpperCase() : ''}
-                                                                            </div>
-                                                                        )}
-                                                                    </div>
-                                                                    <div className="text-white">
-                                                                        <div style={{ fontSize: '14px' }}>{user.name}</div>
-                                                                        <div style={{ fontSize: '12px', color: '#8B9CAF' }}>{user.email}</div>
-                                                                    </div>
+                                                                    {/* {invitee.name.charAt(0).toUpperCase()} */}
+                                                                    {invitee.name?.charAt(0).toUpperCase()}{invitee.name?.split(' ')[1] ? invitee.name?.split(' ')[1]?.charAt(0).toUpperCase() : ''}
                                                                 </div>
-                                                            )
-                                                        })
+                                                            )}
+                                                            <div>
+                                                                <div style={{ fontSize: '14px' }}>{invitee.name}</div>
+                                                                <div style={{ fontSize: '12px', color: '#8B9CAF' }}>{invitee.email}</div>
+                                                            </div>
+                                                        </div>
+                                                    ))
                                                 ) : (
-                                                    <div className="p-3 text-center text-white" style={{ fontSize: '14px' }}>
-                                                        No users found
+                                                    <div className="text-center py-4 d-flex justify-content-center align-items-center flex-column h-100">
+                                                        <img src={search} alt="Search" className='j_no_users' />
+                                                        <p className="text-white mb-0">
+                                                            No result found
+                                                        </p>
                                                     </div>
                                                 )}
                                             </div>
+                                        </div>
+
+                                        <div className="text-center mb-3">
+                                            <button type='submit' className="btn j_button_invite" onClick={() => {
+                                                if (selectedUsers.length > 0) {
+                                                    setFieldValue('invitees', [
+                                                        ...values.invitees,
+                                                        ...selectedUsers.map(user => ({
+                                                            _id: user._id,
+                                                            name: user.name,
+                                                            email: user.email,
+                                                            photo: user.photo
+                                                        }))
+                                                    ]);
+                                                    setSelectedUsers([]); // Clear the selected users after inviting
+                                                }
+                                            }}>
+                                                Invite
+                                            </button>
+                                        </div>
+                                        <div className="position-relative px-4">
+                                            <input
+                                                readOnly
+                                                type="text"
+                                                // value={window.location.href}
+                                                value={`${window.location.host}${window.location.pathname}`}
+                                                className="form-control text-white j_search_Input"
+                                                placeholder="Search email or name"
+                                                style={{ padding: '12px', borderRadius: '5px', border: 'none', fontSize: '13px', backgroundColor: "#080E14" }}
+                                            />
+                                            <div className="position-absolute" style={{ top: "22%", right: "8%", cursor: 'pointer' }}>
+                                                <img src={copytext} alt="" style={{ height: '15px', width: '15px' }} onClick={() => {
+                                                    navigator.clipboard.writeText(window.location.href)
+                                                        .then(() => {
+                                                            setLinkCopied(true);
+                                                            setTimeout(() => setLinkCopied(false), 2000);
+                                                        })
+                                                        .catch(err => {
+                                                            console.error("Failed to copy: ", err);
+                                                        });
+                                                }} />
+                                            </div>
+                                        </div>
+                                        {linkCopied && ( // Conditionally render the copied message
+                                            <div className="text-success text-end mb-1 px-4">
+                                                Link is copied!
+                                            </div>
                                         )}
-
-                                        <div className="invitees-list" style={{ height: 'calc(100vh - 300px)' }}>
-                                            {values.invitees.length > 0 ? (
-                                                values.invitees.map(invitee => (
-                                                    <div key={invitee._id} className="invitee-item d-flex align-items-center mb-2">
-                                                        {invitee.photo ? (
-                                                            <img
-                                                                src={`${IMG_URL}${invitee.photo}`}
-                                                                alt="Profile"
-                                                                className="rounded-circle"
-                                                                style={{ width: '30px', height: '30px', objectFit: 'cover', marginRight: '10px' }}
-                                                            />
-                                                        ) : (
-                                                            <div
-                                                                className="rounded-circle d-flex align-items-center justify-content-center"
-                                                                style={{
-                                                                    fontSize: '12px',
-                                                                    width: '30px',
-                                                                    height: '30px',
-                                                                    backgroundColor: `hsl(${Array.from(invitee._id || invitee.email || invitee.name || '').reduce((acc, char) => acc + char.charCodeAt(0), 0) % 360}, 70%, 45%)`,
-                                                                    color: 'white',
-                                                                    marginRight: '10px'
-                                                                }}
-                                                            >
-                                                                {/* {invitee.name.charAt(0).toUpperCase()} */}
-                                                                {invitee.name?.charAt(0).toUpperCase()}{invitee.name?.split(' ')[1] ? invitee.name?.split(' ')[1]?.charAt(0).toUpperCase() : ''}
-                                                            </div>
-                                                        )}
-                                                        <div>
-                                                            <div style={{ fontSize: '14px' }}>{invitee.name}</div>
-                                                            <div style={{ fontSize: '12px', color: '#8B9CAF' }}>{invitee.email}</div>
-                                                        </div>
-                                                    </div>
-                                                ))
-                                            ) : (
-                                                <div className="text-center py-4 d-flex justify-content-center align-items-center flex-column h-100">
-                                                    <img src={search} alt="Search" className='j_no_users' />
-                                                    <p className="text-white mb-0">
-                                                        No result found
-                                                    </p>
-                                                </div>
-                                            )}
-                                        </div>
                                     </div>
-
-                                    <div className="text-center mb-3">
-                                        <button className="btn j_button_invite" onClick={() => {
-                                            if (selectedUsers.length > 0) {
-                                                setFieldValue('invitees', [
-                                                    ...values.invitees,
-                                                    ...selectedUsers.map(user => ({
-                                                        _id: user._id,
-                                                        name: user.name,
-                                                        email: user.email,
-                                                        photo: user.photo
-                                                    }))
-                                                ]);
-                                                setSelectedUsers([]); // Clear the selected users after inviting
-                                            }
-                                        }}>
-                                            Invite
-                                        </button>
-                                    </div>
-                                    <div className="position-relative px-4">
-                                        <input
-                                            readOnly
-                                            type="text"
-                                            // value={window.location.href}
-                                            value={`${window.location.host}${window.location.pathname}`}
-                                            className="form-control text-white j_search_Input"
-                                            placeholder="Search email or name"
-                                            style={{ padding: '12px', borderRadius: '5px', border: 'none', fontSize: '13px', backgroundColor: "#080E14" }}
-                                        />
-                                        <div className="position-absolute" style={{ top: "22%", right: "8%", cursor: 'pointer' }}>
-                                            <img src={copytext} alt="" style={{ height: '15px', width: '15px' }} onClick={() => {
-                                                navigator.clipboard.writeText(window.location.href)
-                                                    .then(() => {
-                                                        setLinkCopied(true);
-                                                        setTimeout(() => setLinkCopied(false), 2000);
-                                                    })
-                                                    .catch(err => {
-                                                        console.error("Failed to copy: ", err);
-                                                    });
-                                            }} />
-                                        </div>
-                                    </div>
-                                    {linkCopied && ( // Conditionally render the copied message
-                                        <div className="text-success text-end mb-1 px-4">
-                                            Link is copied!
-                                        </div>
-                                    )}
-                                </div>
+                                </form>
                             ) : (
                                 <>
                                     <Offcanvas.Header className='d-flex justify-content-between align-items-center' >
