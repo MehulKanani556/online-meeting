@@ -1,6 +1,7 @@
 const express = require('express');
 const indexRoutes = express.Router()
 const upload = require("../helper/uplodes");
+const { auth } = require("../helper/auth")
 const { removeUser, updateUser, getUserById, getAllUsers, createNewUser, removeUserProfilePic, resetPassword } = require('../controller/user.controller');
 const { userLogin, googleLogin, forgotPassword, verifyOtp, changePassword, userLogout } = require('../auth/auth');
 const { getAllcontact, getcontactById, updatecontact, removecontact, createNewcontact } = require('../controller/contactus.controller');
@@ -46,7 +47,7 @@ indexRoutes.delete('/deletereviews/:id', removereviews);
 // schedule Routes 
 
 indexRoutes.post('/createschedule', createNewschedule);
-indexRoutes.get('/allschedules', getAllschedule);
+indexRoutes.get('/allschedules', auth, getAllschedule);
 indexRoutes.get('/getscheduleById/:id', getscheduleById);
 indexRoutes.put('/scheduleUpdate/:id', updateschedule);
 indexRoutes.delete('/deleteschedule/:id', removeschedule);

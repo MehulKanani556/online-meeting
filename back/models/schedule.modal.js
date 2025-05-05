@@ -74,7 +74,10 @@ const scheduleSchema = mongoose.Schema({
             type: mongoose.Schema.Types.ObjectId,
             ref: 'User',
         }
-    }]
+    }],
+    status: {
+        type: String
+    }
 }, {
     timestamps: true,
     versionKey: false

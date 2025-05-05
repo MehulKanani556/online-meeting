@@ -367,6 +367,7 @@ function Screen() {
     const [showMeetingLinkModal, setShowMeetingLinkModal] = useState(modal == "false" ? false : true);
     const [meetingLink, setMeetingLink] = useState('');
     const [linkCopiedmodal, setLinkCopiedmodal] = useState(false);
+    let controlPanel = null;
 
     useEffect(() => {
         if (location.state && location.state.meetingLink) {
@@ -1198,10 +1199,16 @@ function Screen() {
     //     navigate("/home");
     // };
     let isEndingMeeting = false;
+
     const endMeeting = () => {
         sessionStorage.removeItem('MeetingLinkModal')
         if (isEndingMeeting) return; // Prevent further calls
         isEndingMeeting = true;
+
+        if (controlPanel && document.body.contains(controlPanel)) {
+            document.body.removeChild(controlPanel);
+            controlPanel = null; // Clear the reference
+        }
         // console.log("endMeeting called");
 
         // Stop all media tracks
@@ -1621,157 +1628,178 @@ function Screen() {
     };
 
     // picture in picture
-    // const togglePictureInPicture = async () => {
-    //     try {
-    //         // First check if PiP is supported
-    //         if (!document.pictureInPictureEnabled) {
-    //             console.warn('Picture-in-Picture not supported by this browser');
-    //             return;
-    //         }
+    // let controlPanel = null;
+    let pipVideo = null;
+    let pipTracker = null;
 
-    //         // If already in PiP mode, exit it
-    //         if (document.pictureInPictureElement) {
-    //             await document.exitPictureInPicture();
-    //             return;
-    //         }
+    const togglePictureInPicture = async () => {
+        try {
+            // First check if PiP is supported
+            if (!document.pictureInPictureEnabled) {
+                console.warn('Picture-in-Picture not supported by this browser');
+                return;
+            }
 
-    //         // Determine which video source to use
-    //         let sourceStream = null;
+            // If already in PiP mode, exit it
+            if (document.pictureInPictureElement) {
+                await document.exitPictureInPicture();
+                if (controlPanel && document.body.contains(controlPanel)) {
+                    document.body.removeChild(controlPanel);
+                    controlPanel = null;
+                }
+                if (pipTracker) {
+                    clearInterval(pipTracker);
+                    pipTracker = null;
+                }
+                return;
+            }
 
-    //         // Check for an active speaker first
-    //         const activeSpeakerParticipant = participants.find(p =>
-    //             p.id !== socket?.id && remoteStreams[p.id] && p.hasVideo !== false
-    //         );
+            // Determine which video source to use
+            let sourceStream = null;
 
-    //         if (activeSpeakerParticipant && remoteStreams[activeSpeakerParticipant.id]) {
-    //             sourceStream = remoteStreams[activeSpeakerParticipant.id];
-    //         } else if (localStream && !isVideoOff) {
-    //             sourceStream = localStream;
-    //         } else {
-    //             for (const participant of participants) {
-    //                 if (participant.id !== socket?.id && participant.hasVideo !== false) {
-    //                     if (remoteStreams[participant.id]) {
-    //                         sourceStream = remoteStreams[participant.id];
-    //                         break;
-    //                     }
-    //                 }
-    //             }
-    //         }
+            // Check for an active speaker first
+            const activeSpeakerParticipant = participants.find(p =>
+                p.id !== socket?.id && remoteStreams[p.id] && p.hasVideo !== false
+            );
 
-    //         if (!sourceStream) {
-    //             console.warn('No video source available for PiP');
-    //             return;
-    //         }
+            if (activeSpeakerParticipant && remoteStreams[activeSpeakerParticipant.id]) {
+                sourceStream = remoteStreams[activeSpeakerParticipant.id];
+            } else if (localStream && !isVideoOff) {
+                sourceStream = localStream;
+            } else {
+                for (const participant of participants) {
+                    if (participant.id !== socket?.id && participant.hasVideo !== false) {
+                        if (remoteStreams[participant.id]) {
+                            sourceStream = remoteStreams[participant.id];
+                            break;
+                        }
+                    }
+                }
+            }
 
-    //         // Create a video element to use for PiP
-    //         const pipVideo = document.createElement('video');
-    //         pipVideo.muted = true;
-    //         pipVideo.autoplay = true;
-    //         pipVideo.srcObject = sourceStream;
+            if (!sourceStream) {
+                console.warn('No video source available for PiP');
+                return;
+            }
 
-    //         // Play the video and enter PiP mode
-    //         await pipVideo.play();
-    //         await pipVideo.requestPictureInPicture();
+            // Create the video element for PiP
+            pipVideo = document.createElement('video');
+            pipVideo.muted = true;
+            pipVideo.autoplay = true;
+            pipVideo.srcObject = sourceStream;
 
-    //         // Create a floating control panel in the main window
-    //         const controlPanel = document.createElement('div');
-    //         controlPanel.style.position = 'fixed';
-    //         controlPanel.style.bottom = '20px';
-    //         controlPanel.style.right = '20px';
-    //         controlPanel.style.backgroundColor = '#212121';
-    //         controlPanel.style.padding = '10px';
-    //         controlPanel.style.borderRadius = '8px';
-    //         controlPanel.style.zIndex = '9999';
-    //         controlPanel.style.display = 'flex';
-    //         controlPanel.style.gap = '15px';
+            // Create a control panel
+            controlPanel = document.createElement('div');
+            controlPanel.style.position = 'fixed';
+            controlPanel.style.bottom = '20px';
+            controlPanel.style.right = '20px';
+            controlPanel.style.backgroundColor = 'rgba(33, 33, 33, 0.8)';
+            controlPanel.style.padding = '10px';
+            controlPanel.style.borderRadius = '8px';
+            controlPanel.style.display = 'flex';
+            controlPanel.style.gap = '15px';
+            controlPanel.style.zIndex = '9999';
+            controlPanel.style.boxShadow = '0 0 10px rgba(0, 0, 0, 0.5)';
 
-    //         // Add control buttons
-    //         const createButton = (emoji, label, action) => {
-    //             const button = document.createElement('button');
-    //             button.innerHTML = emoji;
-    //             button.title = label;
-    //             button.style.width = '40px';
-    //             button.style.height = '40px';
-    //             button.style.borderRadius = '50%';
-    //             button.style.border = 'none';
-    //             button.style.fontSize = '18px';
-    //             button.style.cursor = 'pointer';
-    //             button.onclick = action;
-    //             return button;
-    //         };
+            // Add a label
+            const label = document.createElement('div');
+            label.textContent = 'PiP Controls';
+            label.style.color = '#fff';
+            label.style.marginRight = '10px';
+            label.style.display = 'flex';
+            label.style.alignItems = 'center';
+            controlPanel.appendChild(label);
 
-    //         // Handle mute toggle
-    //         const micButton = createButton('🎤', 'Toggle Microphone', () => {
-    //             toggleAudio();
-    //             micButton.style.backgroundColor = isMuted ? '#4c4c4c' : '#e12b2d';
-    //         });
-    //         controlPanel.appendChild(micButton);
+            // Add control buttons
+            const createButton = (emoji, label, action) => {
+                const button = document.createElement('button');
+                button.innerHTML = emoji;
+                button.title = label;
+                button.style.width = '40px';
+                button.style.height = '40px';
+                button.style.borderRadius = '50%';
+                button.style.border = 'none';
+                button.style.fontSize = '18px';
+                button.style.cursor = 'pointer';
+                button.onclick = action;
+                return button;
+            };
 
-    //         // Handle video toggle
-    //         const videoButton = createButton('📹', 'Toggle Video', () => {
-    //             toggleVideo();
-    //             videoButton.style.backgroundColor = isVideoOff ? '#4c4c4c' : '#e12b2d';
-    //         });
-    //         controlPanel.appendChild(videoButton);
+            // Handle mute toggle
+            const micButton = createButton('🎤', 'Toggle Audio', () => {
+                toggleAudio();
+            });
+            controlPanel.appendChild(micButton);
 
-    //         // Handle hand raise toggle
-    //         const handButton = createButton('✋', 'Raise Hand', () => {
-    //             toggleHandRaise();
-    //             handButton.style.backgroundColor = isHandRaised ? '#e12b2d' : '#4c4c4c';
-    //         });
-    //         controlPanel.appendChild(handButton);
+            // Handle video toggle
+            const videoButton = createButton('📷', 'Toggle Video', () => {
+                toggleVideo();
+            });
+            controlPanel.appendChild(videoButton);
 
-    //         // End call button
-    //         const endButton = createButton('📞', 'End Call', endMeeting);
-    //         controlPanel.appendChild(endButton);
+            // Handle hand raise toggle
+            const handButton = createButton('✋', 'Raise Hand', () => {
+                toggleHandRaise();
+            });
+            controlPanel.appendChild(handButton);
 
-    //         // Emoji button to open emoji selection
-    //         const emojiButton = createButton('😊', 'Select Emoji', () => {
-    //             emojiContainer.style.display = emojiContainer.style.display === 'none' ? 'block' : 'none';
-    //         });
-    //         controlPanel.appendChild(emojiButton);
+            // End call button
+            const endButton = createButton('📞', 'End Call', () => {
+                endMeeting();
+                if (document.pictureInPictureElement) {
+                    document.exitPictureInPicture();
+                }
+            });
+            controlPanel.appendChild(endButton);
 
-    //         // Create emoji selection container
-    //         const emojiContainer = document.createElement('div');
-    //         emojiContainer.style.position = 'absolute';
-    //         emojiContainer.style.bottom = '60px'; // Adjust position as needed
-    //         emojiContainer.style.right = '0';
-    //         emojiContainer.style.backgroundColor = '#12161C';
-    //         emojiContainer.style.border = '1px solid #202f41';
-    //         emojiContainer.style.padding = '10px';
-    //         emojiContainer.style.borderRadius = '5px';
-    //         emojiContainer.style.zIndex = '1000';
-    //         emojiContainer.style.display = 'none'; // Initially hidden
+            // Add the control panel to the document
+            document.body.appendChild(controlPanel);
 
-    //         // Add emojis to the container
-    //         ['❤️', '😃', '😮', '🙌', '😂', '🎉', '👏', '💥', '😉', '🔥', '👍', '👎', '▶️', '✨'].forEach(emoji => {
-    //             const emojiSpan = document.createElement('span');
-    //             emojiSpan.innerText = emoji;
-    //             emojiSpan.style.cursor = 'pointer';
-    //             emojiSpan.style.fontSize = '24px';
-    //             emojiSpan.style.margin = '5px';
-    //             emojiSpan.style.color = 'white';
-    //             emojiSpan.onclick = () => {
-    //                 sendEmoji(emoji); // Send the selected emoji
-    //                 emojiContainer.style.display = 'none'; // Hide the container after selection
-    //             };
-    //             emojiContainer.appendChild(emojiSpan);
-    //         });
+            // Play the video and enter PiP mode
+            await pipVideo.play();
+            await pipVideo.requestPictureInPicture();
 
-    //         controlPanel.appendChild(emojiContainer);
-    //         document.body.appendChild(controlPanel);
+            // Track PiP window position (with limitations)
+            // Note: Browsers restrict direct access to PiP window position
+            pipTracker = setInterval(() => {
+                if (!document.pictureInPictureElement) {
+                    clearInterval(pipTracker);
+                    pipTracker = null;
 
-    //         // Clean up when PiP is closed
-    //         pipVideo.addEventListener('leavepictureinpicture', () => {
-    //             if (document.body.contains(controlPanel)) {
-    //                 document.body.removeChild(controlPanel);
-    //             }
-    //         }, { once: true });
+                    if (controlPanel && document.body.contains(controlPanel)) {
+                        document.body.removeChild(controlPanel);
+                        controlPanel = null;
+                    }
+                }
+            }, 1000);
 
-    //     } catch (error) {
-    //         console.error('Failed to enter Picture-in-Picture mode:', error);
-    //     }
-    // };
+            // Clean up when PiP is closed
+            pipVideo.addEventListener('leavepictureinpicture', () => {
+                if (controlPanel && document.body.contains(controlPanel)) {
+                    document.body.removeChild(controlPanel);
+                    controlPanel = null;
+                }
+
+                if (pipTracker) {
+                    clearInterval(pipTracker);
+                    pipTracker = null;
+                }
+            }, { once: true });
+
+        } catch (error) {
+            console.error('Failed to enter Picture-in-Picture mode:', error);
+            // Clean up on error
+            if (controlPanel && document.body.contains(controlPanel)) {
+                document.body.removeChild(controlPanel);
+                controlPanel = null;
+            }
+
+            if (pipTracker) {
+                clearInterval(pipTracker);
+                pipTracker = null;
+            }
+        }
+    };
 
     // picture in picture without controls
     // const togglePictureInPicture = async () => {
@@ -1885,125 +1913,125 @@ function Screen() {
     // };
 
     // picture in picture
-    const togglePictureInPicture = async () => {
-        try {
-            // First check if PiP is supported
-            if (!document.pictureInPictureEnabled) {
-                console.warn('Picture-in-Picture not supported by this browser');
-                return;
-            }
+    // const togglePictureInPicture = async () => {
+    //     try {
+    //         // First check if PiP is supported
+    //         if (!document.pictureInPictureEnabled) {
+    //             console.warn('Picture-in-Picture not supported by this browser');
+    //             return;
+    //         }
 
-            // If already in PiP mode, exit it
-            if (document.pictureInPictureElement) {
-                await document.exitPictureInPicture();
-                return;
-            }
+    //         // If already in PiP mode, exit it
+    //         if (document.pictureInPictureElement) {
+    //             await document.exitPictureInPicture();
+    //             return;
+    //         }
 
-            // Determine which video source to use
-            let sourceStream = null;
+    //         // Determine which video source to use
+    //         let sourceStream = null;
 
-            // Check for an active speaker first
-            const activeSpeakerParticipant = participants.find(p =>
-                p.id !== socket?.id && remoteStreams[p.id] && p.hasVideo !== false
-            );
+    //         // Check for an active speaker first
+    //         const activeSpeakerParticipant = participants.find(p =>
+    //             p.id !== socket?.id && remoteStreams[p.id] && p.hasVideo !== false
+    //         );
 
-            if (activeSpeakerParticipant && remoteStreams[activeSpeakerParticipant.id]) {
-                sourceStream = remoteStreams[activeSpeakerParticipant.id];
-            } else if (localStream && !isVideoOff) {
-                sourceStream = localStream;
-            } else {
-                for (const participant of participants) {
-                    if (participant.id !== socket?.id && participant.hasVideo !== false) {
-                        if (remoteStreams[participant.id]) {
-                            sourceStream = remoteStreams[participant.id];
-                            break;
-                        }
-                    }
-                }
-            }
+    //         if (activeSpeakerParticipant && remoteStreams[activeSpeakerParticipant.id]) {
+    //             sourceStream = remoteStreams[activeSpeakerParticipant.id];
+    //         } else if (localStream && !isVideoOff) {
+    //             sourceStream = localStream;
+    //         } else {
+    //             for (const participant of participants) {
+    //                 if (participant.id !== socket?.id && participant.hasVideo !== false) {
+    //                     if (remoteStreams[participant.id]) {
+    //                         sourceStream = remoteStreams[participant.id];
+    //                         break;
+    //                     }
+    //                 }
+    //             }
+    //         }
 
-            if (!sourceStream) {
-                console.warn('No video source available for PiP');
-                return;
-            }
+    //         if (!sourceStream) {
+    //             console.warn('No video source available for PiP');
+    //             return;
+    //         }
 
-            // Create a video element to use for PiP
-            const pipVideo = document.createElement('video');
-            pipVideo.muted = true;
-            pipVideo.autoplay = true;
-            pipVideo.srcObject = sourceStream;
+    //         // Create a video element to use for PiP
+    //         const pipVideo = document.createElement('video');
+    //         pipVideo.muted = true;
+    //         pipVideo.autoplay = true;
+    //         pipVideo.srcObject = sourceStream;
 
-            // Play the video and enter PiP mode
-            await pipVideo.play();
-            await pipVideo.requestPictureInPicture();
+    //         // Play the video and enter PiP mode
+    //         await pipVideo.play();
+    //         await pipVideo.requestPictureInPicture();
 
-            // Create a floating control panel in the main window
-            const controlPanel = document.createElement('div');
-            controlPanel.style.position = 'fixed';
-            controlPanel.style.bottom = '20px';
-            controlPanel.style.right = '20px';
-            controlPanel.style.backgroundColor = '#212121';
-            controlPanel.style.padding = '10px';
-            controlPanel.style.borderRadius = '8px';
-            controlPanel.style.zIndex = '9999';
-            controlPanel.style.display = 'flex';
-            controlPanel.style.gap = '15px';
+    //         // Create a floating control panel in the main window
+    //         const controlPanel = document.createElement('div');
+    //         controlPanel.style.position = 'fixed';
+    //         controlPanel.style.bottom = '20px';
+    //         controlPanel.style.right = '20px';
+    //         controlPanel.style.backgroundColor = '#212121';
+    //         controlPanel.style.padding = '10px';
+    //         controlPanel.style.borderRadius = '8px';
+    //         controlPanel.style.zIndex = '9999';
+    //         controlPanel.style.display = 'flex';
+    //         controlPanel.style.gap = '15px';
 
-            // Function to create image buttons
-            const createImageButton = (src, label, action) => {
-                const button = document.createElement('button');
-                button.style.width = '40px';
-                button.style.height = '40px';
-                button.style.backgroundColor = 'transparent';
-                button.style.border = '1px solid #fff';
-                button.style.borderRadius = '50%';
-                button.style.cursor = 'pointer';
-                button.onclick = action;
+    //         // Function to create image buttons
+    //         const createImageButton = (src, label, action) => {
+    //             const button = document.createElement('button');
+    //             button.style.width = '40px';
+    //             button.style.height = '40px';
+    //             button.style.backgroundColor = 'transparent';
+    //             button.style.border = '1px solid #fff';
+    //             button.style.borderRadius = '50%';
+    //             button.style.cursor = 'pointer';
+    //             button.onclick = action;
 
-                const img = document.createElement('img');
-                img.src = src;
-                img.alt = label;
-                img.style.width = '18px';
-                img.style.height = '18px';
+    //             const img = document.createElement('img');
+    //             img.src = src;
+    //             img.alt = label;
+    //             img.style.width = '18px';
+    //             img.style.height = '18px';
 
-                button.appendChild(img);
-                return button;
-            };
+    //             button.appendChild(img);
+    //             return button;
+    //         };
 
-            // Create buttons with actual image paths
-            const micButton = createImageButton(isMuted ? offmicrophone : onmicrophone, 'Toggle Microphone', () => {
-                toggleAudio();
-                micButton.firstChild.src = isMuted ? onmicrophone : offmicrophone;
-            });
-            controlPanel.appendChild(micButton);
+    //         // Create buttons with actual image paths
+    //         const micButton = createImageButton(isMuted ? offmicrophone : onmicrophone, 'Toggle Microphone', () => {
+    //             toggleAudio();
+    //             micButton.firstChild.src = isMuted ? onmicrophone : offmicrophone;
+    //         });
+    //         controlPanel.appendChild(micButton);
 
-            const videoButton = createImageButton(isVideoOff ? offcamera : oncamera, 'Toggle Video', () => {
-                toggleVideo();
-                videoButton.firstChild.src = isVideoOff ? oncamera : offcamera;
-            });
-            controlPanel.appendChild(videoButton);
+    //         const videoButton = createImageButton(isVideoOff ? offcamera : oncamera, 'Toggle Video', () => {
+    //             toggleVideo();
+    //             videoButton.firstChild.src = isVideoOff ? oncamera : offcamera;
+    //         });
+    //         controlPanel.appendChild(videoButton);
 
-            const handButton = createImageButton(hand, 'Raise Hand', () => {
-                toggleHandRaise();
-            });
-            controlPanel.appendChild(handButton);
+    //         const handButton = createImageButton(hand, 'Raise Hand', () => {
+    //             toggleHandRaise();
+    //         });
+    //         controlPanel.appendChild(handButton);
 
-            const endButton = createImageButton(endcall, 'End Call', endMeeting);
-            controlPanel.appendChild(endButton);
+    //         const endButton = createImageButton(endcall, 'End Call', endMeeting);
+    //         controlPanel.appendChild(endButton);
 
-            document.body.appendChild(controlPanel);
+    //         document.body.appendChild(controlPanel);
 
-            // Clean up when PiP is closed
-            pipVideo.addEventListener('leavepictureinpicture', () => {
-                if (document.body.contains(controlPanel)) {
-                    document.body.removeChild(controlPanel);
-                }
-            }, { once: true });
+    //         // Clean up when PiP is closed
+    //         pipVideo.addEventListener('leavepictureinpicture', () => {
+    //             if (document.body.contains(controlPanel)) {
+    //                 document.body.removeChild(controlPanel);
+    //             }
+    //         }, { once: true });
 
-        } catch (error) {
-            console.error('Failed to enter Picture-in-Picture mode:', error);
-        }
-    };
+    //     } catch (error) {
+    //         console.error('Failed to enter Picture-in-Picture mode:', error);
+    //     }
+    // };
 
 
     useEffect(() => {

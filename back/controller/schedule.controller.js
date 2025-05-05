@@ -108,19 +108,42 @@ exports.createNewschedule = async (req, res) => {
     }
 };
 
+// exports.getAllschedule = async (req, res) => {
+//     try {
+//         let paginatedschedule;
+
+//         paginatedschedule = await schedule.find()
+
+//         let count = paginatedschedule.length;
+
+//         if (count === 0) {
+//             return res.json({ status: 400, message: "schedule Not Found" })
+//         }
+
+//         return res.json({ status: 200, totalschedules: count, message: "All schedule Found SuccessFully", schedules: paginatedschedule })
+
+//     } catch (error) {
+//         res.json({ status: 500, message: error.message });
+//         console.log(error);
+//     }
+// };
 exports.getAllschedule = async (req, res) => {
-    try {
+    try {g
         let paginatedschedule;
 
-        paginatedschedule = await schedule.find()
+        paginatedschedule = await schedule.find();
 
-        let count = paginatedschedule.length;
+        const userId = req.user.id;
+
+        const userSchedules = paginatedschedule.filter(meeting => meeting.userId.toString() === userId);
+
+        let count = userSchedules.length;
 
         if (count === 0) {
-            return res.json({ status: 400, message: "schedule Not Found" })
+            return res.json({ status: 400, message: "No schedules found for this user" });
         }
 
-        return res.json({ status: 200, totalschedules: count, message: "All schedule Found SuccessFully", schedules: paginatedschedule })
+        return res.json({ status: 200, totalschedules: count, message: "User schedules found successfully", schedules: userSchedules });
 
     } catch (error) {
         res.json({ status: 500, message: error.message });

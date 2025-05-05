@@ -149,10 +149,7 @@ function Meeting() {
     }, []);
 
     const allschedule = useSelector((state) => state.schedule.allschedule);
-    // console.log("allschedule", allschedule);
-
-    const usersMeetings = allschedule.filter(meeting => meeting.userId === userId);
-    // console.log("userMeetings", usersMeetings);
+    // console.log("allschedule", allschedule); 
 
     useEffect(() => {
         dispatch(getAllschedule());
@@ -195,9 +192,8 @@ function Meeting() {
                 <div className='mx-4'>
                     <div className="row g-5 B_meeting_card_section">
                         {/* METTING CARD ALL SECTION */}
-
                         {/* Upcoming Meeting Card */}
-                        {usersMeetings.filter(schedule => {
+                        {allschedule.filter(schedule => {
                             const duration = calculateDuration(schedule.startTime, schedule.endTime);
                             const date = formatDate(schedule.date)
                             return (
@@ -208,7 +204,7 @@ function Meeting() {
                             );
                         }).map((schedule, index) => {
                             return (
-                                <div className=" col-xl-3 col-lg-4 col-md-6 col-12">
+                                <div key={index} className="col-xl-3 col-lg-4 col-md-6 col-12">
                                     <div className="B_meeting_card" style={{ backgroundColor: '#0A1119', borderRadius: '6px' }}>
                                         <div className="d-flex justify-content-between align-items-center  p-3 B_meeting_padding">
                                             <h6 className="text-white m-0 B_card_title">{schedule.title}</h6>
@@ -274,7 +270,9 @@ function Meeting() {
                                                 )}
 
                                                 {formatDate(schedule.date) == formatDate(currentDate) && schedule.startTime == currentTime && (
-                                                    <button type="button" class="btn btn-outline-secondary B_upcoming_btn1 B_upcoming_btn2 me-2">Join</button>
+                                                    <button type="button" class="btn btn-outline-secondary B_upcoming_btn1 B_upcoming_btn2 me-2"
+                                                        onClick={() => window.location.href = schedule.meetingLink}
+                                                    >Join</button>
                                                 )}
                                                 {/* <button type="button" class="btn btn-outline-danger B_upcoming_btn1 me-2">Cancelled</button> */}
                                             </div>
@@ -1748,6 +1746,11 @@ function Meeting() {
         return `${day}-${month}-${year}`;
     };
 
+    const formatEditDate = (dateString) => {
+        const date = new Date(dateString);
+        return date.toISOString().split('T')[0]; // Returns date in YYYY-MM-DD format
+    };
+
     return (
         <div>
             {/* .......................NAVBAR START ....................... */}
@@ -2213,7 +2216,8 @@ function Meeting() {
                                                                                         style={{
                                                                                             width: '30px',
                                                                                             height: '30px',
-                                                                                            backgroundColor: '#364758',
+                                                                                            // backgroundColor: '#364758',
+                                                                                            backgroundColor: `hsl(${Array.from(invitee._id || invitee.email || invitee.name || '').reduce((acc, char) => acc + char.charCodeAt(0), 0) % 360}, 70%, 45%)`,
                                                                                             color: 'white'
                                                                                         }}
                                                                                     >
@@ -2462,7 +2466,7 @@ function Meeting() {
                             </Modal.Header>
 
                             <div className="j_modal_header"></div>
-
+                            {/* {console.log("Schedule Data ... ", ScheduleData)} */}
                             <Modal.Body className="py-0">
 
                                 <Formik
@@ -2470,10 +2474,11 @@ function Meeting() {
                                         _id: ScheduleData ? ScheduleData._id : '',
                                         userId: ScheduleData ? ScheduleData?.userId : userId,
                                         title: ScheduleData ? ScheduleData?.title : '',
-                                        date: ScheduleData ? ScheduleData?.date : '',
+                                        date: ScheduleData ? formatEditDate(ScheduleData.date) : '',
                                         startTime: ScheduleData ? ScheduleData?.startTime : '',
                                         endTime: ScheduleData ? ScheduleData?.endTime : '',
                                         meetingLink: ScheduleData ? ScheduleData?.meetingLink : '',
+                                        password: ScheduleData ? ScheduleData?.password : '',
                                         description: ScheduleData ? ScheduleData?.description : '',
                                         reminder: ScheduleData ? ScheduleData?.reminder : [],
                                         recurringMeeting: ScheduleData ? ScheduleData?.recurringMeeting : '',
@@ -2524,7 +2529,7 @@ function Meeting() {
 
                                                     <div className="j_schedule_DnT B_schedule_DnT">
                                                         <div className="mb-3">
-                                                            {console.log("values.date", formatDate(values.date))}
+                                                            {/* {console.log("values.date", values.date, formatDate(values.date))} */}
                                                             <label htmlFor="date" className="form-label text-white j_join_text">Date</label>
                                                             <input
                                                                 type="date"
@@ -2570,8 +2575,9 @@ function Meeting() {
                                                             className="form-select j_select j_join_text"
                                                             id="meetingLink"
                                                             name="meetingLink"
-                                                            value={values.meetingLink}
-                                                            onChange={handleChange}
+                                                            // value={values.meetingLink}
+                                                            value={values.password ? "UseMyPersonalRoomLink" : "GenerateaOneTimeMeetingLink"}
+                                                        // onChange={handleChange}
                                                         >
                                                             <option value="">Select</option>
                                                             <option value="GenerateaOneTimeMeetingLink">Generate a one time meeting link</option>
@@ -2730,7 +2736,8 @@ function Meeting() {
                                                                                             style={{
                                                                                                 width: '30px',
                                                                                                 height: '30px',
-                                                                                                backgroundColor: '#364758',
+                                                                                                // backgroundColor: '#364758',
+                                                                                                backgroundColor: `hsl(${Array.from(user._id || user.email || user.name || '').reduce((acc, char) => acc + char.charCodeAt(0), 0) % 360}, 70%, 45%)`,
                                                                                                 color: 'white'
                                                                                             }}
                                                                                         >
@@ -2777,7 +2784,8 @@ function Meeting() {
                                                                                         style={{
                                                                                             width: '30px',
                                                                                             height: '30px',
-                                                                                            backgroundColor: '#364758',
+                                                                                            // backgroundColor: '#364758',
+                                                                                            backgroundColor: `hsl(${Array.from(user._id || user.email || user.name || '').reduce((acc, char) => acc + char.charCodeAt(0), 0) % 360}, 70%, 45%)`,
                                                                                             color: 'white'
                                                                                         }}
                                                                                     >
@@ -2810,7 +2818,8 @@ function Meeting() {
                                                                                         style={{
                                                                                             width: '30px',
                                                                                             height: '30px',
-                                                                                            backgroundColor: '#364758',
+                                                                                            // backgroundColor: '#364758',
+                                                                                            backgroundColor: `hsl(${Array.from(invitee._id || invitee.email || invitee.name || '').reduce((acc, char) => acc + char.charCodeAt(0), 0) % 360}, 70%, 45%)`,
                                                                                             color: 'white'
                                                                                         }}
                                                                                     >
@@ -3040,7 +3049,6 @@ function Meeting() {
                             </Modal.Body>
                         </Modal>
 
-
                         {/* ============================ Cancel Meeting Modal ============================ */}
 
                         <Modal
@@ -3067,7 +3075,7 @@ function Meeting() {
                                 <div className="d-flex justify-content-center gap-5 mt-4 B_cancle_model_btn_flex">
                                     <Button
                                         variant="outline-light"
-                                        className="px-4 py-2 B_cancle_model_btn"
+                                        className="px-4 py-2 B_cancle_model_btn fw-semibold"
                                         onClick={handleCloseCancelModel}
                                         style={{
                                             minWidth: '180px'
@@ -3077,7 +3085,7 @@ function Meeting() {
                                     </Button>
                                     <Button
                                         variant="light"
-                                        className="px-4 py-2 B_cancle_model_btn"
+                                        className="px-4 py-2 B_cancle_model_btn fw-semibold"
                                         onClick={handleCloseCancelModel}
                                         style={{
                                             minWidth: '180px'
@@ -3126,11 +3134,12 @@ function Meeting() {
                                         <span className='B_invite_people_text_span' style={{ color: '#B3AEAE', width: '100px' }}>Meeting ID</span>
                                         <span className="text-white B_invite_people_text">: {inviteData?.meetingLink}</span>
                                     </div>
-                                    <div className="d-flex align-items-center mb-3 B_invite_people_text_flex">
-                                        <span className='B_invite_people_text_span' style={{ color: '#B3AEAE', width: '100px' }}>Password</span>
-                                        <span className="text-white B_invite_people_text">: {inviteData?.password || "N/A"}</span>
-
-                                    </div>
+                                    {inviteData?.password &&
+                                        <div className="d-flex align-items-center mb-3 B_invite_people_text_flex">
+                                            <span className='B_invite_people_text_span' style={{ color: '#B3AEAE', width: '100px' }}>Password</span>
+                                            <span className="text-white B_invite_people_text">: {inviteData?.password || "N/A"}</span>
+                                        </div>
+                                    }
                                 </div>
                                 <div className="d-flex justify-content-center gap-4 mt-4">
                                     <Button
