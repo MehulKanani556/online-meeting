@@ -1628,10 +1628,6 @@ function Screen() {
     };
 
     // picture in picture
-    // let controlPanel = null;
-    let pipVideo = null;
-    let pipTracker = null;
-
     const togglePictureInPicture = async () => {
         try {
             // First check if PiP is supported
@@ -1643,14 +1639,6 @@ function Screen() {
             // If already in PiP mode, exit it
             if (document.pictureInPictureElement) {
                 await document.exitPictureInPicture();
-                if (controlPanel && document.body.contains(controlPanel)) {
-                    document.body.removeChild(controlPanel);
-                    controlPanel = null;
-                }
-                if (pipTracker) {
-                    clearInterval(pipTracker);
-                    pipTracker = null;
-                }
                 return;
             }
 
@@ -1682,33 +1670,27 @@ function Screen() {
                 return;
             }
 
-            // Create the video element for PiP
-            pipVideo = document.createElement('video');
+            // Create a video element to use for PiP
+            const pipVideo = document.createElement('video');
             pipVideo.muted = true;
             pipVideo.autoplay = true;
             pipVideo.srcObject = sourceStream;
 
-            // Create a control panel
+            // Play the video and enter PiP mode
+            await pipVideo.play();
+            await pipVideo.requestPictureInPicture();
+
+            // Create a floating control panel in the main window
             controlPanel = document.createElement('div');
             controlPanel.style.position = 'fixed';
             controlPanel.style.bottom = '20px';
             controlPanel.style.right = '20px';
-            controlPanel.style.backgroundColor = 'rgba(33, 33, 33, 0.8)';
+            controlPanel.style.backgroundColor = '#212121';
             controlPanel.style.padding = '10px';
             controlPanel.style.borderRadius = '8px';
+            controlPanel.style.zIndex = '9999';
             controlPanel.style.display = 'flex';
             controlPanel.style.gap = '15px';
-            controlPanel.style.zIndex = '9999';
-            controlPanel.style.boxShadow = '0 0 10px rgba(0, 0, 0, 0.5)';
-
-            // Add a label
-            const label = document.createElement('div');
-            label.textContent = 'PiP Controls';
-            label.style.color = '#fff';
-            label.style.marginRight = '10px';
-            label.style.display = 'flex';
-            label.style.alignItems = 'center';
-            controlPanel.appendChild(label);
 
             // Add control buttons
             const createButton = (emoji, label, action) => {
@@ -1726,78 +1708,77 @@ function Screen() {
             };
 
             // Handle mute toggle
-            const micButton = createButton('🎤', 'Toggle Audio', () => {
+            const micButton = createButton('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>', 'Toggle Audio', () => {
                 toggleAudio();
             });
             controlPanel.appendChild(micButton);
 
             // Handle video toggle
-            const videoButton = createButton('📷', 'Toggle Video', () => {
+            const videoButton = createButton('<svg width="18" height="14" viewBox="0 0 18 14" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M17.2505 2.17385C17.0385 2.07067 16.8015 2.03006 16.5673 2.05678C16.3331 2.08349 16.1113 2.17643 15.928 2.32469L13.7922 4.03302V3.66719C13.8411 3.24497 13.794 2.81715 13.6542 2.41574C13.5145 2.01432 13.2858 1.6497 12.9852 1.34915C12.6847 1.0486 12.32 0.819901 11.9186 0.680159C11.5172 0.540416 11.0894 0.493249 10.6672 0.542185H3.16719C2.74497 0.493249 2.31715 0.540416 1.91574 0.680159C1.51432 0.819901 1.1497 1.0486 0.849153 1.34915C0.548602 1.6497 0.319901 2.01432 0.180159 2.41574C0.0404158 2.81715 -0.00675141 3.24497 0.0421853 3.66719V10.3339C-0.00675141 10.7561 0.0404158 11.1839 0.180159 11.5853C0.319901 11.9867 0.548602 12.3513 0.849153 12.6519C1.1497 12.9524 1.51432 13.1811 1.91574 13.3209C2.31715 13.4606 2.74497 13.5078 3.16719 13.4589H10.6672C11.0894 13.5078 11.5172 13.4606 11.9186 13.3209C12.32 13.1811 12.6847 12.9524 12.9852 12.6519C13.2858 12.3513 13.5145 11.9867 13.6542 11.5853C13.794 11.1839 13.8411 10.7561 13.7922 10.3339V9.96802L15.928 11.6764C16.1484 11.8543 16.4231 11.9514 16.7064 11.9514C16.8947 11.9511 17.0807 11.9087 17.2505 11.8272C17.4634 11.7258 17.643 11.566 17.7685 11.3663C17.8939 11.1667 17.9599 10.9355 17.9589 10.6997V3.30135C17.9599 3.06557 17.8939 2.83436 17.7685 2.63471C17.643 2.43506 17.4634 2.27521 17.2505 2.17385ZM12.5422 10.3339C12.5422 11.648 11.9814 12.2089 10.6672 12.2089H3.16719C1.85302 12.2089 1.29219 11.648 1.29219 10.3339V3.66719C1.29219 2.35302 1.85302 1.79219 3.16719 1.79219H10.6672C11.9814 1.79219 12.5422 2.35302 12.5422 3.66719V10.3339ZM16.7089 10.7005L13.7922 8.36719V5.63385L16.7089 3.30052V10.7005Z" fill="black"/></svg>', 'Toggle Video', () => {
                 toggleVideo();
             });
             controlPanel.appendChild(videoButton);
 
             // Handle hand raise toggle
-            const handButton = createButton('✋', 'Raise Hand', () => {
+            const handButton = createButton('<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M16.438 14.25V4.84375C16.438 3.96875 15.6568 3.21875 14.6567 3.21875C14.4067 3.21875 14.188 3.25 14.0005 3.34375V2.75C14.0005 1.875 13.2192 1.125 12.2192 1.125C11.813 1.125 11.4692 1.25 11.188 1.4375C10.8755 1.0625 10.3442 0.8125 9.78175 0.8125C8.96925 0.8125 8.313 1.3125 8.09425 1.96875C7.8755 1.875 7.6255 1.8125 7.34425 1.8125C6.3755 1.8125 5.563 2.53125 5.563 3.4375V10.5L4.90675 9.6875C4.2505 8.8125 3.0005 8.53125 2.063 9.03125C1.59425 9.28125 1.28175 9.71875 1.15675 10.2188C1.03175 10.75 1.15675 11.2813 1.5005 11.7188C2.063 12.4688 2.65675 13.25 3.21925 14L4.2505 15.375C4.40675 15.5625 4.53175 15.7812 4.688 15.9688C5.1255 16.5938 5.59425 17.2188 6.21925 17.75C7.40675 18.75 9.03175 19.125 10.563 19.125C11.313 19.125 12.0317 19.0312 12.688 18.9062C16.438 18.125 16.438 15.3125 16.438 14.25ZM12.4692 17.875C10.8443 18.2188 8.40675 18.1875 6.938 16.9688C6.438 16.5312 6.03175 15.9688 5.59425 15.375C5.438 15.1563 5.28175 14.9375 5.1255 14.75L4.09425 13.375C3.53175 12.625 2.938 11.8438 2.3755 11.0938C2.21925 10.9062 2.188 10.6875 2.21925 10.4688C2.2505 10.2812 2.3755 10.125 2.563 10C3.03175 9.75 3.688 9.90625 4.0005 10.3437C4.0005 10.3437 4.0005 10.375 4.03175 10.375L5.688 12.3438C5.84425 12.5313 6.063 12.5938 6.28175 12.5C6.5005 12.4062 6.65675 12.2188 6.65675 12V3.46875C6.65675 3.1875 6.96925 2.9375 7.34425 2.9375C7.688 2.9375 8.0005 3.15625 8.0005 3.4375V8.875C8.0005 9.1875 8.2505 9.4375 8.563 9.4375C8.8755 9.4375 9.1255 9.1875 9.1255 8.875V2.46875C9.1255 2.1875 9.438 1.9375 9.813 1.9375C10.188 1.9375 10.5005 2.1875 10.5005 2.46875V9.125C10.5005 9.4375 10.7505 9.6875 11.063 9.6875C11.3755 9.6875 11.6255 9.4375 11.6255 9.125V2.75C11.6255 2.46875 11.938 2.21875 12.313 2.21875C12.688 2.21875 13.0005 2.46875 13.0005 2.75V9.6875C13.0005 10 13.2505 10.25 13.563 10.25C13.8755 10.25 14.1255 10 14.1255 9.6875V4.8125C14.1567 4.53125 14.438 4.3125 14.7817 4.3125C15.1567 4.3125 15.4692 4.5625 15.4692 4.84375V14.2813C15.3442 15.3125 15.3442 17.25 12.4692 17.875Z" fill="black"/></svg>', 'Raise Hand', () => {
                 toggleHandRaise();
             });
             controlPanel.appendChild(handButton);
 
             // End call button
-            const endButton = createButton('📞', 'End Call', () => {
-                endMeeting();
-                if (document.pictureInPictureElement) {
-                    document.exitPictureInPicture();
-                }
-            });
+            const endButton = createButton('<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" width="20" height="20" x="0" y="0" viewBox="0 0 24 24" style="enable-background:new 0 0 512 512" xml:space="preserve" class=""><g><path d="M20.145 16.75a2.21 2.21 0 0 1-.527-.065l-2.727-.7a2.636 2.636 0 0 1-1.929-3.078l.117-.578a10.68 10.68 0 0 0-6.13 0l.115.59a2.638 2.638 0 0 1-1.941 3.063l-2.741.693a2.145 2.145 0 0 1-2.293-.875 5.308 5.308 0 0 1-.684-4.171 4.983 4.983 0 0 1 2.326-3.21 16.786 16.786 0 0 1 16.53.013 5.015 5.015 0 0 1 2.339 3.232 5.262 5.262 0 0 1-.673 4.132 2.127 2.127 0 0 1-1.782.954zm-8.128-6.372a12.087 12.087 0 0 1 4.189.747.751.751 0 0 1 .476.853l-.249 1.227a1.137 1.137 0 0 0 .831 1.327l2.723.7a.622.622 0 0 0 .682-.257 3.76 3.76 0 0 0 .469-2.962 3.516 3.516 0 0 0-1.616-2.273 15.286 15.286 0 0 0-15.054-.014 3.481 3.481 0 0 0-1.6 2.251 3.849 3.849 0 0 0 .47 2.987.633.633 0 0 0 .683.254l2.739-.694a1.136 1.136 0 0 0 .836-1.32l-.246-1.238a.75.75 0 0 1 .479-.849 12.269 12.269 0 0 1 4.188-.739z" fill="#000" opacity="1" data-original="#000000"></path></g></svg>', 'End Call', endMeeting);
             controlPanel.appendChild(endButton);
 
-            // Add the control panel to the document
+            // End call button
+            const shareButton = createButton('<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M9.16741 7.49755C9.22375 7.44121 9.29065 7.39651 9.36426 7.36601C9.43788 7.33552 9.51679 7.31982 9.59647 7.31982C9.67616 7.31982 9.75506 7.33552 9.82868 7.36601C9.9023 7.39651 9.9692 7.44121 10.0255 7.49755L12.5157 9.98747C12.6295 10.1013 12.6934 10.2557 12.6934 10.4166C12.6934 10.5776 12.6294 10.7319 12.5156 10.8457C12.4017 10.9595 12.2474 11.0234 12.0864 11.0234C11.9255 11.0234 11.7711 10.9594 11.6573 10.8456L10.2034 9.39165V13.1827C10.2034 13.3436 10.1394 13.4979 10.0257 13.6117C9.91186 13.7255 9.75752 13.7894 9.59659 13.7894C9.43566 13.7894 9.28132 13.7255 9.16753 13.6117C9.05374 13.4979 8.98981 13.3436 8.98981 13.1827V9.39165L7.53586 10.8456C7.42206 10.9594 7.26772 11.0233 7.10679 11.0233C6.94586 11.0233 6.79152 10.9594 6.67773 10.8456C6.56393 10.7318 6.5 10.5775 6.5 10.4165C6.5 10.2556 6.56393 10.1013 6.67773 9.98747L9.16741 7.49755Z" fill="black"/><path fill-rule="evenodd" clip-rule="evenodd" d="M1 6.47381C1 5.10738 2.10761 4 3.47381 4H15.7262C17.0924 4 18.2 5.10738 18.2 6.47381V14.3629C18.2 15.7291 17.0924 16.8368 15.7262 16.8368H3.47381C2.10761 16.8368 1 15.7291 1 14.3629V6.47381ZM3.47381 5.21357C3.13958 5.21357 2.81903 5.34634 2.58269 5.58269C2.34634 5.81903 2.21357 6.13958 2.21357 6.47381V14.3629C2.21357 14.5284 2.24617 14.6923 2.3095 14.8452C2.37283 14.9981 2.46566 15.137 2.58269 15.2541C2.69971 15.3711 2.83864 15.4639 2.99154 15.5273C3.14444 15.5906 3.30832 15.6232 3.47381 15.6232H15.7262C15.8917 15.6232 16.0556 15.5906 16.2085 15.5273C16.3614 15.4639 16.5003 15.3711 16.6173 15.2541C16.7343 15.137 16.8272 14.9981 16.8905 14.8452C16.9538 14.6923 16.9864 14.5284 16.9864 14.3629V6.47358C16.9864 6.13934 16.8537 5.81879 16.6173 5.58245C16.381 5.34611 16.0604 5.21334 15.7262 5.21334L3.47381 5.21357Z" fill="black"/></svg>', 'share screen', toggleScreenShare);
+            controlPanel.appendChild(shareButton);
+
+            // Emoji button to open emoji selection
+            const emojiButton = createButton('<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M9 0C4.02943 0 0 4.02943 0 9C0 13.9706 4.02943 18 9 18C13.9706 18 18 13.9706 18 9C18 4.02943 13.9706 0 9 0ZM9 16.875C4.65075 16.875 1.125 13.3492 1.125 9C1.125 4.65075 4.65075 1.125 9 1.125C13.3492 1.125 16.875 4.65075 16.875 9C16.875 13.3492 13.3492 16.875 9 16.875Z" fill="black"/><path d="M6.1875 7.3125C6.80882 7.3125 7.3125 6.80882 7.3125 6.1875C7.3125 5.56618 6.80882 5.0625 6.1875 5.0625C5.56618 5.0625 5.0625 5.56618 5.0625 6.1875C5.0625 6.80882 5.56618 7.3125 6.1875 7.3125Z" fill="black"/><path d="M11.8125 7.3125C12.4338 7.3125 12.9375 6.80882 12.9375 6.1875C12.9375 5.56618 12.4338 5.0625 11.8125 5.0625C11.1912 5.0625 10.6875 5.56618 10.6875 6.1875C10.6875 6.80882 11.1912 7.3125 11.8125 7.3125Z" fill="black"/><path d="M12.9375 9C12.9375 11.1746 11.1746 12.9375 9 12.9375C6.82538 12.9375 5.0625 11.1746 5.0625 9H3.9375C3.9375 11.7959 6.20406 14.0625 9 14.0625C11.7959 14.0625 14.0625 11.7959 14.0625 9H12.9375Z" fill="black"/></svg>', 'Select Emoji', () => {
+                emojiContainer.style.display = emojiContainer.style.display === 'none' ? 'block' : 'none';
+            });
+            controlPanel.appendChild(emojiButton);
+
+            // Create emoji selection container
+            const emojiContainer = document.createElement('div');
+            emojiContainer.style.position = 'absolute';
+            emojiContainer.style.bottom = '60px'; // Adjust position as needed
+            emojiContainer.style.right = '0';
+            emojiContainer.style.backgroundColor = '#12161C';
+            emojiContainer.style.border = '1px solid #202f41';
+            emojiContainer.style.padding = '10px';
+            emojiContainer.style.borderRadius = '5px';
+            emojiContainer.style.zIndex = '1000';
+            emojiContainer.style.display = 'none'; // Initially hidden
+
+            // Add emojis to the container
+            ['❤️', '😃', '😮', '🙌', '😂', '🎉', '👏', '💥', '😉', '🔥', '👍', '👎', '▶️', '✨'].forEach(emoji => {
+                const emojiSpan = document.createElement('span');
+                emojiSpan.innerText = emoji;
+                emojiSpan.style.cursor = 'pointer';
+                emojiSpan.style.fontSize = '24px';
+                emojiSpan.style.margin = '5px';
+                emojiSpan.style.color = 'white';
+                emojiSpan.onclick = () => {
+                    sendEmoji(emoji); // Send the selected emoji
+                    emojiContainer.style.display = 'none'; // Hide the container after selection
+                };
+                emojiContainer.appendChild(emojiSpan);
+            });
+
+            controlPanel.appendChild(emojiContainer);
             document.body.appendChild(controlPanel);
-
-            // Play the video and enter PiP mode
-            await pipVideo.play();
-            await pipVideo.requestPictureInPicture();
-
-            // Track PiP window position (with limitations)
-            // Note: Browsers restrict direct access to PiP window position
-            pipTracker = setInterval(() => {
-                if (!document.pictureInPictureElement) {
-                    clearInterval(pipTracker);
-                    pipTracker = null;
-
-                    if (controlPanel && document.body.contains(controlPanel)) {
-                        document.body.removeChild(controlPanel);
-                        controlPanel = null;
-                    }
-                }
-            }, 1000);
 
             // Clean up when PiP is closed
             pipVideo.addEventListener('leavepictureinpicture', () => {
                 if (controlPanel && document.body.contains(controlPanel)) {
                     document.body.removeChild(controlPanel);
-                    controlPanel = null;
-                }
-
-                if (pipTracker) {
-                    clearInterval(pipTracker);
-                    pipTracker = null;
+                    controlPanel = null; // Clear the reference
                 }
             }, { once: true });
 
         } catch (error) {
             console.error('Failed to enter Picture-in-Picture mode:', error);
-            // Clean up on error
-            if (controlPanel && document.body.contains(controlPanel)) {
-                document.body.removeChild(controlPanel);
-                controlPanel = null;
-            }
-
-            if (pipTracker) {
-                clearInterval(pipTracker);
-                pipTracker = null;
-            }
         }
     };
 

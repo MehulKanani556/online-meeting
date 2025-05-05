@@ -128,7 +128,7 @@ exports.createNewschedule = async (req, res) => {
 //     }
 // };
 exports.getAllschedule = async (req, res) => {
-    try {g
+    try {
         let paginatedschedule;
 
         paginatedschedule = await schedule.find();
