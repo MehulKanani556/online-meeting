@@ -138,8 +138,18 @@ export const useSocket = (userId, roomId, userName) => {
                 initials: `${user.userName?.charAt(0)}${user.userName?.split(' ')[1] ? user.userName?.split(' ')[1]?.charAt(0) : ''}`,
                 isHost: user.isHost
             }));
+
+            const renameParticipant = JSON.parse(sessionStorage.getItem("renameParticipant"));
+            if (renameParticipant) {
+                const updatedParticipants = formattedParticipants.map(participant => {
+                    const rename = renameParticipant?.find(p => p.participantId === participant.id);
+                    return rename ? { ...participant, name: rename.newName } : participant;
+                });
+                setParticipants(updatedParticipants);
+            }
+
             setParticipants(formattedParticipants);
-            // Remove any existing system messages when room is first loaded
+         
             setSystemMessages([]);
         });
 
