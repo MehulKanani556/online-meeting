@@ -148,7 +148,7 @@ async function initializeSocket(io) {
 
                 // Get meeting details from the database
                 const meetingDetails = await schedule.findOne({
-                    meetingLink: { $regex: roomId }
+                    meetingLink: { $regex: String(roomId) } // Ensure roomId is a string
                 });
 
                 const hostUserId = meetingDetails?.userId?.toString();

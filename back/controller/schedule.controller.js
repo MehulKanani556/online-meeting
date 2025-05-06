@@ -24,7 +24,23 @@ exports.createNewschedule = async (req, res) => {
             recurringMeeting,
             customRecurrence,
             invitees,
+            status,
         } = req.body;
+
+        // Get the current date and time
+        const currentDateTime = new Date();
+        const scheduleDateTime = new Date(`${date}T${startTime}`);
+        // console.log("scheduleDateTime", scheduleDateTime, endTime, new Date(`${date}T${endTime}`));
+        console.log("endTime type:", typeof endTime);
+        console.log("endTime format:", endTime);
+
+
+        // Check if the schedule time is in the past or future
+        if (scheduleDateTime <= currentDateTime && new Date(`${date}T${endTime}`) >= currentDateTime) {
+            status = "Join"; // Set status to join if current time matches
+        } else if (scheduleDateTime > currentDateTime) {
+            status = "Upcoming"; // Set status to upcoming if it's a future date
+        }
 
         let scheduleData = {
             title,
@@ -36,7 +52,8 @@ exports.createNewschedule = async (req, res) => {
             description,
             reminder,
             recurringMeeting,
-            invitees
+            invitees,
+            status, // Use the updated status
         };
 
         if (meetingLink === "GenerateaOneTimeMeetingLink") {
@@ -108,25 +125,11 @@ exports.createNewschedule = async (req, res) => {
     }
 };
 
-// exports.getAllschedule = async (req, res) => {
-//     try {
-//         let paginatedschedule;
+const formatDate = (date) => {
+    const d = new Date(date);
+    return d.toISOString().split('T')[0]; // Get the date part only
+};
 
-//         paginatedschedule = await schedule.find()
-
-//         let count = paginatedschedule.length;
-
-//         if (count === 0) {
-//             return res.json({ status: 400, message: "schedule Not Found" })
-//         }
-
-//         return res.json({ status: 200, totalschedules: count, message: "All schedule Found SuccessFully", schedules: paginatedschedule })
-
-//     } catch (error) {
-//         res.json({ status: 500, message: error.message });
-//         console.log(error);
-//     }
-// };
 exports.getAllschedule = async (req, res) => {
     try {
         let paginatedschedule;
@@ -135,21 +138,84 @@ exports.getAllschedule = async (req, res) => {
 
         const userId = req.user.id;
 
-        const userSchedules = paginatedschedule.filter(meeting => meeting.userId.toString() === userId);
+        const currentDateTime = new Date();
+        const userSchedules = paginatedschedule.filter((meeting) => {
+            const scheduleEndTime = new Date(`${formatDate(meeting.date)}T${meeting.endTime}`);
+            console.log("scheduleEndTime", scheduleEndTime);
+
+            console.log("date", formatDate(meeting.date));
+
+
+            // Check if the status is upcoming or join and end time is past
+            if ((meeting.status === "Upcoming" || meeting.status === "Join") && scheduleEndTime < currentDateTime) {
+                // Update status in database
+                schedule.findByIdAndUpdate(meeting._id, { status: "Completed" })
+                    .catch(err => console.error("Error updating meeting status:", err));
+
+                meeting.status = "Completed"; // Set status to completed if end time is past
+            }
+
+            return (meeting.userId.toString() === userId.toString() ||
+                meeting?.invitees?.some((invitee) => invitee?.userId?.toString() === userId?.toString()))
+        });
+
 
         let count = userSchedules.length;
 
         if (count === 0) {
-            return res.json({ status: 400, message: "No schedules found for this user" });
+            return res.json({
+                status: 400,
+                message: "No schedules found",
+            });
         }
 
-        return res.json({ status: 200, totalschedules: count, message: "User schedules found successfully", schedules: userSchedules });
-
+        return res.json({
+            status: 200,
+            totalschedules: count,
+            message: "All schedules found successfully",
+            schedules: userSchedules,
+        });
     } catch (error) {
         res.json({ status: 500, message: error.message });
         console.log(error);
     }
 };
+
+// exports.getAllschedule = async (req, res) => {
+//     try {
+//         let paginatedschedule;
+
+//         paginatedschedule = await schedule.find();
+
+//         const userId = req.user.id;
+
+//         const userSchedules = paginatedschedule.filter(
+//             (meeting) =>
+//                 (meeting.userId.toString() === userId.toString() ||
+//                     meeting?.invitees?.some((invitee) => invitee?.userId?.toString() == userId?.toString())) &&
+//                 meeting.status !== "Completed" // Exclude completed schedules
+//         );
+
+//         let count = userSchedules.length;
+
+//         if (count === 0) {
+//             return res.json({
+//                 status: 400,
+//                 message: "No schedules found",
+//             });
+//         }
+
+//         return res.json({
+//             status: 200,
+//             totalschedules: count,
+//             message: "All schedules found successfully",
+//             schedules: userSchedules,
+//         });
+//     } catch (error) {
+//         res.json({ status: 500, message: error.message });
+//         console.log(error);
+//     }
+// };
 
 exports.getscheduleById = async (req, res) => {
     try {

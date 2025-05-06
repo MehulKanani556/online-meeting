@@ -62,9 +62,8 @@ function Screen() {
   const userId = sessionStorage.getItem("userId");
   const currUser = useSelector((state) => state.user.currUser);
   const userInitials = currUser?.name
-    ? `${currUser.name.charAt(0)}${
-        currUser.name.split(" ")[1] ? currUser.name.split(" ")[1].charAt(0) : ""
-      }`
+    ? `${currUser.name.charAt(0)}${currUser.name.split(" ")[1] ? currUser.name.split(" ")[1].charAt(0) : ""
+    }`
     : "U";
   const userName = currUser?.name;
 
@@ -104,13 +103,13 @@ function Screen() {
   const [newMessage, setNewMessage] = useState("");
   const [showViewMoreDropdown, setShowViewMoreDropdown] = useState(false);
   //   const [show, setShow] = useState(false);
-//   const [showEmojis, setshowEmojis] = useState(false);
+  //   const [showEmojis, setshowEmojis] = useState(false);
   const [localStream, setLocalStream] = useState(null);
   const [remoteStreams, setRemoteStreams] = useState({});
   const [maxVisibleParticipants, setMaxVisibleParticipants] = useState(9);
   const [messageUser, setmessageUser] = useState("Messages");
   const [activeDropdown, setActiveDropdown] = useState(null);
-//   const [mainSectionMargin, setMainSectionMargin] = useState(0);
+  //   const [mainSectionMargin, setMainSectionMargin] = useState(0);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const [newName, setNewName] = useState("");
   const [showRenameModal, setShowRenameModal] = useState(false);
@@ -1358,19 +1357,26 @@ function Screen() {
       .join(":");
   };
 
- // picture in picture
- const togglePictureInPicture = async () => {
-  try {
+  const toggleHandRaised = () => {
+    dispatch(setIsHandRaised());
+    socket.emit("hand-status-change", {
+      roomId,
+      hasRaisedHand: !isHandRaised,
+    });
+  }
+  // picture in picture
+  const togglePictureInPicture = async () => {
+    try {
       // First check if PiP is supported
       if (!document.pictureInPictureEnabled) {
-          console.warn('Picture-in-Picture not supported by this browser');
-          return;
+        console.warn('Picture-in-Picture not supported by this browser');
+        return;
       }
 
       // If already in PiP mode, exit it
       if (document.pictureInPictureElement) {
-          await document.exitPictureInPicture();
-          return;
+        await document.exitPictureInPicture();
+        return;
       }
 
       // Determine which video source to use
@@ -1378,27 +1384,27 @@ function Screen() {
 
       // Check for an active speaker first
       const activeSpeakerParticipant = participants.find(p =>
-          p.id !== socket?.id && remoteStreams[p.id] && p.hasVideo !== false
+        p.id !== socket?.id && remoteStreams[p.id] && p.hasVideo !== false
       );
 
       if (activeSpeakerParticipant && remoteStreams[activeSpeakerParticipant.id]) {
-          sourceStream = remoteStreams[activeSpeakerParticipant.id];
+        sourceStream = remoteStreams[activeSpeakerParticipant.id];
       } else if (localStream && !isVideoOff) {
-          sourceStream = localStream;
+        sourceStream = localStream;
       } else {
-          for (const participant of participants) {
-              if (participant.id !== socket?.id && participant.hasVideo !== false) {
-                  if (remoteStreams[participant.id]) {
-                      sourceStream = remoteStreams[participant.id];
-                      break;
-                  }
-              }
+        for (const participant of participants) {
+          if (participant.id !== socket?.id && participant.hasVideo !== false) {
+            if (remoteStreams[participant.id]) {
+              sourceStream = remoteStreams[participant.id];
+              break;
+            }
           }
+        }
       }
 
       if (!sourceStream) {
-          console.warn('No video source available for PiP');
-          return;
+        console.warn('No video source available for PiP');
+        return;
       }
 
       // Create a video element to use for PiP
@@ -1425,39 +1431,34 @@ function Screen() {
 
       // Add control buttons
       const createButton = (emoji, label, action) => {
-          const button = document.createElement('button');
-          button.innerHTML = emoji;
-          button.title = label;
-          button.style.width = '40px';
-          button.style.height = '40px';
-          button.style.borderRadius = '50%';
-          button.style.border = 'none';
-          button.style.fontSize = '18px';
-          button.style.cursor = 'pointer';
-          button.onclick = action;
-          return button;
+        const button = document.createElement('button');
+        button.innerHTML = emoji;
+        button.title = label;
+        button.style.width = '40px';
+        button.style.height = '40px';
+        button.style.borderRadius = '50%';
+        button.style.border = 'none';
+        button.style.fontSize = '18px';
+        button.style.cursor = 'pointer';
+        button.onclick = action;
+        return button;
       };
 
       // Handle mute toggle
       const micButton = createButton('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>', 'Toggle Audio', () => {
-          toggleAudio();
+        toggleAudio();
       });
       controlPanel.appendChild(micButton);
 
       // Handle video toggle
       const videoButton = createButton('<svg width="18" height="14" viewBox="0 0 18 14" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M17.2505 2.17385C17.0385 2.07067 16.8015 2.03006 16.5673 2.05678C16.3331 2.08349 16.1113 2.17643 15.928 2.32469L13.7922 4.03302V3.66719C13.8411 3.24497 13.794 2.81715 13.6542 2.41574C13.5145 2.01432 13.2858 1.6497 12.9852 1.34915C12.6847 1.0486 12.32 0.819901 11.9186 0.680159C11.5172 0.540416 11.0894 0.493249 10.6672 0.542185H3.16719C2.74497 0.493249 2.31715 0.540416 1.91574 0.680159C1.51432 0.819901 1.1497 1.0486 0.849153 1.34915C0.548602 1.6497 0.319901 2.01432 0.180159 2.41574C0.0404158 2.81715 -0.00675141 3.24497 0.0421853 3.66719V10.3339C-0.00675141 10.7561 0.0404158 11.1839 0.180159 11.5853C0.319901 11.9867 0.548602 12.3513 0.849153 12.6519C1.1497 12.9524 1.51432 13.1811 1.91574 13.3209C2.31715 13.4606 2.74497 13.5078 3.16719 13.4589H10.6672C11.0894 13.5078 11.5172 13.4606 11.9186 13.3209C12.32 13.1811 12.6847 12.9524 12.9852 12.6519C13.2858 12.3513 13.5145 11.9867 13.6542 11.5853C13.794 11.1839 13.8411 10.7561 13.7922 10.3339V9.96802L15.928 11.6764C16.1484 11.8543 16.4231 11.9514 16.7064 11.9514C16.8947 11.9511 17.0807 11.9087 17.2505 11.8272C17.4634 11.7258 17.643 11.566 17.7685 11.3663C17.8939 11.1667 17.9599 10.9355 17.9589 10.6997V3.30135C17.9599 3.06557 17.8939 2.83436 17.7685 2.63471C17.643 2.43506 17.4634 2.27521 17.2505 2.17385ZM12.5422 10.3339C12.5422 11.648 11.9814 12.2089 10.6672 12.2089H3.16719C1.85302 12.2089 1.29219 11.648 1.29219 10.3339V3.66719C1.29219 2.35302 1.85302 1.79219 3.16719 1.79219H10.6672C11.9814 1.79219 12.5422 2.35302 12.5422 3.66719V10.3339ZM16.7089 10.7005L13.7922 8.36719V5.63385L16.7089 3.30052V10.7005Z" fill="black"/></svg>', 'Toggle Video', () => {
-          toggleVideo();
+        toggleVideo();
       });
       controlPanel.appendChild(videoButton);
 
       // Handle hand raise toggle
       const handButton = createButton('<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M16.438 14.25V4.84375C16.438 3.96875 15.6568 3.21875 14.6567 3.21875C14.4067 3.21875 14.188 3.25 14.0005 3.34375V2.75C14.0005 1.875 13.2192 1.125 12.2192 1.125C11.813 1.125 11.4692 1.25 11.188 1.4375C10.8755 1.0625 10.3442 0.8125 9.78175 0.8125C8.96925 0.8125 8.313 1.3125 8.09425 1.96875C7.8755 1.875 7.6255 1.8125 7.34425 1.8125C6.3755 1.8125 5.563 2.53125 5.563 3.4375V10.5L4.90675 9.6875C4.2505 8.8125 3.0005 8.53125 2.063 9.03125C1.59425 9.28125 1.28175 9.71875 1.15675 10.2188C1.03175 10.75 1.15675 11.2813 1.5005 11.7188C2.063 12.4688 2.65675 13.25 3.21925 14L4.2505 15.375C4.40675 15.5625 4.53175 15.7812 4.688 15.9688C5.1255 16.5938 5.59425 17.2188 6.21925 17.75C7.40675 18.75 9.03175 19.125 10.563 19.125C11.313 19.125 12.0317 19.0312 12.688 18.9062C16.438 18.125 16.438 15.3125 16.438 14.25ZM12.4692 17.875C10.8443 18.2188 8.40675 18.1875 6.938 16.9688C6.438 16.5312 6.03175 15.9688 5.59425 15.375C5.438 15.1563 5.28175 14.9375 5.1255 14.75L4.09425 13.375C3.53175 12.625 2.938 11.8438 2.3755 11.0938C2.21925 10.9062 2.188 10.6875 2.21925 10.4688C2.2505 10.2812 2.3755 10.125 2.563 10C3.03175 9.75 3.688 9.90625 4.0005 10.3437C4.0005 10.3437 4.0005 10.375 4.03175 10.375L5.688 12.3438C5.84425 12.5313 6.063 12.5938 6.28175 12.5C6.5005 12.4062 6.65675 12.2188 6.65675 12V3.46875C6.65675 3.1875 6.96925 2.9375 7.34425 2.9375C7.688 2.9375 8.0005 3.15625 8.0005 3.4375V8.875C8.0005 9.1875 8.2505 9.4375 8.563 9.4375C8.8755 9.4375 9.1255 9.1875 9.1255 8.875V2.46875C9.1255 2.1875 9.438 1.9375 9.813 1.9375C10.188 1.9375 10.5005 2.1875 10.5005 2.46875V9.125C10.5005 9.4375 10.7505 9.6875 11.063 9.6875C11.3755 9.6875 11.6255 9.4375 11.6255 9.125V2.75C11.6255 2.46875 11.938 2.21875 12.313 2.21875C12.688 2.21875 13.0005 2.46875 13.0005 2.75V9.6875C13.0005 10 13.2505 10.25 13.563 10.25C13.8755 10.25 14.1255 10 14.1255 9.6875V4.8125C14.1567 4.53125 14.438 4.3125 14.7817 4.3125C15.1567 4.3125 15.4692 4.5625 15.4692 4.84375V14.2813C15.3442 15.3125 15.3442 17.25 12.4692 17.875Z" fill="black"/></svg>', 'Raise Hand', () => {
-          // toggleHandRaise();
-          dispatch(setIsHandRaised());
-          socket.emit("hand-status-change", {
-            roomId,
-            hasRaisedHand: !isHandRaised,
-          });
+        toggleHandRaised();
       });
       controlPanel.appendChild(handButton);
 
@@ -1471,7 +1472,7 @@ function Screen() {
 
       // Emoji button to open emoji selection
       const emojiButton = createButton('<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M9 0C4.02943 0 0 4.02943 0 9C0 13.9706 4.02943 18 9 18C13.9706 18 18 13.9706 18 9C18 4.02943 13.9706 0 9 0ZM9 16.875C4.65075 16.875 1.125 13.3492 1.125 9C1.125 4.65075 4.65075 1.125 9 1.125C13.3492 1.125 16.875 4.65075 16.875 9C16.875 13.3492 13.3492 16.875 9 16.875Z" fill="black"/><path d="M6.1875 7.3125C6.80882 7.3125 7.3125 6.80882 7.3125 6.1875C7.3125 5.56618 6.80882 5.0625 6.1875 5.0625C5.56618 5.0625 5.0625 5.56618 5.0625 6.1875C5.0625 6.80882 5.56618 7.3125 6.1875 7.3125Z" fill="black"/><path d="M11.8125 7.3125C12.4338 7.3125 12.9375 6.80882 12.9375 6.1875C12.9375 5.56618 12.4338 5.0625 11.8125 5.0625C11.1912 5.0625 10.6875 5.56618 10.6875 6.1875C10.6875 6.80882 11.1912 7.3125 11.8125 7.3125Z" fill="black"/><path d="M12.9375 9C12.9375 11.1746 11.1746 12.9375 9 12.9375C6.82538 12.9375 5.0625 11.1746 5.0625 9H3.9375C3.9375 11.7959 6.20406 14.0625 9 14.0625C11.7959 14.0625 14.0625 11.7959 14.0625 9H12.9375Z" fill="black"/></svg>', 'Select Emoji', () => {
-          emojiContainer.style.display = emojiContainer.style.display === 'none' ? 'block' : 'none';
+        emojiContainer.style.display = emojiContainer.style.display === 'none' ? 'block' : 'none';
       });
       controlPanel.appendChild(emojiButton);
 
@@ -1489,17 +1490,17 @@ function Screen() {
 
       // Add emojis to the container
       ['❤️', '😃', '😮', '🙌', '😂', '🎉', '👏', '💥', '😉', '🔥', '👍', '👎', '▶️', '✨'].forEach(emoji => {
-          const emojiSpan = document.createElement('span');
-          emojiSpan.innerText = emoji;
-          emojiSpan.style.cursor = 'pointer';
-          emojiSpan.style.fontSize = '24px';
-          emojiSpan.style.margin = '5px';
-          emojiSpan.style.color = 'white';
-          emojiSpan.onclick = () => {
-              sendEmoji(emoji); // Send the selected emoji
-              emojiContainer.style.display = 'none'; // Hide the container after selection
-          };
-          emojiContainer.appendChild(emojiSpan);
+        const emojiSpan = document.createElement('span');
+        emojiSpan.innerText = emoji;
+        emojiSpan.style.cursor = 'pointer';
+        emojiSpan.style.fontSize = '24px';
+        emojiSpan.style.margin = '5px';
+        emojiSpan.style.color = 'white';
+        emojiSpan.onclick = () => {
+          sendEmoji(emoji); // Send the selected emoji
+          emojiContainer.style.display = 'none'; // Hide the container after selection
+        };
+        emojiContainer.appendChild(emojiSpan);
       });
 
       controlPanel.appendChild(emojiContainer);
@@ -1507,16 +1508,16 @@ function Screen() {
 
       // Clean up when PiP is closed
       pipVideo.addEventListener('leavepictureinpicture', () => {
-          if (controlPanel && document.body.contains(controlPanel)) {
-              document.body.removeChild(controlPanel);
-              controlPanel = null; // Clear the reference
-          }
+        if (controlPanel && document.body.contains(controlPanel)) {
+          document.body.removeChild(controlPanel);
+          controlPanel = null; // Clear the reference
+        }
       }, { once: true });
 
-  } catch (error) {
+    } catch (error) {
       console.error('Failed to enter Picture-in-Picture mode:', error);
-  }
-};
+    }
+  };
   // picture in picture without controls
   // const togglePictureInPicture = async () => {
   //     try {
@@ -1957,11 +1958,12 @@ function Screen() {
                 {/* Display extra participants indicator */}
                 {index === maxVisibleParticipants - 2 &&
                   extraParticipants > 0 && (
-                    <div onClick={(e)=>{ 
-                        dispatch(setShow(true));
-                        dispatch(setIsChatOpen(true));
-                        handleShow(e)}
-                        } className="d_extra-participants">
+                    <div onClick={(e) => {
+                      dispatch(setShow(true));
+                      dispatch(setIsChatOpen(true));
+                      handleShow(e)
+                    }
+                    } className="d_extra-participants">
                       <span>+{extraParticipants} others</span>
                     </div>
                   )}

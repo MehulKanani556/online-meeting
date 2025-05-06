@@ -172,9 +172,8 @@ const MeetingSidebar = ({
                               return (
                                 <div
                                   key={user._id}
-                                  className={`d-flex align-items-center p-2 cursor-pointer ${
-                                    isSelected && "j_invite_selected"
-                                  }`}
+                                  className={`d-flex align-items-center p-2 cursor-pointer ${isSelected && "j_invite_selected"
+                                    }`}
                                   style={{ cursor: "pointer" }}
                                   onClick={() => {
                                     if (isSelected) {
@@ -211,27 +210,26 @@ const MeetingSidebar = ({
                                           fontSize: "12px",
                                           width: "30px",
                                           height: "30px",
-                                          backgroundColor: `hsl(${
-                                            Array.from(
-                                              user._id ||
-                                                user.email ||
-                                                user.name ||
-                                                ""
-                                            ).reduce(
-                                              (acc, char) =>
-                                                acc + char.charCodeAt(0),
-                                              0
-                                            ) % 360
-                                          }, 70%, 45%)`,
+                                          backgroundColor: `hsl(${Array.from(
+                                            user._id ||
+                                            user.email ||
+                                            user.name ||
+                                            ""
+                                          ).reduce(
+                                            (acc, char) =>
+                                              acc + char.charCodeAt(0),
+                                            0
+                                          ) % 360
+                                            }, 70%, 45%)`,
                                           color: "white",
                                         }}
                                       >
                                         {user.name?.charAt(0).toUpperCase()}
                                         {user.name?.split(" ")[1]
                                           ? user.name
-                                              ?.split(" ")[1]
-                                              ?.charAt(0)
-                                              .toUpperCase()
+                                            ?.split(" ")[1]
+                                            ?.charAt(0)
+                                            .toUpperCase()
                                           : ""}
                                       </div>
                                     )}
@@ -292,17 +290,16 @@ const MeetingSidebar = ({
                                   fontSize: "12px",
                                   width: "30px",
                                   height: "30px",
-                                  backgroundColor: `hsl(${
-                                    Array.from(
-                                      invitee._id ||
-                                        invitee.email ||
-                                        invitee.name ||
-                                        ""
-                                    ).reduce(
-                                      (acc, char) => acc + char.charCodeAt(0),
-                                      0
-                                    ) % 360
-                                  }, 70%, 45%)`,
+                                  backgroundColor: `hsl(${Array.from(
+                                    invitee._id ||
+                                    invitee.email ||
+                                    invitee.name ||
+                                    ""
+                                  ).reduce(
+                                    (acc, char) => acc + char.charCodeAt(0),
+                                    0
+                                  ) % 360
+                                    }, 70%, 45%)`,
                                   color: "white",
                                   marginRight: "10px",
                                 }}
@@ -310,9 +307,9 @@ const MeetingSidebar = ({
                                 {invitee.name?.charAt(0).toUpperCase()}
                                 {invitee.name?.split(" ")[1]
                                   ? invitee.name
-                                      ?.split(" ")[1]
-                                      ?.charAt(0)
-                                      .toUpperCase()
+                                    ?.split(" ")[1]
+                                    ?.charAt(0)
+                                    .toUpperCase()
                                   : ""}
                               </div>
                             )}
@@ -521,9 +518,8 @@ const MeetingSidebar = ({
                                   style={{
                                     width: "40px",
                                     height: "40px",
-                                    backgroundColor: `hsl(${
-                                      participant.id.charCodeAt(0) * 60
-                                    }, 70%, 45%)`,
+                                    backgroundColor: `hsl(${participant.id.charCodeAt(0) * 60
+                                      }, 70%, 45%)`,
                                     color: "white",
                                     textTransform: "uppercase",
                                   }}
@@ -536,19 +532,19 @@ const MeetingSidebar = ({
 
                                 {(participant.isHost ||
                                   participant.isCohost) && (
-                                  <div className="me-3">
-                                    <span
-                                      className="px-3 py-1 rounded-pill text-white"
-                                      style={{
-                                        backgroundColor:
-                                          "rgba(255, 255, 255, 0.2)",
-                                        fontSize: "0.8rem",
-                                      }}
-                                    >
-                                      {participant.isHost ? "Host" : "Cohost"}
-                                    </span>
-                                  </div>
-                                )}
+                                    <div className="me-3">
+                                      <span
+                                        className="px-3 py-1 rounded-pill text-white"
+                                        style={{
+                                          backgroundColor:
+                                            "rgba(255, 255, 255, 0.2)",
+                                          fontSize: "0.8rem",
+                                        }}
+                                      >
+                                        {participant.isHost ? "Host" : "Cohost"}
+                                      </span>
+                                    </div>
+                                  )}
 
                                 <div className="d-flex align-items-center">
                                   {participant.hasRaisedHand && (
@@ -807,9 +803,8 @@ const MeetingSidebar = ({
                           {messages.map((msg, index) => (
                             <div
                               key={index}
-                              className={`d-flex align-items-start me-2 mb-3 ${
-                                index === lastUnreadIndex ? "first-unread" : ""
-                              }`}
+                              className={`d-flex align-items-start me-2 mb-3 ${index === lastUnreadIndex ? "first-unread" : ""
+                                }`}
                             >
                               {msg.sender !== userName && (
                                 <div

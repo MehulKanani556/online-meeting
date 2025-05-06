@@ -258,7 +258,8 @@ function Login() {
                     </div>
                     <div className="social-login">
                       <div className="row">
-                        <div className="col-md-6 col-12 j_col_pad">
+                        {/* <div className="col-md-6 col-12 j_col_pad"> */}
+                        <div className="col-12">
                           <GoogleLogin
                             onSuccess={response => {
                               const { name, email, sub: uid } = jwtDecode(response.credential);
@@ -281,12 +282,12 @@ function Login() {
                             )}
                           />
                         </div>
-                        <div className="col-md-6 col-12 j_col_pad2">
+                        {/* <div className="col-md-6 col-12 j_col_pad2">
                           <button className="j_Login_social d-flex justify-content-center align-items-center">
                             <img src={facebook_login} alt="google_login" className='google_login' />
                             <span className='j_google_social'>Facebook</span>
                           </button>
-                        </div>
+                        </div> */}
                       </div>
                     </div>
                     <p className='j_login_p'>Don't have an account? <a style={{ cursor: 'pointer' }} className='text-decoration-none text-white' onClick={() => setIsSignIn(false)}>Sign Up</a></p>
@@ -381,7 +382,8 @@ function Login() {
                     </div>
                     <div className="social-login">
                       <div className="row">
-                        <div className="col-md-6 col-12 j_col_pad">
+                        {/* <div className="col-md-6 col-12 j_col_pad"> */}
+                        <div className="col-12">
                           <GoogleLogin
                             onSuccess={response => {
                               const { name, email, sub: uid } = jwtDecode(response.credential);
@@ -404,12 +406,12 @@ function Login() {
                             )}
                           />
                         </div>
-                        <div className="col-md-6 col-12 j_col_pad2">
+                        {/* <div className="col-md-6 col-12 j_col_pad2">
                           <button className="j_Login_social d-flex justify-content-center align-items-center">
                             <img src={facebook_login} alt="google_login" className='google_login' />
                             <span className='j_google_social'>Facebook</span>
                           </button>
-                        </div>
+                        </div> */}
                       </div>
                     </div>
                     <p className='j_login_p'>Already have an account? <a style={{ cursor: 'pointer' }} className='text-decoration-none text-white' onClick={() => setIsSignIn(true)}>Sign In</a></p>
