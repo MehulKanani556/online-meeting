@@ -836,6 +836,17 @@
     outline: none !important;
 }
 
+.j_no_meeting {
+    color: white;
+    font-weight: 500;
+    font-size: 18px;
+}
+
+.j_no_meeting_icon {
+    height: 100px;
+    width: 140px;
+}
+
 /* ====================================== start calendar ======================================== */
 
 /* =================== month calendar start =================== */

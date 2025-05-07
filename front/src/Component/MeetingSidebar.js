@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Offcanvas, Button } from "react-bootstrap";
 // import { IoClose, IoSearch, IoMdSend } from "react-icons/io5";
 import { HiOutlineDotsVertical } from "react-icons/hi";
@@ -771,23 +771,25 @@ const MeetingSidebar = ({
                           )}
                         </div>
 
-                        <div className="d-flex justify-content-center mb-3 mt-auto">
-                          <Button
-                            className="B_screen_btn fw-semibold p-2"
-                            onClick={() => setInvitePeople(true)}
-                          >
-                            <img
-                              src={inviteuser}
-                              alt=""
-                              className="j_invite_user_icon"
-                            />
-                            Invite people
-                          </Button>
-                          <Button className="B_screen_btn fw-semibold p-2">
-                            {" "}
-                            Mute all{" "}
-                          </Button>
-                        </div>
+                        {isHost && (
+                          <div className="d-flex justify-content-center mb-3 mt-auto">
+                            <Button
+                              className="B_screen_btn fw-semibold p-2"
+                              onClick={() => setInvitePeople(true)}
+                            >
+                              <img
+                                src={inviteuser}
+                                alt="Invite user"
+                                className="j_invite_user_icon"
+                              />
+                              Invite people
+                            </Button>
+                            <Button className="B_screen_btn fw-semibold p-2">
+                              {" "}
+                              Mute all{" "}
+                            </Button>
+                          </div>
+                        )}
                       </div>
                     </>
                   </Offcanvas.Body>
@@ -870,16 +872,16 @@ const MeetingSidebar = ({
                               </div>
                             </div>
                           ))}
-                          {lastUnreadIndex >= 0 && (
+                          {/* {lastUnreadIndex >= 0 && (
                             <div className="unread-messages-divider">
                               <span>Unread Messages</span>
                             </div>
-                          )}
+                          )} */}
                         </div>
 
                         {renderTypingIndicator()}
 
-                        <div className="B_search-container  mb-3">
+                        <div className="B_search-container mb-3">
                           <div className="position-relative B_input_search B_input_search22  mx-auto">
                             <form
                               onSubmit={handleSendMessage}
@@ -913,6 +915,52 @@ const MeetingSidebar = ({
                             </form>
                           </div>
                         </div>
+
+                        {/* <div className="B_search-container mb-3">
+                          <div className="position-relative mx-auto" style={{ width: "100%" }}>
+                            <form onSubmit={handleSendMessage} className="d-flex">
+                              <textarea
+                                className="form-control text-white j_search_Input"
+                                value={newMessage}
+                                onChange={(e) => {
+                                  handleMessageInput(e);
+                                  handleTextareaResize(e);
+                                }}
+                                onInput={handleTextareaResize}
+                                placeholder="Write a message"
+                                style={{
+                                  color: 'white',
+                                  backgroundColor: "#101317",
+                                  border: "none",
+                                  borderRadius: "8px",
+                                  padding: "12px 48px 12px 16px",
+                                  fontSize: "16px",
+                                  resize: "none",
+                                  minHeight: "44px",
+                                  maxHeight: "44px", // Keeps it single-line height
+                                  overflow: "hidden",
+                                }}
+                              />
+                              <button
+                                type="submit"
+                                className="position-absolute"
+                                style={{
+                                  right: "16px",
+                                  top: "50%",
+                                  transform: "translateY(-50%)",
+                                  background: "none",
+                                  border: "none",
+                                  color: "#fff",
+                                  fontSize: "22px",
+                                  padding: 0,
+                                }}
+                              >
+                                <IoMdSend />
+                              </button>
+                            </form>
+                          </div>
+                        </div> */}
+
                       </div>
                     </>
                   </Offcanvas.Body>

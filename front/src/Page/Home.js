@@ -352,6 +352,15 @@ function Home() {
               <div className="col-4 g-5 ">
                 <div className="j_home_cards"
                   onClick={() => {
+                    if (!gettoken && !userId) {
+                      enqueueSnackbar('Please login to create new meeting', {
+                        variant: 'error', autoHideDuration: 3000, anchorOrigin: {
+                          vertical: 'top', // Position at the top
+                          horizontal: 'right', // Position on the right
+                        }
+                      });
+                      return;
+                    }
                     setActiveItem('New Meeting');
                     const newMeetingId = generateMeetingId(20);
                     const meetingLink = `${FRONT_URL}/screen/${newMeetingId}`;

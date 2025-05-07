@@ -446,13 +446,8 @@ async function initializeSocket(io) {
             io.to(roomId).emit('participant-renamed', { participantId, newName });
         });
 
-        socket.on('remove-participant', ({ roomId, participantId }) => {
-            io.to(roomId).emit('participant-removed', { participantId });
-            // Also disconnect the removed user's socket
-            const userSocket = io.sockets.sockets.get(participantId);
-            if (userSocket) {
-                userSocket.disconnect();
-            }
+        socket.on('rename-participant', ({ roomId, participantId, newName, userId }) => {
+            io.to(roomId).emit('participant-renamed', { participantId, newName, participantUserId: userId });
         });
 
         // User disconnects

@@ -917,6 +917,7 @@ function Screen() {
 
   const endMeeting = () => {
     sessionStorage.removeItem("MeetingLinkModal");
+    sessionStorage.removeItem("renameParticipant");
     if (isEndingMeeting) return; // Prevent further calls
     isEndingMeeting = true;
 
@@ -1136,19 +1137,43 @@ function Screen() {
     socket.emit("rename-participant", {
       roomId,
       participantId: selectedParticipant.id,
+      userId: selectedParticipant.userId,
       newName: newName.trim(),
     });
 
-    const renameParticipant = JSON.parse(sessionStorage.getItem("renameParticipant")) || [];
-    if (renameParticipant) {
-      const updatedParticipants = renameParticipant.map(p => p.participantId === selectedParticipant.id ? { ...p, newName: newName.trim() } : p);
-      sessionStorage.setItem("renameParticipant", JSON.stringify(updatedParticipants));
+    const renameParticipant =
+      JSON.parse(sessionStorage.getItem("renameParticipant")) || [];
+    console.log("renameParticipant", selectedParticipant);
+
+    const obj = {
+      roomId,
+      participantId: selectedParticipant.userId,
+      newName: newName.trim(),
+    };
+
+    if (renameParticipant.length > 0) {
+      if (
+        renameParticipant.some(
+          (p) => p.participantId === selectedParticipant.userId
+        )
+      ) {
+        const updatedParticipants = renameParticipant.map((p) =>
+          p.participantId === selectedParticipant.userId
+            ? { ...p, newName: newName.trim() }
+            : p
+        );
+        sessionStorage.setItem(
+          "renameParticipant",
+          JSON.stringify(updatedParticipants)
+        );
+      } else {
+        sessionStorage.setItem(
+          "renameParticipant",
+          JSON.stringify([...renameParticipant, obj])
+        );
+      }
     } else {
-      sessionStorage.setItem("renameParticipant", JSON.stringify([{
-        roomId,
-        participantId: selectedParticipant.id,
-        newName: newName.trim(),
-      }]));
+      sessionStorage.setItem("renameParticipant", JSON.stringify([obj]));
     }
 
     setShowRenameModal(false);
@@ -1847,20 +1872,6 @@ function Screen() {
           </Modal.Body>
         </Modal>
       )}
-      {/* <div className="position-fixed top-0 end-0 p-3 ps-0 pb-0" style={{ zIndex: '1' }}>
-                <div className="j_Invite text-white p-3">
-                    <div className="d-flex align-items-center j_Box_margin">
-                        <div className="j_join_user">
-                            KP
-                        </div>
-                        <p className="p-0 m-0">Kiara Patel wants to join this meeting.</p>
-                    </div>
-                    <div className="mt-2">
-                        <button className="btn j_deny_button me-2">Deny</button>
-                        <button className="btn j_accept_button">Accept</button>
-                    </div>
-                </div>
-            </div> */}
       <div
         className="position-fixed top-0 end-0 p-3 ps-0 pb-0"
         style={{ zIndex: "1" }}
@@ -2047,6 +2058,7 @@ function Screen() {
         filteredUsers={filteredUsers}
         selectedUsers={selectedUsers}
         setSelectedUsers={setSelectedUsers}
+        markMessagesAsRead={markMessagesAsRead}
         allusers={allusers}
         userId={userId}
         IMG_URL={IMG_URL}

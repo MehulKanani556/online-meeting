@@ -127,6 +127,7 @@ export const useSocket = (userId, roomId, userName) => {
             setReminders(prevReminders => [...prevReminders, data.message]); // Add new reminder to state
         });
 
+        const renameParticipant = JSON.parse(sessionStorage.getItem("renameParticipant"));
         // Get list of room users when joining
         socketRef.current.on('room-users', (roomUsers) => {
             const formattedParticipants = roomUsers.map(user => ({
@@ -139,17 +140,23 @@ export const useSocket = (userId, roomId, userName) => {
                 isHost: user.isHost
             }));
 
-            const renameParticipant = JSON.parse(sessionStorage.getItem("renameParticipant"));
+
             if (renameParticipant) {
                 const updatedParticipants = formattedParticipants.map(participant => {
-                    const rename = renameParticipant?.find(p => p.participantId === participant.id);
+                    console.log("participant", participant);
+
+                    const rename = renameParticipant?.find(p => p.participantId === participant.userId);
+
+                    console.log("rename", rename);
                     return rename ? { ...participant, name: rename.newName } : participant;
                 });
+                console.log("updatedParticipants", updatedParticipants);
+
                 setParticipants(updatedParticipants);
+            } else {
+                setParticipants(formattedParticipants);
             }
 
-            setParticipants(formattedParticipants);
-         
             setSystemMessages([]);
         });
 
@@ -230,7 +237,31 @@ export const useSocket = (userId, roomId, userName) => {
         });
 
         // Handle participant rename
-        socketRef.current.on('participant-renamed', ({ participantId, newName }) => {
+        socketRef.current.on('participant-renamed', ({ participantId, newName, participantUserId }) => {
+
+            const renameParticipant = JSON.parse(sessionStorage.getItem("renameParticipant")) || [];
+            console.log("renameParticipant", renameParticipant);
+
+            console.log("participantId", participantUserId);
+
+            const obj = {
+                roomId,
+                participantId: participantUserId,
+                newName: newName.trim(),
+            }
+
+            if (renameParticipant.length > 0) {
+                if (renameParticipant.some(p => p.participantId === participantUserId)) {
+                    const updatedParticipants = renameParticipant.map(p => p.participantId === participantUserId ? { ...p, newName: newName.trim() } : p);
+                    sessionStorage.setItem("renameParticipant", JSON.stringify(updatedParticipants));
+                } else {
+                    sessionStorage.setItem("renameParticipant", JSON.stringify([...renameParticipant, obj]));
+                }
+            } else {
+                sessionStorage.setItem("renameParticipant", JSON.stringify([obj]));
+            }
+
+
             setParticipants(prev => prev.map(participant =>
                 participant.id === participantId
                     ? {
@@ -240,6 +271,8 @@ export const useSocket = (userId, roomId, userName) => {
                     }
                     : participant
             ));
+            console.log("participants", participants);
+
         });
 
         // Handle participant removal

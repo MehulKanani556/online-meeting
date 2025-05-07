@@ -238,7 +238,7 @@ const BottomBar = React.memo(
                 >
                   <img src={bar} alt="Bar" className="me-2" />
                   <span>Chat</span>
-                  {unreadMessages > 0 && (
+                  {/* {unreadMessages > 0 && (
                     <span
                       className="ms-2 badge rounded-pill"
                       style={{
@@ -251,7 +251,7 @@ const BottomBar = React.memo(
                     >
                       {unreadMessages}
                     </span>
-                  )}
+                  )} */}
                 </div>
               </div>
             )}
@@ -348,7 +348,7 @@ const BottomBar = React.memo(
               }}
             >
               <img src={bar} alt="Bar" />
-              {unreadMessages > 0 && (
+              {/* {unreadMessages > 0 && (
                 <span
                   className="position-absolute top-0 start-100 translate-middle badge rounded-pill"
                   style={{
@@ -361,7 +361,7 @@ const BottomBar = React.memo(
                 >
                   {unreadMessages}
                 </span>
-              )}
+              )} */}
             </div>
           </div>
         </div>

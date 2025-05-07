@@ -134,25 +134,37 @@ exports.getAllschedule = async (req, res) => {
     try {
         let paginatedschedule;
 
-        paginatedschedule = await schedule.find();
+        // paginatedschedule = await schedule.find();
+        paginatedschedule = await schedule.aggregate([
+            {
+                $lookup: {
+                    from: 'users',
+                    localField: 'userId',
+                    foreignField: '_id',
+                    as: 'userData'
+                }
+            },
+            {
+                $unwind: {
+                    path: '$userData',
+                    preserveNullAndEmptyArrays: true
+                }
+            }
+        ]);
 
         const userId = req.user.id;
 
         const currentDateTime = new Date();
         const userSchedules = paginatedschedule.filter((meeting) => {
             const scheduleEndTime = new Date(`${formatDate(meeting.date)}T${meeting.endTime}`);
-            console.log("scheduleEndTime", scheduleEndTime);
-
-            console.log("date", formatDate(meeting.date));
-
 
             // Check if the status is upcoming or join and end time is past
-            if ((meeting.status === "Upcoming" || meeting.status === "Join") && scheduleEndTime < currentDateTime) {
+            // if ((meeting.status === "Upcoming" || meeting.status === "Join") && scheduleEndTime < currentDateTime && meeting.participants.length > 1) {
+            if (meeting.participants?.length > 1) {
                 // Update status in database
                 schedule.findByIdAndUpdate(meeting._id, { status: "Completed" })
                     .catch(err => console.error("Error updating meeting status:", err));
-
-                meeting.status = "Completed"; // Set status to completed if end time is past
+                meeting.status = "Completed";
             }
 
             return (meeting.userId.toString() === userId.toString() ||
@@ -180,42 +192,6 @@ exports.getAllschedule = async (req, res) => {
         console.log(error);
     }
 };
-
-// exports.getAllschedule = async (req, res) => {
-//     try {
-//         let paginatedschedule;
-
-//         paginatedschedule = await schedule.find();
-
-//         const userId = req.user.id;
-
-//         const userSchedules = paginatedschedule.filter(
-//             (meeting) =>
-//                 (meeting.userId.toString() === userId.toString() ||
-//                     meeting?.invitees?.some((invitee) => invitee?.userId?.toString() == userId?.toString())) &&
-//                 meeting.status !== "Completed" // Exclude completed schedules
-//         );
-
-//         let count = userSchedules.length;
-
-//         if (count === 0) {
-//             return res.json({
-//                 status: 400,
-//                 message: "No schedules found",
-//             });
-//         }
-
-//         return res.json({
-//             status: 200,
-//             totalschedules: count,
-//             message: "All schedules found successfully",
-//             schedules: userSchedules,
-//         });
-//     } catch (error) {
-//         res.json({ status: 500, message: error.message });
-//         console.log(error);
-//     }
-// };
 
 exports.getscheduleById = async (req, res) => {
     try {

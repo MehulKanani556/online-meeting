@@ -19,6 +19,8 @@ import { getAllUsers } from '../Redux/Slice/user.slice';
 import bin from '../Image/j_bin.svg'
 import { IMAGE_URL } from '../Utils/baseUrl';
 import { createpersonalroom } from '../Redux/Slice/personalroom.slice';
+import NoMeeting from '../Image/j_meeting_not.png'
+import moment from 'moment-timezone';
 
 function Meeting() {
 
@@ -186,7 +188,6 @@ function Meeting() {
     }
 
     const [cancelMeeting, setcancelMeeting] = useState()
-    console.log("cancelMeeting", cancelMeeting);
 
     const handlecancelMeeting = (data) => {
         setcancelMeeting(data)
@@ -197,11 +198,35 @@ function Meeting() {
         handleCloseCancelModel()
     }
 
-    const handlecanvas = (status) => {
+    const [meetingdetail, setmeetingdetail] = useState()
+
+    const formatTimeTo12Hour = (time) => {
+        if (!time) return '';
+        const [hours, minutes] = time.split(':');
+        const hour = parseInt(hours);
+        const ampm = hour >= 12 ? 'PM' : 'AM';
+        const hour12 = hour % 12 || 12;
+        return `${hour12}:${minutes} ${ampm}`;
+    }
+
+    const formatDateWithDay = (dateString) => {
+        if (!dateString) return '';
+        const date = new Date(dateString);
+        const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        const day = days[date.getDay()];
+        const dd = String(date.getDate()).padStart(2, '0');
+        const mm = String(date.getMonth() + 1).padStart(2, '0');
+        const yyyy = date.getFullYear();
+        return `${day}, ${dd}-${mm}-${yyyy}`;
+    };
+
+    const handlecanvas = (status, data) => {
         if (status === 'Completed') {
             handleShowOffcanvasModel('completed')
+            setmeetingdetail(data)
         } else if (status === 'Cancelled') {
             handleShowOffcanvasModel('cancelled')
+            setmeetingdetail(data)
         }
     }
 
@@ -224,214 +249,187 @@ function Meeting() {
                                     schedule.startTime.includes(searchTerm) ||
                                     duration.includes(searchTerm)
                                 );
-                            }).map((schedule, index) => {
-                                return (
-                                    <div key={index} className="col-xl-3 col-lg-4 col-md-6 col-12 mt-4">
-                                        <div className="B_meeting_card" style={{ backgroundColor: '#0A1119', borderRadius: '6px' }}>
-                                            <div className="d-flex justify-content-between align-items-center  p-3 B_meeting_padding">
-                                                <h6 className="text-white m-0 B_card_title">{schedule.title}</h6>
-                                                <div>
-                                                    {schedule.status === 'Upcoming' && (
-                                                        <>
-                                                            <button type="button" class="btn btn-outline-primary B_upcoming_btn me-2">Upcoming</button>
+                            }).length === 0 ? (
+                            <div className="col-12 text-center mt-4">
+                                <img src={NoMeeting} alt="No Meeting" className='j_no_meeting_icon' />
+                                <h5 className="j_no_meeting">You haven't created any meetings yet</h5>
+                                <p className="text-white opacity-50">Click on "Schedule" to schedule your first meeting</p>
+                            </div>
+                        ) : (
+                            allschedule
+                                .filter(schedule => schedule.userId == userId)
+                                .filter(schedule => {
+                                    const duration = calculateDuration(schedule.startTime, schedule.endTime);
+                                    const date = formatDate(schedule.date)
+                                    return (
+                                        schedule.title.includes(searchTerm) ||
+                                        date.includes(searchTerm) ||
+                                        schedule.startTime.includes(searchTerm) ||
+                                        duration.includes(searchTerm)
+                                    );
+                                }).map((schedule, index) => {
+                                    return (
+                                        <div key={index} className="col-xl-3 col-lg-4 col-md-6 col-12 mt-4">
+                                            <div className="B_meeting_card" style={{ backgroundColor: '#0A1119', borderRadius: '6px' }}>
+                                                <div className="d-flex justify-content-between align-items-center  p-3 B_meeting_padding">
+                                                    <h6 className="text-white m-0 B_card_title">{schedule.title}</h6>
+                                                    <div>
+                                                        {schedule.status === 'Upcoming' && (
+                                                            <>
+                                                                <button type="button" class="btn btn-outline-primary B_upcoming_btn me-2">Upcoming</button>
 
-                                                            <HiOutlineDotsVertical
-                                                                className='text-white'
-                                                                size={22}
-                                                                style={{ cursor: "pointer" }}
-                                                                onClick={(e) => handleDotsClick(schedule._id, e)}
-                                                            />
+                                                                <HiOutlineDotsVertical
+                                                                    className='text-white'
+                                                                    size={22}
+                                                                    style={{ cursor: "pointer" }}
+                                                                    onClick={(e) => handleDotsClick(schedule._id, e)}
+                                                                />
 
-                                                            {openDropdownId === schedule._id && (
-                                                                <div className="position-absolute  mt-2 py-2 B_boxEdit  rounded shadow-lg"
-                                                                    style={{ minWidth: '120px', zIndex: 1000 }}>
-                                                                    {/* <Link target="_blank" to={`${schedule.meetingLink}`} className="dropdown-item text-white px-3 py-1 hover-bg-secondary"
-                                                                    style={{ backgroundColor: 'transparent', border: 'none', width: '100%', textAlign: 'left' }}>
-                                                                    Start
-                                                                </Link> */}
-                                                                    <button
+                                                                {openDropdownId === schedule._id && (
+                                                                    <div className="position-absolute  mt-2 py-2 B_boxEdit  rounded shadow-lg"
+                                                                        style={{ minWidth: '120px', zIndex: 1000 }}>
+                                                                        {/* <Link target="_blank" to={`${schedule.meetingLink}`} className="dropdown-item text-white px-3 py-1 hover-bg-secondary"
+                                                                        style={{ backgroundColor: 'transparent', border: 'none', width: '100%', textAlign: 'left' }}>
+                                                                        Start
+                                                                    </Link> */}
+                                                                        <button
+                                                                            className="dropdown-item text-white px-3 py-1 hover-bg-secondary"
+                                                                            style={{ backgroundColor: 'transparent', border: 'none', width: '100%', textAlign: 'left' }}
+                                                                            onClick={() => window.location.href = schedule.meetingLink}
+                                                                        >
+                                                                            Start
+                                                                        </button>
+                                                                        {/* <button
                                                                         className="dropdown-item text-white px-3 py-1 hover-bg-secondary"
                                                                         style={{ backgroundColor: 'transparent', border: 'none', width: '100%', textAlign: 'left' }}
-                                                                        onClick={() => window.location.href = schedule.meetingLink}
+                                                                        onClick={() => window.open(schedule.meetingLink, '_blank')}
                                                                     >
                                                                         Start
-                                                                    </button>
-                                                                    {/* <button
-                                                                    className="dropdown-item text-white px-3 py-1 hover-bg-secondary"
-                                                                    style={{ backgroundColor: 'transparent', border: 'none', width: '100%', textAlign: 'left' }}
-                                                                    onClick={() => window.open(schedule.meetingLink, '_blank')}
-                                                                >
-                                                                    Start
-                                                                </button> */}
-                                                                    <button
-                                                                        className="dropdown-item text-white px-3 py-1 hover-bg-secondary"
-                                                                        style={{ backgroundColor: 'transparent', border: 'none', width: '100%', textAlign: 'left' }}
-                                                                        onClick={() => { handleShowScheduleModel(); handleEdit(schedule) }}
-                                                                    >
-                                                                        Edit
-                                                                    </button>
-                                                                    <button
-                                                                        className="dropdown-item text-white px-3 py-1 hover-bg-secondary"
-                                                                        style={{ backgroundColor: 'transparent', border: 'none', width: '100%', textAlign: 'left' }}
-                                                                        onClick={() => { handleShowCancelModel(); handlecancelMeeting(schedule) }}
-                                                                    >
-                                                                        Cancel
-                                                                    </button>
-                                                                    <button className="dropdown-item text-white px-3 py-1 hover-bg-secondary"
-                                                                        style={{ backgroundColor: 'transparent', border: 'none', width: '100%', textAlign: 'left' }}
-                                                                        onClick={() => { handleShowInviteModel(); handleInvite(schedule) }}
-                                                                    >
-                                                                        Invite People
-                                                                    </button>
-                                                                </div>
-                                                            )}
-                                                        </>
-                                                    )}
-                                                    {schedule.status === 'Completed' && (
-                                                        <button type="button" class="btn btn-outline-success B_upcoming_btn1 me-2">Completed</button>
-                                                    )}
-                                                    {schedule.status === 'Join' && (
-                                                        <button type="button" class="btn btn-outline-secondary B_upcoming_btn1 B_upcoming_btn2 me-2"
-                                                            onClick={() => window.location.href = schedule.meetingLink}
-                                                        >Join</button>
-                                                    )}
-                                                    {schedule.status === 'Cancelled' && (
-                                                        <button type="button" class="btn btn-outline-danger B_upcoming_btn1 me-2">Cancelled</button>
-                                                    )}
+                                                                    </button> */}
+                                                                        <button
+                                                                            className="dropdown-item text-white px-3 py-1 hover-bg-secondary"
+                                                                            style={{ backgroundColor: 'transparent', border: 'none', width: '100%', textAlign: 'left' }}
+                                                                            onClick={() => { handleShowScheduleModel(); handleEdit(schedule) }}
+                                                                        >
+                                                                            Edit
+                                                                        </button>
+                                                                        <button
+                                                                            className="dropdown-item text-white px-3 py-1 hover-bg-secondary"
+                                                                            style={{ backgroundColor: 'transparent', border: 'none', width: '100%', textAlign: 'left' }}
+                                                                            onClick={() => { handleShowCancelModel(); handlecancelMeeting(schedule) }}
+                                                                        >
+                                                                            Cancel
+                                                                        </button>
+                                                                        <button className="dropdown-item text-white px-3 py-1 hover-bg-secondary"
+                                                                            style={{ backgroundColor: 'transparent', border: 'none', width: '100%', textAlign: 'left' }}
+                                                                            onClick={() => { handleShowInviteModel(); handleInvite(schedule) }}
+                                                                        >
+                                                                            Invite People
+                                                                        </button>
+                                                                    </div>
+                                                                )}
+                                                            </>
+                                                        )}
+                                                        {schedule.status === 'Completed' && (
+                                                            <button type="button" class="btn btn-outline-success B_upcoming_btn1 me-2">Completed</button>
+                                                        )}
+                                                        {schedule.status === 'Join' && (
+                                                            <button type="button" class="btn btn-outline-secondary B_upcoming_btn1 B_upcoming_btn2 me-2"
+                                                                onClick={() => window.location.href = schedule.meetingLink}
+                                                            >Join</button>
+                                                        )}
+                                                        {schedule.status === 'Cancelled' && (
+                                                            <button type="button" class="btn btn-outline-danger B_upcoming_btn1 me-2">Cancelled</button>
+                                                        )}
+                                                    </div>
                                                 </div>
-                                            </div>
-                                            <div style={{ borderTop: "1px solid #525252" }}></div>
-                                            <div className="B_meetingALl_details p-3 B_meeting_padding" style={{ color: '#B3AEAE' }}>
-                                                <div className="d-flex  mb-2">
-                                                    <span className='B_meetingALl_details_span'>Meeting Date</span>
-                                                    <span className='text-white'>: {formatDate(schedule.date)}</span>
-                                                </div>
-                                                <div className="d-flex  mb-2">
-                                                    <span className='B_meetingALl_details_span'>Meeting Time</span>
-                                                    <span className='text-white'>: {schedule.startTime}</span>
-                                                </div>
-                                                <div className="d-flex ">
-                                                    <span className='B_meetingALl_details_span'>Meeting Duration</span>
-                                                    <span className='text-white'>: {calculateDuration(schedule.startTime, schedule.endTime)}</span>
+                                                <div style={{ borderTop: "1px solid #525252" }}></div>
+                                                <div className="B_meetingALl_details p-3 B_meeting_padding" style={{ color: '#B3AEAE' }}>
+                                                    <div className="d-flex  mb-2">
+                                                        <span className='B_meetingALl_details_span'>Meeting Date</span>
+                                                        <span className='text-white'>: {formatDate(schedule.date)}</span>
+                                                    </div>
+                                                    <div className="d-flex  mb-2">
+                                                        <span className='B_meetingALl_details_span'>Meeting Time</span>
+                                                        <span className='text-white'>: {schedule.startTime}</span>
+                                                    </div>
+                                                    <div className="d-flex ">
+                                                        <span className='B_meetingALl_details_span'>Meeting Duration</span>
+                                                        <span className='text-white'>: {calculateDuration(schedule.startTime, schedule.endTime)}</span>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
-                                )
-                            })}
+                                    )
+                                }))}
                     </div>
 
                     {/* Invited By Me Section */}
                     <h6 className="text-white ms-4">Invited Meetings</h6>
                     <div className="row g-5 B_meeting_card_section B_G_space">
-                        {/* Upcoming Meeting Card */}
-                        <div className=" col-xl-3 col-lg-4 col-md-6 col-12 mt-4">
-                            <div className="B_meeting_card" style={{ backgroundColor: '#0A1119', borderRadius: '6px' }}>
-                                <div className="d-flex justify-content-between align-items-center  p-3 B_meeting_padding">
-                                    <h6 className="text-white m-0 B_card_title">Project Meeting</h6>
-                                    <div>
-                                        <button type="button" class="btn btn-outline-secondary B_upcoming_btn1 B_upcoming_btn2 me-2">Join</button>
-                                    </div>
-                                </div>
-                                <div style={{ borderTop: "1px solid #525252" }}></div>
-                                <div className="B_meetingALl_details p-3 B_meeting_padding" style={{ color: '#B3AEAE' }}>
-                                    <div className="d-flex  mb-2">
-                                        <span className='B_meetingALl_details_span'>Meeting Date</span>
-                                        <span className='text-white'>: 23-01-2025</span>
-                                    </div>
-                                    <div className="d-flex mb-2">
-                                        <span className='B_meetingALl_details_span'>Meeting Time</span>
-                                        <span className='text-white'>: 11:00 AM</span>
-                                    </div>
-                                    <div className="d-flex ">
-                                        <span className='B_meetingALl_details_span'>Meeting Duration</span>
-                                        <span className='text-white'>: 0h 30m</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
 
-                        {/* Completed Meeting Card */}
-                        <div className=" col-xl-3 col-lg-4 col-md-6 col-12">
-                            <div className="B_meeting_card " style={{ backgroundColor: '#0A1119', borderRadius: '6px' }}>
-                                <div className="d-flex justify-content-between align-items-center  p-3 B_meeting_padding ">
-                                    <h6 className="text-white m-0 B_card_title">Online Meeting</h6>
-                                    <div>
-                                        <button type="button" class="btn btn-outline-secondary B_upcoming_btn1 B_upcoming_btn2 me-2">Join</button>
-                                    </div>
-                                </div>
-                                <div style={{ borderTop: "1px solid #525252" }}></div>
-                                <div className="B_meetingALl_details p-3 B_meeting_padding" style={{ color: '#B3AEAE' }}>
-                                    <div className="d-flex mb-2">
-                                        <span className='B_meetingALl_details_span'>Meeting Date</span>
-                                        <span className='text-white'>: 23-01-2025</span>
-                                    </div>
-                                    <div className="d-flex mb-2">
-                                        <span className='B_meetingALl_details_span'>Meeting Time</span>
-                                        <span className='text-white'>: 11:00 AM</span>
-                                    </div>
-                                    <div className="d-flex ">
-                                        <span className='B_meetingALl_details_span'>Meeting Duration</span>
-                                        <span className='text-white'>: 0h 30m</span>
-                                    </div>
-                                </div>
+                        {allschedule
+                            .filter(schedule => schedule.invitees.some((inv) => inv.userId == userId))
+                            .filter(schedule => {
+                                const duration = calculateDuration(schedule.startTime, schedule.endTime);
+                                const date = formatDate(schedule.date)
+                                return (
+                                    schedule.title.includes(searchTerm) ||
+                                    date.includes(searchTerm) ||
+                                    schedule.startTime.includes(searchTerm) ||
+                                    duration.includes(searchTerm)
+                                );
+                            }).length === 0 ? (
+                            <div className="col-12 text-center mt-4">
+                                <img src={NoMeeting} alt="No Meeting" className='j_no_meeting_icon' />
+                                <h5 className="j_no_meeting">No meeting invitations</h5>
+                                <p className="text-white opacity-50">You haven't been invited to any meetings</p>
                             </div>
-                        </div>
-
-                        {/* Join Meeting Card */}
-                        <div className=" col-xl-3 col-lg-4 col-md-6 col-12">
-                            <div className="B_meeting_card " style={{ backgroundColor: '#0A1119', borderRadius: '6px' }}>
-                                <div className="d-flex justify-content-between align-items-center p-3 B_meeting_padding">
-                                    <h6 className="text-white m-0 B_card_title">Project Meeting</h6>
-                                    <div>
-                                        <button type="button" class="btn btn-outline-secondary B_upcoming_btn1 B_upcoming_btn2 me-2">Join</button>
-                                    </div>
-                                </div>
-                                <div style={{ borderTop: "1px solid #525252" }}></div>
-                                <div className="B_meetingALl_details p-3 B_meeting_padding" style={{ color: '#B3AEAE' }}>
-                                    <div className="d-flex  mb-2">
-                                        <span className='B_meetingALl_details_span'>Meeting Date</span>
-                                        <span className='text-white'>: 23-01-2025</span>
-                                    </div>
-                                    <div className="d-flex mb-2">
-                                        <span className='B_meetingALl_details_span'>Meeting Time</span>
-                                        <span className='text-white'>: 11:00 AM</span>
-                                    </div>
-                                    <div className="d-flex ">
-                                        <span className='B_meetingALl_details_span'>Meeting Duration</span>
-                                        <span className='text-white'>: 0h 30m</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Cancelled Meeting Card */}
-                        <div className=" col-xl-3 col-lg-4 col-md-6 col-12">
-                            <div className="B_meeting_card " style={{ backgroundColor: '#0A1119', borderRadius: '6px' }}>
-                                <div className="d-flex justify-content-between align-items-center p-3 B_meeting_padding">
-                                    <h6 className="text-white m-0 B_card_title">Online Meeting</h6>
-                                    <div>
-                                        <button type="button" class="btn btn-outline-secondary B_upcoming_btn1 B_upcoming_btn2 me-2">Join</button>
-                                    </div>
-
-                                </div>
-                                <div style={{ borderTop: "1px solid #525252" }}></div>
-                                <div className="B_meetingALl_details p-3 B_meeting_padding" style={{ color: '#B3AEAE' }}>
-                                    <div className="d-flex  mb-2">
-                                        <span className='B_meetingALl_details_span'>Meeting Date</span>
-                                        <span className='text-white'>: 23-01-2025</span>
-                                    </div>
-                                    <div className="d-flex  mb-2">
-                                        <span className='B_meetingALl_details_span'>Meeting Time</span>
-                                        <span className='text-white'>: 11:00 AM</span>
-                                    </div>
-                                    <div className="d-flex ">
-                                        <span className='B_meetingALl_details_span'>Meeting Duration</span>
-                                        <span className='text-white'>: 0h 30m</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                        ) : (
+                            allschedule
+                                .filter(schedule => schedule.invitees.some((inv) => inv.userId == userId))
+                                .filter(schedule => {
+                                    const duration = calculateDuration(schedule.startTime, schedule.endTime);
+                                    const date = formatDate(schedule.date)
+                                    return (
+                                        schedule.title.includes(searchTerm) ||
+                                        date.includes(searchTerm) ||
+                                        schedule.startTime.includes(searchTerm) ||
+                                        duration.includes(searchTerm)
+                                    );
+                                }).map((schedule, index) => {
+                                    return (
+                                        <div key={index} className="col-xl-3 col-lg-4 col-md-6 col-12 mt-4">
+                                            <div className="B_meeting_card" style={{ backgroundColor: '#0A1119', borderRadius: '6px' }}>
+                                                <div className="d-flex justify-content-between align-items-center  p-3 B_meeting_padding">
+                                                    <h6 className="text-white m-0 B_card_title">{schedule.title}</h6>
+                                                    <div>
+                                                        {schedule.status === 'Join' && (
+                                                            <button type="button" class="btn btn-outline-secondary B_upcoming_btn1 B_upcoming_btn2 me-2"
+                                                                onClick={() => window.location.href = schedule.meetingLink}
+                                                            >Join</button>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                                <div style={{ borderTop: "1px solid #525252" }}></div>
+                                                <div className="B_meetingALl_details p-3 B_meeting_padding" style={{ color: '#B3AEAE' }}>
+                                                    <div className="d-flex  mb-2">
+                                                        <span className='B_meetingALl_details_span'>Meeting Date</span>
+                                                        <span className='text-white'>: {formatDate(schedule.date)}</span>
+                                                    </div>
+                                                    <div className="d-flex  mb-2">
+                                                        <span className='B_meetingALl_details_span'>Meeting Time</span>
+                                                        <span className='text-white'>: {schedule.startTime}</span>
+                                                    </div>
+                                                    <div className="d-flex ">
+                                                        <span className='B_meetingALl_details_span'>Meeting Duration</span>
+                                                        <span className='text-white'>: {calculateDuration(schedule.startTime, schedule.endTime)}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )
+                                }))}
                     </div>
                 </div>
             );
@@ -453,101 +451,119 @@ function Meeting() {
                                     schedule.startTime.includes(searchTerm) ||
                                     duration.includes(searchTerm)
                                 );
-                            }).map((schedule, index) => {
-                                return (
-                                    <div key={index} className="col-xl-3 col-lg-4 col-md-6 col-12">
-                                        <div className="B_meeting_card" style={{ backgroundColor: '#0A1119', borderRadius: '6px' }}>
-                                            <div className="d-flex justify-content-between align-items-center  p-3 B_meeting_padding">
-                                                <h6 className="text-white m-0 B_card_title">{schedule.title}</h6>
-                                                <div>
-                                                    {schedule.status === 'Upcoming' && (
-                                                        <>
-                                                            <button type="button" class="btn btn-outline-primary B_upcoming_btn me-2">Upcoming</button>
+                            }).length === 0 ? (
+                            <div className="col-12 text-center mt-4">
+                                <img src={NoMeeting} alt="No Meeting" className='j_no_meeting_icon' />
+                                <h5 className="j_no_meeting">You haven't created any meetings yet</h5>
+                                <p className="text-white opacity-50">Click on "Schedule" to schedule your first meeting</p>
+                            </div>
+                        ) : (
+                            allschedule
+                                .filter(schedule => schedule.userId == userId)
+                                .filter(schedule => {
+                                    const duration = calculateDuration(schedule.startTime, schedule.endTime);
+                                    const date = formatDate(schedule.date)
+                                    return (
+                                        schedule.title.includes(searchTerm) ||
+                                        date.includes(searchTerm) ||
+                                        schedule.startTime.includes(searchTerm) ||
+                                        duration.includes(searchTerm)
+                                    );
+                                }).map((schedule, index) => {
+                                    return (
+                                        <div key={index} className="col-xl-3 col-lg-4 col-md-6 col-12">
+                                            <div className="B_meeting_card" style={{ backgroundColor: '#0A1119', borderRadius: '6px' }}>
+                                                <div className="d-flex justify-content-between align-items-center  p-3 B_meeting_padding">
+                                                    <h6 className="text-white m-0 B_card_title">{schedule.title}</h6>
+                                                    <div>
+                                                        {schedule.status === 'Upcoming' && (
+                                                            <>
+                                                                <button type="button" class="btn btn-outline-primary B_upcoming_btn me-2">Upcoming</button>
 
-                                                            <HiOutlineDotsVertical
-                                                                className='text-white'
-                                                                size={22}
-                                                                style={{ cursor: "pointer" }}
-                                                                onClick={(e) => handleDotsClick(schedule._id, e)}
-                                                            />
+                                                                <HiOutlineDotsVertical
+                                                                    className='text-white'
+                                                                    size={22}
+                                                                    style={{ cursor: "pointer" }}
+                                                                    onClick={(e) => handleDotsClick(schedule._id, e)}
+                                                                />
 
-                                                            {openDropdownId === schedule._id && (
-                                                                <div className="position-absolute  mt-2 py-2 B_boxEdit  rounded shadow-lg"
-                                                                    style={{ minWidth: '120px', zIndex: 1000 }}>
-                                                                    {/* <Link target="_blank" to={`${schedule.meetingLink}`} className="dropdown-item text-white px-3 py-1 hover-bg-secondary"
+                                                                {openDropdownId === schedule._id && (
+                                                                    <div className="position-absolute  mt-2 py-2 B_boxEdit  rounded shadow-lg"
+                                                                        style={{ minWidth: '120px', zIndex: 1000 }}>
+                                                                        {/* <Link target="_blank" to={`${schedule.meetingLink}`} className="dropdown-item text-white px-3 py-1 hover-bg-secondary"
                                                                     style={{ backgroundColor: 'transparent', border: 'none', width: '100%', textAlign: 'left' }}>
                                                                     Start
                                                                 </Link> */}
-                                                                    <button
-                                                                        className="dropdown-item text-white px-3 py-1 hover-bg-secondary"
-                                                                        style={{ backgroundColor: 'transparent', border: 'none', width: '100%', textAlign: 'left' }}
-                                                                        onClick={() => window.location.href = schedule.meetingLink}
-                                                                    >
-                                                                        Start
-                                                                    </button>
-                                                                    {/* <button
+                                                                        <button
+                                                                            className="dropdown-item text-white px-3 py-1 hover-bg-secondary"
+                                                                            style={{ backgroundColor: 'transparent', border: 'none', width: '100%', textAlign: 'left' }}
+                                                                            onClick={() => window.location.href = schedule.meetingLink}
+                                                                        >
+                                                                            Start
+                                                                        </button>
+                                                                        {/* <button
                                                                     className="dropdown-item text-white px-3 py-1 hover-bg-secondary"
                                                                     style={{ backgroundColor: 'transparent', border: 'none', width: '100%', textAlign: 'left' }}
                                                                     onClick={() => window.open(schedule.meetingLink, '_blank')}
                                                                 >
                                                                     Start
                                                                 </button> */}
-                                                                    <button
-                                                                        className="dropdown-item text-white px-3 py-1 hover-bg-secondary"
-                                                                        style={{ backgroundColor: 'transparent', border: 'none', width: '100%', textAlign: 'left' }}
-                                                                        onClick={() => { handleShowScheduleModel(); handleEdit(schedule) }}
-                                                                    >
-                                                                        Edit
-                                                                    </button>
-                                                                    <button
-                                                                        className="dropdown-item text-white px-3 py-1 hover-bg-secondary"
-                                                                        style={{ backgroundColor: 'transparent', border: 'none', width: '100%', textAlign: 'left' }}
-                                                                        onClick={() => { handleShowCancelModel(); handlecancelMeeting(schedule) }}
-                                                                    >
-                                                                        Cancel
-                                                                    </button>
-                                                                    <button className="dropdown-item text-white px-3 py-1 hover-bg-secondary"
-                                                                        style={{ backgroundColor: 'transparent', border: 'none', width: '100%', textAlign: 'left' }}
-                                                                        onClick={() => { handleShowInviteModel(); handleInvite(schedule) }}
-                                                                    >
-                                                                        Invite People
-                                                                    </button>
-                                                                </div>
-                                                            )}
-                                                        </>
-                                                    )}
-                                                    {schedule.status === 'Completed' && (
-                                                        <button type="button" class="btn btn-outline-success B_upcoming_btn1 me-2">Completed</button>
-                                                    )}
-                                                    {schedule.status === 'Join' && (
-                                                        <button type="button" class="btn btn-outline-secondary B_upcoming_btn1 B_upcoming_btn2 me-2"
-                                                            onClick={() => window.location.href = schedule.meetingLink}
-                                                        >Join</button>
-                                                    )}
-                                                    {schedule.status === 'Cancelled' && (
-                                                        <button type="button" class="btn btn-outline-danger B_upcoming_btn1 me-2">Cancelled</button>
-                                                    )}
+                                                                        <button
+                                                                            className="dropdown-item text-white px-3 py-1 hover-bg-secondary"
+                                                                            style={{ backgroundColor: 'transparent', border: 'none', width: '100%', textAlign: 'left' }}
+                                                                            onClick={() => { handleShowScheduleModel(); handleEdit(schedule) }}
+                                                                        >
+                                                                            Edit
+                                                                        </button>
+                                                                        <button
+                                                                            className="dropdown-item text-white px-3 py-1 hover-bg-secondary"
+                                                                            style={{ backgroundColor: 'transparent', border: 'none', width: '100%', textAlign: 'left' }}
+                                                                            onClick={() => { handleShowCancelModel(); handlecancelMeeting(schedule) }}
+                                                                        >
+                                                                            Cancel
+                                                                        </button>
+                                                                        <button className="dropdown-item text-white px-3 py-1 hover-bg-secondary"
+                                                                            style={{ backgroundColor: 'transparent', border: 'none', width: '100%', textAlign: 'left' }}
+                                                                            onClick={() => { handleShowInviteModel(); handleInvite(schedule) }}
+                                                                        >
+                                                                            Invite People
+                                                                        </button>
+                                                                    </div>
+                                                                )}
+                                                            </>
+                                                        )}
+                                                        {schedule.status === 'Completed' && (
+                                                            <button type="button" class="btn btn-outline-success B_upcoming_btn1 me-2">Completed</button>
+                                                        )}
+                                                        {schedule.status === 'Join' && (
+                                                            <button type="button" class="btn btn-outline-secondary B_upcoming_btn1 B_upcoming_btn2 me-2"
+                                                                onClick={() => window.location.href = schedule.meetingLink}
+                                                            >Join</button>
+                                                        )}
+                                                        {schedule.status === 'Cancelled' && (
+                                                            <button type="button" class="btn btn-outline-danger B_upcoming_btn1 me-2">Cancelled</button>
+                                                        )}
+                                                    </div>
                                                 </div>
-                                            </div>
-                                            <div style={{ borderTop: "1px solid #525252" }}></div>
-                                            <div className="B_meetingALl_details p-3 B_meeting_padding" style={{ color: '#B3AEAE' }}>
-                                                <div className="d-flex  mb-2">
-                                                    <span className='B_meetingALl_details_span'>Meeting Date</span>
-                                                    <span className='text-white'>: {formatDate(schedule.date)}</span>
-                                                </div>
-                                                <div className="d-flex  mb-2">
-                                                    <span className='B_meetingALl_details_span'>Meeting Time</span>
-                                                    <span className='text-white'>: {schedule.startTime}</span>
-                                                </div>
-                                                <div className="d-flex ">
-                                                    <span className='B_meetingALl_details_span'>Meeting Duration</span>
-                                                    <span className='text-white'>: {calculateDuration(schedule.startTime, schedule.endTime)}</span>
+                                                <div style={{ borderTop: "1px solid #525252" }}></div>
+                                                <div className="B_meetingALl_details p-3 B_meeting_padding" style={{ color: '#B3AEAE' }}>
+                                                    <div className="d-flex  mb-2">
+                                                        <span className='B_meetingALl_details_span'>Meeting Date</span>
+                                                        <span className='text-white'>: {formatDate(schedule.date)}</span>
+                                                    </div>
+                                                    <div className="d-flex  mb-2">
+                                                        <span className='B_meetingALl_details_span'>Meeting Time</span>
+                                                        <span className='text-white'>: {schedule.startTime}</span>
+                                                    </div>
+                                                    <div className="d-flex ">
+                                                        <span className='B_meetingALl_details_span'>Meeting Duration</span>
+                                                        <span className='text-white'>: {calculateDuration(schedule.startTime, schedule.endTime)}</span>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
-                                )
-                            })}
+                                    )
+                                }))}
                     </div>
                 </div>
             );
@@ -557,114 +573,68 @@ function Meeting() {
             return (
                 <div className='mx-4'>
                     <div className="row g-5 B_meeting_card_section B_G_space">
-                        {/* Upcoming Meeting Card */}
-                        <div className=" col-xl-3 col-lg-4 col-md-6 col-12 mt-4">
-                            <div className="B_meeting_card" style={{ backgroundColor: '#0A1119', borderRadius: '6px' }}>
-                                <div className="d-flex justify-content-between align-items-center  p-3 B_meeting_padding">
-                                    <h6 className="text-white m-0 B_card_title">Project Meeting</h6>
-                                    <div>
-                                        <button type="button" class="btn btn-outline-secondary B_upcoming_btn1 B_upcoming_btn2 me-2">Join</button>
-                                    </div>
-                                </div>
-                                <div style={{ borderTop: "1px solid #525252" }}></div>
-                                <div className="B_meetingALl_details p-3 B_meeting_padding" style={{ color: '#B3AEAE' }}>
-                                    <div className="d-flex  mb-2">
-                                        <span className='B_meetingALl_details_span'>Meeting Date</span>
-                                        <span className='text-white'>: 23-01-2025</span>
-                                    </div>
-                                    <div className="d-flex mb-2">
-                                        <span className='B_meetingALl_details_span'>Meeting Time</span>
-                                        <span className='text-white'>: 11:00 AM</span>
-                                    </div>
-                                    <div className="d-flex ">
-                                        <span className='B_meetingALl_details_span'>Meeting Duration</span>
-                                        <span className='text-white'>: 0h 30m</span>
-                                    </div>
-                                </div>
+                        {allschedule
+                            .filter(schedule => schedule.invitees.some((inv) => inv.userId == userId))
+                            .filter(schedule => {
+                                const duration = calculateDuration(schedule.startTime, schedule.endTime);
+                                const date = formatDate(schedule.date)
+                                return (
+                                    schedule.title.includes(searchTerm) ||
+                                    date.includes(searchTerm) ||
+                                    schedule.startTime.includes(searchTerm) ||
+                                    duration.includes(searchTerm)
+                                );
+                            }).length === 0 ? (
+                            <div className="col-12 text-center mt-4">
+                                <img src={NoMeeting} alt="No Meeting" className='j_no_meeting_icon' />
+                                <h5 className="j_no_meeting">No meeting invitations</h5>
+                                <p className="text-white opacity-50">You haven't been invited to any meetings yet</p>
                             </div>
-                        </div>
-
-                        {/* Completed Meeting Card */}
-                        <div className=" col-xl-3 col-lg-4 col-md-6 col-12">
-                            <div className="B_meeting_card " style={{ backgroundColor: '#0A1119', borderRadius: '6px' }}>
-                                <div className="d-flex justify-content-between align-items-center  p-3 B_meeting_padding ">
-                                    <h6 className="text-white m-0 B_card_title">Online Meeting</h6>
-                                    <div>
-                                        <button type="button" class="btn btn-outline-secondary B_upcoming_btn1 B_upcoming_btn2 me-2">Join</button>
-                                    </div>
-                                </div>
-                                <div style={{ borderTop: "1px solid #525252" }}></div>
-                                <div className="B_meetingALl_details p-3 B_meeting_padding" style={{ color: '#B3AEAE' }}>
-                                    <div className="d-flex mb-2">
-                                        <span className='B_meetingALl_details_span'>Meeting Date</span>
-                                        <span className='text-white'>: 23-01-2025</span>
-                                    </div>
-                                    <div className="d-flex mb-2">
-                                        <span className='B_meetingALl_details_span'>Meeting Time</span>
-                                        <span className='text-white'>: 11:00 AM</span>
-                                    </div>
-                                    <div className="d-flex ">
-                                        <span className='B_meetingALl_details_span'>Meeting Duration</span>
-                                        <span className='text-white'>: 0h 30m</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Join Meeting Card */}
-                        <div className=" col-xl-3 col-lg-4 col-md-6 col-12">
-                            <div className="B_meeting_card " style={{ backgroundColor: '#0A1119', borderRadius: '6px' }}>
-                                <div className="d-flex justify-content-between align-items-center p-3 B_meeting_padding">
-                                    <h6 className="text-white m-0 B_card_title">Project Meeting</h6>
-                                    <div>
-                                        <button type="button" class="btn btn-outline-secondary B_upcoming_btn1 B_upcoming_btn2 me-2">Join</button>
-                                    </div>
-                                </div>
-                                <div style={{ borderTop: "1px solid #525252" }}></div>
-                                <div className="B_meetingALl_details p-3 B_meeting_padding" style={{ color: '#B3AEAE' }}>
-                                    <div className="d-flex  mb-2">
-                                        <span className='B_meetingALl_details_span'>Meeting Date</span>
-                                        <span className='text-white'>: 23-01-2025</span>
-                                    </div>
-                                    <div className="d-flex mb-2">
-                                        <span className='B_meetingALl_details_span'>Meeting Time</span>
-                                        <span className='text-white'>: 11:00 AM</span>
-                                    </div>
-                                    <div className="d-flex ">
-                                        <span className='B_meetingALl_details_span'>Meeting Duration</span>
-                                        <span className='text-white'>: 0h 30m</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Cancelled Meeting Card */}
-                        <div className=" col-xl-3 col-lg-4 col-md-6 col-12">
-                            <div className="B_meeting_card " style={{ backgroundColor: '#0A1119', borderRadius: '6px' }}>
-                                <div className="d-flex justify-content-between align-items-center p-3 B_meeting_padding">
-                                    <h6 className="text-white m-0 B_card_title">Online Meeting</h6>
-                                    <div>
-                                        <button type="button" class="btn btn-outline-secondary B_upcoming_btn1 B_upcoming_btn2 me-2">Join</button>
-                                    </div>
-
-                                </div>
-                                <div style={{ borderTop: "1px solid #525252" }}></div>
-                                <div className="B_meetingALl_details p-3 B_meeting_padding" style={{ color: '#B3AEAE' }}>
-                                    <div className="d-flex  mb-2">
-                                        <span className='B_meetingALl_details_span'>Meeting Date</span>
-                                        <span className='text-white'>: 23-01-2025</span>
-                                    </div>
-                                    <div className="d-flex  mb-2">
-                                        <span className='B_meetingALl_details_span'>Meeting Time</span>
-                                        <span className='text-white'>: 11:00 AM</span>
-                                    </div>
-                                    <div className="d-flex ">
-                                        <span className='B_meetingALl_details_span'>Meeting Duration</span>
-                                        <span className='text-white'>: 0h 30m</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                        ) : (
+                            allschedule
+                                .filter(schedule => schedule.invitees.some((inv) => inv.userId == userId))
+                                .filter(schedule => {
+                                    const duration = calculateDuration(schedule.startTime, schedule.endTime);
+                                    const date = formatDate(schedule.date)
+                                    return (
+                                        schedule.title.includes(searchTerm) ||
+                                        date.includes(searchTerm) ||
+                                        schedule.startTime.includes(searchTerm) ||
+                                        duration.includes(searchTerm)
+                                    );
+                                }).map((schedule, index) => {
+                                    return (
+                                        <div key={index} className="col-xl-3 col-lg-4 col-md-6 col-12 mt-4">
+                                            <div className="B_meeting_card" style={{ backgroundColor: '#0A1119', borderRadius: '6px' }}>
+                                                <div className="d-flex justify-content-between align-items-center  p-3 B_meeting_padding">
+                                                    <h6 className="text-white m-0 B_card_title">{schedule.title}</h6>
+                                                    <div>
+                                                        {schedule.status === 'Join' && (
+                                                            <button type="button" class="btn btn-outline-secondary B_upcoming_btn1 B_upcoming_btn2 me-2"
+                                                                onClick={() => window.location.href = schedule.meetingLink}
+                                                            >Join</button>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                                <div style={{ borderTop: "1px solid #525252" }}></div>
+                                                <div className="B_meetingALl_details p-3 B_meeting_padding" style={{ color: '#B3AEAE' }}>
+                                                    <div className="d-flex  mb-2">
+                                                        <span className='B_meetingALl_details_span'>Meeting Date</span>
+                                                        <span className='text-white'>: {formatDate(schedule.date)}</span>
+                                                    </div>
+                                                    <div className="d-flex  mb-2">
+                                                        <span className='B_meetingALl_details_span'>Meeting Time</span>
+                                                        <span className='text-white'>: {schedule.startTime}</span>
+                                                    </div>
+                                                    <div className="d-flex ">
+                                                        <span className='B_meetingALl_details_span'>Meeting Duration</span>
+                                                        <span className='text-white'>: {calculateDuration(schedule.startTime, schedule.endTime)}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )
+                                }))}
                     </div>
                 </div>
             );
@@ -676,9 +646,25 @@ function Meeting() {
                     {/* Created By Me Section */}
                     <h6 className="text-white mt-4 ms-4">Created By Me</h6>
                     <div className="row g-5 B_meeting_card_section B_G_space mb-5">
-
                         {allschedule
-                            .filter(schedule => schedule.status === "Upcoming")
+                            .filter(schedule => (schedule.status === "Upcoming" && schedule.userId == userId))
+                            .filter(schedule => {
+                                const duration = calculateDuration(schedule.startTime, schedule.endTime);
+                                const date = formatDate(schedule.date)
+                                return (
+                                    schedule.title.includes(searchTerm) ||
+                                    date.includes(searchTerm) ||
+                                    schedule.startTime.includes(searchTerm) ||
+                                    duration.includes(searchTerm)
+                                );
+                            }).length === 0 ? (
+                            <div className="col-12 text-center mt-4">
+                                <img src={NoMeeting} alt="No Meeting" className='j_no_meeting_icon' />
+                                <h5 className="j_no_meeting">No upcoming meetings found</h5>
+                                <p className="text-white opacity-50">You don't have any upcoming meetings scheduled</p>
+                            </div>
+                        ) : (allschedule
+                            .filter(schedule => (schedule.status === "Upcoming" && schedule.userId == userId))
                             .filter(schedule => {
                                 const duration = calculateDuration(schedule.startTime, schedule.endTime);
                                 const date = formatDate(schedule.date)
@@ -765,120 +751,73 @@ function Meeting() {
                                         </div>
                                     </div>
                                 )
-                            })}
+                            }))}
                     </div>
 
                     {/* Invited By Me Section */}
                     <h6 className="text-white mb-4 ms-4">Invited Meetings</h6>
                     <div className="row g-5 B_meeting_card_section B_G_space">
-                        {/* Upcoming Meeting Card */}
-                        <div className=" col-xl-3 col-lg-4 col-md-6 col-12">
-                            <div className="B_meeting_card" style={{ backgroundColor: '#0A1119', borderRadius: '6px' }}>
-                                <div className="d-flex justify-content-between align-items-center  p-3 B_meeting_padding">
-                                    <h6 className="text-white m-0 B_card_title">Project Meeting</h6>
-                                    <div>
-                                        <button type="button" class="btn btn-outline-secondary B_upcoming_btn1 B_upcoming_btn2 me-2">Join</button>
-                                    </div>
-                                </div>
-                                <div style={{ borderTop: "1px solid #525252" }}></div>
-                                <div className="B_meetingALl_details p-3 B_meeting_padding" style={{ color: '#B3AEAE' }}>
-                                    <div className="d-flex  mb-2">
-                                        <span className='B_meetingALl_details_span'>Meeting Date</span>
-                                        <span className='text-white'>: 23-01-2025</span>
-                                    </div>
-                                    <div className="d-flex mb-2">
-                                        <span className='B_meetingALl_details_span'>Meeting Time</span>
-                                        <span className='text-white'>: 11:00 AM</span>
-                                    </div>
-                                    <div className="d-flex ">
-                                        <span className='B_meetingALl_details_span'>Meeting Duration</span>
-                                        <span className='text-white'>: 0h 30m</span>
-                                    </div>
-                                </div>
+                        {allschedule
+                            .filter(schedule => (schedule.status === "Upcoming" && schedule.invitees.some((inv) => inv.userId == userId)))
+                            .filter(schedule => {
+                                const duration = calculateDuration(schedule.startTime, schedule.endTime);
+                                const date = formatDate(schedule.date)
+                                return (
+                                    schedule.title.includes(searchTerm) ||
+                                    date.includes(searchTerm) ||
+                                    schedule.startTime.includes(searchTerm) ||
+                                    duration.includes(searchTerm)
+                                );
+                            }).length === 0 ? (
+                            <div className="col-12 text-center mt-4">
+                                <img src={NoMeeting} alt="No Meeting" className='j_no_meeting_icon' />
+                                <h5 className="j_no_meeting">No meeting invitations</h5>
+                                <p className="text-white opacity-50">You haven't been invited to any meetings yet</p>
                             </div>
-                        </div>
-
-                        {/* Completed Meeting Card */}
-                        <div className=" col-xl-3 col-lg-4 col-md-6 col-12">
-                            <div className="B_meeting_card " style={{ backgroundColor: '#0A1119', borderRadius: '6px' }}>
-                                <div className="d-flex justify-content-between align-items-center  p-3 B_meeting_padding ">
-                                    <h6 className="text-white m-0 B_card_title">Online Meeting</h6>
-                                    <div>
-                                        <button type="button" class="btn btn-outline-secondary B_upcoming_btn1 B_upcoming_btn2 me-2">Join</button>
+                        ) : (allschedule
+                            .filter(schedule => (schedule.status === "Upcoming" && schedule.invitees.some((inv) => inv.userId == userId)))
+                            .filter(schedule => {
+                                const duration = calculateDuration(schedule.startTime, schedule.endTime);
+                                const date = formatDate(schedule.date)
+                                return (
+                                    schedule.title.includes(searchTerm) ||
+                                    date.includes(searchTerm) ||
+                                    schedule.startTime.includes(searchTerm) ||
+                                    duration.includes(searchTerm)
+                                );
+                            }).map((schedule, index) => {
+                                return (
+                                    <div key={index} className="col-xl-3 col-lg-4 col-md-6 col-12">
+                                        <div className="B_meeting_card" style={{ backgroundColor: '#0A1119', borderRadius: '6px' }}>
+                                            <div className="d-flex justify-content-between align-items-center  p-3 B_meeting_padding">
+                                                <h6 className="text-white m-0 B_card_title">{schedule.title}</h6>
+                                                <div>
+                                                    {schedule.status === 'Join' && (
+                                                        <button type="button" class="btn btn-outline-secondary B_upcoming_btn1 B_upcoming_btn2 me-2"
+                                                            onClick={() => window.location.href = schedule.meetingLink}
+                                                        >Join</button>
+                                                    )}
+                                                </div>
+                                            </div>
+                                            <div style={{ borderTop: "1px solid #525252" }}></div>
+                                            <div className="B_meetingALl_details p-3 B_meeting_padding" style={{ color: '#B3AEAE' }}>
+                                                <div className="d-flex  mb-2">
+                                                    <span className='B_meetingALl_details_span'>Meeting Date</span>
+                                                    <span className='text-white'>: {formatDate(schedule.date)}</span>
+                                                </div>
+                                                <div className="d-flex  mb-2">
+                                                    <span className='B_meetingALl_details_span'>Meeting Time</span>
+                                                    <span className='text-white'>: {schedule.startTime}</span>
+                                                </div>
+                                                <div className="d-flex ">
+                                                    <span className='B_meetingALl_details_span'>Meeting Duration</span>
+                                                    <span className='text-white'>: {calculateDuration(schedule.startTime, schedule.endTime)}</span>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
-                                </div>
-                                <div style={{ borderTop: "1px solid #525252" }}></div>
-                                <div className="B_meetingALl_details p-3 B_meeting_padding" style={{ color: '#B3AEAE' }}>
-                                    <div className="d-flex mb-2">
-                                        <span className='B_meetingALl_details_span'>Meeting Date</span>
-                                        <span className='text-white'>: 23-01-2025</span>
-                                    </div>
-                                    <div className="d-flex mb-2">
-                                        <span className='B_meetingALl_details_span'>Meeting Time</span>
-                                        <span className='text-white'>: 11:00 AM</span>
-                                    </div>
-                                    <div className="d-flex ">
-                                        <span className='B_meetingALl_details_span'>Meeting Duration</span>
-                                        <span className='text-white'>: 0h 30m</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Join Meeting Card */}
-                        <div className=" col-xl-3 col-lg-4 col-md-6 col-12">
-                            <div className="B_meeting_card " style={{ backgroundColor: '#0A1119', borderRadius: '6px' }}>
-                                <div className="d-flex justify-content-between align-items-center p-3 B_meeting_padding">
-                                    <h6 className="text-white m-0 B_card_title">Project Meeting</h6>
-                                    <div>
-                                        <button type="button" class="btn btn-outline-secondary B_upcoming_btn1 B_upcoming_btn2 me-2">Join</button>
-                                    </div>
-                                </div>
-                                <div style={{ borderTop: "1px solid #525252" }}></div>
-                                <div className="B_meetingALl_details p-3 B_meeting_padding" style={{ color: '#B3AEAE' }}>
-                                    <div className="d-flex  mb-2">
-                                        <span className='B_meetingALl_details_span'>Meeting Date</span>
-                                        <span className='text-white'>: 23-01-2025</span>
-                                    </div>
-                                    <div className="d-flex mb-2">
-                                        <span className='B_meetingALl_details_span'>Meeting Time</span>
-                                        <span className='text-white'>: 11:00 AM</span>
-                                    </div>
-                                    <div className="d-flex ">
-                                        <span className='B_meetingALl_details_span'>Meeting Duration</span>
-                                        <span className='text-white'>: 0h 30m</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Cancelled Meeting Card */}
-                        <div className=" col-xl-3 col-lg-4 col-md-6 col-12">
-                            <div className="B_meeting_card " style={{ backgroundColor: '#0A1119', borderRadius: '6px' }}>
-                                <div className="d-flex justify-content-between align-items-center p-3 B_meeting_padding">
-                                    <h6 className="text-white m-0 B_card_title">Online Meeting</h6>
-                                    <div>
-                                        <button type="button" class="btn btn-outline-secondary B_upcoming_btn1 B_upcoming_btn2 me-2">Join</button>
-                                    </div>
-
-                                </div>
-                                <div style={{ borderTop: "1px solid #525252" }}></div>
-                                <div className="B_meetingALl_details p-3 B_meeting_padding" style={{ color: '#B3AEAE' }}>
-                                    <div className="d-flex  mb-2">
-                                        <span className='B_meetingALl_details_span'>Meeting Date</span>
-                                        <span className='text-white'>: 23-01-2025</span>
-                                    </div>
-                                    <div className="d-flex  mb-2">
-                                        <span className='B_meetingALl_details_span'>Meeting Time</span>
-                                        <span className='text-white'>: 11:00 AM</span>
-                                    </div>
-                                    <div className="d-flex ">
-                                        <span className='B_meetingALl_details_span'>Meeting Duration</span>
-                                        <span className='text-white'>: 0h 30m</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                                )
+                            }))}
                     </div>
                 </div>
             );
@@ -888,9 +827,25 @@ function Meeting() {
             return (
                 <div className='mx-4'>
                     <div className="row g-5 B_meeting_card_section">
-
                         {allschedule
-                            .filter(schedule => schedule.status === 'Upcoming')
+                            .filter(schedule => (schedule.status === "Upcoming" && schedule.userId == userId))
+                            .filter(schedule => {
+                                const duration = calculateDuration(schedule.startTime, schedule.endTime);
+                                const date = formatDate(schedule.date)
+                                return (
+                                    schedule.title.includes(searchTerm) ||
+                                    date.includes(searchTerm) ||
+                                    schedule.startTime.includes(searchTerm) ||
+                                    duration.includes(searchTerm)
+                                );
+                            }).length === 0 ? (
+                            <div className="col-12 text-center mt-4">
+                                <img src={NoMeeting} alt="No Meeting" className='j_no_meeting_icon' />
+                                <h5 className="j_no_meeting">No upcoming meetings found</h5>
+                                <p className="text-white opacity-50">You don't have any upcoming meetings scheduled</p>
+                            </div>
+                        ) : (allschedule
+                            .filter(schedule => (schedule.status === "Upcoming" && schedule.userId == userId))
                             .filter(schedule => {
                                 const duration = calculateDuration(schedule.startTime, schedule.endTime);
                                 const date = formatDate(schedule.date)
@@ -977,247 +932,7 @@ function Meeting() {
                                         </div>
                                     </div>
                                 )
-                            })}
-                        {/* METTING CARD UPCOMING SECTION */}
-                        {/* Upcoming Meeting Card */}
-                        {/* <div className=" col-xl-3 col-lg-4 col-md-6 col-12">
-                            <div className="B_meeting_card" style={{ backgroundColor: '#0A1119', borderRadius: '6px' }}>
-                                <div className="d-flex justify-content-between align-items-center  p-3 B_meeting_padding">
-                                    <h6 className="text-white m-0 B_card_title">Project Meeting</h6>
-                                    <div className="position-relative">
-                                        <HiOutlineDotsVertical
-                                            className='text-white'
-                                            size={22}
-                                            style={{ cursor: "pointer" }}
-                                            onClick={(e) => handleDotsClick('meeting1', e)}
-                                        />
-                                        {openDropdownId === 'meeting1' && (
-                                            <div className="position-absolute end-0 mt-2 py-2 B_boxEdit  rounded shadow-lg"
-                                                style={{ minWidth: '120px', zIndex: 1000 }}>
-                                                <button className="dropdown-item text-white px-3 py-1 hover-bg-secondary"
-                                                    style={{ backgroundColor: 'transparent', border: 'none', width: '100%', textAlign: 'left' }}>
-                                                    Start
-                                                </button>
-                                                <button
-                                                    className="dropdown-item text-white px-3 py-1 hover-bg-secondary"
-                                                    style={{ backgroundColor: 'transparent', border: 'none', width: '100%', textAlign: 'left' }}
-                                                    onClick={handleShowScheduleModel}
-                                                >
-                                                    Edit
-                                                </button>
-                                                <button
-                                                    className="dropdown-item text-white px-3 py-1 hover-bg-secondary"
-                                                    style={{ backgroundColor: 'transparent', border: 'none', width: '100%', textAlign: 'left' }}
-                                                    onClick={handleShowCancelModel}
-                                                >
-                                                    Cancel
-                                                </button>
-                                                <button className="dropdown-item text-white px-3 py-1 hover-bg-secondary"
-                                                    style={{ backgroundColor: 'transparent', border: 'none', width: '100%', textAlign: 'left' }}
-                                                    onClick={handleShowInviteModel}
-                                                >
-                                                    Invite People
-                                                </button>
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-                                <div style={{ borderTop: "1px solid #525252" }}></div>
-                                <div className="B_meetingALl_details p-3 B_meeting_padding" style={{ color: '#B3AEAE' }}>
-                                    <div className="d-flex  mb-2">
-                                        <span className='B_meetingALl_details_span'>Meeting Date</span>
-                                        <span className='text-white'>: 23-01-2025</span>
-                                    </div>
-                                    <div className="d-flex mb-2">
-                                        <span className='B_meetingALl_details_span'>Meeting Time</span>
-                                        <span className='text-white'>: 11:00 AM</span>
-                                    </div>
-                                    <div className="d-flex ">
-                                        <span className='B_meetingALl_details_span'>Meeting Duration</span>
-                                        <span className='text-white'>: 0h 30m</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div> */}
-
-                        {/* Completed Meeting Card */}
-                        {/* <div className=" col-xl-3 col-lg-4 col-md-6 col-12">
-                            <div className="B_meeting_card " style={{ backgroundColor: '#0A1119', borderRadius: '6px' }}>
-                                <div className="d-flex justify-content-between align-items-center  p-3 B_meeting_padding ">
-                                    <h6 className="text-white m-0 B_card_title">Online Meeting</h6>
-                                    <div className="position-relative">
-                                        <HiOutlineDotsVertical
-                                            className='text-white'
-                                            size={22}
-                                            style={{ cursor: "pointer" }}
-                                            onClick={(e) => handleDotsClick('meeting2', e)}
-                                        />
-                                        {openDropdownId === 'meeting2' && (
-                                            <div className="position-absolute end-0 mt-2 py-2 B_boxEdit rounded shadow-lg"
-                                                style={{ minWidth: '120px', zIndex: 1000 }}>
-                                                <button className="dropdown-item text-white px-3 py-1 hover-bg-secondary"
-                                                    style={{ backgroundColor: 'transparent', border: 'none', width: '100%', textAlign: 'left' }}>
-                                                    Start
-                                                </button>
-                                                <button className="dropdown-item text-white px-3 py-1 hover-bg-secondary"
-                                                    style={{ backgroundColor: 'transparent', border: 'none', width: '100%', textAlign: 'left' }}
-                                                    onClick={handleShowScheduleModel}
-                                                >
-                                                    Edit
-                                                </button>
-                                                <button
-                                                    className="dropdown-item text-white px-3 py-1 hover-bg-secondary"
-                                                    style={{ backgroundColor: 'transparent', border: 'none', width: '100%', textAlign: 'left' }}
-                                                    onClick={handleShowCancelModel}
-                                                >
-                                                    Cancel
-                                                </button>
-                                                <button className="dropdown-item text-white px-3 py-1 hover-bg-secondary"
-                                                    style={{ backgroundColor: 'transparent', border: 'none', width: '100%', textAlign: 'left' }}
-                                                    onClick={handleShowInviteModel}
-                                                >
-                                                    Invite People
-                                                </button>
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-                                <div style={{ borderTop: "1px solid #525252" }}></div>
-                                <div className="B_meetingALl_details p-3 B_meeting_padding" style={{ color: '#B3AEAE' }}>
-                                    <div className="d-flex mb-2">
-                                        <span className='B_meetingALl_details_span'>Meeting Date</span>
-                                        <span className='text-white'>: 23-01-2025</span>
-                                    </div>
-                                    <div className="d-flex mb-2">
-                                        <span className='B_meetingALl_details_span'>Meeting Time</span>
-                                        <span className='text-white'>: 11:00 AM</span>
-                                    </div>
-                                    <div className="d-flex ">
-                                        <span className='B_meetingALl_details_span'>Meeting Duration</span>
-                                        <span className='text-white'>: 0h 30m</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div> */}
-
-                        {/* Join Meeting Card */}
-                        {/* <div className=" col-xl-3 col-lg-4 col-md-6 col-12">
-                            <div className="B_meeting_card " style={{ backgroundColor: '#0A1119', borderRadius: '6px' }}>
-                                <div className="d-flex justify-content-between align-items-center p-3 B_meeting_padding">
-                                    <h6 className="text-white m-0 B_card_title">Project Meeting</h6>
-                                    <div className="position-relative">
-                                        <HiOutlineDotsVertical
-                                            className='text-white'
-                                            size={22}
-                                            style={{ cursor: "pointer" }}
-                                            onClick={(e) => handleDotsClick('meeting3', e)}
-                                        />
-                                        {openDropdownId === 'meeting3' && (
-                                            <div className="position-absolute end-0 mt-2 py-2 B_boxEdit rounded shadow-lg"
-                                                style={{ minWidth: '120px', zIndex: 1000 }}>
-                                                <button className="dropdown-item text-white px-3 py-1 hover-bg-secondary"
-                                                    style={{ backgroundColor: 'transparent', border: 'none', width: '100%', textAlign: 'left' }}>
-                                                    Start
-                                                </button>
-                                                <button className="dropdown-item text-white px-3 py-1 hover-bg-secondary"
-                                                    style={{ backgroundColor: 'transparent', border: 'none', width: '100%', textAlign: 'left' }}
-                                                    onClick={handleShowScheduleModel}>
-                                                    Edit
-                                                </button>
-                                                <button
-                                                    className="dropdown-item text-white px-3 py-1 hover-bg-secondary"
-                                                    style={{ backgroundColor: 'transparent', border: 'none', width: '100%', textAlign: 'left' }}
-                                                    onClick={handleShowCancelModel}
-                                                >
-                                                    Cancel
-                                                </button>
-                                                <button className="dropdown-item text-white px-3 py-1 hover-bg-secondary"
-                                                    style={{ backgroundColor: 'transparent', border: 'none', width: '100%', textAlign: 'left' }}
-                                                    onClick={handleShowInviteModel}
-                                                >
-                                                    Invite People
-                                                </button>
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-                                <div style={{ borderTop: "1px solid #525252" }}></div>
-                                <div className="B_meetingALl_details p-3 B_meeting_padding" style={{ color: '#B3AEAE' }}>
-                                    <div className="d-flex  mb-2">
-                                        <span className='B_meetingALl_details_span'>Meeting Date</span>
-                                        <span className='text-white'>: 23-01-2025</span>
-                                    </div>
-                                    <div className="d-flex mb-2">
-                                        <span className='B_meetingALl_details_span'>Meeting Time</span>
-                                        <span className='text-white'>: 11:00 AM</span>
-                                    </div>
-                                    <div className="d-flex">
-                                        <span className='B_meetingALl_details_span'>Meeting Duration</span>
-                                        <span className='text-white'>: 0h 30m</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div> */}
-
-                        {/* Cancelled Meeting Card */}
-                        {/* <div className=" col-xl-3 col-lg-4 col-md-6 col-12">
-                            <div className="B_meeting_card " style={{ backgroundColor: '#0A1119', borderRadius: '6px' }}>
-                                <div className="d-flex justify-content-between align-items-center p-3 B_meeting_padding">
-                                    <h6 className="text-white m-0 B_card_title">Online Meeting</h6>
-                                    <div className="position-relative">
-                                        <HiOutlineDotsVertical
-                                            className='text-white'
-                                            size={22}
-                                            style={{ cursor: "pointer" }}
-                                            onClick={(e) => handleDotsClick('meeting4', e)}
-                                        />
-                                        {openDropdownId === 'meeting4' && (
-                                            <div className="position-absolute end-0 mt-2 py-2 B_boxEdit rounded shadow-lg"
-                                                style={{ minWidth: '120px', zIndex: 1000 }}>
-                                                <button className="dropdown-item text-white px-3 py-1 hover-bg-secondary"
-                                                    style={{ backgroundColor: 'transparent', border: 'none', width: '100%', textAlign: 'left' }}>
-                                                    Start
-                                                </button>
-                                                <button className="dropdown-item text-white px-3 py-1 hover-bg-secondary"
-                                                    style={{ backgroundColor: 'transparent', border: 'none', width: '100%', textAlign: 'left' }}
-                                                    onClick={handleShowScheduleModel}>
-                                                    Edit
-                                                </button>
-                                                <button
-                                                    className="dropdown-item text-white px-3 py-1 hover-bg-secondary"
-                                                    style={{ backgroundColor: 'transparent', border: 'none', width: '100%', textAlign: 'left' }}
-                                                    onClick={handleShowCancelModel}
-                                                >
-                                                    Cancel
-                                                </button>
-                                                <button className="dropdown-item text-white px-3 py-1 hover-bg-secondary"
-                                                    style={{ backgroundColor: 'transparent', border: 'none', width: '100%', textAlign: 'left' }}
-                                                    onClick={handleShowInviteModel}
-                                                >
-                                                    Invite People
-                                                </button>
-                                            </div>
-                                        )}
-                                    </div>
-
-                                </div>
-                                <div style={{ borderTop: "1px solid #525252" }}></div>
-                                <div className="B_meetingALl_details p-3 B_meeting_padding" style={{ color: '#B3AEAE' }}>
-                                    <div className="d-flex  mb-2">
-                                        <span className='B_meetingALl_details_span'>Meeting Date</span>
-                                        <span className='text-white'>: 23-01-2025</span>
-                                    </div>
-                                    <div className="d-flex  mb-2">
-                                        <span className='B_meetingALl_details_span'>Meeting Time</span>
-                                        <span className='text-white'>: 11:00 AM</span>
-                                    </div>
-                                    <div className="d-flex ">
-                                        <span className='B_meetingALl_details_span'>Meeting Duration</span>
-                                        <span className='text-white'>: 0h 30m</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div> */}
+                            }))}
                     </div>
                 </div>
             );
@@ -1227,115 +942,67 @@ function Meeting() {
             return (
                 <div className='mx-4'>
                     <div className="row g-5 B_meeting_card_section">
-                        {/* METTING CARD ALL SECTION */}
-                        {/* Upcoming Meeting Card */}
-                        <div className=" col-xl-3 col-lg-4 col-md-6 col-12">
-                            <div className="B_meeting_card" style={{ backgroundColor: '#0A1119', borderRadius: '6px' }}>
-                                <div className="d-flex justify-content-between align-items-center  p-3 B_meeting_padding">
-                                    <h6 className="text-white m-0 B_card_title">Project Meeting</h6>
-                                    <div>
-                                        <button type="button" class="btn btn-outline-secondary B_upcoming_btn1 B_upcoming_btn2 me-2">Join</button>
-                                    </div>
-                                </div>
-                                <div style={{ borderTop: "1px solid #525252" }}></div>
-                                <div className="B_meetingALl_details p-3 B_meeting_padding" style={{ color: '#B3AEAE' }}>
-                                    <div className="d-flex  mb-2">
-                                        <span className='B_meetingALl_details_span'>Meeting Date</span>
-                                        <span className='text-white'>: 23-01-2025</span>
-                                    </div>
-                                    <div className="d-flex mb-2">
-                                        <span className='B_meetingALl_details_span'>Meeting Time</span>
-                                        <span className='text-white'>: 11:00 AM</span>
-                                    </div>
-                                    <div className="d-flex ">
-                                        <span className='B_meetingALl_details_span'>Meeting Duration</span>
-                                        <span className='text-white'>: 0h 30m</span>
-                                    </div>
-                                </div>
+                        {allschedule
+                            .filter(schedule => (schedule.status === "Upcoming" && schedule.invitees.some((inv) => inv.userId == userId)))
+                            .filter(schedule => {
+                                const duration = calculateDuration(schedule.startTime, schedule.endTime);
+                                const date = formatDate(schedule.date)
+                                return (
+                                    schedule.title.includes(searchTerm) ||
+                                    date.includes(searchTerm) ||
+                                    schedule.startTime.includes(searchTerm) ||
+                                    duration.includes(searchTerm)
+                                );
+                            }).length === 0 ? (
+                            <div className="col-12 text-center mt-4">
+                                <img src={NoMeeting} alt="No Meeting" className='j_no_meeting_icon' />
+                                <h5 className="j_no_meeting">No meeting invitations</h5>
+                                <p className="text-white opacity-50">You haven't been invited to any meetings yet</p>
                             </div>
-                        </div>
-
-                        {/* Completed Meeting Card */}
-                        <div className=" col-xl-3 col-lg-4 col-md-6 col-12">
-                            <div className="B_meeting_card " style={{ backgroundColor: '#0A1119', borderRadius: '6px' }}>
-                                <div className="d-flex justify-content-between align-items-center  p-3 B_meeting_padding ">
-                                    <h6 className="text-white m-0 B_card_title">Online Meeting</h6>
-                                    <div>
-                                        <button type="button" class="btn btn-outline-secondary B_upcoming_btn1 B_upcoming_btn2 me-2">Join</button>
+                        ) : (allschedule
+                            .filter(schedule => (schedule.status === "Upcoming" && schedule.invitees.some((inv) => inv.userId == userId)))
+                            .filter(schedule => {
+                                const duration = calculateDuration(schedule.startTime, schedule.endTime);
+                                const date = formatDate(schedule.date)
+                                return (
+                                    schedule.title.includes(searchTerm) ||
+                                    date.includes(searchTerm) ||
+                                    schedule.startTime.includes(searchTerm) ||
+                                    duration.includes(searchTerm)
+                                );
+                            }).map((schedule, index) => {
+                                return (
+                                    <div key={index} className="col-xl-3 col-lg-4 col-md-6 col-12">
+                                        <div className="B_meeting_card" style={{ backgroundColor: '#0A1119', borderRadius: '6px' }}>
+                                            <div className="d-flex justify-content-between align-items-center  p-3 B_meeting_padding">
+                                                <h6 className="text-white m-0 B_card_title">{schedule.title}</h6>
+                                                <div>
+                                                    {schedule.status === 'Join' && (
+                                                        <button type="button" class="btn btn-outline-secondary B_upcoming_btn1 B_upcoming_btn2 me-2"
+                                                            onClick={() => window.location.href = schedule.meetingLink}
+                                                        >Join</button>
+                                                    )}
+                                                </div>
+                                            </div>
+                                            <div style={{ borderTop: "1px solid #525252" }}></div>
+                                            <div className="B_meetingALl_details p-3 B_meeting_padding" style={{ color: '#B3AEAE' }}>
+                                                <div className="d-flex  mb-2">
+                                                    <span className='B_meetingALl_details_span'>Meeting Date</span>
+                                                    <span className='text-white'>: {formatDate(schedule.date)}</span>
+                                                </div>
+                                                <div className="d-flex  mb-2">
+                                                    <span className='B_meetingALl_details_span'>Meeting Time</span>
+                                                    <span className='text-white'>: {schedule.startTime}</span>
+                                                </div>
+                                                <div className="d-flex ">
+                                                    <span className='B_meetingALl_details_span'>Meeting Duration</span>
+                                                    <span className='text-white'>: {calculateDuration(schedule.startTime, schedule.endTime)}</span>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
-                                </div>
-                                <div style={{ borderTop: "1px solid #525252" }}></div>
-                                <div className="B_meetingALl_details p-3 B_meeting_padding" style={{ color: '#B3AEAE' }}>
-                                    <div className="d-flex mb-2">
-                                        <span className='B_meetingALl_details_span'>Meeting Date</span>
-                                        <span className='text-white'>: 23-01-2025</span>
-                                    </div>
-                                    <div className="d-flex mb-2">
-                                        <span className='B_meetingALl_details_span'>Meeting Time</span>
-                                        <span className='text-white'>: 11:00 AM</span>
-                                    </div>
-                                    <div className="d-flex ">
-                                        <span className='B_meetingALl_details_span'>Meeting Duration</span>
-                                        <span className='text-white'>: 0h 30m</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Join Meeting Card */}
-                        <div className=" col-xl-3 col-lg-4 col-md-6 col-12">
-                            <div className="B_meeting_card " style={{ backgroundColor: '#0A1119', borderRadius: '6px' }}>
-                                <div className="d-flex justify-content-between align-items-center p-3 B_meeting_padding">
-                                    <h6 className="text-white m-0 B_card_title">Project Meeting</h6>
-                                    <div>
-                                        <button type="button" class="btn btn-outline-secondary B_upcoming_btn1 B_upcoming_btn2 me-2">Join</button>
-                                    </div>
-                                </div>
-                                <div style={{ borderTop: "1px solid #525252" }}></div>
-                                <div className="B_meetingALl_details p-3 B_meeting_padding" style={{ color: '#B3AEAE' }}>
-                                    <div className="d-flex  mb-2">
-                                        <span className='B_meetingALl_details_span'>Meeting Date</span>
-                                        <span className='text-white'>: 23-01-2025</span>
-                                    </div>
-                                    <div className="d-flex mb-2">
-                                        <span className='B_meetingALl_details_span'>Meeting Time</span>
-                                        <span className='text-white'>: 11:00 AM</span>
-                                    </div>
-                                    <div className="d-flex ">
-                                        <span className='B_meetingALl_details_span'>Meeting Duration</span>
-                                        <span className='text-white'>: 0h 30m</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Cancelled Meeting Card */}
-                        <div className=" col-xl-3 col-lg-4 col-md-6 col-12">
-                            <div className="B_meeting_card " style={{ backgroundColor: '#0A1119', borderRadius: '6px' }}>
-                                <div className="d-flex justify-content-between align-items-center p-3 B_meeting_padding">
-                                    <h6 className="text-white m-0 B_card_title">Online Meeting</h6>
-                                    <div>
-                                        <button type="button" class="btn btn-outline-secondary B_upcoming_btn1 B_upcoming_btn2 me-2">Join</button>
-                                    </div>
-
-                                </div>
-                                <div style={{ borderTop: "1px solid #525252" }}></div>
-                                <div className="B_meetingALl_details p-3 B_meeting_padding" style={{ color: '#B3AEAE' }}>
-                                    <div className="d-flex  mb-2">
-                                        <span className='B_meetingALl_details_span'>Meeting Date</span>
-                                        <span className='text-white'>: 23-01-2025</span>
-                                    </div>
-                                    <div className="d-flex  mb-2">
-                                        <span className='B_meetingALl_details_span'>Meeting Time</span>
-                                        <span className='text-white'>: 11:00 AM</span>
-                                    </div>
-                                    <div className="d-flex ">
-                                        <span className='B_meetingALl_details_span'>Meeting Duration</span>
-                                        <span className='text-white'>: 0h 30m</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                                )
+                            }))}
                     </div>
                 </div>
             )
@@ -1346,9 +1013,8 @@ function Meeting() {
                 <div className='mx-4'>
                     <h6 className="text-white mt-4 ms-4">Created By Me</h6>
                     <div className="row g-5 B_meeting_card_section">
-                        {/* METTING CARD ALL SECTION */}
                         {allschedule
-                            .filter(schedule => schedule.status === "Completed" || schedule.status === "Cancelled")
+                            .filter(schedule => ((schedule.status === "Completed" || schedule.status === "Cancelled") && schedule.userId == userId))
                             .filter(schedule => {
                                 const duration = calculateDuration(schedule.startTime, schedule.endTime);
                                 const date = formatDate(schedule.date)
@@ -1358,237 +1024,128 @@ function Meeting() {
                                     schedule.startTime.includes(searchTerm) ||
                                     duration.includes(searchTerm)
                                 );
-                            }).map((schedule, index) => {
-                                return (
-                                    <div key={index} onClick={() => handlecanvas(schedule.status, schedule._id)} className="col-xl-3 col-lg-4 col-md-6 col-12 mt-4 mb-4">
-                                        <div className="B_meeting_card" style={{ backgroundColor: '#0A1119', borderRadius: '6px', cursor: "pointer" }}>
-                                            <div className="d-flex justify-content-between align-items-center  p-3 B_meeting_padding">
-                                                <h6 className="text-white m-0 B_card_title">{schedule.title}</h6>
-                                                <div>
-                                                    {schedule.status === 'Completed' && (
-                                                        <button type="button" class="btn btn-outline-success B_upcoming_btn1 me-2">Completed</button>
-                                                    )}
-                                                    {schedule.status === 'Cancelled' && (
-                                                        <button type="button" class="btn btn-outline-danger B_upcoming_btn1 me-2">Cancelled</button>
-                                                    )}
+                            }).length === 0 ? (
+                            <div className="col-12 text-center mt-4">
+                                <img src={NoMeeting} alt="No Meeting" className='j_no_meeting_icon' />
+                                <h5 className="j_no_meeting">No Past meeting</h5>
+                                <p className="text-white opacity-50">Looks like you haven’t had any meetings yet</p>
+                            </div>
+                        ) : (
+                            allschedule
+                                .filter(schedule => ((schedule.status === "Completed" || schedule.status === "Cancelled") && schedule.userId == userId))
+                                .filter(schedule => {
+                                    const duration = calculateDuration(schedule.startTime, schedule.endTime);
+                                    const date = formatDate(schedule.date)
+                                    return (
+                                        schedule.title.includes(searchTerm) ||
+                                        date.includes(searchTerm) ||
+                                        schedule.startTime.includes(searchTerm) ||
+                                        duration.includes(searchTerm)
+                                    );
+                                }).map((schedule, index) => {
+                                    return (
+                                        <div key={index} onClick={() => handlecanvas(schedule.status, schedule)} className="col-xl-3 col-lg-4 col-md-6 col-12 mt-4 mb-4">
+                                            <div className="B_meeting_card" style={{ backgroundColor: '#0A1119', borderRadius: '6px', cursor: "pointer" }}>
+                                                <div className="d-flex justify-content-between align-items-center  p-3 B_meeting_padding">
+                                                    <h6 className="text-white m-0 B_card_title">{schedule.title}</h6>
+                                                    <div>
+                                                        {schedule.status === 'Completed' && (
+                                                            <button type="button" class="btn btn-outline-success B_upcoming_btn1 me-2">Completed</button>
+                                                        )}
+                                                        {schedule.status === 'Cancelled' && (
+                                                            <button type="button" class="btn btn-outline-danger B_upcoming_btn1 me-2">Cancelled</button>
+                                                        )}
+                                                    </div>
                                                 </div>
-                                            </div>
-                                            <div style={{ borderTop: "1px solid #525252" }}></div>
-                                            <div className="B_meetingALl_details p-3 B_meeting_padding" style={{ color: '#B3AEAE' }}>
-                                                <div className="d-flex  mb-2">
-                                                    <span className='B_meetingALl_details_span'>Meeting Date</span>
-                                                    <span className='text-white'>: {formatDate(schedule.date)}</span>
-                                                </div>
-                                                <div className="d-flex  mb-2">
-                                                    <span className='B_meetingALl_details_span'>Meeting Time</span>
-                                                    <span className='text-white'>: {schedule.startTime}</span>
-                                                </div>
-                                                <div className="d-flex ">
-                                                    <span className='B_meetingALl_details_span'>Meeting Duration</span>
-                                                    <span className='text-white'>: {calculateDuration(schedule.startTime, schedule.endTime)}</span>
+                                                <div style={{ borderTop: "1px solid #525252" }}></div>
+                                                <div className="B_meetingALl_details p-3 B_meeting_padding" style={{ color: '#B3AEAE' }}>
+                                                    <div className="d-flex  mb-2">
+                                                        <span className='B_meetingALl_details_span'>Meeting Date</span>
+                                                        <span className='text-white'>: {formatDate(schedule.date)}</span>
+                                                    </div>
+                                                    <div className="d-flex  mb-2">
+                                                        <span className='B_meetingALl_details_span'>Meeting Time</span>
+                                                        <span className='text-white'>: {schedule.startTime}</span>
+                                                    </div>
+                                                    <div className="d-flex ">
+                                                        <span className='B_meetingALl_details_span'>Meeting Duration</span>
+                                                        <span className='text-white'>: {calculateDuration(schedule.startTime, schedule.endTime)}</span>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
-                                )
-                            })}
-
-                        {/* Completed Meeting Card */}
-                        {/* <div className=" col-xl-3 col-lg-4 col-md-6 col-12" onClick={() => handleShowOffcanvasModel('completed')}>
-                            <div className="B_meeting_card" style={{ backgroundColor: '#0A1119', borderRadius: '6px', cursor: "pointer" }}
-                            >
-                                <div className="d-flex justify-content-between align-items-center  p-3 B_meeting_padding">
-                                    <h6 className="text-white m-0 B_card_title">Project Meeting</h6>
-                                    <div>
-                                        <button type="button" class="btn btn-outline-success B_upcoming_btn1 me-2">Completed</button>
-                                    </div>
-                                </div>
-                                <div style={{ borderTop: "1px solid #525252" }}></div>
-                                <div className="B_meetingALl_details p-3 B_meeting_padding" style={{ color: '#B3AEAE' }}>
-                                    <div className="d-flex  mb-2">
-                                        <span className='B_meetingALl_details_span'>Meeting Date</span>
-                                        <span className='text-white'>: 23-01-2025</span>
-                                    </div>
-                                    <div className="d-flex  mb-2">
-                                        <span className='B_meetingALl_details_span'>Meeting Time</span>
-                                        <span className='text-white'>: 11:00 AM</span>
-                                    </div>
-                                    <div className="d-flex ">
-                                        <span className='B_meetingALl_details_span'>Meeting Duration</span>
-                                        <span className='text-white'>: 0h 30m</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div> */}
-
-                        {/* Cancelled Meeting Card */}
-                        {/* <div className=" col-xl-3 col-lg-4 col-md-6 col-12" onClick={() => handleShowOffcanvasModel('cancelled')}>
-                            <div className="B_meeting_card " style={{ backgroundColor: '#0A1119', borderRadius: '6px', cursor: "pointer" }}>
-                                <div className="d-flex justify-content-between align-items-center  p-3 B_meeting_padding ">
-                                    <h6 className="text-white m-0 B_card_title">Online Meeting</h6>
-                                    <div>
-                                        <button type="button" class="btn btn-outline-danger B_upcoming_btn1 me-2">Cancelled</button>
-                                    </div>
-                                </div>
-                                <div style={{ borderTop: "1px solid #525252" }}></div>
-                                <div className="B_meetingALl_details p-3 B_meeting_padding" style={{ color: '#B3AEAE' }}>
-                                    <div className="d-flex mb-2">
-                                        <span className='B_meetingALl_details_span'>Meeting Date</span>
-                                        <span className='text-white'>: 23-01-2025</span>
-                                    </div>
-                                    <div className="d-flex mb-2">
-                                        <span className='B_meetingALl_details_span'>Meeting Time</span>
-                                        <span className='text-white'>: 11:00 AM</span>
-                                    </div>
-                                    <div className="d-flex ">
-                                        <span className='B_meetingALl_details_span'>Meeting Duration</span>
-                                        <span className='text-white'>: 0h 30m</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div> */}
-
-                        {/* Completed Meeting Card */}
-                        {/* <div className=" col-xl-3 col-lg-4 col-md-6 col-12" onClick={() => handleShowOffcanvasModel('completed')}>
-                            <div className="B_meeting_card " style={{ backgroundColor: '#0A1119', borderRadius: '6px', cursor: "pointer" }}>
-                                <div className="d-flex justify-content-between align-items-center p-3 B_meeting_padding">
-                                    <h6 className="text-white m-0 B_card_title">Online Meeting</h6>
-                                    <div>
-                                        <button type="button" class="btn btn-outline-success B_upcoming_btn1 me-2">Completed</button>
-                                    </div>
-
-                                </div>
-                                <div style={{ borderTop: "1px solid #525252" }}></div>
-                                <div className="B_meetingALl_details p-3 B_meeting_padding" style={{ color: '#B3AEAE' }}>
-                                    <div className="d-flex  mb-2">
-                                        <span className='B_meetingALl_details_span'>Meeting Date</span>
-                                        <span className='text-white'>: 23-01-2025</span>
-                                    </div>
-                                    <div className="d-flex  mb-2">
-                                        <span className='B_meetingALl_details_span'>Meeting Time</span>
-                                        <span className='text-white'>: 11:00 AM</span>
-                                    </div>
-                                    <div className="d-flex ">
-                                        <span className='B_meetingALl_details_span'>Meeting Duration</span>
-                                        <span className='text-white'>: 0h 30m</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div> */}
-
+                                    )
+                                }))}
                     </div>
 
                     {/* Invited By Me Section */}
                     <h6 className="text-white ms-4">Invited Meetings</h6>
                     <div className="row g-5 B_meeting_card_section B_G_space">
-                        {/* Upcoming Meeting Card */}
-                        <div className=" col-xl-3 col-lg-4 col-md-6 col-12 mt-4">
-                            <div className="B_meeting_card" style={{ backgroundColor: '#0A1119', borderRadius: '6px' }}>
-                                <div className="d-flex justify-content-between align-items-center  p-3 B_meeting_padding">
-                                    <h6 className="text-white m-0 B_card_title">Project Meeting</h6>
-                                    <div>
-                                        <button type="button" class="btn btn-outline-secondary B_upcoming_btn1 B_upcoming_btn2 me-2">Join</button>
-                                    </div>
-                                </div>
-                                <div style={{ borderTop: "1px solid #525252" }}></div>
-                                <div className="B_meetingALl_details p-3 B_meeting_padding" style={{ color: '#B3AEAE' }}>
-                                    <div className="d-flex  mb-2">
-                                        <span className='B_meetingALl_details_span'>Meeting Date</span>
-                                        <span className='text-white'>: 23-01-2025</span>
-                                    </div>
-                                    <div className="d-flex mb-2">
-                                        <span className='B_meetingALl_details_span'>Meeting Time</span>
-                                        <span className='text-white'>: 11:00 AM</span>
-                                    </div>
-                                    <div className="d-flex ">
-                                        <span className='B_meetingALl_details_span'>Meeting Duration</span>
-                                        <span className='text-white'>: 0h 30m</span>
-                                    </div>
-                                </div>
+                        {allschedule
+                            .filter(schedule => ((schedule.status === "Completed" || schedule.status === "Cancelled") && schedule.invitees.some((inv) => inv.userId == userId)))
+                            .filter(schedule => {
+                                const duration = calculateDuration(schedule.startTime, schedule.endTime);
+                                const date = formatDate(schedule.date)
+                                return (
+                                    schedule.title.includes(searchTerm) ||
+                                    date.includes(searchTerm) ||
+                                    schedule.startTime.includes(searchTerm) ||
+                                    duration.includes(searchTerm)
+                                );
+                            }).length === 0 ? (
+                            <div className="col-12 text-center mt-4">
+                                <img src={NoMeeting} alt="No Meeting" className='j_no_meeting_icon' />
+                                <h5 className="j_no_meeting">No past meeting invitations</h5>
+                                <p className="text-white opacity-50">You haven't been invited to any past meetings</p>
                             </div>
-                        </div>
-
-                        {/* Completed Meeting Card */}
-                        <div className=" col-xl-3 col-lg-4 col-md-6 col-12">
-                            <div className="B_meeting_card " style={{ backgroundColor: '#0A1119', borderRadius: '6px' }}>
-                                <div className="d-flex justify-content-between align-items-center  p-3 B_meeting_padding ">
-                                    <h6 className="text-white m-0 B_card_title">Online Meeting</h6>
-                                    <div>
-                                        <button type="button" class="btn btn-outline-secondary B_upcoming_btn1 B_upcoming_btn2 me-2">Join</button>
-                                    </div>
-                                </div>
-                                <div style={{ borderTop: "1px solid #525252" }}></div>
-                                <div className="B_meetingALl_details p-3 B_meeting_padding" style={{ color: '#B3AEAE' }}>
-                                    <div className="d-flex mb-2">
-                                        <span className='B_meetingALl_details_span'>Meeting Date</span>
-                                        <span className='text-white'>: 23-01-2025</span>
-                                    </div>
-                                    <div className="d-flex mb-2">
-                                        <span className='B_meetingALl_details_span'>Meeting Time</span>
-                                        <span className='text-white'>: 11:00 AM</span>
-                                    </div>
-                                    <div className="d-flex ">
-                                        <span className='B_meetingALl_details_span'>Meeting Duration</span>
-                                        <span className='text-white'>: 0h 30m</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Join Meeting Card */}
-                        <div className=" col-xl-3 col-lg-4 col-md-6 col-12">
-                            <div className="B_meeting_card " style={{ backgroundColor: '#0A1119', borderRadius: '6px' }}>
-                                <div className="d-flex justify-content-between align-items-center p-3 B_meeting_padding">
-                                    <h6 className="text-white m-0 B_card_title">Project Meeting</h6>
-                                    <div>
-                                        <button type="button" class="btn btn-outline-secondary B_upcoming_btn1 B_upcoming_btn2 me-2">Join</button>
-                                    </div>
-                                </div>
-                                <div style={{ borderTop: "1px solid #525252" }}></div>
-                                <div className="B_meetingALl_details p-3 B_meeting_padding" style={{ color: '#B3AEAE' }}>
-                                    <div className="d-flex  mb-2">
-                                        <span className='B_meetingALl_details_span'>Meeting Date</span>
-                                        <span className='text-white'>: 23-01-2025</span>
-                                    </div>
-                                    <div className="d-flex mb-2">
-                                        <span className='B_meetingALl_details_span'>Meeting Time</span>
-                                        <span className='text-white'>: 11:00 AM</span>
-                                    </div>
-                                    <div className="d-flex ">
-                                        <span className='B_meetingALl_details_span'>Meeting Duration</span>
-                                        <span className='text-white'>: 0h 30m</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Cancelled Meeting Card */}
-                        <div className=" col-xl-3 col-lg-4 col-md-6 col-12">
-                            <div className="B_meeting_card " style={{ backgroundColor: '#0A1119', borderRadius: '6px' }}>
-                                <div className="d-flex justify-content-between align-items-center p-3 B_meeting_padding">
-                                    <h6 className="text-white m-0 B_card_title">Online Meeting</h6>
-                                    <div>
-                                        <button type="button" class="btn btn-outline-secondary B_upcoming_btn1 B_upcoming_btn2 me-2">Join</button>
-                                    </div>
-
-                                </div>
-                                <div style={{ borderTop: "1px solid #525252" }}></div>
-                                <div className="B_meetingALl_details p-3 B_meeting_padding" style={{ color: '#B3AEAE' }}>
-                                    <div className="d-flex  mb-2">
-                                        <span className='B_meetingALl_details_span'>Meeting Date</span>
-                                        <span className='text-white'>: 23-01-2025</span>
-                                    </div>
-                                    <div className="d-flex  mb-2">
-                                        <span className='B_meetingALl_details_span'>Meeting Time</span>
-                                        <span className='text-white'>: 11:00 AM</span>
-                                    </div>
-                                    <div className="d-flex ">
-                                        <span className='B_meetingALl_details_span'>Meeting Duration</span>
-                                        <span className='text-white'>: 0h 30m</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                        ) : (
+                            allschedule
+                                .filter(schedule => ((schedule.status === "Completed" || schedule.status === "Cancelled") && schedule.invitees.some((inv) => inv.userId == userId)))
+                                .filter(schedule => {
+                                    const duration = calculateDuration(schedule.startTime, schedule.endTime);
+                                    const date = formatDate(schedule.date)
+                                    return (
+                                        schedule.title.includes(searchTerm) ||
+                                        date.includes(searchTerm) ||
+                                        schedule.startTime.includes(searchTerm) ||
+                                        duration.includes(searchTerm)
+                                    );
+                                }).map((schedule, index) => {
+                                    return (
+                                        <div key={index}
+                                            // onClick={() => handlecanvas(schedule.status, schedule._id)} 
+                                            className="col-xl-3 col-lg-4 col-md-6 col-12 mt-4 mb-4">
+                                            <div className="B_meeting_card" style={{ backgroundColor: '#0A1119', borderRadius: '6px', cursor: "pointer" }}>
+                                                <div className="d-flex justify-content-between align-items-center  p-3 B_meeting_padding">
+                                                    <h6 className="text-white m-0 B_card_title">{schedule.title}</h6>
+                                                    <div>
+                                                        {schedule.status === 'Completed' && (
+                                                            <button type="button" class="btn btn-outline-success B_upcoming_btn1 me-2">Completed</button>
+                                                        )}
+                                                        {schedule.status === 'Cancelled' && (
+                                                            <button type="button" class="btn btn-outline-danger B_upcoming_btn1 me-2">Cancelled</button>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                                <div style={{ borderTop: "1px solid #525252" }}></div>
+                                                <div className="B_meetingALl_details p-3 B_meeting_padding" style={{ color: '#B3AEAE' }}>
+                                                    <div className="d-flex  mb-2">
+                                                        <span className='B_meetingALl_details_span'>Meeting Date</span>
+                                                        <span className='text-white'>: {formatDate(schedule.date)}</span>
+                                                    </div>
+                                                    <div className="d-flex  mb-2">
+                                                        <span className='B_meetingALl_details_span'>Meeting Time</span>
+                                                        <span className='text-white'>: {schedule.startTime}</span>
+                                                    </div>
+                                                    <div className="d-flex ">
+                                                        <span className='B_meetingALl_details_span'>Meeting Duration</span>
+                                                        <span className='text-white'>: {calculateDuration(schedule.startTime, schedule.endTime)}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )
+                                }))}
                     </div>
                 </div>
             );
@@ -1600,7 +1157,7 @@ function Meeting() {
                     <div className="row g-5 B_meeting_card_section">
                         {/* METTING CARD ALL SECTION */}
                         {allschedule
-                            .filter(schedule => (schedule.status === "Completed" || schedule.status === "Cancelled" && schedule.userId == userId))
+                            .filter(schedule => ((schedule.status === "Completed" || schedule.status === "Cancelled") && schedule.userId == userId))
                             .filter(schedule => {
                                 const duration = calculateDuration(schedule.startTime, schedule.endTime);
                                 const date = formatDate(schedule.date)
@@ -1610,40 +1167,58 @@ function Meeting() {
                                     schedule.startTime.includes(searchTerm) ||
                                     duration.includes(searchTerm)
                                 );
-                            }).map((schedule, index) => {
-                                return (
-                                    <div key={index} onClick={() => handlecanvas(schedule.status, schedule._id)} className="col-xl-3 col-lg-4 col-md-6 col-12">
-                                        <div className="B_meeting_card" style={{ backgroundColor: '#0A1119', borderRadius: '6px', cursor: "pointer" }}>
-                                            <div className="d-flex justify-content-between align-items-center  p-3 B_meeting_padding">
-                                                <h6 className="text-white m-0 B_card_title">{schedule.title}</h6>
-                                                <div>
-                                                    {schedule.status === 'Completed' && (
-                                                        <button type="button" class="btn btn-outline-success B_upcoming_btn1 me-2">Completed</button>
-                                                    )}
-                                                    {schedule.status === 'Cancelled' && (
-                                                        <button type="button" class="btn btn-outline-danger B_upcoming_btn1 me-2">Cancelled</button>
-                                                    )}
+                            }).length === 0 ? (
+                            <div className="col-12 text-center mt-4">
+                                <img src={NoMeeting} alt="No Meeting" className='j_no_meeting_icon' />
+                                <h5 className="j_no_meeting">No Past meeting</h5>
+                                <p className="text-white opacity-50">Looks like you haven’t had any meetings yet</p>
+                            </div>
+                        ) : (
+                            allschedule
+                                .filter(schedule => ((schedule.status === "Completed" || schedule.status === "Cancelled") && schedule.userId == userId))
+                                .filter(schedule => {
+                                    const duration = calculateDuration(schedule.startTime, schedule.endTime);
+                                    const date = formatDate(schedule.date)
+                                    return (
+                                        schedule.title.includes(searchTerm) ||
+                                        date.includes(searchTerm) ||
+                                        schedule.startTime.includes(searchTerm) ||
+                                        duration.includes(searchTerm)
+                                    );
+                                }).map((schedule, index) => {
+                                    return (
+                                        <div key={index} onClick={() => handlecanvas(schedule.status, schedule._id)} className="col-xl-3 col-lg-4 col-md-6 col-12">
+                                            <div className="B_meeting_card" style={{ backgroundColor: '#0A1119', borderRadius: '6px', cursor: "pointer" }}>
+                                                <div className="d-flex justify-content-between align-items-center  p-3 B_meeting_padding">
+                                                    <h6 className="text-white m-0 B_card_title">{schedule.title}</h6>
+                                                    <div>
+                                                        {schedule.status === 'Completed' && (
+                                                            <button type="button" class="btn btn-outline-success B_upcoming_btn1 me-2">Completed</button>
+                                                        )}
+                                                        {schedule.status === 'Cancelled' && (
+                                                            <button type="button" class="btn btn-outline-danger B_upcoming_btn1 me-2">Cancelled</button>
+                                                        )}
+                                                    </div>
                                                 </div>
-                                            </div>
-                                            <div style={{ borderTop: "1px solid #525252" }}></div>
-                                            <div className="B_meetingALl_details p-3 B_meeting_padding" style={{ color: '#B3AEAE' }}>
-                                                <div className="d-flex  mb-2">
-                                                    <span className='B_meetingALl_details_span'>Meeting Date</span>
-                                                    <span className='text-white'>: {formatDate(schedule.date)}</span>
-                                                </div>
-                                                <div className="d-flex  mb-2">
-                                                    <span className='B_meetingALl_details_span'>Meeting Time</span>
-                                                    <span className='text-white'>: {schedule.startTime}</span>
-                                                </div>
-                                                <div className="d-flex ">
-                                                    <span className='B_meetingALl_details_span'>Meeting Duration</span>
-                                                    <span className='text-white'>: {calculateDuration(schedule.startTime, schedule.endTime)}</span>
+                                                <div style={{ borderTop: "1px solid #525252" }}></div>
+                                                <div className="B_meetingALl_details p-3 B_meeting_padding" style={{ color: '#B3AEAE' }}>
+                                                    <div className="d-flex  mb-2">
+                                                        <span className='B_meetingALl_details_span'>Meeting Date</span>
+                                                        <span className='text-white'>: {formatDate(schedule.date)}</span>
+                                                    </div>
+                                                    <div className="d-flex  mb-2">
+                                                        <span className='B_meetingALl_details_span'>Meeting Time</span>
+                                                        <span className='text-white'>: {schedule.startTime}</span>
+                                                    </div>
+                                                    <div className="d-flex ">
+                                                        <span className='B_meetingALl_details_span'>Meeting Duration</span>
+                                                        <span className='text-white'>: {calculateDuration(schedule.startTime, schedule.endTime)}</span>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
-                                )
-                            })}
+                                    )
+                                }))}
                     </div>
                 </div>
             );
@@ -1654,114 +1229,71 @@ function Meeting() {
                 <div className='mx-4'>
                     {/* Invited By Me Section */}
                     <div className="row g-5 B_meeting_card_section B_G_space">
-                        {/* Upcoming Meeting Card */}
-                        <div className=" col-xl-3 col-lg-4 col-md-6 col-12 mt-4">
-                            <div className="B_meeting_card" style={{ backgroundColor: '#0A1119', borderRadius: '6px' }}>
-                                <div className="d-flex justify-content-between align-items-center  p-3 B_meeting_padding">
-                                    <h6 className="text-white m-0 B_card_title">Project Meeting</h6>
-                                    <div>
-                                        <button type="button" class="btn btn-outline-secondary B_upcoming_btn1 B_upcoming_btn2 me-2">Join</button>
-                                    </div>
-                                </div>
-                                <div style={{ borderTop: "1px solid #525252" }}></div>
-                                <div className="B_meetingALl_details p-3 B_meeting_padding" style={{ color: '#B3AEAE' }}>
-                                    <div className="d-flex  mb-2">
-                                        <span className='B_meetingALl_details_span'>Meeting Date</span>
-                                        <span className='text-white'>: 23-01-2025</span>
-                                    </div>
-                                    <div className="d-flex mb-2">
-                                        <span className='B_meetingALl_details_span'>Meeting Time</span>
-                                        <span className='text-white'>: 11:00 AM</span>
-                                    </div>
-                                    <div className="d-flex ">
-                                        <span className='B_meetingALl_details_span'>Meeting Duration</span>
-                                        <span className='text-white'>: 0h 30m</span>
-                                    </div>
-                                </div>
+                        {allschedule
+                            .filter(schedule => ((schedule.status === "Completed" || schedule.status === "Cancelled") && schedule.invitees.some((inv) => inv.userId == userId)))
+                            .filter(schedule => {
+                                const duration = calculateDuration(schedule.startTime, schedule.endTime);
+                                const date = formatDate(schedule.date)
+                                return (
+                                    schedule.title.includes(searchTerm) ||
+                                    date.includes(searchTerm) ||
+                                    schedule.startTime.includes(searchTerm) ||
+                                    duration.includes(searchTerm)
+                                );
+                            }).length === 0 ? (
+                            <div className="col-12 text-center mt-4">
+                                <img src={NoMeeting} alt="No Meeting" className='j_no_meeting_icon' />
+                                <h5 className="j_no_meeting">No past meeting invitations</h5>
+                                <p className="text-white opacity-50">You haven't been invited to any past meetings</p>
                             </div>
-                        </div>
-
-                        {/* Completed Meeting Card */}
-                        <div className=" col-xl-3 col-lg-4 col-md-6 col-12">
-                            <div className="B_meeting_card " style={{ backgroundColor: '#0A1119', borderRadius: '6px' }}>
-                                <div className="d-flex justify-content-between align-items-center  p-3 B_meeting_padding ">
-                                    <h6 className="text-white m-0 B_card_title">Online Meeting</h6>
-                                    <div>
-                                        <button type="button" class="btn btn-outline-secondary B_upcoming_btn1 B_upcoming_btn2 me-2">Join</button>
-                                    </div>
-                                </div>
-                                <div style={{ borderTop: "1px solid #525252" }}></div>
-                                <div className="B_meetingALl_details p-3 B_meeting_padding" style={{ color: '#B3AEAE' }}>
-                                    <div className="d-flex mb-2">
-                                        <span className='B_meetingALl_details_span'>Meeting Date</span>
-                                        <span className='text-white'>: 23-01-2025</span>
-                                    </div>
-                                    <div className="d-flex mb-2">
-                                        <span className='B_meetingALl_details_span'>Meeting Time</span>
-                                        <span className='text-white'>: 11:00 AM</span>
-                                    </div>
-                                    <div className="d-flex ">
-                                        <span className='B_meetingALl_details_span'>Meeting Duration</span>
-                                        <span className='text-white'>: 0h 30m</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Join Meeting Card */}
-                        <div className=" col-xl-3 col-lg-4 col-md-6 col-12">
-                            <div className="B_meeting_card " style={{ backgroundColor: '#0A1119', borderRadius: '6px' }}>
-                                <div className="d-flex justify-content-between align-items-center p-3 B_meeting_padding">
-                                    <h6 className="text-white m-0 B_card_title">Project Meeting</h6>
-                                    <div>
-                                        <button type="button" class="btn btn-outline-secondary B_upcoming_btn1 B_upcoming_btn2 me-2">Join</button>
-                                    </div>
-                                </div>
-                                <div style={{ borderTop: "1px solid #525252" }}></div>
-                                <div className="B_meetingALl_details p-3 B_meeting_padding" style={{ color: '#B3AEAE' }}>
-                                    <div className="d-flex  mb-2">
-                                        <span className='B_meetingALl_details_span'>Meeting Date</span>
-                                        <span className='text-white'>: 23-01-2025</span>
-                                    </div>
-                                    <div className="d-flex mb-2">
-                                        <span className='B_meetingALl_details_span'>Meeting Time</span>
-                                        <span className='text-white'>: 11:00 AM</span>
-                                    </div>
-                                    <div className="d-flex ">
-                                        <span className='B_meetingALl_details_span'>Meeting Duration</span>
-                                        <span className='text-white'>: 0h 30m</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Cancelled Meeting Card */}
-                        <div className=" col-xl-3 col-lg-4 col-md-6 col-12">
-                            <div className="B_meeting_card " style={{ backgroundColor: '#0A1119', borderRadius: '6px' }}>
-                                <div className="d-flex justify-content-between align-items-center p-3 B_meeting_padding">
-                                    <h6 className="text-white m-0 B_card_title">Online Meeting</h6>
-                                    <div>
-                                        <button type="button" class="btn btn-outline-secondary B_upcoming_btn1 B_upcoming_btn2 me-2">Join</button>
-                                    </div>
-
-                                </div>
-                                <div style={{ borderTop: "1px solid #525252" }}></div>
-                                <div className="B_meetingALl_details p-3 B_meeting_padding" style={{ color: '#B3AEAE' }}>
-                                    <div className="d-flex  mb-2">
-                                        <span className='B_meetingALl_details_span'>Meeting Date</span>
-                                        <span className='text-white'>: 23-01-2025</span>
-                                    </div>
-                                    <div className="d-flex  mb-2">
-                                        <span className='B_meetingALl_details_span'>Meeting Time</span>
-                                        <span className='text-white'>: 11:00 AM</span>
-                                    </div>
-                                    <div className="d-flex ">
-                                        <span className='B_meetingALl_details_span'>Meeting Duration</span>
-                                        <span className='text-white'>: 0h 30m</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                        ) : (
+                            allschedule
+                                .filter(schedule => ((schedule.status === "Completed" || schedule.status === "Cancelled") && schedule.invitees.some((inv) => inv.userId == userId)))
+                                .filter(schedule => {
+                                    const duration = calculateDuration(schedule.startTime, schedule.endTime);
+                                    const date = formatDate(schedule.date)
+                                    return (
+                                        schedule.title.includes(searchTerm) ||
+                                        date.includes(searchTerm) ||
+                                        schedule.startTime.includes(searchTerm) ||
+                                        duration.includes(searchTerm)
+                                    );
+                                }).map((schedule, index) => {
+                                    return (
+                                        <div key={index}
+                                            // onClick={() => handlecanvas(schedule.status, schedule._id)} 
+                                            className="col-xl-3 col-lg-4 col-md-6 col-12 mt-4 mb-4">
+                                            <div className="B_meeting_card" style={{ backgroundColor: '#0A1119', borderRadius: '6px', cursor: "pointer" }}>
+                                                <div className="d-flex justify-content-between align-items-center  p-3 B_meeting_padding">
+                                                    <h6 className="text-white m-0 B_card_title">{schedule.title}</h6>
+                                                    <div>
+                                                        {schedule.status === 'Completed' && (
+                                                            <button type="button" class="btn btn-outline-success B_upcoming_btn1 me-2">Completed</button>
+                                                        )}
+                                                        {schedule.status === 'Cancelled' && (
+                                                            <button type="button" class="btn btn-outline-danger B_upcoming_btn1 me-2">Cancelled</button>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                                <div style={{ borderTop: "1px solid #525252" }}></div>
+                                                <div className="B_meetingALl_details p-3 B_meeting_padding" style={{ color: '#B3AEAE' }}>
+                                                    <div className="d-flex  mb-2">
+                                                        <span className='B_meetingALl_details_span'>Meeting Date</span>
+                                                        <span className='text-white'>: {formatDate(schedule.date)}</span>
+                                                    </div>
+                                                    <div className="d-flex  mb-2">
+                                                        <span className='B_meetingALl_details_span'>Meeting Time</span>
+                                                        <span className='text-white'>: {schedule.startTime}</span>
+                                                    </div>
+                                                    <div className="d-flex ">
+                                                        <span className='B_meetingALl_details_span'>Meeting Duration</span>
+                                                        <span className='text-white'>: {calculateDuration(schedule.startTime, schedule.endTime)}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )
+                                }))}
                     </div>
                 </div>
             );
@@ -2186,12 +1718,6 @@ function Meeting() {
         return true;
     };
 
-    // const handlePasswordChange = (e) => {
-    //     const newValue = e.target.value;
-    //     setPassword(newValue);
-    //     validatePassword(newValue);
-    // };
-
     const handlePasswordEdit = (e) => {
         if (e.key === 'Enter') {
             if (validatePassword(password)) {
@@ -2199,14 +1725,6 @@ function Meeting() {
             }
         }
     };
-
-    // const handlepasswordDice = () => {
-    //     setIsRotating(true);
-    //     setTimeout(() => {
-    //         setIsRotating(false);
-    //         setPassword(generatePassword());
-    //     }, 1000);
-    // };
 
     const scheduleSchema = Yup.object().shape({
         title: Yup.string().required('Title is required'),
@@ -2305,7 +1823,7 @@ function Meeting() {
 
     const formatEditDate = (dateString) => {
         const date = new Date(dateString);
-        return date.toISOString().split('T')[0]; // Returns date in YYYY-MM-DD format
+        return date.toISOString().split('T')[0];
     };
 
     return (
@@ -2388,7 +1906,7 @@ function Meeting() {
                                     <button className="btn btn-outline-light B_metting_btn fw-semibold" onClick={() => {
                                         const newMeetingId = generateMeetingId(20);
                                         const meetingLink = `${FRONT_URL}/screen/${newMeetingId}`;
-                                        navigate(`/screen/${newMeetingId}`, { state: { meetingLink } });
+                                        navigate(`/screen/${newMeetingId}`, { state: { meetingLink, status: true } });
                                     }}>Meet Now</button>
                                 </div>
                             </div>
@@ -3808,15 +3326,30 @@ function Meeting() {
                                                     <div className='ps-3' style={{ borderLeft: '1px solid #474e58' }}>
                                                         <div className="d-flex align-items-center justify-content-between">
                                                             <div className="me-3">
-                                                                <span className='B_meeting_Date_text_span' style={{ color: '#fff' }}>Mon, 23-01-2025</span>
+                                                                <span className='B_meeting_Date_text_span' style={{ color: '#fff' }}>{formatDateWithDay(meetingdetail?.date)}</span>
                                                             </div>
                                                             <div>
-                                                                <span className='B_meeting_time_text_span' style={{ color: '#fff' }}>11:00 AM</span>
+                                                                <span className='B_meeting_time_text_span' style={{ color: '#fff' }}>{formatTimeTo12Hour(meetingdetail?.startTime)}</span>
                                                             </div>
                                                         </div>
                                                         <div>
-                                                            <small className='B_meeting_time_text' style={{ color: '#8c8c8c' }}>
+                                                            {/* <small className='B_meeting_time_text' style={{ color: '#8c8c8c' }}>
                                                                 (GMT + 05:30) India Standard Time (Asia / Kolkata)
+                                                                {meetingdetail?.userData?.timeZone}
+                                                            </small> */}
+                                                            <small className='B_meeting_time_text' style={{ color: '#8c8c8c' }}>
+                                                                {(() => {
+                                                                    if (meetingdetail?.userData?.timeZone) {
+                                                                        const offset = moment.tz(meetingdetail.userData.timeZone).utcOffset();
+                                                                        const hours = Math.floor(Math.abs(offset) / 60).toString().padStart(2, '0');
+                                                                        const minutes = (Math.abs(offset) % 60).toString().padStart(2, '0');
+                                                                        const sign = offset >= 0 ? '+' : '-';
+                                                                        const offsetString = `(GMT ${sign}${hours}:${minutes})`;
+                                                                        const fullName = moment.tz(meetingdetail.userData.timeZone).zoneName();
+                                                                        return `${offsetString} ${fullName} (${meetingdetail.userData.timeZone})`;
+                                                                    }
+                                                                    return '';
+                                                                })()}
                                                             </small>
                                                         </div>
                                                     </div>
@@ -3832,16 +3365,16 @@ function Meeting() {
                                                     <div className='ps-3' style={{ borderLeft: '1px solid #474e58' }}>
                                                         <div className="d-flex align-items-center justify-content-between">
                                                             <div className="me-3">
-                                                                <span className='B_meeting_Date_text_span' style={{ color: '#fff' }}>Host : John Kumar</span>
+                                                                <span className='B_meeting_Date_text_span' style={{ color: '#fff' }}>Host : {meetingdetail?.userData?.name}</span>
                                                             </div>
                                                         </div>
                                                         <div>
-                                                            <small className='B_meeting_time_text' style={{ color: '#8c8c8c' }}>johnkumar123@gmail.com</small>
+                                                            <small className='B_meeting_time_text' style={{ color: '#8c8c8c' }}>{meetingdetail?.userData?.email}</small>
                                                         </div>
                                                         {!isSelectedMeetingCancelled && (
                                                             <div>
                                                                 <small className='B_meeting_time_text' style={{ color: '#8c8c8c' }}>
-                                                                    Participant: <span style={{ color: '#dadada' }}> 89</span>
+                                                                    Participant: <span style={{ color: '#dadada' }}> {meetingdetail?.participants?.length || 0}</span>
                                                                 </small>
                                                             </div>
                                                         )}
@@ -3856,25 +3389,22 @@ function Meeting() {
                                                         <img src={MeetingMultiUser} alt="" />
                                                     </div>
                                                     <div className='ps-3' style={{ borderLeft: '1px solid #474e58' }}>
-                                                        <div className="d-flex align-items-center justify-content-between B_meeting_details_flex">
-                                                            <div className="me-3">
-                                                                <span className='B_meeting_Date_text_span' style={{ color: '#fff' }}>Meeting Link : </span>
-                                                            </div>
-                                                            <div>
-                                                                <small className='B_meeting_time_text' style={{ color: '#dadada' }}>
-                                                                    https://googlemeet.123/57809
+                                                        <div className="B_meeting_details_flex">
+                                                            <small className="text-white">
+                                                                Meeting Link : <span>{meetingdetail?.meetingLink?.split('/').slice(-2).join('/')}</span>
+                                                            </small>
+                                                        </div>
+                                                        <div>
+                                                            <small className='B_meeting_time_text' style={{ color: '#8c8c8c' }}>
+                                                                Meeting ID : <span style={{ color: '#dadada' }}>{meetingdetail?.meetingLink?.split('/').pop()}</span>
+                                                            </small>
+                                                        </div>
+                                                        <div>
+                                                            {meetingdetail?.password && (
+                                                                <small className='B_meeting_time_text' style={{ color: '#8c8c8c' }}>
+                                                                    Password: <span style={{ color: '#dadada' }}> {meetingdetail?.password}</span>
                                                                 </small>
-                                                            </div>
-                                                        </div>
-                                                        <div>
-                                                            <small className='B_meeting_time_text' style={{ color: '#8c8c8c' }}>
-                                                                Meeting ID : <span style={{ color: '#dadada' }}> 1245644575</span>
-                                                            </small>
-                                                        </div>
-                                                        <div>
-                                                            <small className='B_meeting_time_text' style={{ color: '#8c8c8c' }}>
-                                                                Password: <span style={{ color: '#dadada' }}> YvujvbuFRT</span>
-                                                            </small>
+                                                            )}
                                                         </div>
                                                     </div>
                                                 </div>
@@ -3886,7 +3416,7 @@ function Meeting() {
                                                 <Button
                                                     variant="outline-light"
                                                     className="w-50 py-2"
-                                                    style={{ borderColor: '#474E58', color: '#fff', backgroundColor: 'transparent' }}
+                                                    style={{ borderColor: '#474E58', color: '#fff', fontWeight: 600, backgroundColor: 'transparent' }}
                                                     onClick={handleShowDeleteModel}
                                                 >
                                                     Delete Meeting
@@ -3894,7 +3424,7 @@ function Meeting() {
                                                 <Button
                                                     variant="light"
                                                     className="w-50 py-2"
-                                                    style={{ backgroundColor: '#fff', color: '#000' }}
+                                                    style={{ backgroundColor: '#fff', fontWeight: 600, color: '#000' }}
                                                     onClick={handleShowScheduleModel}
                                                 >
                                                     Schedule Meeting
