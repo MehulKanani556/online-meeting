@@ -153,6 +153,14 @@ async function initializeSocket(io) {
 
                 const hostUserId = meetingDetails?.userId?.toString();
 
+                // Add participant to the meeting's participants array if not already present
+                if (meetingDetails && !meetingDetails.participants.includes(userId)) {
+                    await schedule.findByIdAndUpdate(
+                        meetingDetails._id,
+                        { $addToSet: { participants: userId } }
+                    );
+                }
+
                 // Join the room
                 socket.join(roomId);
 

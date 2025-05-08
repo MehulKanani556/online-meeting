@@ -77,6 +77,13 @@ const scheduleSchema = mongoose.Schema({
     }],
     status: {
         type: String
+    },
+    participants: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+    }],
+    googleCalendarEventId: {
+        type: String,
     }
 }, {
     timestamps: true,
