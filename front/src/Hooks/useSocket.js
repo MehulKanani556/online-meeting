@@ -275,9 +275,18 @@ export const useSocket = (userId, roomId, userName) => {
 
         });
 
-        // Handle participant removal
-        socketRef.current.on('participant-removed', ({ participantId }) => {
-            setParticipants(prev => prev.filter(participant => participant.id !== participantId));
+        // mute all users
+        socketRef.current.on('mute-all-users', ({ hostId }) => {
+            // Update participants state to show all non-host users as muted
+            setParticipants(prev => prev.map(participant => ({
+                ...participant,
+                hasAudio: participant.userId === hostId ? true : false
+            })));
+
+            // Only mute the current user's audio if they are not the host
+            if (userId !== hostId) {
+                setIsMuted(true);
+            }
         });
 
         // Handle media state changes
@@ -367,6 +376,16 @@ export const useSocket = (userId, roomId, userName) => {
                 roomId,
                 message,
                 sender: userName
+            });
+        }
+    };
+
+    // mute all event
+    const muteAllUsers = () => {
+        if (socketRef.current) {
+            socketRef.current.emit('mute-all-users', {
+                roomId,
+                hostId: userId // Send the host's userId
             });
         }
     };
@@ -554,6 +573,7 @@ export const useSocket = (userId, roomId, userName) => {
         setIsVideoOff,
         isMuted,
         setIsMuted,
-        systemMessages
+        systemMessages,
+        muteAllUsers
     };
 }

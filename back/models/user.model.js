@@ -32,7 +32,7 @@ const userSchema = mongoose.Schema({
     },
     originalaudio: {
         type: Boolean,
-        default: false
+        default: true
     },
     GoogleCalendar: {
         type: Boolean,
@@ -44,7 +44,7 @@ const userSchema = mongoose.Schema({
     },
     Joinnotification: {
         type: Boolean,
-        default: false
+        default: true
     },
     joinwithouthost: {
         type: Boolean,
@@ -56,11 +56,11 @@ const userSchema = mongoose.Schema({
     },
     videomuted: {
         type: Boolean,
-        default: false
+        default: true
     },
     sharescreen: {
         type: Boolean,
-        default: false
+        default: true
     },
     Autorecord: {
         type: Boolean,

@@ -35,8 +35,6 @@ const BottomBar = React.memo(
       (state) => state.meeting
     );
 
-    console.log("isHandRaised", isHandRaised);
-
     const handleShowee = (e) => {
       dispatch(setShow(true));
       dispatch(setIsChatOpen(true));

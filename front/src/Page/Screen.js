@@ -96,6 +96,7 @@ function Screen() {
     joinRequests,
     handleJoinRequest,
     systemMessages,
+    muteAllUsers
   } = useSocket(userId, roomId, userName);
 
   // WebRTC State
@@ -1181,12 +1182,13 @@ function Screen() {
   };
 
   // Function to remove a participant
-  const removeParticipant = (participantId) => {
+  const removeParticipant = (participantdata) => {
     if (!socket) return;
 
     socket.emit("remove-participant", {
       roomId,
-      participantId,
+      participantId: participantdata.id,
+      participantuserId: participantdata.userId,
     });
 
     setActiveDropdown(null);
@@ -1356,9 +1358,17 @@ function Screen() {
       );
     });
 
+
+    // Handle participant removal
+    socket.on('participant-removed', ({ participantuserId }) => {
+      setParticipants(prev => prev.filter(participant => participant.userId !== participantuserId));
+      endMeeting()
+    });
+
     return () => {
       if (socket) {
         socket.off("recording-status-change");
+        socket.off("participant-removed");
       }
     };
   }, [socket, isConnected]);
@@ -2073,6 +2083,7 @@ function Screen() {
         handleTextareaResize={handleTextareaResize}
         renderTypingIndicator={renderTypingIndicator}
         values={usersValues}
+        muteAllUsers={muteAllUsers}
         // setFieldValue={setFieldValue}
         handleSubmit={() => {
           // Handle form submission if needed

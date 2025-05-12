@@ -369,7 +369,7 @@ function Meeting() {
                     <div className="row g-5 B_meeting_card_section B_G_space">
 
                         {allschedule
-                            .filter(schedule => schedule.invitees.some((inv) => inv.userId == userId))
+                            .filter(schedule => schedule.invitees?.some((inv) => inv.userId == userId))
                             .filter(schedule => {
                                 const duration = calculateDuration(schedule.startTime, schedule.endTime);
                                 const date = formatDate(schedule.date)
@@ -387,7 +387,7 @@ function Meeting() {
                             </div>
                         ) : (
                             allschedule
-                                .filter(schedule => schedule.invitees.some((inv) => inv.userId == userId))
+                                .filter(schedule => schedule.invitees?.some((inv) => inv.userId == userId))
                                 .filter(schedule => {
                                     const duration = calculateDuration(schedule.startTime, schedule.endTime);
                                     const date = formatDate(schedule.date)
@@ -574,7 +574,7 @@ function Meeting() {
                 <div className='mx-4'>
                     <div className="row g-5 B_meeting_card_section B_G_space">
                         {allschedule
-                            .filter(schedule => schedule.invitees.some((inv) => inv.userId == userId))
+                            .filter(schedule => schedule.invitees?.some((inv) => inv.userId == userId))
                             .filter(schedule => {
                                 const duration = calculateDuration(schedule.startTime, schedule.endTime);
                                 const date = formatDate(schedule.date)
@@ -592,7 +592,7 @@ function Meeting() {
                             </div>
                         ) : (
                             allschedule
-                                .filter(schedule => schedule.invitees.some((inv) => inv.userId == userId))
+                                .filter(schedule => schedule.invitees?.some((inv) => inv.userId == userId))
                                 .filter(schedule => {
                                     const duration = calculateDuration(schedule.startTime, schedule.endTime);
                                     const date = formatDate(schedule.date)
@@ -758,7 +758,7 @@ function Meeting() {
                     <h6 className="text-white mb-4 ms-4">Invited Meetings</h6>
                     <div className="row g-5 B_meeting_card_section B_G_space">
                         {allschedule
-                            .filter(schedule => (schedule.status === "Upcoming" && schedule.invitees.some((inv) => inv.userId == userId)))
+                            .filter(schedule => (schedule.status === "Upcoming" && schedule.invitees?.some((inv) => inv.userId == userId)))
                             .filter(schedule => {
                                 const duration = calculateDuration(schedule.startTime, schedule.endTime);
                                 const date = formatDate(schedule.date)
@@ -775,7 +775,7 @@ function Meeting() {
                                 <p className="text-white opacity-50">You haven't been invited to any meetings yet</p>
                             </div>
                         ) : (allschedule
-                            .filter(schedule => (schedule.status === "Upcoming" && schedule.invitees.some((inv) => inv.userId == userId)))
+                            .filter(schedule => (schedule.status === "Upcoming" && schedule.invitees?.some((inv) => inv.userId == userId)))
                             .filter(schedule => {
                                 const duration = calculateDuration(schedule.startTime, schedule.endTime);
                                 const date = formatDate(schedule.date)
@@ -943,7 +943,7 @@ function Meeting() {
                 <div className='mx-4'>
                     <div className="row g-5 B_meeting_card_section">
                         {allschedule
-                            .filter(schedule => (schedule.status === "Upcoming" && schedule.invitees.some((inv) => inv.userId == userId)))
+                            .filter(schedule => (schedule.status === "Upcoming" && schedule.invitees?.some((inv) => inv.userId == userId)))
                             .filter(schedule => {
                                 const duration = calculateDuration(schedule.startTime, schedule.endTime);
                                 const date = formatDate(schedule.date)
@@ -960,7 +960,7 @@ function Meeting() {
                                 <p className="text-white opacity-50">You haven't been invited to any meetings yet</p>
                             </div>
                         ) : (allschedule
-                            .filter(schedule => (schedule.status === "Upcoming" && schedule.invitees.some((inv) => inv.userId == userId)))
+                            .filter(schedule => (schedule.status === "Upcoming" && schedule.invitees?.some((inv) => inv.userId == userId)))
                             .filter(schedule => {
                                 const duration = calculateDuration(schedule.startTime, schedule.endTime);
                                 const date = formatDate(schedule.date)
@@ -1082,7 +1082,7 @@ function Meeting() {
                     <h6 className="text-white ms-4">Invited Meetings</h6>
                     <div className="row g-5 B_meeting_card_section B_G_space">
                         {allschedule
-                            .filter(schedule => ((schedule.status === "Completed" || schedule.status === "Cancelled") && schedule.invitees.some((inv) => inv.userId == userId)))
+                            .filter(schedule => ((schedule.status === "Completed" || schedule.status === "Cancelled") && schedule.invitees?.some((inv) => inv.userId == userId)))
                             .filter(schedule => {
                                 const duration = calculateDuration(schedule.startTime, schedule.endTime);
                                 const date = formatDate(schedule.date)
@@ -1100,7 +1100,7 @@ function Meeting() {
                             </div>
                         ) : (
                             allschedule
-                                .filter(schedule => ((schedule.status === "Completed" || schedule.status === "Cancelled") && schedule.invitees.some((inv) => inv.userId == userId)))
+                                .filter(schedule => ((schedule.status === "Completed" || schedule.status === "Cancelled") && schedule.invitees?.some((inv) => inv.userId == userId)))
                                 .filter(schedule => {
                                     const duration = calculateDuration(schedule.startTime, schedule.endTime);
                                     const date = formatDate(schedule.date)
@@ -1230,7 +1230,7 @@ function Meeting() {
                     {/* Invited By Me Section */}
                     <div className="row g-5 B_meeting_card_section B_G_space">
                         {allschedule
-                            .filter(schedule => ((schedule.status === "Completed" || schedule.status === "Cancelled") && schedule.invitees.some((inv) => inv.userId == userId)))
+                            .filter(schedule => ((schedule.status === "Completed" || schedule.status === "Cancelled") && schedule.invitees?.some((inv) => inv.userId == userId)))
                             .filter(schedule => {
                                 const duration = calculateDuration(schedule.startTime, schedule.endTime);
                                 const date = formatDate(schedule.date)
@@ -1248,7 +1248,7 @@ function Meeting() {
                             </div>
                         ) : (
                             allschedule
-                                .filter(schedule => ((schedule.status === "Completed" || schedule.status === "Cancelled") && schedule.invitees.some((inv) => inv.userId == userId)))
+                                .filter(schedule => ((schedule.status === "Completed" || schedule.status === "Cancelled") && schedule.invitees?.some((inv) => inv.userId == userId)))
                                 .filter(schedule => {
                                     const duration = calculateDuration(schedule.startTime, schedule.endTime);
                                     const date = formatDate(schedule.date)

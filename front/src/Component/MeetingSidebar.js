@@ -61,6 +61,7 @@ const MeetingSidebar = ({
   handleMessageInput,
   handleTextareaResize,
   renderTypingIndicator,
+  muteAllUsers,
 }) => {
   const usersValues = {
     invitees: [],
@@ -640,7 +641,7 @@ const MeetingSidebar = ({
                                               className="px-3 py-2 hover-bg-secondary cursor-pointer"
                                               onClick={() =>
                                                 removeParticipant(
-                                                  participant.id
+                                                  participant
                                                 )
                                               }
                                             >
@@ -784,7 +785,7 @@ const MeetingSidebar = ({
                               />
                               Invite people
                             </Button>
-                            <Button className="B_screen_btn fw-semibold p-2">
+                            <Button className="B_screen_btn fw-semibold p-2" onClick={muteAllUsers}>
                               {" "}
                               Mute all{" "}
                             </Button>

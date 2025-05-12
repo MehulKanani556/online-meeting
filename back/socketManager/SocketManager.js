@@ -442,20 +442,37 @@ async function initializeSocket(io) {
             }
         });
 
+        // make host
         socket.on('make-host', ({ roomId, newHostId }) => {
             io.to(roomId).emit('host-updated', { newHostId });
         });
 
+        // make co-host
         socket.on('make-cohost', ({ roomId, newCohostId }) => {
             io.to(roomId).emit('cohost-updated', { newCohostId });
         });
 
-        socket.on('rename-participant', ({ roomId, participantId, newName }) => {
-            io.to(roomId).emit('participant-renamed', { participantId, newName });
-        });
-
+        // rename participant
         socket.on('rename-participant', ({ roomId, participantId, newName, userId }) => {
             io.to(roomId).emit('participant-renamed', { participantId, newName, participantUserId: userId });
+        });
+
+        // remove participant
+        socket.on('remove-participant', ({ roomId, participantId, participantuserId }) => {
+            io.to(roomId).emit('participant-removed', { participantId });
+            // Also disconnect the removed user's socket
+            const userSocket = io.sockets.sockets.get(participantId);
+            if (userSocket) {
+                userSocket.disconnect();
+            }
+
+            rooms[roomId] = rooms[roomId].filter(user => user.userId !== participantuserId);
+        });
+
+        // mute all users
+        socket.on('mute-all-users', ({ roomId, hostId }) => {
+            // Broadcast to ALL users in the room including the host
+            io.to(roomId).emit('mute-all-users', { hostId });
         });
 
         // User disconnects
