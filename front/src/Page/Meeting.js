@@ -21,6 +21,7 @@ import { IMAGE_URL } from '../Utils/baseUrl';
 import { createpersonalroom } from '../Redux/Slice/personalroom.slice';
 import NoMeeting from '../Image/j_meeting_not.png'
 import moment from 'moment-timezone';
+import { getchatsById } from '../Redux/Slice/chats.slice';
 
 function Meeting() {
 
@@ -288,24 +289,13 @@ function Meeting() {
                                                                 {openDropdownId === schedule._id && (
                                                                     <div className="position-absolute  mt-2 py-2 B_boxEdit  rounded shadow-lg"
                                                                         style={{ minWidth: '120px', zIndex: 1000 }}>
-                                                                        {/* <Link target="_blank" to={`${schedule.meetingLink}`} className="dropdown-item text-white px-3 py-1 hover-bg-secondary"
-                                                                        style={{ backgroundColor: 'transparent', border: 'none', width: '100%', textAlign: 'left' }}>
-                                                                        Start
-                                                                    </Link> */}
                                                                         <button
                                                                             className="dropdown-item text-white px-3 py-1 hover-bg-secondary"
                                                                             style={{ backgroundColor: 'transparent', border: 'none', width: '100%', textAlign: 'left' }}
-                                                                            onClick={() => window.location.href = schedule.meetingLink}
+                                                                            onClick={() => { window.location.href = schedule.meetingLink }}
                                                                         >
                                                                             Start
                                                                         </button>
-                                                                        {/* <button
-                                                                        className="dropdown-item text-white px-3 py-1 hover-bg-secondary"
-                                                                        style={{ backgroundColor: 'transparent', border: 'none', width: '100%', textAlign: 'left' }}
-                                                                        onClick={() => window.open(schedule.meetingLink, '_blank')}
-                                                                    >
-                                                                        Start
-                                                                    </button> */}
                                                                         <button
                                                                             className="dropdown-item text-white px-3 py-1 hover-bg-secondary"
                                                                             style={{ backgroundColor: 'transparent', border: 'none', width: '100%', textAlign: 'left' }}
@@ -1044,7 +1034,11 @@ function Meeting() {
                                     );
                                 }).map((schedule, index) => {
                                     return (
-                                        <div key={index} onClick={() => handlecanvas(schedule.status, schedule)} className="col-xl-3 col-lg-4 col-md-6 col-12 mt-4 mb-4">
+                                        <div key={index} onClick={() => {
+                                            const meetingId = schedule.meetingLink.split('/screen/')[1];
+                                            sendmeetingId(meetingId);
+                                            handlecanvas(schedule.status, schedule)
+                                        }} className="col-xl-3 col-lg-4 col-md-6 col-12 mt-4 mb-4">
                                             <div className="B_meeting_card" style={{ backgroundColor: '#0A1119', borderRadius: '6px', cursor: "pointer" }}>
                                                 <div className="d-flex justify-content-between align-items-center  p-3 B_meeting_padding">
                                                     <h6 className="text-white m-0 B_card_title">{schedule.title}</h6>
@@ -1187,7 +1181,11 @@ function Meeting() {
                                     );
                                 }).map((schedule, index) => {
                                     return (
-                                        <div key={index} onClick={() => handlecanvas(schedule.status, schedule._id)} className="col-xl-3 col-lg-4 col-md-6 col-12">
+                                        <div key={index} onClick={() => {
+                                            const meetingId = schedule.meetingLink.split('/screen/')[1];
+                                            sendmeetingId(meetingId);
+                                            handlecanvas(schedule.status, schedule)
+                                        }} className="col-xl-3 col-lg-4 col-md-6 col-12">
                                             <div className="B_meeting_card" style={{ backgroundColor: '#0A1119', borderRadius: '6px', cursor: "pointer" }}>
                                                 <div className="d-flex justify-content-between align-items-center  p-3 B_meeting_padding">
                                                     <h6 className="text-white m-0 B_card_title">{schedule.title}</h6>
@@ -1261,7 +1259,11 @@ function Meeting() {
                                 }).map((schedule, index) => {
                                     return (
                                         <div key={index}
-                                            // onClick={() => handlecanvas(schedule.status, schedule._id)} 
+                                            onClick={() => {
+                                                const meetingId = schedule.meetingLink.split('/screen/')[1];
+                                                sendmeetingId(meetingId);
+                                                handlecanvas(schedule.status, schedule)
+                                            }}
                                             className="col-xl-3 col-lg-4 col-md-6 col-12 mt-4 mb-4">
                                             <div className="B_meeting_card" style={{ backgroundColor: '#0A1119', borderRadius: '6px', cursor: "pointer" }}>
                                                 <div className="d-flex justify-content-between align-items-center  p-3 B_meeting_padding">
@@ -1691,6 +1693,14 @@ function Meeting() {
         setBillingCycle('Meeting Details');
         setOffcanvasModel(true);
     };
+
+    const sendmeetingId = (meetingId) => {
+        dispatch(getchatsById(meetingId))
+    }
+
+    const selectMeetingchat = useSelector((state) => state.chat.currchats)
+    console.log(selectMeetingchat);
+
 
     const handleSecurityChange = (type) => {
         setSecurityType(type);
@@ -2541,7 +2551,6 @@ function Meeting() {
                             </Modal.Header>
 
                             <div className="j_modal_header"></div>
-                            {/* {console.log("Schedule Data ... ", ScheduleData)} */}
                             <Modal.Body className="py-0">
 
                                 <Formik
@@ -3333,10 +3342,6 @@ function Meeting() {
                                                             </div>
                                                         </div>
                                                         <div>
-                                                            {/* <small className='B_meeting_time_text' style={{ color: '#8c8c8c' }}>
-                                                                (GMT + 05:30) India Standard Time (Asia / Kolkata)
-                                                                {meetingdetail?.userData?.timeZone}
-                                                            </small> */}
                                                             <small className='B_meeting_time_text' style={{ color: '#8c8c8c' }}>
                                                                 {(() => {
                                                                     if (meetingdetail?.userData?.timeZone) {
@@ -3391,7 +3396,7 @@ function Meeting() {
                                                     <div className='ps-3' style={{ borderLeft: '1px solid #474e58' }}>
                                                         <div className="B_meeting_details_flex">
                                                             <small className="text-white">
-                                                                Meeting Link : <span>{meetingdetail?.meetingLink?.split('/').slice(-2).join('/')}</span>
+                                                                Meeting Link : <span>{meetingdetail?.meetingLink}</span>
                                                             </small>
                                                         </div>
                                                         <div>

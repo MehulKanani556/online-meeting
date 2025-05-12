@@ -375,7 +375,9 @@ export const useSocket = (userId, roomId, userName) => {
             socketRef.current.emit('send-message', {
                 roomId,
                 message,
-                sender: userName
+                sender: userName,
+                senderId: userId,
+                ReceiverId: roomId
             });
         }
     };

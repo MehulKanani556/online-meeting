@@ -18,7 +18,7 @@ const oauth2Client = new OAuth2Client(
     process.env.GOOGLE_CLIENT_ID,
     process.env.GOOGLE_CLIENT_SECRET,
     process.env.GOOGLE_REDIRECT_URI
-  );
+);
 
 exports.createNewschedule = async (req, res) => {
     try {
@@ -68,7 +68,7 @@ exports.createNewschedule = async (req, res) => {
 
         if (meetingLink === "GenerateaOneTimeMeetingLink") {
             const uniqueId = crypto.randomBytes(10).toString('hex');
-            scheduleData.meetingLink = `http://localhost:3000/screen/${uniqueId}`;
+            scheduleData.meetingLink = `/screen/${uniqueId}`;
         }
 
         if (meetingLink === "UseMyPersonalRoomLink") {
@@ -79,7 +79,7 @@ exports.createNewschedule = async (req, res) => {
             // .slice(0, 12)
             // .replace(/(.{3})/g, '$1-')
             // .slice(0, -1);
-            scheduleData.meetingLink = `http://localhost:3000/screen/${uniqueId}`;
+            scheduleData.meetingLink = `/screen/${uniqueId}`;
             scheduleData.password = password;
         }
 
@@ -127,49 +127,49 @@ exports.createNewschedule = async (req, res) => {
         // ===========Google Calendar============
 
         let checkUser = await userModel.findById(userId);
-            // Prepare event
-            const event = {
+        // Prepare event
+        const event = {
             summary: title,
             description,
             start: {
-            dateTime: `${date}T${startTime}:00`,
-            timeZone: 'Asia/Kolkata',
+                dateTime: `${date}T${startTime}:00`,
+                timeZone: 'Asia/Kolkata',
             },
             end: {
-            dateTime: `${date}T${endTime}:00`,
-            timeZone: 'Asia/Kolkata',
+                dateTime: `${date}T${endTime}:00`,
+                timeZone: 'Asia/Kolkata',
             },
             attendees: invitees.map(i => ({ email: i.email })),
             reminders: {
-            useDefault: false,
-            overrides: [
-                { method: 'email', minutes: 24 * 60 },
-                { method: 'popup', minutes: 10 },
-            ],
+                useDefault: false,
+                overrides: [
+                    { method: 'email', minutes: 24 * 60 },
+                    { method: 'popup', minutes: 10 },
+                ],
             },
         };
 
-     
-      
-          try {
+
+
+        try {
             // Get user info from Google
             oauth2Client.setCredentials({ refresh_token: checkUser.googleRefreshToken })
 
             const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
-                const response =   await calendar.events.insert({
+            const response = await calendar.events.insert({
                 calendarId: 'primary',
                 resource: event,
-                });
-                //  console.log("response", response);
+            });
+            //  console.log("response", response);
 
-                  // Store the Google Calendar event ID in the schedule
-                if (response && response.data && response.data.id) {
-                    chekschedule.googleCalendarEventId = response.data.id;
-                    await chekschedule.save();
-                }
-            } catch (error) {
-                    console.log(error);
+            // Store the Google Calendar event ID in the schedule
+            if (response && response.data && response.data.id) {
+                chekschedule.googleCalendarEventId = response.data.id;
+                await chekschedule.save();
             }
+        } catch (error) {
+            console.log(error);
+        }
         return res.json({
             status: 200,
             message: "Schedule Created Successfully",
@@ -213,19 +213,24 @@ exports.getAllschedule = async (req, res) => {
 
         const currentDateTime = new Date();
         const userSchedules = paginatedschedule.filter((meeting) => {
+            const scheduleStartTime = new Date(`${formatDate(meeting.date)}T${meeting.startTime}`);
             const scheduleEndTime = new Date(`${formatDate(meeting.date)}T${meeting.endTime}`);
 
-            // Check if the status is upcoming or join and end time is past
-            // if ((meeting.status === "Upcoming" || meeting.status === "Join") && scheduleEndTime < currentDateTime && meeting.participants.length > 1) {
-            if (meeting.participants?.length > 1) {
-                // Update status in database
+            // Check if the current time matches the start time
+            if (scheduleStartTime <= currentDateTime && scheduleEndTime > currentDateTime) {
+                // Update status to "Join" if current time is within the meeting time
+                schedule.findByIdAndUpdate(meeting._id, { status: "Join" })
+                    .catch(err => console.error("Error updating meeting status:", err));
+                meeting.status = "Join";
+            } else if (meeting.participants?.length > 1) {
+                // Update status to "Completed" if the meeting has ended
                 schedule.findByIdAndUpdate(meeting._id, { status: "Completed" })
                     .catch(err => console.error("Error updating meeting status:", err));
                 meeting.status = "Completed";
             }
 
             return (meeting.userId.toString() === userId.toString() ||
-                meeting?.invitees?.some((invitee) => invitee?.userId?.toString() === userId?.toString()))
+                meeting?.invitees?.some((invitee) => invitee?.userId?.toString() === userId?.toString()));
         });
 
 
@@ -281,7 +286,7 @@ exports.updateschedule = async (req, res) => {
         // Update Google Calendar event if event ID exists
         if (scheduleUpdateById.googleCalendarEventId) {
             const user = await userModel.findById(scheduleUpdateById.userId);
-           
+
             oauth2Client.setCredentials({ refresh_token: user.googleRefreshToken });
 
             const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
@@ -343,7 +348,7 @@ exports.removeschedule = async (req, res) => {
         // Delete from Google Calendar if event ID exists
         if (removeschedule.googleCalendarEventId) {
             const user = await userModel.findById(removeschedule.userId);
-           
+
             oauth2Client.setCredentials({ refresh_token: user.googleRefreshToken });
 
             const calendar = google.calendar({ version: 'v3', auth: oauth2Client });

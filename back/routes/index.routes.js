@@ -8,6 +8,7 @@ const { getAllcontact, getcontactById, updatecontact, removecontact, createNewco
 const { createNewreviews, getAllreviews, getreviewsById, updatereviews, removereviews } = require('../controller/review.controller');
 const { createNewschedule, getAllschedule, getscheduleById, updateschedule, removeschedule } = require('../controller/schedule.controller');
 const { createNewpersonalroom, getAllpersonalroom, getpersonalroomById, updatepersonalroom, removepersonalroom } = require('../controller/personalroom.controller');
+const { getchatsById } = require('../controller/chat.controller');
 
 // auth Routes
 
@@ -59,6 +60,10 @@ indexRoutes.get('/allpersonalroom', getAllpersonalroom);
 indexRoutes.get('/getpersonalroomById/:id', getpersonalroomById);
 indexRoutes.put('/personalroomUpdate/:id', updatepersonalroom);
 indexRoutes.delete('/deletepersonalroom/:id', removepersonalroom);
+
+// personal room Routes 
+
+indexRoutes.get('/getchatsById/:id', getchatsById);
 
 
 module.exports = indexRoutes
