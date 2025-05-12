@@ -7,6 +7,7 @@ import reviewSlice from "./Slice/reviews.slice";
 import scheduleSlice from "./Slice/schedule.slice";
 import personalroomSlice from "./Slice/personalroom.slice";
 import meetingSlice from "./Slice/meeting.slice";
+import chatsSlice from "./Slice/chats.slice";
 
 export const rootReducer = combineReducers({
     alert: alertSlice,
@@ -17,4 +18,5 @@ export const rootReducer = combineReducers({
     schedule: scheduleSlice,
     personalroom: personalroomSlice,
     meeting: meetingSlice,
+    chat: chatsSlice
 });

@@ -381,7 +381,9 @@ export const useSocket = (userId, roomId, userName, hostUserId) => {
             socketRef.current.emit('send-message', {
                 roomId,
                 message,
-                sender: userName
+                sender: userName,
+                senderId: userId,
+                ReceiverId: roomId
             });
         }
     };

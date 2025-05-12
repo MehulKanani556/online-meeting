@@ -1,3 +1,4 @@
+const { createchat } = require('../controller/chat.controller');
 const schedule = require('../models/schedule.modal')
 
 const onlineUsers = new Map();
@@ -280,12 +281,13 @@ async function initializeSocket(io) {
         });
 
         // Chat functionality
-        socket.on('send-message', ({ roomId, message, sender }) => {
+        socket.on('send-message', ({ roomId, message, sender, senderId, ReceiverId }) => {
             io.to(roomId).emit('receive-message', {
                 sender,
                 message,
                 timestamp: new Date().toISOString()
             });
+            createchat({ sender, meetingId: roomId, senderId, ReceiverId, message })
         });
 
         socket.on("user-login", async (userId) => {

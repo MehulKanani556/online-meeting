@@ -74,6 +74,8 @@ function Screen() {
     : "U";
   const userName = currUser?.name;
 
+    // const setid 
+
   // Use the socket hook
   const {
     socket,
@@ -927,6 +929,7 @@ function Screen() {
   let isEndingMeeting = false;
 
   const endMeeting = () => {
+    sessionStorage.removeItem('meetingLinkId');
     sessionStorage.removeItem("MeetingLinkModal");
     sessionStorage.removeItem("renameParticipant");
     if (isEndingMeeting) return; // Prevent further calls
@@ -2102,11 +2105,10 @@ function Screen() {
         renderTypingIndicator={renderTypingIndicator}
         values={usersValues}
         muteAllUsers={muteAllUsers}
-        // setFieldValue={setFieldValue}
         handleSubmit={() => {
-          // Handle form submission if needed
           console.log("values", usersValues);
         }}
+        // setFieldValue={setFieldValue}
       />
     </div>
   );
