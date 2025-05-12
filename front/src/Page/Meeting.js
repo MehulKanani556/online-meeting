@@ -369,7 +369,7 @@ function Meeting() {
                     <div className="row g-5 B_meeting_card_section B_G_space">
 
                         {allschedule
-                            .filter(schedule => schedule.invitees?.some((inv) => inv.userId == userId))
+                            .filter(schedule => schedule?.invitees?.some((inv) => inv.userId == userId))
                             .filter(schedule => {
                                 const duration = calculateDuration(schedule.startTime, schedule.endTime);
                                 const date = formatDate(schedule.date)

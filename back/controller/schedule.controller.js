@@ -1,6 +1,10 @@
 const schedule = require('../models/schedule.modal');
 const crypto = require('crypto');
 const nodemailer = require('nodemailer');
+const userModel = require('../models/user.model');
+// const { google } = require("googleapis");
+const { OAuth2Client } = require('google-auth-library');
+const google = require('googleapis').google;
 
 const transporter = nodemailer.createTransport({
     service: 'Gmail',
@@ -9,6 +13,12 @@ const transporter = nodemailer.createTransport({
         pass: process.env.EMAIL_PASS
     }
 });
+
+const oauth2Client = new OAuth2Client(
+    process.env.GOOGLE_CLIENT_ID,
+    process.env.GOOGLE_CLIENT_SECRET,
+    process.env.GOOGLE_REDIRECT_URI
+  );
 
 exports.createNewschedule = async (req, res) => {
     try {
@@ -113,6 +123,53 @@ exports.createNewschedule = async (req, res) => {
 
         let chekschedule = await schedule.create(scheduleData);
 
+
+        // ===========Google Calendar============
+
+        let checkUser = await userModel.findById(userId);
+            // Prepare event
+            const event = {
+            summary: title,
+            description,
+            start: {
+            dateTime: `${date}T${startTime}:00`,
+            timeZone: 'Asia/Kolkata',
+            },
+            end: {
+            dateTime: `${date}T${endTime}:00`,
+            timeZone: 'Asia/Kolkata',
+            },
+            attendees: invitees.map(i => ({ email: i.email })),
+            reminders: {
+            useDefault: false,
+            overrides: [
+                { method: 'email', minutes: 24 * 60 },
+                { method: 'popup', minutes: 10 },
+            ],
+            },
+        };
+
+     
+      
+          try {
+            // Get user info from Google
+            oauth2Client.setCredentials({ refresh_token: checkUser.googleRefreshToken })
+
+            const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
+                const response =   await calendar.events.insert({
+                calendarId: 'primary',
+                resource: event,
+                });
+                //  console.log("response", response);
+
+                  // Store the Google Calendar event ID in the schedule
+                if (response && response.data && response.data.id) {
+                    chekschedule.googleCalendarEventId = response.data.id;
+                    await chekschedule.save();
+                }
+            } catch (error) {
+                    console.log(error);
+            }
         return res.json({
             status: 200,
             message: "Schedule Created Successfully",
@@ -213,14 +270,56 @@ exports.getscheduleById = async (req, res) => {
 
 exports.updateschedule = async (req, res) => {
     try {
-        let id = req.params.id
+        let id = req.params.id;
         let scheduleData = req.body;
         let scheduleUpdateById = await schedule.findById(id);
 
         if (!scheduleUpdateById) {
-            return res.json({ status: 400, message: "schedule Not Found" })
+            return res.json({ status: 400, message: "schedule Not Found" });
         }
 
+        // Update Google Calendar event if event ID exists
+        if (scheduleUpdateById.googleCalendarEventId) {
+            const user = await userModel.findById(scheduleUpdateById.userId);
+           
+            oauth2Client.setCredentials({ refresh_token: user.googleRefreshToken });
+
+            const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
+
+            // Prepare updated event data
+            const event = {
+                summary: scheduleData.title,
+                description: scheduleData.description,
+                start: {
+                    dateTime: `${scheduleData.date}T${scheduleData.startTime}:00`,
+                    timeZone: 'Asia/Kolkata',
+                },
+                end: {
+                    dateTime: `${scheduleData.date}T${scheduleData.endTime}:00`,
+                    timeZone: 'Asia/Kolkata',
+                },
+                attendees: scheduleData.invitees?.map(i => ({ email: i.email })) || [],
+                reminders: {
+                    useDefault: false,
+                    overrides: [
+                        { method: 'email', minutes: 24 * 60 },
+                        { method: 'popup', minutes: 10 },
+                    ],
+                },
+            };
+
+            try {
+                await calendar.events.update({
+                    calendarId: 'primary',
+                    eventId: scheduleUpdateById.googleCalendarEventId,
+                    resource: event,
+                });
+            } catch (error) {
+                console.log("Google Calendar update error:", error);
+            }
+        }
+
+        // Update schedule in DB
         scheduleUpdateById = await schedule.findByIdAndUpdate(id, { ...scheduleData }, { new: true });
 
         return res.json({ status: 200, message: "schedule Updated SuccessFully", schedules: scheduleUpdateById });
@@ -233,17 +332,35 @@ exports.updateschedule = async (req, res) => {
 
 exports.removeschedule = async (req, res) => {
     try {
-        let id = req.params.id
+        let id = req.params.id;
 
         let removeschedule = await schedule.findById(id);
 
         if (!removeschedule) {
-            return res.json({ status: 400, message: "schedule Not Found" })
+            return res.json({ status: 400, message: "schedule Not Found" });
+        }
+
+        // Delete from Google Calendar if event ID exists
+        if (removeschedule.googleCalendarEventId) {
+            const user = await userModel.findById(removeschedule.userId);
+           
+            oauth2Client.setCredentials({ refresh_token: user.googleRefreshToken });
+
+            const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
+
+            try {
+                await calendar.events.delete({
+                    calendarId: 'primary',
+                    eventId: removeschedule.googleCalendarEventId,
+                });
+            } catch (error) {
+                console.log("Google Calendar delete error:", error);
+            }
         }
 
         await schedule.findByIdAndDelete(id);
 
-        return res.json({ status: 200, message: "schedule Deleted SuccessFully" })
+        return res.json({ status: 200, message: "schedule Deleted SuccessFully" });
 
     } catch (error) {
         res.json({ status: 500, message: error.message });
