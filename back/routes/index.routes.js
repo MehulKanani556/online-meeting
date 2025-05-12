@@ -60,4 +60,5 @@ indexRoutes.get('/getpersonalroomById/:id', getpersonalroomById);
 indexRoutes.put('/personalroomUpdate/:id', updatepersonalroom);
 indexRoutes.delete('/deletepersonalroom/:id', removepersonalroom);
 
+
 module.exports = indexRoutes

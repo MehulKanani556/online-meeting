@@ -69,6 +69,15 @@ const userSchema = mongoose.Schema({
     Recordinglayout: {
         type: String,
         enum: ['0', 'videowithscharescreen', 'activespeakerscreenshare']
+    },
+    googleAccessToken: {
+        type: String,
+    },
+    googleRefreshToken: {
+        type: String,
+    },
+    googleTokenExpiry: {
+        type: Date,
     }
 }, {
     timestamps: true,
