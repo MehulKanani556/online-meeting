@@ -58,8 +58,6 @@ function Home() {
   const currentUser = allusers.find((id) => id._id === userId)
   const userName = currentUser?.name;
 
-
-
   const [requestSent, setRequestSent] = useState(false);
   const [joinRequestStatus, setJoinRequestStatus] = useState('');
   const [meetingToJoin, setMeetingToJoin] = useState(null);
@@ -364,7 +362,7 @@ function Home() {
                     setActiveItem('New Meeting');
                     const newMeetingId = generateMeetingId(20);
                     const meetingLink = `${FRONT_URL}/screen/${newMeetingId}`;
-                    navigate(`/screen/${newMeetingId}`, { state: { meetingLink, status: true } });
+                    navigate(`/screen/${newMeetingId}`, { state: { meetingLink, status: true, hostUserId: userId } });
                   }}
                   style={{
                     border: activeItem === 'New Meeting' ? '2px solid #bfbfbf' : 'none',

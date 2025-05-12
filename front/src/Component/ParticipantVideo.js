@@ -17,6 +17,7 @@ const ParticipantVideo = React.memo(
     imgpath,
   }) => {
     const allUser = useSelector((state) => state.user.allusers);
+    const currUser = useSelector((state) => state.user.currUser);
 
     const singleuser = allUser.find((u) => u._id == participant.userId);
 
@@ -31,7 +32,7 @@ const ParticipantVideo = React.memo(
               autoPlay
               muted
               playsInline
-              style={{ display: isVideoOff ? "none" : "block" }}
+              style={{ display: isVideoOff  ? "none" : "block" }}
             />
             <div
               className="d_avatar-circle"
@@ -43,7 +44,7 @@ const ParticipantVideo = React.memo(
                 }, 70%, 45%)`,
               }}
             >
-              {singleuser?.photo ? (
+              {singleuser?.photo && currUser?.videomuted ? (
                 <img
                   src={`${imgpath}${singleuser?.photo}`}
                   alt="userphoto"

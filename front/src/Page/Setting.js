@@ -5,6 +5,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import HomeNavBar from '../Component/HomeNavBar'
 import SideBar from '../Component/SideBar'
 import { updateUser, getUserById } from '../Redux/Slice/user.slice'
+import { enqueueSnackbar } from 'notistack';
 
 function Setting() {
     const dispatch = useDispatch()
@@ -53,6 +54,17 @@ function Setting() {
 
     // Handle checkbox changes with automatic save
     const handleSettingChange = (fieldName) => {
+     
+
+        if (fieldName === 'GoogleCalendar' && !currentUser?.googleRefreshToken) {
+            enqueueSnackbar('Google login is required for this feature.', {
+                variant: 'warning', autoHideDuration: 3000, anchorOrigin: {
+                  vertical: 'top', // Position at the top
+                  horizontal: 'right', // Position on the right
+                }
+              });
+              return;       
+        }
         const newValue = !formik.values[fieldName]
         formik.setFieldValue(fieldName, newValue)
         formik.submitForm() // This will trigger the update API call
@@ -125,20 +137,25 @@ function Setting() {
                                             It only allow original audio. No edited audio will be allowed.
                                         </label>
                                     </p>
-                                    <h5 className='text-white j_margin_setting py-2'>Add to Google Calendar</h5>
-                                    <p className='d-flex align-items-center'>
-                                        <input
-                                            type="checkbox"
-                                            className='form-check-input j_setting_check'
-                                            checked={formik.values.GoogleCalendar}
-                                            onChange={() => handleSettingChange('GoogleCalendar')}
-                                        />
-                                        <label className='ms-2'>
-                                            This feature helps to join meeting in calendar. If meeting is scheduled then automatically
-                                            it get added in the calender as a event.It helps to remember date and time of meeting
-                                            easliy and also provide remainder for meeting.
-                                        </label>
-                                    </p>
+                                    {/* {currentUser?.googleRefreshToken && ( */}
+                                        <>
+                                            <h5 className='text-white j_margin_setting py-2'>Add to Google Calendar</h5>
+                                            <p className='d-flex align-items-center'>
+                                                <input
+                                                    type="checkbox"
+                                                    className='form-check-input j_setting_check'
+                                                    checked={formik.values.GoogleCalendar}
+                                                    onChange={() => handleSettingChange('GoogleCalendar')}
+                                                    // disabled={!currentUser?.googleRefreshToken}
+                                                />
+                                                <label className='ms-2' style={{ opacity: !currentUser?.googleRefreshToken ? '0.5' : '1' }}>
+                                                    This feature helps to join meeting in calendar. If meeting is scheduled then automatically
+                                                    it get added in the calender as a event.It helps to remember date and time of meeting
+                                                    easliy and also provide remainder for meeting.
+                                                </label>
+                                            </p>
+                                        </>
+                                    {/* )} */}
                                     <h5 className='text-white j_margin_setting py-2'>Chat notification</h5>
                                     <p className='d-flex align-items-center'>
                                         <input

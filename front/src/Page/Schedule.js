@@ -107,7 +107,7 @@ const CustomToolbar = (toolbar) => {
         <button className="btn btn-outline-light j_nav_btn" onClick={() => {
           const newMeetingId = generateMeetingId(20);
           const meetingLink = `${FRONT_URL}/screen/${newMeetingId}`; // Create the meeting link
-          navigate(`/screen/${newMeetingId}`, { state: { meetingLink, status: true } }); // Pass the meeting link as state
+          navigate(`/screen/${newMeetingId}`, { state: { meetingLink, status: true, hostUserId: userId } }); // Pass the meeting link as state
         }}>
           Meet Now
         </button>

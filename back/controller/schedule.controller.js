@@ -127,6 +127,8 @@ exports.createNewschedule = async (req, res) => {
         // ===========Google Calendar============
 
         let checkUser = await userModel.findById(userId);
+
+        if(checkUser.GoogleCalendar){
             // Prepare event
             const event = {
             summary: title,
@@ -148,9 +150,6 @@ exports.createNewschedule = async (req, res) => {
             ],
             },
         };
-
-     
-      
           try {
             // Get user info from Google
             oauth2Client.setCredentials({ refresh_token: checkUser.googleRefreshToken })
@@ -160,8 +159,6 @@ exports.createNewschedule = async (req, res) => {
                 calendarId: 'primary',
                 resource: event,
                 });
-                //  console.log("response", response);
-
                   // Store the Google Calendar event ID in the schedule
                 if (response && response.data && response.data.id) {
                     chekschedule.googleCalendarEventId = response.data.id;
@@ -170,6 +167,8 @@ exports.createNewschedule = async (req, res) => {
             } catch (error) {
                     console.log(error);
             }
+
+        }
         return res.json({
             status: 200,
             message: "Schedule Created Successfully",

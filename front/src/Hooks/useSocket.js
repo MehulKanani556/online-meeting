@@ -1,10 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { io } from 'socket.io-client';
+import { useDispatch, useSelector } from "react-redux";
 
 const SOCKET_SERVER_URL = "http://localhost:4000"; // Move to environment variable in production
 // const SOCKET_SERVER_URL = "https://online-meeting-backend-le8t.onrender.com"; // Move to environment variable in production
 
-export const useSocket = (userId, roomId, userName) => {
+export const useSocket = (userId, roomId, userName, hostUserId) => {
     const socketRef = useRef(null);
     const [reminders, setReminders] = useState([]); // State to hold reminders 
     const [isConnected, setIsConnected] = useState(false);
@@ -23,6 +24,8 @@ export const useSocket = (userId, roomId, userName) => {
     const [notificationPermission, setNotificationPermission] = useState(
         Notification.permission
     );
+
+    const currUser = useSelector((state) => state.user.currUser);
 
     useEffect(() => {
         if (Notification.permission === "default") {
@@ -115,7 +118,9 @@ export const useSocket = (userId, roomId, userName) => {
         socketRef.current.emit('join-room', {
             roomId,
             userId,
-            userName
+            userName,
+            hostUserId,
+            screenShare: currUser?.ScreenShare
         });
 
         socketRef.current.on("user-status-changed", (onlineUserIds) => {
@@ -137,7 +142,8 @@ export const useSocket = (userId, roomId, userName) => {
                 hasVideo: true,
                 hasAudio: true,
                 initials: `${user.userName?.charAt(0)}${user.userName?.split(' ')[1] ? user.userName?.split(' ')[1]?.charAt(0) : ''}`,
-                isHost: user.isHost
+                isHost: user.isHost,
+                screenShare: user.screenShare
             }));
 
 

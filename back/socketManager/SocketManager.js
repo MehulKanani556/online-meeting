@@ -4,6 +4,7 @@ const onlineUsers = new Map();
 const rooms = {};
 const typingUsers = new Map(); // Store typing status for each room
 const joinRequests = new Map(); // Map of roomId -> array of requests
+const screenShare = new Map(); // Map of roomId -> array of requests
 
 async function sendReminder(socket) {
     const data = await schedule.find();
@@ -130,11 +131,15 @@ async function initializeSocket(io) {
         console.log("New socket connection:", socket.id);
 
         // User joins a room
-        socket.on('join-room', async ({ roomId, userId, userName }) => {
+        socket.on('join-room', async ({ roomId, userId, userName, hostUserId = null , screenShare}) => {
             try {
                 // Initialize rooms[roomId] if it doesn't exist
                 if (!rooms[roomId]) {
                     rooms[roomId] = [];
+                }
+
+                if(!screenShare[roomId]){
+                    screenShare[roomId] = screenShare === true ? true : false;
                 }
 
                 // Check for existing user
@@ -151,7 +156,9 @@ async function initializeSocket(io) {
                     meetingLink: { $regex: String(roomId) } // Ensure roomId is a string
                 });
 
-                const hostUserId = meetingDetails?.userId?.toString();
+                if (!hostUserId) {
+                    hostUserId = meetingDetails?.userId?.toString();
+                }
 
                 // Add participant to the meeting's participants array if not already present
                 if (meetingDetails && !meetingDetails.participants.includes(userId)) {
@@ -170,19 +177,21 @@ async function initializeSocket(io) {
                     roomId
                 };
 
-                // Add user to room participants
-                rooms[roomId].push({
-                    id: socket.id,
-                    userId,
-                    userName,
-                    isHost: userId === hostUserId
-                });
+              
+                    rooms[roomId].push({
+                        id: socket.id,
+                        userId,
+                        userName,
+                        screenShare: screenShare[roomId],
+                        isHost: userId === hostUserId
+                    });
 
                 // Notify others in the room
                 socket.to(roomId).emit('user-connected', {
                     socketId: socket.id,
                     userId,
                     userName,
+                    screenShare: screenShare[roomId],
                     isHost: userId === hostUserId
                 });
 

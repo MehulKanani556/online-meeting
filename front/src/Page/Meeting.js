@@ -1906,7 +1906,7 @@ function Meeting() {
                                     <button className="btn btn-outline-light B_metting_btn fw-semibold" onClick={() => {
                                         const newMeetingId = generateMeetingId(20);
                                         const meetingLink = `${FRONT_URL}/screen/${newMeetingId}`;
-                                        navigate(`/screen/${newMeetingId}`, { state: { meetingLink, status: true } });
+                                        navigate(`/screen/${newMeetingId}`, { state: { meetingLink, status: true, hostUserId: userId } });
                                     }}>Meet Now</button>
                                 </div>
                             </div>

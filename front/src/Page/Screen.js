@@ -40,6 +40,9 @@ import { setIsHandRaised, setMainSectionMargin, setShow } from "../Redux/Slice/m
 
 function Screen() {
   const { id: roomId } = useParams();
+
+
+  
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const location = useLocation();
@@ -51,12 +54,16 @@ function Screen() {
   const [linkCopiedmodal, setLinkCopiedmodal] = useState(false);
   let controlPanel = null;
 
+
+
   useEffect(() => {
     if (location.state && location.state.meetingLink) {
       setMeetingLink(location.state.meetingLink);
       // setShowMeetingLinkModal(true);
     }
   }, [location.state]);
+
+  console.log("hostUserId", location?.state?.hostUserId);
 
   // Current user information
   const userId = sessionStorage.getItem("userId");
@@ -97,7 +104,7 @@ function Screen() {
     handleJoinRequest,
     systemMessages,
     muteAllUsers
-  } = useSocket(userId, roomId, userName);
+  } = useSocket(userId, roomId, userName, location?.state?.hostUserId);
 
   // WebRTC State
   const [isScreenSharing, setIsScreenSharing] = useState(false);
@@ -145,6 +152,9 @@ function Screen() {
     );
     setIsHost(currentUserIsHost);
   }, [participants, currUser]);
+
+  console.log(participants);
+  
 
   // Refs
   const localVideoRef = useRef();
@@ -1207,6 +1217,14 @@ function Screen() {
     e.target.style.height = "auto";
     e.target.style.height = Math.min(120, e.target.scrollHeight) + "px";
   };
+
+  useEffect(()=>{
+    if(currUser && currUser?.Autorecord){
+      console.log("dasvawv");
+      
+      toggleRecording()
+    }
+  },[currUser?.Autorecord,recordingDivRef?.current])
 
   // record video
   const toggleRecording = async () => {
