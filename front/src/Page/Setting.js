@@ -66,6 +66,7 @@ function Setting() {
               return;       
         }
         const newValue = !formik.values[fieldName]
+        console.log("newValue", newValue);
         formik.setFieldValue(fieldName, newValue)
         formik.submitForm() // This will trigger the update API call
     }

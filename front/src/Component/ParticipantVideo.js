@@ -122,7 +122,7 @@ const ParticipantVideo = React.memo(
 
         <div className="d_controls-bottom">
           <span className="d_participant-name">
-            {participant.name}
+          {currUser?.participantsNameandVideo ? participant?.name : ""}
             {participant.isHost ? " (Host)" : ""}
           </span>
           <div className="d_mic-status">

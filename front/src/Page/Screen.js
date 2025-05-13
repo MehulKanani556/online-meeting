@@ -37,12 +37,10 @@ import ParticipantVideo from "../Component/ParticipantVideo";
 import BottomBar from "../Component/BottomBar";
 import MeetingSidebar from "../Component/MeetingSidebar";
 import { setIsHandRaised, setMainSectionMargin, setShow } from "../Redux/Slice/meeting.slice";
+import { getAllschedule } from "../Redux/Slice/schedule.slice";
 
 function Screen() {
   const { id: roomId } = useParams();
-
-
-  
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const location = useLocation();
@@ -53,8 +51,6 @@ function Screen() {
   const [meetingLink, setMeetingLink] = useState("");
   const [linkCopiedmodal, setLinkCopiedmodal] = useState(false);
   let controlPanel = null;
-
-
 
   useEffect(() => {
     if (location.state && location.state.meetingLink) {
@@ -67,12 +63,41 @@ function Screen() {
 
   // Current user information
   const userId = sessionStorage.getItem("userId");
+  const meetingStarted = sessionStorage.getItem("meetingStarted");
+
   const currUser = useSelector((state) => state.user.currUser);
   const userInitials = currUser?.name
     ? `${currUser.name.charAt(0)}${currUser.name.split(" ")[1] ? currUser.name.split(" ")[1].charAt(0) : ""
     }`
     : "U";
   const userName = currUser?.name;
+
+  const allschedule = useSelector((state) => state.schedule.allschedule);
+  console.log("location---------------", location); 
+
+  useEffect(() => {
+      dispatch(getAllschedule());
+  }, [dispatch]);
+
+  useEffect(()=>{
+
+    let schedule;
+    console.log("schedule", allschedule);
+    if(allschedule && userId && location.pathname && !meetingStarted){
+      if(allschedule.length > 0){
+        schedule = allschedule.find(schedule => schedule.meetingLink == location.pathname);
+        console.log("schedule", schedule,allschedule);
+      }
+      if (schedule && !schedule?.joinBeforeHost) {
+        if (schedule?.userId !== userId) {
+          navigate("/home");
+          return;
+        }
+      }
+  }
+  
+  },[allschedule, location.pathname, userId])
+
 
     // const setid 
 
@@ -253,7 +278,9 @@ function Screen() {
 
   // Get current user data
   useEffect(() => {
-    dispatch(getUserById(userId));
+    if(userId){
+      dispatch(getUserById(userId));
+    }
   }, [userId, dispatch]);
 
   // Initialize WebRTC
@@ -932,6 +959,7 @@ function Screen() {
     sessionStorage.removeItem('meetingLinkId');
     sessionStorage.removeItem("MeetingLinkModal");
     sessionStorage.removeItem("renameParticipant");
+    sessionStorage.removeItem("meetingStarted");
     if (isEndingMeeting) return; // Prevent further calls
     isEndingMeeting = true;
 
@@ -2041,6 +2069,7 @@ function Screen() {
             PictureInPicture={togglePictureInPicture}
             socket={socket}
             roomId={roomId}
+            participants={participants}
           />
         </div>
       </section>

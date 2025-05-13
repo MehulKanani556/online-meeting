@@ -210,6 +210,9 @@ exports.getAllschedule = async (req, res) => {
 
         const userId = req.user.id;
 
+        // console.log(paginatedschedule,"paginatedschedule");
+        
+
         const currentDateTime = new Date();
         const userSchedules = paginatedschedule.filter((meeting) => {
             const scheduleStartTime = new Date(`${formatDate(meeting.date)}T${meeting.startTime}`);
@@ -227,7 +230,6 @@ exports.getAllschedule = async (req, res) => {
                     .catch(err => console.error("Error updating meeting status:", err));
                 meeting.status = "Completed";
             }
-
             return (meeting.userId.toString() === userId.toString() ||
                 meeting?.invitees?.some((invitee) => invitee?.userId?.toString() === userId?.toString()));
         });

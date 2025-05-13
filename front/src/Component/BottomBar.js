@@ -11,6 +11,7 @@ import hand from "../Image/d_hand.svg";
 import bar from "../Image/d_bar.svg";
 import { useDispatch, useSelector } from "react-redux";
 import { setIsChatOpen, setIsHandRaised, setMainSectionMargin, setShow, setShowEmojis } from "../Redux/Slice/meeting.slice";
+import { enqueueSnackbar } from 'notistack';
 
 const BottomBar = React.memo(
   ({
@@ -29,11 +30,19 @@ const BottomBar = React.memo(
     PictureInPicture,
     socket,
     roomId,
+    participants
   }) => {
     const dispatch = useDispatch();
     const { isHandRaised, show, isChatOpen, showEmojis } = useSelector(
       (state) => state.meeting
     );
+
+    const userId = sessionStorage.getItem("userId");
+
+    const screenShare = participants?.find(participant => participant?.userId === userId)?.screenShare ;
+    const userisHost = participants?.find(participant => participant?.userId === userId)?.isHost ;
+    console.log(screenShare,"==========screenShare");
+    
 
     const handleShowee = (e) => {
       dispatch(setShow(true));
@@ -81,8 +90,25 @@ const BottomBar = React.memo(
             <div className="d-flex d_resposive">
               <div
                 className="d_box me-sm-3 mb-2 mb-sm-0"
-                style={{ cursor: "pointer" }}
-                onClick={toggleScreenShare}
+                style={{ cursor: "pointer", opacity: screenShare ? 1 : userisHost ? 1: 0.5 }}
+                onClick={()=>{
+                  if(screenShare){
+                    toggleScreenShare();
+                  }else{
+
+                    if(userisHost){
+                      toggleScreenShare();
+                    }else{
+                      enqueueSnackbar('Screen share is not allowed', {
+                        variant: 'warning', autoHideDuration: 3000, anchorOrigin: {
+                          vertical: 'top', // Position at the top
+                          horizontal: 'right', // Position on the right
+                        }
+                      });
+                      return;
+                    }
+                  }
+                }}
               >
                 <img src={upload} alt="screen share" />
               </div>

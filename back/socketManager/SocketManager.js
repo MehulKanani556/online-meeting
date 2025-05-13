@@ -5,7 +5,10 @@ const onlineUsers = new Map();
 const rooms = {};
 const typingUsers = new Map(); // Store typing status for each room
 const joinRequests = new Map(); // Map of roomId -> array of requests
-const screenShareData = new Map(); // Map of roomId -> array of requests
+const screenShareData = new Map();
+const listOnlineUsers = new Map();
+
+
 
 async function sendReminder(socket) {
     const data = await schedule.find();
@@ -99,30 +102,24 @@ function handleDisconnect(socket) {
 
 async function handleUserLogin(socket, userId) {
     // Check if the user is already connected
-    if (onlineUsers.hasOwnProperty(userId)) {
-        // console.log(`User ${userId} is already connected.`);
+    if (listOnlineUsers.hasOwnProperty(userId)) {
         return;
     }
 
     // Remove any existing socket connection for this user
-    for (const existingUserId in onlineUsers) {
-        if (existingUserId === userId && onlineUsers[existingUserId] !== socket.id) {
+    for (const existingUserId in listOnlineUsers) {
+        if (existingUserId === userId && listOnlineUsers[existingUserId] !== socket.id) {
             const existingSocket = global.io.sockets.sockets.get(onlineUsers[existingUserId]);
             if (existingSocket) {
                 existingSocket.disconnect(); // Disconnect the existing socket
             }
-            delete onlineUsers[existingUserId];
+            delete listOnlineUsers[existingUserId];
         }
     }
 
     // Add new socket connection
-    onlineUsers[userId] = socket.id;
+    listOnlineUsers[userId] = socket.id;
     socket.userId = userId;
-
-    // Broadcast updated online users list to all connected clients
-    const onlineUsersList = Object.keys(onlineUsers);
-    global.io.emit("user-status-changed", onlineUsersList);
-    // console.log(onlineUsers);
 }
 
 async function initializeSocket(io) {
@@ -131,6 +128,7 @@ async function initializeSocket(io) {
     io.on("connection", (socket) => {
         console.log("New socket connection:", socket.id);
 
+        listOnlineUsers
         // User joins a room
         socket.on('join-room', async ({ roomId, userId, userName, hostUserId = null , screenShare}) => {
             try {
@@ -139,10 +137,10 @@ async function initializeSocket(io) {
                     rooms[roomId] = [];
                 }
 
-                if(!screenShareData[roomId]){
-                    screenShareData[roomId] = screenShare === true ? true : false;
+                if(!(screenShareData[roomId] == true || screenShareData[roomId] == false)){
+                    screenShareData[roomId] = screenShare == true ? true : false;
                 }
-
+            
                 // Check for existing user
                 const existingUser = rooms[roomId].find(user => user.userId === userId);
                 if (existingUser) {
@@ -177,27 +175,42 @@ async function initializeSocket(io) {
                     userName,
                     roomId
                 };
-
-              
+            
+                if(roomId){
                     rooms[roomId].push({
                         id: socket.id,
                         userId,
-                        userName,
-                        screenShare: screenShareData[roomId],
-                        isHost: userId === hostUserId
+                         userName,
+                         screenShare: screenShareData[roomId],
+                         isHost: userId === hostUserId
+                   });
+   
+                   socket.to(roomId).emit('user-connected', {
+                       socketId: socket.id,
+                       userId,
+                       userName,
+                       screenShare: screenShareData[roomId],
+                       isHost: userId === hostUserId
+                   });
+                   socket.emit('room-users', rooms[roomId]);
+
+                   if (userId == hostUserId) {
+                    (meetingDetails.invitees || []).forEach(invitee => {
+                      const inviteeUserId = invitee.userId && invitee.userId.toString();
+                       const socketId = listOnlineUsers[inviteeUserId.toString()]
+                       console.log("socketId", socketId,inviteeUserId.toString());
+                          io.to(socketId).emit('meeting-started', {
+                            message: 'The host has started the meeting.',
+                            hostUserId,
+                            roomId,
+                            timestamp: Date.now()
+                          });
+                   
                     });
-
-                // Notify others in the room
-                socket.to(roomId).emit('user-connected', {
-                    socketId: socket.id,
-                    userId,
-                    userName,
-                    screenShare: screenShareData[roomId],
-                    isHost: userId === hostUserId
-                });
-
-                // Send list of all users in the room to the new participant
-                socket.emit('room-users', rooms[roomId]);
+                  }
+                }
+              
+               
             } catch (error) {
                 console.error("Error in join-room:", error);
                 socket.emit('error', { message: 'Failed to join room' });

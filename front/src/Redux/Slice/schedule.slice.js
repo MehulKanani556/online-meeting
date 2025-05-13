@@ -66,7 +66,7 @@ export const deleteschedule = createAsyncThunk(
         console.log(id);
         try {
             const token = await sessionStorage.getItem("token");
-            const response = await axios.delete(`${BASE_URL}/deleteschedules/${id}`, {
+            const response = await axios.delete(`${BASE_URL}/deleteschedule/${id}`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 }
@@ -84,9 +84,13 @@ export const updateschedule = createAsyncThunk(
     async (data, { dispatch, rejectWithValue }) => {
         console.log("update data", data);
 
+        const transformedData = {
+            ...data,
+            invitees: data.invitees.map(invitee => ({ email: invitee.email, userId: invitee._id, name: invitee.name })),
+        };
         try {
             const token = await sessionStorage.getItem("token");
-            const response = await axios.put(`${BASE_URL}/scheduleUpdate/${data._id}`, data, {
+            const response = await axios.put(`${BASE_URL}/scheduleUpdate/${data._id}`, transformedData, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },

@@ -1,6 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { io } from 'socket.io-client';
 import { useDispatch, useSelector } from "react-redux";
+import { getUserById } from '../Redux/Slice/user.slice';
+import { enqueueSnackbar } from 'notistack';
 
 const SOCKET_SERVER_URL = "http://localhost:4000"; // Move to environment variable in production
 // const SOCKET_SERVER_URL = "https://online-meeting-backend-le8t.onrender.com"; // Move to environment variable in production
@@ -24,8 +26,17 @@ export const useSocket = (userId, roomId, userName, hostUserId) => {
     const [notificationPermission, setNotificationPermission] = useState(
         Notification.permission
     );
+    const userid = sessionStorage.getItem("userId");
+    const dispatch = useDispatch();
 
     const currUser = useSelector((state) => state.user.currUser);
+
+    useEffect(() => {
+        if(userid){
+            dispatch(getUserById(userid));
+        }
+    }, [userid]);
+    
 
     useEffect(() => {
         if (Notification.permission === "default") {
@@ -115,12 +126,14 @@ export const useSocket = (userId, roomId, userName, hostUserId) => {
             socketRef.current.emit("user-login", userId);
         });
 
+        console.log("currUserwwwwww", currUser?.sharescreen);
+
         socketRef.current.emit('join-room', {
             roomId,
             userId,
             userName,
             hostUserId,
-            screenShare: currUser?.ScreenShare
+            screenShare: currUser?.sharescreen
         });
 
         socketRef.current.on("user-status-changed", (onlineUserIds) => {
@@ -166,8 +179,13 @@ export const useSocket = (userId, roomId, userName, hostUserId) => {
             setSystemMessages([]);
         });
 
+        console.log("participants", participants);
+
         // Handle new user connected
         socketRef.current.on('user-connected', (user) => {
+
+            console.log(user.screenShare,"user.............");
+            
             if (user.userName && !user.isHost && user.userId !== userId) {
                 setSystemMessages(prev => [...prev, {
                     type: 'join',
@@ -186,7 +204,8 @@ export const useSocket = (userId, roomId, userName, hostUserId) => {
                     hasVideo: true,
                     hasAudio: true,
                     initials: `${user.userName?.charAt(0)}${user.userName?.split(' ')[1] ? user.userName?.split(' ')[1]?.charAt(0) : ''}`,
-                    isHost: user.isHost
+                    isHost: user.isHost,
+                    screenShare: user.screenShare
                 }
             ]);
         });
@@ -362,6 +381,16 @@ export const useSocket = (userId, roomId, userName, hostUserId) => {
             setParticipants(prev =>
                 prev.filter(participant => participant.id !== socketId)
             );
+        });
+
+        socketRef.current.on('meeting-started', (data) => {
+            enqueueSnackbar(data.message, {
+                variant: 'success', autoHideDuration: 3000, anchorOrigin: {
+                  vertical: 'top', // Position at the top
+                  horizontal: 'right', // Position on the right
+                }
+              });
+            sessionStorage.setItem("meetingStarted",true)
         });
 
         return () => {

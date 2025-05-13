@@ -94,7 +94,7 @@ export const updateUser = createAsyncThunk(
                 },
             });
             dispatch(setAlert({ text: response.data.message, color: 'success' }));
-            return response.data;
+            return response.data.user;
         } catch (error) {
             return handleErrors(error, null, rejectWithValue);
         }

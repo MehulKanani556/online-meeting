@@ -84,7 +84,11 @@ const scheduleSchema = mongoose.Schema({
     }],
     googleCalendarEventId: {
         type: String,
-    }
+    },
+    joinBeforeHost:{
+        type:Boolean,
+        default:false
+    },
 }, {
     timestamps: true,
     versionKey: false
