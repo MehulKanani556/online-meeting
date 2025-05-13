@@ -14,7 +14,7 @@ import { useNavigate } from 'react-router-dom';
 import * as Yup from 'yup';
 import { Formik } from 'formik';
 import { useDispatch, useSelector } from 'react-redux';
-import { createschedule, getAllschedule, updateschedule } from '../Redux/Slice/schedule.slice';
+import { createschedule, deleteschedule, getAllschedule, updateschedule } from '../Redux/Slice/schedule.slice';
 import { getAllUsers } from '../Redux/Slice/user.slice';
 import bin from '../Image/j_bin.svg'
 import { IMAGE_URL } from '../Utils/baseUrl';
@@ -22,6 +22,8 @@ import { createpersonalroom } from '../Redux/Slice/personalroom.slice';
 import NoMeeting from '../Image/j_meeting_not.png'
 import moment from 'moment-timezone';
 import { getchatsById } from '../Redux/Slice/chats.slice';
+import Nomessage from '../Image/Nomessage.png'
+import { enqueueSnackbar } from 'notistack';
 
 function Meeting() {
 
@@ -60,38 +62,48 @@ function Meeting() {
     const [linkCopied, setLinkCopied] = useState(false);
     const [isRotating, setIsRotating] = useState(false);
     const [openDropdownId, setOpenDropdownId] = useState(null);
+    const [showDropdown, setShowDropdown] = useState(false);
+    const [ScheduleData, setScheduleData] = useState()
+    const [inviteData, setInviteData] = useState()
+    const [cancelMeeting, setcancelMeeting] = useState()
+    const [meetingdetail, setmeetingdetail] = useState()
+    const [createScheduleModel, setcreateScheduleModel] = useState(false);
+    const [EditScheduleModel, seteditScheduleModel] = useState(false);
+    const [InviteModel, setInviteModel] = useState(false);
+    const [ScheduleCustomModel, setScheduleCustomModel] = useState(false);
+    const [DeleteModel, setDeleteModel] = useState(false);
+    const [OffcanvasModel, setOffcanvasModel] = useState(false);
+    const [meetingIdToDelete, setMeetingIdToDelete] = useState(null);
+    const [CancelModel, setCancelModel] = useState(false);
+    const [linkNumber, setLinkNumber] = useState(generateMeetingId(20));
     const [billingCycle, setBillingCycle] = useState('Meeting Details');
     const [meetingFilter, setMeetingFilter] = useState("All Meetings");
     const [securityType, setSecurityType] = useState('alwaysLocked');
     const [meetingType, setMeetingType] = useState("All Meetings");
     const [password, setPassword] = useState(generatePassword());
+    const [filteredUsers, setFilteredUsers] = useState([]);
+    const [searchTerm, setSearchTerm] = useState('');
     const [passwordError, setPasswordError] = useState('');
     const [linkError, setLinkError] = useState('');
     const userId = sessionStorage.getItem('userId');
     const gettoken = sessionStorage.getItem('token');
     const allusers = useSelector((state) => state.user.allusers);
-    const [showDropdown, setShowDropdown] = useState(false);
-    const [filteredUsers, setFilteredUsers] = useState([]);
-    const [searchTerm, setSearchTerm] = useState('');
+    const singleuser = allusers.find((u) => u._id === userId);
+    const allschedule = useSelector((state) => state.schedule.allschedule);
+    const selectMeetingchat = useSelector((state) => state.chat.currchats);
     const IMG_URL = IMAGE_URL
+    const FRONT_URL = 'localhost:3000'
+
     const dispatch = useDispatch();
+    const navigate = useNavigate()
+
+    // Refs 
     const dropdownRef = useRef(null);
     const searchInputRef = useRef(null);
-    const navigate = useNavigate()
-    const FRONT_URL = 'localhost:3000'
-    const singleuser = allusers.find(u => u._id === userId);
-    const [linkNumber, setLinkNumber] = useState(generateMeetingId(20));
-
-    // const handleLinkDiceClick = () => {
-    //     setIsLinkRotating(true);
-    //     setTimeout(() => {
-    //         setIsLinkRotating(false);
-    //         setLinkNumber(generateMeetingId(20));
-    //     }, 1000);
-    // };
 
     useEffect(() => {
         dispatch(getAllUsers());
+        dispatch(getAllschedule());
     }, [dispatch]);
 
     useEffect(() => {
@@ -121,12 +133,6 @@ function Meeting() {
         return true;
     };
 
-    // const handleLinkChange = (e) => {
-    //     const newValue = e.target.value;
-    //     setLinkNumber(newValue);
-    //     validateLink(newValue);
-    // };
-
     const handleLinkEdit = (e) => {
         if (e.key === 'Enter') {
             if (validateLink(linkNumber)) {
@@ -151,22 +157,6 @@ function Meeting() {
         };
     }, []);
 
-    const allschedule = useSelector((state) => state.schedule.allschedule);
-    // console.log("allschedule", allschedule); 
-
-    useEffect(() => {
-        dispatch(getAllschedule());
-    }, [dispatch]);
-
-    const currentDate = new Date().toISOString().split('T')[0];
-    const currentTime = new Date().toLocaleTimeString('en-US', {
-        hour: '2-digit',
-        minute: '2-digit',
-        // second: '2-digit',
-        hour12: false // set to false if you want 24-hour format
-    });
-    // console.log(currentTime);
-
     const calculateDuration = (startTime, endTime) => {
         const start = new Date(`1970-01-01T${startTime}:00`);
         const end = new Date(`1970-01-01T${endTime}:00`);
@@ -178,17 +168,13 @@ function Meeting() {
         return `${hours}h ${minutes}m`;
     };
 
-    const [ScheduleData, setScheduleData] = useState()
     const handleEdit = (data) => {
         setScheduleData(data)
     }
 
-    const [inviteData, setInviteData] = useState()
     const handleInvite = (data) => {
         setInviteData(data)
     }
-
-    const [cancelMeeting, setcancelMeeting] = useState()
 
     const handlecancelMeeting = (data) => {
         setcancelMeeting(data)
@@ -198,8 +184,6 @@ function Meeting() {
         dispatch(updateschedule({ ...cancelMeeting, status: "Cancelled" }))
         handleCloseCancelModel()
     }
-
-    const [meetingdetail, setmeetingdetail] = useState()
 
     const formatTimeTo12Hour = (time) => {
         if (!time) return '';
@@ -398,6 +382,9 @@ function Meeting() {
                                                             <button type="button" class="btn btn-outline-secondary B_upcoming_btn1 B_upcoming_btn2 me-2"
                                                                 onClick={() => window.location.href = schedule.meetingLink}
                                                             >Join</button>
+                                                        )}
+                                                        {schedule.status === 'Completed' && (
+                                                            <button type="button" class="btn btn-outline-success B_upcoming_btn1 me-2">Completed</button>
                                                         )}
                                                     </div>
                                                 </div>
@@ -603,6 +590,9 @@ function Meeting() {
                                                             <button type="button" class="btn btn-outline-secondary B_upcoming_btn1 B_upcoming_btn2 me-2"
                                                                 onClick={() => window.location.href = schedule.meetingLink}
                                                             >Join</button>
+                                                        )}
+                                                        {schedule.status === 'Completed' && (
+                                                            <button type="button" class="btn btn-outline-success B_upcoming_btn1 me-2">Completed</button>
                                                         )}
                                                     </div>
                                                 </div>
@@ -972,6 +962,9 @@ function Meeting() {
                                                             onClick={() => window.location.href = schedule.meetingLink}
                                                         >Join</button>
                                                     )}
+                                                    {schedule.status === 'Completed' && (
+                                                        <button type="button" class="btn btn-outline-success B_upcoming_btn1 me-2">Completed</button>
+                                                    )}
                                                 </div>
                                             </div>
                                             <div style={{ borderTop: "1px solid #525252" }}></div>
@@ -1107,7 +1100,11 @@ function Meeting() {
                                 }).map((schedule, index) => {
                                     return (
                                         <div key={index}
-                                            onClick={() => handlecanvas(schedule.status, schedule)} 
+                                            onClick={() => {
+                                                const meetingId = schedule.meetingLink.split('/screen/')[1];
+                                                sendmeetingId(meetingId);
+                                                handlecanvas(schedule.status, schedule)
+                                            }}
                                             className="col-xl-3 col-lg-4 col-md-6 col-12 mt-4 mb-4">
                                             <div className="B_meeting_card" style={{ backgroundColor: '#0A1119', borderRadius: '6px', cursor: "pointer" }}>
                                                 <div className="d-flex justify-content-between align-items-center  p-3 B_meeting_padding">
@@ -1659,31 +1656,36 @@ function Meeting() {
         }
     }
 
-    const [createScheduleModel, setcreateScheduleModel] = useState(false);
-    const [EditScheduleModel, seteditScheduleModel] = useState(false);
     const handleCloseScheduleModel = () => setcreateScheduleModel(false);
     const handlecreateScheduleModel = () => setcreateScheduleModel(true);
     const handleShowScheduleModel = () => seteditScheduleModel(true);
     const handleCloseeditScheduleModel = () => seteditScheduleModel(false);
 
-    const [ScheduleCustomModel, setScheduleCustomModel] = useState(false);
     const handleCloseScheduleCustomModel = () => setScheduleCustomModel(false);
     const handleShowScheduleCustomModel = () => setScheduleCustomModel(true);
 
-    const [CancelModel, setCancelModel] = useState(false);
     const handleCloseCancelModel = () => setCancelModel(false);
     const handleShowCancelModel = () => setCancelModel(true);
 
-    const [InviteModel, setInviteModel] = useState(false);
     const handleCloseInviteModel = () => setInviteModel(false);
     const handleShowInviteModel = () => setInviteModel(true);
 
-    const [DeleteModel, setDeleteModel] = useState(false);
     const handleCloseDeleteModel = () => setDeleteModel(false);
-    const handleShowDeleteModel = () => setDeleteModel(true);
+    const handleShowDeleteModel = (meetingId) => {
+        setDeleteModel(true)
+        setMeetingIdToDelete(meetingId);
+    };
 
-    const [OffcanvasModel, setOffcanvasModel] = useState(false);
+    const handleConfirmDelete = () => {
+        if (meetingIdToDelete) {
+            dispatch(deleteschedule(meetingIdToDelete));
+            handleCloseDeleteModel();
+            handleCloseOffcanvasModel();
+        }
+    };
+
     const handleCloseOffcanvasModel = () => {
+        setmeetingdetail(null);
         setOffcanvasModel(false);
         setBillingCycle('Meeting Details');
     };
@@ -1697,10 +1699,6 @@ function Meeting() {
     const sendmeetingId = (meetingId) => {
         dispatch(getchatsById(meetingId))
     }
-
-    const selectMeetingchat = useSelector((state) => state.chat.currchats)
-    console.log(selectMeetingchat);
-
 
     const handleSecurityChange = (type) => {
         setSecurityType(type);
@@ -1922,18 +1920,11 @@ function Meeting() {
                             </div>
                         </div>
 
-                        {/* <div className='B_Meeting_video_icon text-white d-flex flex-column align-items-center justify-content-center' >
-                            <img src={VideoIcon} alt="" />
-                            <p className='B_Meeting_txt1'>No Upcoming Meetings</p>
-                            <p className='B_Meeting_txt2' style={{color: "#999999"}}>You're all caught up - no meetings ahead</p>
-                        </div> */}
-
                         {/* .......................MEETING CARDS START ....................... */}
                         {renderMeetingCards()}
                         {/* .......................MEETING CARDS END ....................... */}
 
-
-                        {/* ============================create Schedule Meeting Modal ============================ */}
+                        {/* ============================ create Schedule Meeting Modal ============================ */}
 
                         <Modal
                             show={createScheduleModel}
@@ -1952,21 +1943,19 @@ function Meeting() {
                             </Modal.Header>
 
                             <div className="j_modal_header"></div>
-
                             <Modal.Body className="py-0">
-
                                 <Formik
                                     initialValues={{
-                                        userId: userId,
-                                        title: '',
+                                        userId: meetingdetail ? meetingdetail.userId : userId,
+                                        title: meetingdetail ? meetingdetail.title : '',
                                         date: '',
                                         startTime: '',
                                         endTime: '',
                                         meetingLink: '',
-                                        description: '',
-                                        reminder: [],
-                                        recurringMeeting: '',
-                                        customRecurrence: {
+                                        description: meetingdetail ? meetingdetail.description : '',
+                                        reminder: meetingdetail ? meetingdetail.reminder : [],
+                                        recurringMeeting: meetingdetail ? meetingdetail.recurringMeeting : '',
+                                        customRecurrence: meetingdetail ? meetingdetail.customRecurrence : {
                                             repeatType: '',
                                             repeatEvery: "1",
                                             repeatOn: [],
@@ -1975,12 +1964,17 @@ function Meeting() {
                                             Recurrence: '1',
                                             Monthfirst: '',
                                         },
-                                        invitees: []
+                                        invitees: meetingdetail ? meetingdetail.invitees : []
                                     }}
                                     validationSchema={scheduleSchema}
                                     onSubmit={(values, { resetForm }) => {
-                                        if (!gettoken || !userId) {
-                                            alert('Please login to create a schedule');
+                                        if (!gettoken && !userId) {
+                                            enqueueSnackbar('Please login to create new meeting', {
+                                                variant: 'warning', autoHideDuration: 3000, anchorOrigin: {
+                                                    vertical: 'top',
+                                                    horizontal: 'right',
+                                                }
+                                            });
                                             return;
                                         }
                                         dispatch(createschedule(values)).then((response) => {
@@ -1988,13 +1982,14 @@ function Meeting() {
                                             if (response.payload?.status === 200) {
                                                 resetForm();
                                                 handleCloseScheduleModel();
+                                                if (meetingdetail) {
+                                                    handleCloseOffcanvasModel()
+                                                }
                                             }
                                         });
                                     }}
                                 >
-
                                     {({ values, errors, touched, handleSubmit, handleChange, setFieldValue }) => (
-                                        console.log(formatDate(values.date)),
                                         <form onSubmit={handleSubmit}>
                                             <div className="row B_flex_reverse">
                                                 <div className="col-12 col-lg-8 ps-0 j_schedule_border">
@@ -2526,8 +2521,6 @@ function Meeting() {
                                             </Modal>
                                         </form>
                                     )}
-
-
                                 </Formik>
                             </Modal.Body>
                         </Modal>
@@ -3417,20 +3410,22 @@ function Meeting() {
                                         </div>
 
                                         <div className="mt-auto" style={{ padding: '1rem' }}>
-                                            <div className="d-flex gap-3">
-                                                <Button
-                                                    variant="outline-light"
-                                                    className="w-50 py-2"
-                                                    style={{ borderColor: '#474E58', color: '#fff', fontWeight: 600, backgroundColor: 'transparent' }}
-                                                    onClick={handleShowDeleteModel}
-                                                >
-                                                    Delete Meeting
-                                                </Button>
+                                            <div className="d-flex justify-content-center gap-3">
+                                                {meetingdetail?.userId == userId && (
+                                                    <Button
+                                                        variant="outline-light"
+                                                        className="w-50 py-2"
+                                                        style={{ borderColor: '#474E58', color: '#fff', fontWeight: 600, backgroundColor: 'transparent' }}
+                                                        onClick={() => handleShowDeleteModel(meetingdetail._id)}
+                                                    >
+                                                        Delete Meeting
+                                                    </Button>
+                                                )}
                                                 <Button
                                                     variant="light"
                                                     className="w-50 py-2"
                                                     style={{ backgroundColor: '#fff', fontWeight: 600, color: '#000' }}
-                                                    onClick={handleShowScheduleModel}
+                                                    onClick={handlecreateScheduleModel}
                                                 >
                                                     Schedule Meeting
                                                 </Button>
@@ -3439,98 +3434,143 @@ function Meeting() {
                                     </>
                                 ) : (
                                     <div className="chat-container h-100 d-flex flex-column">
-                                        <div className="chat-messages flex-grow-1" style={{ overflowY: 'auto' }}>
-                                            {/* Lisa's first message */}
-                                            <div className="d-flex align-items-start mb-3">
-                                                <div className="chat-avatar me-2" style={{ backgroundColor: '#2B7982', width: '32px', height: '32px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                                    <span style={{ color: '#fff' }}>LN</span>
+                                        <div
+                                            className="chat-messages flex-grow-1"
+                                            style={{ overflowY: "auto" }}
+                                        >
+                                            {selectMeetingchat?.length > 0 ? (
+                                                selectMeetingchat?.map((msg, index) => (
+                                                    <div key={index} className="d-flex align-items-start me-2 mb-3">
+                                                        {msg.sender !== singleuser.name && (
+                                                            <div
+                                                                className="chat-avatar me-2"
+                                                                style={{
+                                                                    backgroundColor: "#4A90E2",
+                                                                    width: "32px",
+                                                                    height: "32px",
+                                                                    borderRadius: "50%",
+                                                                    display: "flex",
+                                                                    alignItems: "center",
+                                                                    justifyContent: "center",
+                                                                    textTransform: "uppercase",
+                                                                }}
+                                                            >
+                                                                <span style={{ color: "#fff" }}>{msg.sender.charAt(0)}</span>
+                                                            </div>
+                                                        )}
+
+                                                        <div
+                                                            className="chat-message"
+                                                            style={{
+                                                                marginLeft: msg.sender === singleuser.name ? "auto" : "0",
+                                                            }}
+                                                        >
+                                                            <div
+                                                                className="small"
+                                                                style={{
+                                                                    color: msg.sender === singleuser.name ? "white" : "#b3aeae",
+                                                                    textAlign: msg.sender === singleuser.name ? "end" : "start",
+                                                                }}
+                                                            >
+                                                                {msg.sender === singleuser.name ? "You" : msg.sender}
+                                                            </div>
+
+                                                            <div
+                                                                style={{
+                                                                    backgroundColor: msg.sender === singleuser.name ? "#2A323B" : "#1E242B",
+                                                                    color: msg.sender === singleuser.name ? "white" : "#b3aeae",
+                                                                    padding: "8px 12px",
+                                                                    borderRadius: "8px",
+                                                                    maxWidth: "250px",
+                                                                    wordBreak: "break-word",
+                                                                    whiteSpace: "pre-wrap",
+                                                                }}
+                                                            >
+                                                                {msg.message}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                ))
+                                            ) : (
+                                                <div className="text-center h-100 align-content-center">
+                                                    <img src={Nomessage} alt="Message" style={{ height: '100px', width: '93px' }} />
+                                                    <p className='text-white mb-1'>No Message</p>
+                                                    <p className='text-white opacity-50'>Looks quite ! we have nothing to show up here</p>
                                                 </div>
-                                                <div>
-                                                    <div className="chat-name" style={{ color: '#fff', fontSize: '14px' }}>Lisa</div>
-                                                    <div className="chat-message" style={{ backgroundColor: '#1E242B', color: '#B3AEAE', padding: '8px 12px', borderRadius: '8px', maxWidth: '250px', marginTop: '4px' }}>
-                                                        Can u hear my voice
+                                            )}
+
+
+                                            {/* {selectMeetingchat?.map((msg, index) => (
+                                                <div
+                                                    key={index}
+                                                    className="d-flex align-items-start me-2 mb-3"
+                                                >
+                                                    {
+                                                        msg.sender !== singleuser.name && (
+                                                            <div
+                                                                className="chat-avatar me-2"
+                                                                style={{
+                                                                    backgroundColor:
+                                                                        msg.sender === singleuser.name
+                                                                            ? "#2B7982"
+                                                                            : "#4A90E2",
+                                                                    width: "32px",
+                                                                    height: "32px",
+                                                                    borderRadius: "50%",
+                                                                    display: "flex",
+                                                                    alignItems: "center",
+                                                                    justifyContent: "center",
+                                                                    textTransform: "uppercase",
+                                                                }}
+                                                            >
+                                                                <span style={{ color: "#fff" }}>
+                                                                    {msg.sender.charAt(0)}
+                                                                </span>
+                                                            </div>
+                                                        )
+                                                    }
+                                                    < div
+                                                        className="chat-message"
+                                                        style={{
+                                                            marginLeft:
+                                                                msg.sender === singleuser.name ? "auto" : "0",
+                                                        }}
+                                                    >
+                                                        <div
+                                                            className="small"
+                                                            style={{
+                                                                color:
+                                                                    msg.sender === singleuser.name
+                                                                        ? "white"
+                                                                        : "#b3aeae",
+                                                                textAlign:
+                                                                    msg.sender === singleuser.name ? "end" : "start",
+                                                            }}
+                                                        >
+                                                            {msg.sender === singleuser.name ? "You" : msg.sender}
+                                                        </div>
+                                                        <div
+                                                            style={{
+                                                                backgroundColor:
+                                                                    msg.sender === singleuser.name
+                                                                        ? "#2A323B"
+                                                                        : "#1E242B",
+                                                                color:
+                                                                    msg.sender === singleuser.name
+                                                                        ? "white"
+                                                                        : "#b3aeae",
+                                                                padding: "8px 12px",
+                                                                borderRadius: "8px",
+                                                                maxWidth: "250px",
+                                                                wordBreak: "break-word",
+                                                                whiteSpace: "pre-wrap",
+                                                            }}
+                                                        >
+                                                            {msg.message}
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </div>
-
-                                            {/* Your first message */}
-                                            <div className="d-flex justify-content-end mb-3">
-                                                <div className="chat-message" style={{ backgroundColor: '#2A323B', color: '#fff', padding: '8px 12px', borderRadius: '8px', maxWidth: '250px' }}>
-                                                    Ok, wait, 5 min
-                                                </div>
-                                            </div>
-
-                                            {/* Lisa's second message */}
-                                            <div className="d-flex align-items-start mb-3">
-                                                <div className="chat-avatar me-2" style={{ backgroundColor: '#2B7982', width: '32px', height: '32px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                                    <span style={{ color: '#fff' }}>LN</span>
-                                                </div>
-                                                <div>
-                                                    <div className="chat-name" style={{ color: '#fff', fontSize: '14px' }}>Lisa</div>
-                                                    <div className="chat-message" style={{ backgroundColor: '#1E242B', color: '#B3AEAE', padding: '8px 12px', borderRadius: '8px', maxWidth: '250px', marginTop: '4px' }}>
-                                                        Thanks....
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            {/* Kiara's message */}
-                                            <div className="d-flex align-items-start mb-3">
-                                                <div className="chat-avatar me-2" style={{ backgroundColor: '#382B82', width: '32px', height: '32px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                                    <span style={{ color: '#fff' }}>KP</span>
-                                                </div>
-                                                <div>
-                                                    <div className="chat-name" style={{ color: '#fff', fontSize: '14px' }}>Kiara</div>
-                                                    <div className="chat-message" style={{ backgroundColor: '#1E242B', color: '#B3AEAE', padding: '8px 12px', borderRadius: '8px', maxWidth: '250px', marginTop: '4px' }}>
-                                                        Lorem ipsum is simply dummy
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            {/* Your second message */}
-                                            <div className="d-flex justify-content-end mb-3">
-                                                <div className="chat-message" style={{ backgroundColor: '#2A323B', color: '#fff', padding: '8px 12px', borderRadius: '8px', maxWidth: '250px' }}>
-                                                    Lorem ipsum is simply dummy text of the printing
-                                                </div>
-                                            </div>
-
-                                            {/* Lisa's third message */}
-                                            <div className="d-flex align-items-start mb-3">
-                                                <div className="chat-avatar me-2" style={{ backgroundColor: '#2B7982', width: '32px', height: '32px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                                    <span style={{ color: '#fff' }}>LN</span>
-                                                </div>
-                                                <div>
-                                                    <div className="chat-name" style={{ color: '#fff', fontSize: '14px' }}>Lisa</div>
-                                                    <div className="chat-message" style={{ backgroundColor: '#1E242B', color: '#B3AEAE', padding: '8px 12px', borderRadius: '8px', maxWidth: '250px', marginTop: '4px' }}>
-                                                        Lorem ipsum is simply dummy
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            {/* Your third message */}
-                                            <div className="d-flex justify-content-end mb-3">
-                                                <div className="chat-message" style={{ backgroundColor: '#2A323B', color: '#fff', padding: '8px 12px', borderRadius: '8px', maxWidth: '250px' }}>
-                                                    Ok, wait, 5 min
-                                                </div>
-                                            </div>
-                                            {/* Lisa's third message */}
-                                            <div className="d-flex align-items-start mb-3">
-                                                <div className="chat-avatar me-2" style={{ backgroundColor: '#2B7982', width: '32px', height: '32px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                                    <span style={{ color: '#fff' }}>LN</span>
-                                                </div>
-                                                <div>
-                                                    <div className="chat-name" style={{ color: '#fff', fontSize: '14px' }}>Lisa</div>
-                                                    <div className="chat-message" style={{ backgroundColor: '#1E242B', color: '#B3AEAE', padding: '8px 12px', borderRadius: '8px', maxWidth: '250px', marginTop: '4px' }}>
-                                                        Lorem ipsum is simply dummy
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            {/* Your third message */}
-                                            <div className="d-flex justify-content-end mb-3">
-                                                <div className="chat-message" style={{ backgroundColor: '#2A323B', color: '#fff', padding: '8px 12px', borderRadius: '8px', maxWidth: '250px' }}>
-                                                    Ok, wait, 5 min
-                                                </div>
-                                            </div>
+                                            ))} */}
                                         </div>
                                     </div>
                                 )}
@@ -3575,7 +3615,7 @@ function Meeting() {
                                     <Button
                                         variant="light"
                                         className="px-4 py-2 B_cancle_model_btn"
-                                        onClick={handleCloseDeleteModel}
+                                        onClick={handleConfirmDelete}
                                         style={{
                                             minWidth: '180px'
                                         }}
@@ -3587,10 +3627,8 @@ function Meeting() {
                         </Modal>
 
                         {/* .......................MODEL END ....................... */}
-
-
                     </div>
-                </div>
+                </div >
             </section >
         </div >
     )
