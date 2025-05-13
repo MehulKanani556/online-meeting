@@ -5,7 +5,7 @@ const onlineUsers = new Map();
 const rooms = {};
 const typingUsers = new Map(); // Store typing status for each room
 const joinRequests = new Map(); // Map of roomId -> array of requests
-const screenShare = new Map(); // Map of roomId -> array of requests
+const screenShareData = new Map(); // Map of roomId -> array of requests
 
 async function sendReminder(socket) {
     const data = await schedule.find();
@@ -139,8 +139,8 @@ async function initializeSocket(io) {
                     rooms[roomId] = [];
                 }
 
-                if(!screenShare[roomId]){
-                    screenShare[roomId] = screenShare === true ? true : false;
+                if(!screenShareData[roomId]){
+                    screenShareData[roomId] = screenShare === true ? true : false;
                 }
 
                 // Check for existing user
@@ -183,7 +183,7 @@ async function initializeSocket(io) {
                         id: socket.id,
                         userId,
                         userName,
-                        screenShare: screenShare[roomId],
+                        screenShare: screenShareData[roomId],
                         isHost: userId === hostUserId
                     });
 
@@ -192,7 +192,7 @@ async function initializeSocket(io) {
                     socketId: socket.id,
                     userId,
                     userName,
-                    screenShare: screenShare[roomId],
+                    screenShare: screenShareData[roomId],
                     isHost: userId === hostUserId
                 });
 
