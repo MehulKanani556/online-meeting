@@ -1107,7 +1107,7 @@ function Meeting() {
                                 }).map((schedule, index) => {
                                     return (
                                         <div key={index}
-                                            // onClick={() => handlecanvas(schedule.status, schedule._id)} 
+                                            onClick={() => handlecanvas(schedule.status, schedule)} 
                                             className="col-xl-3 col-lg-4 col-md-6 col-12 mt-4 mb-4">
                                             <div className="B_meeting_card" style={{ backgroundColor: '#0A1119', borderRadius: '6px', cursor: "pointer" }}>
                                                 <div className="d-flex justify-content-between align-items-center  p-3 B_meeting_padding">

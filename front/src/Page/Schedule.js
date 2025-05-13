@@ -21,6 +21,9 @@ const localizer = momentLocalizer(moment);
 
 
 const CustomToolbar = (toolbar) => {
+
+  const userId = sessionStorage.getItem('userId')
+
   const goToCurrent = () => {
     toolbar.onNavigate('TODAY');
   };
