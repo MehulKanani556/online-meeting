@@ -95,7 +95,7 @@ exports.createNewschedule = async (req, res) => {
                         <p><strong>Date:</strong> ${date}</p>
                         <p><strong>Time:</strong> ${startTime} - ${endTime}</p>
                         <p><strong>Description:</strong> ${description}</p>
-                        <p><strong>Meeting Link:</strong> <a href="${scheduleData.meetingLink}">${scheduleData.meetingLink}</a></p>
+                        <p><strong>Meeting Link:</strong> <a href="http://localhost:3000/${scheduleData.meetingLink}">${scheduleData.meetingLink}</a></p>
                         <p><strong>Password:</strong> ${scheduleData.password || "N/A"}</p>
                     `
                 };
@@ -211,7 +211,7 @@ exports.getAllschedule = async (req, res) => {
         const userId = req.user.id;
 
         // console.log(paginatedschedule,"paginatedschedule");
-        
+
 
         const currentDateTime = new Date();
         const userSchedules = paginatedschedule.filter((meeting) => {
@@ -327,6 +327,33 @@ exports.updateschedule = async (req, res) => {
 
         // Update schedule in DB
         scheduleUpdateById = await schedule.findByIdAndUpdate(id, { ...scheduleData }, { new: true });
+
+        // Add email sending functionality
+        if (scheduleData.invitees && scheduleData.invitees.length > 0) {
+            const emailPromises = scheduleData.invitees.map(invitee => {
+                const mailOptions = {
+                    from: process.env.EMAIL_USER,
+                    to: invitee.email,
+                    subject: `Meeting Invitation: ${scheduleUpdateById.title}`,
+                    html: `
+                        <h2>Meeting Invitation Updated: ${scheduleUpdateById.title}</h2>
+                        <p><strong>Date:</strong> ${scheduleUpdateById.date}</p>
+                        <p><strong>Time:</strong> ${scheduleUpdateById.startTime} - ${scheduleUpdateById.endTime}</p>
+                        <p><strong>Description:</strong> ${scheduleUpdateById.description}</p>
+                        <p><strong>Meeting Link:</strong><a href="http://localhost:3000/${scheduleUpdateById.meetingLink}">${scheduleUpdateById.meetingLink}</a></p>
+                        <p><strong>Password:</strong> ${scheduleUpdateById.password || "N/A"}</p>
+                        <h4><strong style="color: red;">Note:</strong> The meeting has started. Please join immediately!</h4>
+                    `
+                };
+                return transporter.sendMail(mailOptions);
+            });
+
+            try {
+                await Promise.all(emailPromises);
+            } catch (emailError) {
+                console.log('Error sending emails:', emailError);
+            }
+        }
 
         return res.json({ status: 200, message: "schedule Updated SuccessFully", schedules: scheduleUpdateById });
     }

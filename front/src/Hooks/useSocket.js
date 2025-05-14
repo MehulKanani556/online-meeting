@@ -32,11 +32,11 @@ export const useSocket = (userId, roomId, userName, hostUserId) => {
     const currUser = useSelector((state) => state.user.currUser);
 
     useEffect(() => {
-        if(userid){
+        if (userid) {
             dispatch(getUserById(userid));
         }
     }, [userid]);
-    
+
 
     useEffect(() => {
         if (Notification.permission === "default") {
@@ -126,8 +126,6 @@ export const useSocket = (userId, roomId, userName, hostUserId) => {
             socketRef.current.emit("user-login", userId);
         });
 
-        console.log("currUserwwwwww", currUser?.sharescreen);
-
         socketRef.current.emit('join-room', {
             roomId,
             userId,
@@ -179,13 +177,9 @@ export const useSocket = (userId, roomId, userName, hostUserId) => {
             setSystemMessages([]);
         });
 
-        console.log("participants", participants);
-
         // Handle new user connected
         socketRef.current.on('user-connected', (user) => {
 
-            console.log(user.screenShare,"user.............");
-            
             if (user.userName && !user.isHost && user.userId !== userId) {
                 setSystemMessages(prev => [...prev, {
                     type: 'join',
@@ -386,11 +380,11 @@ export const useSocket = (userId, roomId, userName, hostUserId) => {
         socketRef.current.on('meeting-started', (data) => {
             enqueueSnackbar(data.message, {
                 variant: 'success', autoHideDuration: 3000, anchorOrigin: {
-                  vertical: 'top', // Position at the top
-                  horizontal: 'right', // Position on the right
+                    vertical: 'top', // Position at the top
+                    horizontal: 'right', // Position on the right
                 }
-              });
-            sessionStorage.setItem("meetingStarted",true)
+            });
+            sessionStorage.setItem("meetingStarted", true)
         });
 
         return () => {
