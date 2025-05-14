@@ -14,6 +14,7 @@ import { IoClose, IoSearch } from "react-icons/io5";
 import { IoMdSend } from "react-icons/io";
 import { setIsChatOpen, setMainSectionMargin, setShow } from "../Redux/Slice/meeting.slice";
 import { useDispatch } from "react-redux";
+import { updateschedule } from "../Redux/Slice/schedule.slice";
 
 const MeetingSidebar = ({
   show,
@@ -62,9 +63,11 @@ const MeetingSidebar = ({
   handleTextareaResize,
   renderTypingIndicator,
   muteAllUsers,
+  singleSchedule,
 }) => {
   const usersValues = {
-    invitees: [],
+    _id: singleSchedule?._id,
+    invitees: singleSchedule?.invitees,
   };
   const dispatch = useDispatch();
   return (
@@ -85,8 +88,9 @@ const MeetingSidebar = ({
     >
       <Formik
         initialValues={usersValues}
-        onSubmit={(values) => {
-          console.log("values", values);
+        onSubmit={(values, { resetForm }) => {
+          dispatch(updateschedule(values));
+          setSelectedUsers([]);
         }}
       >
         {({ values, setFieldValue, handleSubmit }) => (
@@ -129,7 +133,7 @@ const MeetingSidebar = ({
                         ref={searchInputRef}
                         onChange={(e) => {
                           const searchusers = e.target.value.toLowerCase();
-                          const filtered = allusers.filter(
+                          const filtered = allusers?.filter(
                             (user) =>
                               user.email.toLowerCase().includes(searchusers) ||
                               user.name.toLowerCase().includes(searchusers)
@@ -342,6 +346,7 @@ const MeetingSidebar = ({
                   <div className="text-center mb-3">
                     <button
                       type="submit"
+                      disabled={selectedUsers.length === 0}
                       className="btn j_button_invite"
                       onClick={() => {
                         if (selectedUsers.length > 0) {
@@ -354,7 +359,6 @@ const MeetingSidebar = ({
                               photo: user.photo,
                             })),
                           ]);
-                          setSelectedUsers([]);
                         }
                       }}
                     >
@@ -399,7 +403,7 @@ const MeetingSidebar = ({
                     </div>
                   </div>
                   {linkCopied && (
-                    <div className="text-success text-end mb-1 px-4">
+                    <div className="text-success text-end mb-1 px-4" style={{ fontSize: '14px' }}>
                       Link is copied!
                     </div>
                   )}
@@ -917,51 +921,6 @@ const MeetingSidebar = ({
                           </div>
                         </div>
 
-                        {/* <div className="B_search-container mb-3">
-                          <div className="position-relative mx-auto" style={{ width: "100%" }}>
-                            <form onSubmit={handleSendMessage} className="d-flex">
-                              <textarea
-                                className="form-control text-white j_search_Input"
-                                value={newMessage}
-                                onChange={(e) => {
-                                  handleMessageInput(e);
-                                  handleTextareaResize(e);
-                                }}
-                                onInput={handleTextareaResize}
-                                placeholder="Write a message"
-                                style={{
-                                  color: 'white',
-                                  backgroundColor: "#101317",
-                                  border: "none",
-                                  borderRadius: "8px",
-                                  padding: "12px 48px 12px 16px",
-                                  fontSize: "16px",
-                                  resize: "none",
-                                  minHeight: "44px",
-                                  maxHeight: "44px", // Keeps it single-line height
-                                  overflow: "hidden",
-                                }}
-                              />
-                              <button
-                                type="submit"
-                                className="position-absolute"
-                                style={{
-                                  right: "16px",
-                                  top: "50%",
-                                  transform: "translateY(-50%)",
-                                  background: "none",
-                                  border: "none",
-                                  color: "#fff",
-                                  fontSize: "22px",
-                                  padding: 0,
-                                }}
-                              >
-                                <IoMdSend />
-                              </button>
-                            </form>
-                          </div>
-                        </div> */}
-
                       </div>
                     </>
                   </Offcanvas.Body>
@@ -971,7 +930,7 @@ const MeetingSidebar = ({
           </>
         )}
       </Formik>
-    </Offcanvas>
+    </Offcanvas >
   );
 };
 

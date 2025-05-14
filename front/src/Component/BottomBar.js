@@ -39,9 +39,8 @@ const BottomBar = React.memo(
 
     const userId = sessionStorage.getItem("userId");
 
-    const screenShare = participants?.find(participant => participant?.userId === userId)?.screenShare ;
-    const userisHost = participants?.find(participant => participant?.userId === userId)?.isHost ;
-    
+    const screenShare = participants?.find(participant => participant?.userId === userId)?.screenShare;
+    const userisHost = participants?.find(participant => participant?.userId === userId)?.isHost;
 
     const handleShowee = (e) => {
       dispatch(setShow(true));
@@ -89,15 +88,14 @@ const BottomBar = React.memo(
             <div className="d-flex d_resposive">
               <div
                 className="d_box me-sm-3 mb-2 mb-sm-0"
-                style={{ cursor: "pointer", opacity: screenShare ? 1 : userisHost ? 1: 0.5 }}
-                onClick={()=>{
-                  if(screenShare){
+                style={{ cursor: "pointer", opacity: screenShare ? 1 : userisHost ? 1 : 0.5 }}
+                onClick={() => {
+                  if (screenShare) {
                     toggleScreenShare();
-                  }else{
-
-                    if(userisHost){
+                  } else {
+                    if (userisHost) {
                       toggleScreenShare();
-                    }else{
+                    } else {
                       enqueueSnackbar('Screen share is not allowed', {
                         variant: 'warning', autoHideDuration: 3000, anchorOrigin: {
                           vertical: 'top', // Position at the top

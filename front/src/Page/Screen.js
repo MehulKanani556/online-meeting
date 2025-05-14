@@ -59,7 +59,6 @@ function Screen() {
     }
   }, [location.state]);
 
-
   // Current user information
   const userId = sessionStorage.getItem("userId");
   const meetingStarted = sessionStorage.getItem("meetingStarted");
@@ -73,17 +72,15 @@ function Screen() {
 
   const allschedule = useSelector((state) => state.schedule.allschedule);
 
-
   useEffect(() => {
-      dispatch(getAllschedule());
+    dispatch(getAllschedule());
   }, [dispatch]);
 
-  useEffect(()=>{
+  useEffect(() => {
 
     let schedule;
-
-    if(allschedule && userId && location.pathname && !meetingStarted){
-      if(allschedule.length > 0){
+    if (allschedule && userId && location.pathname && !meetingStarted) {
+      if (allschedule.length > 0) {
         schedule = allschedule.find(schedule => schedule.meetingLink == location.pathname);
       }
       if (schedule && !schedule?.joinBeforeHost) {
@@ -92,12 +89,12 @@ function Screen() {
           return;
         }
       }
-  }
-  
-  },[allschedule, location.pathname, userId])
+    }
+
+  }, [allschedule, location.pathname, userId])
 
 
-    // const setid 
+  // const setid 
 
   // Use the socket hook
   const {
@@ -161,6 +158,8 @@ function Screen() {
   const dropdownRef = useRef(null);
   const allusers = useSelector((state) => state.user.allusers);
   const IMG_URL = IMAGE_URL;
+  const [recordedChunks, setRecordedChunks] = useState([]);
+  const singleSchedule = allschedule.find(schedule => schedule.meetingLink === location.pathname);
 
   useEffect(() => {
     dispatch(getAllUsers());
@@ -178,9 +177,6 @@ function Screen() {
     setIsHost(currentUserIsHost);
   }, [participants, currUser]);
 
-
-  
-
   // Refs
   const localVideoRef = useRef();
   const peerConnectionsRef = useRef({});
@@ -189,7 +185,6 @@ function Screen() {
   const pendingIceCandidatesRef = useRef({});
   const mediaRecorderRef = useRef(null);
   const recordingTimerRef = useRef(null);
-  const recordingDivRef = useRef(null);
   const frameCaptureIntervalRef = useRef(null);
   const canvasRef = useRef(null);
 
@@ -276,7 +271,7 @@ function Screen() {
 
   // Get current user data
   useEffect(() => {
-    if(userId){
+    if (userId) {
       dispatch(getUserById(userId));
     }
   }, [userId, dispatch]);
@@ -1247,151 +1242,398 @@ function Screen() {
     e.target.style.height = Math.min(120, e.target.scrollHeight) + "px";
   };
 
-  useEffect(()=>{
-    if(currUser && currUser?.Autorecord){
+  useEffect(() => {
+    if (currUser && currUser?.Autorecord) {
       console.log("dasvawv");
-      
+
       toggleRecording()
     }
-  },[currUser?.Autorecord,recordingDivRef?.current])
+  }, [currUser?.Autorecord])
 
   // record video
+  // const toggleRecording = async () => {
+  //   if (isRecording) {
+  //     // Stop recording
+  //     if (mediaRecorderRef.current) {
+  //       mediaRecorderRef.current.stop();
+  //       setIsRecording(false);
+  //       clearInterval(recordingTimerRef.current);
+  //       clearInterval(frameCaptureIntervalRef.current); // Stop canvas updates
+  //       recordingTimerRef.current = null;
+
+  //       if (socket) {
+  //         socket.emit("recording-status-change", {
+  //           roomId,
+  //           isRecording: false,
+  //         });
+  //       }
+  //     }
+  //   } else {
+  //     try {
+  //       const recordingDiv = recordingDivRef.current;
+  //       if (!recordingDiv) {
+  //         console.error("Recording div not found");
+  //         return;
+  //       }
+
+  //       const canvas = document.createElement("canvas");
+  //       const rect = recordingDiv.getBoundingClientRect();
+  //       canvas.width = rect.width;
+  //       canvas.height = rect.height;
+  //       const ctx = canvas.getContext("2d");
+  //       canvasRef.current = canvas;
+
+  //       const audioContext = new AudioContext();
+  //       const audioDestination = audioContext.createMediaStreamDestination();
+
+  //       if (localStream) {
+  //         localStream.getAudioTracks().forEach((track) => {
+  //           const source = audioContext.createMediaStreamSource(
+  //             new MediaStream([track])
+  //           );
+  //           source.connect(audioDestination);
+  //         });
+  //       }
+
+  //       Object.values(remoteStreams).forEach((stream) => {
+  //         stream.getAudioTracks().forEach((track) => {
+  //           const source = audioContext.createMediaStreamSource(
+  //             new MediaStream([track])
+  //           );
+  //           source.connect(audioDestination);
+  //         });
+  //       });
+
+  //       let lastCapturedImage = null;
+
+  //       const captureHtmlToCanvas = async () => {
+  //         if (!recordingDiv) return;
+
+  //         try {
+  //           const snapshot = await html2canvas(recordingDiv, {
+  //             backgroundColor: null,
+  //             useCORS: true,
+  //             scale: window.devicePixelRatio || 1,
+  //           });
+  //           lastCapturedImage = snapshot;
+  //         } catch (err) {
+  //           console.error("Failed to capture html2canvas", err);
+  //         }
+  //       };
+
+  //       const drawScreen = () => {
+  //         ctx.clearRect(0, 0, canvas.width, canvas.height);
+  //         if (lastCapturedImage) {
+  //           ctx.drawImage(lastCapturedImage, 0, 0, canvas.width, canvas.height);
+  //         }
+  //         requestAnimationFrame(drawScreen);
+  //       };
+
+  //       drawScreen(); // Kick off animation
+
+  //       // ⏱️ Update canvas content at 30fps
+  //       const frameCaptureInterval = setInterval(captureHtmlToCanvas, 33);
+  //       frameCaptureIntervalRef.current = frameCaptureInterval;
+
+  //       const canvasStream = canvas.captureStream(30);
+  //       audioDestination.stream.getAudioTracks().forEach((track) => {
+  //         canvasStream.addTrack(track);
+  //       });
+
+  //       const chunks = [];
+  //       mediaRecorderRef.current = new MediaRecorder(canvasStream, {
+  //         mimeType: "video/webm",
+  //       });
+
+  //       mediaRecorderRef.current.ondataavailable = (event) => {
+  //         if (event.data.size > 0) chunks.push(event.data);
+  //       };
+
+  //       mediaRecorderRef.current.onstop = () => {
+  //         if (chunks.length > 0) {
+  //           const blob = new Blob(chunks, { type: "video/webm" });
+  //           const url = URL.createObjectURL(blob);
+  //           const a = document.createElement("a");
+  //           a.href = url;
+  //           a.download = `meeting-recording-${roomId}-${new Date().toLocaleDateString(
+  //             "en-GB"
+  //           )}.webm`;
+  //           a.style.display = "none";
+  //           document.body.appendChild(a);
+  //           a.click();
+  //           setTimeout(() => {
+  //             document.body.removeChild(a);
+  //             URL.revokeObjectURL(url);
+  //           }, 100);
+  //         }
+  //       };
+
+  //       mediaRecorderRef.current.start();
+  //       setIsRecording(true);
+  //       // setRecordedChunks([]);
+
+  //       recordingTimerRef.current = setInterval(() => {
+  //         setRecordingTime((prev) => prev + 1);
+  //       }, 1000);
+
+  //       if (socket) {
+  //         socket.emit("recording-status-change", {
+  //           roomId,
+  //           isRecording: true,
+  //         });
+  //       }
+  //     } catch (error) {
+  //       console.error("Error starting recording:", error);
+  //     }
+  //   }
+  // };
+
   const toggleRecording = async () => {
     if (isRecording) {
       // Stop recording
       if (mediaRecorderRef.current) {
         mediaRecorderRef.current.stop();
         setIsRecording(false);
-        clearInterval(recordingTimerRef.current);
-        clearInterval(frameCaptureIntervalRef.current); // Stop canvas updates
-        recordingTimerRef.current = null;
-
-        if (socket) {
-          socket.emit("recording-status-change", {
-            roomId,
-            isRecording: false,
-          });
-        }
       }
     } else {
       try {
-        const recordingDiv = recordingDivRef.current;
-        if (!recordingDiv) {
-          console.error("Recording div not found");
+        // Get streams to record - collect all streams
+        const streamsToRecord = new Map();
+
+        // Add local stream with ID
+        if (localStream && socket) {
+          streamsToRecord.set(socket.id, localStream);
+        }
+
+        // Add all remote streams with their participant IDs
+        Object.entries(remoteStreams).forEach(([peerId, stream]) => {
+          streamsToRecord.set(peerId, stream);
+        });
+
+        // Check if screen sharing is active and add the screen stream
+        if (isScreenSharing && localVideoRef.current) {
+          const screenStream = localVideoRef.current.srcObject;
+          if (screenStream) {
+            streamsToRecord.set('screen', screenStream);
+          }
+        }
+
+        if (streamsToRecord.size === 0) {
+          console.error('No streams available to record');
           return;
         }
 
-        const canvas = document.createElement("canvas");
-        const rect = recordingDiv.getBoundingClientRect();
-        canvas.width = rect.width;
-        canvas.height = rect.height;
-        const ctx = canvas.getContext("2d");
-        canvasRef.current = canvas;
+        // Create a canvas to combine all video streams
+        const canvas = document.createElement('canvas');
+        canvas.width = 1920;  // HD width
+        canvas.height = 1080;  // HD height
+        const ctx = canvas.getContext('2d');
 
+        // Create a combined audio context
         const audioContext = new AudioContext();
         const audioDestination = audioContext.createMediaStreamDestination();
 
-        if (localStream) {
-          localStream.getAudioTracks().forEach((track) => {
-            const source = audioContext.createMediaStreamSource(
-              new MediaStream([track])
-            );
-            source.connect(audioDestination);
-          });
-        }
-
-        Object.values(remoteStreams).forEach((stream) => {
-          stream.getAudioTracks().forEach((track) => {
-            const source = audioContext.createMediaStreamSource(
-              new MediaStream([track])
-            );
-            source.connect(audioDestination);
-          });
+        // Add all audio tracks to the audio destination
+        streamsToRecord.forEach((stream) => {
+          const audioTracks = stream.getAudioTracks();
+          if (audioTracks.length > 0) {
+            const audioSource = audioContext.createMediaStreamSource(new MediaStream([audioTracks[0]]));
+            audioSource.connect(audioDestination);
+          }
         });
 
-        let lastCapturedImage = null;
+        // Create a function to draw all videos on the canvas in a grid layout
+        const drawVideos = () => {
+          // Clear the canvas
+          ctx.fillStyle = 'transparent'; // Match the dark background of your app
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        const captureHtmlToCanvas = async () => {
-          if (!recordingDiv) return;
+          // Get all participant videos
+          const videoElements = [];
 
-          try {
-            const snapshot = await html2canvas(recordingDiv, {
-              backgroundColor: null,
-              useCORS: true,
-              scale: window.devicePixelRatio || 1,
+          // Add local video
+          if (localVideoRef.current) {
+            videoElements.push({
+              id: socket?.id,
+              element: localVideoRef.current,
+              hasVideo: !isVideoOff
             });
-            lastCapturedImage = snapshot;
-          } catch (err) {
-            console.error("Failed to capture html2canvas", err);
           }
+
+          // Add remote videos
+          participants.forEach(participant => {
+            if (participant.id !== socket?.id) { // Skip local participant
+              const videoElement = videoRefsMap.current[participant.id];
+              if (videoElement) {
+                videoElements.push({
+                  id: participant.id,
+                  element: videoElement,
+                  hasVideo: participant.hasVideo !== false
+                });
+              }
+            }
+          });
+
+          // Check if screen sharing is active and add it to the video elements
+          if (isScreenSharing && localVideoRef.current) {
+            videoElements.push({
+              id: 'screen',
+              element: localVideoRef.current,
+              hasVideo: true // Assuming screen sharing is active
+            });
+          }
+
+          // Calculate grid dimensions
+          const count = videoElements.length;
+          let cols = 1;
+          if (count > 1) cols = 2;
+          if (count > 4) cols = 3;
+          if (count > 9) cols = 4;
+
+          const rows = Math.ceil(count / cols);
+          const cellWidth = (canvas.width / cols) - 20; // Subtracting for gaps
+          const cellHeight = (canvas.height / rows) - 20; // Subtracting for gaps
+
+          // Draw each video
+          videoElements.forEach((video, index) => {
+            const col = index % cols;
+            const row = Math.floor(index / cols);
+            const x = col * (cellWidth + 20); // Adding gap
+            const y = row * (cellHeight + 20); // Adding gap
+
+            if (video.hasVideo && video.element.srcObject) {
+              // Draw the video element
+              ctx.drawImage(video.element, x, y, cellWidth, cellHeight);
+            } else {
+              // Draw a placeholder with avatar
+              ctx.fillStyle = `hsl(${video.id?.charCodeAt(0) * 60}, 70%, 45%)`;
+              ctx.fillRect(x, y, cellWidth, cellHeight);
+
+              // Draw user initials
+              const participant = participants.find(p => p.id === video.id);
+              if (participant) {
+                ctx.fillStyle = 'white';
+                ctx.font = `${cellWidth * 0.2}px Arial`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(participant.initials, x + cellWidth / 2, y + cellHeight / 2);
+              }
+            }
+
+            // Draw participant name
+            const participant = participants.find(p => p.id === video.id);
+            if (participant) {
+              ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+              ctx.fillRect(x, y + cellHeight - 30, cellWidth, 30);
+
+              ctx.fillStyle = 'white';
+              ctx.font = '16px Arial';
+              ctx.textAlign = 'left';
+              ctx.fillText(participant.name + (participant.isHost ? ' (Host)' : ''), x + 10, y + cellHeight - 10);
+            }
+          });
+
+          // Call this function again to keep updating
+          requestAnimationFrame(drawVideos);
         };
 
-        const drawScreen = () => {
-          ctx.clearRect(0, 0, canvas.width, canvas.height);
-          if (lastCapturedImage) {
-            ctx.drawImage(lastCapturedImage, 0, 0, canvas.width, canvas.height);
-          }
-          requestAnimationFrame(drawScreen);
-        };
+        // Start drawing
+        drawVideos();
 
-        drawScreen(); // Kick off animation
+        // Create a stream from the canvas
+        const canvasStream = canvas.captureStream(30); // 30 FPS
 
-        // ⏱️ Update canvas content at 30fps
-        const frameCaptureInterval = setInterval(captureHtmlToCanvas, 33);
-        frameCaptureIntervalRef.current = frameCaptureInterval;
-
-        const canvasStream = canvas.captureStream(30);
-        audioDestination.stream.getAudioTracks().forEach((track) => {
+        // Add audio tracks to the canvas stream
+        audioDestination.stream.getAudioTracks().forEach(track => {
           canvasStream.addTrack(track);
         });
 
-        const chunks = [];
-        mediaRecorderRef.current = new MediaRecorder(canvasStream, {
-          mimeType: "video/webm",
-        });
+        // Create MediaRecorder with webm compatible options
+        const options = { mimeType: 'video/webm; codecs=vp9,opus' }; // Use webm which is more widely supported
+        mediaRecorderRef.current = new MediaRecorder(canvasStream, options);
 
+        setRecordedChunks([]);
+
+        // Set up event handlers
         mediaRecorderRef.current.ondataavailable = (event) => {
-          if (event.data.size > 0) chunks.push(event.data);
-        };
-
-        mediaRecorderRef.current.onstop = () => {
-          if (chunks.length > 0) {
-            const blob = new Blob(chunks, { type: "video/webm" });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement("a");
-            a.href = url;
-            a.download = `meeting-recording-${roomId}-${new Date().toLocaleDateString(
-              "en-GB"
-            )}.webm`;
-            a.style.display = "none";
-            document.body.appendChild(a);
-            a.click();
-            setTimeout(() => {
-              document.body.removeChild(a);
-              URL.revokeObjectURL(url);
-            }, 100);
+          if (event.data.size > 0) {
+            setRecordedChunks(prevChunks => {
+              const newChunks = [...prevChunks, event.data];
+              return newChunks;
+            });
           }
         };
 
+        // mediaRecorderRef.current.onstop = () => {
+        //   // Use a local variable to hold the current chunks
+        //   const chunksToSave = [...recordedChunks]; // Copy the current state
+        //   console.log('Recorded chunks:', chunksToSave);
+
+        //   if (chunksToSave.length > 0) {
+        //     const blob = new Blob(chunksToSave, { type: 'video/webm' });
+        //     const url = URL.createObjectURL(blob);
+        //     const a = document.createElement('a');
+        //     a.href = url;
+        //     a.download = `meeting-recording-${new Date().toISOString()}-${roomId}.webm`;
+        //     document.body.appendChild(a);
+        //     a.click();
+        //     window.URL.revokeObjectURL(url);
+        //     document.body.removeChild(a);
+        //     setRecordedChunks([]); // Clear the chunks after saving
+        //   } else {
+        //     console.error('No recorded chunks available to save.');
+        //   }
+        // };
+
+        // Start recording with 1 second chunks
         mediaRecorderRef.current.start();
         setIsRecording(true);
-        // setRecordedChunks([]);
 
-        recordingTimerRef.current = setInterval(() => {
-          setRecordingTime((prev) => prev + 1);
-        }, 1000);
-
+        // If using Socket.io, notify others that recording has started
         if (socket) {
-          socket.emit("recording-status-change", {
+          socket.emit('recording-status-change', {
             roomId,
-            isRecording: true,
+            isRecording: true
           });
         }
+
       } catch (error) {
-        console.error("Error starting recording:", error);
+        console.error('Error starting recording:', error);
       }
     }
   };
+
+  const formatDate = (date) => {
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+    const year = date.getFullYear();
+    return `${day}-${month}-${year}`;
+  };
+
+  useEffect(() => {
+    if (recordedChunks.length > 0 && !isRecording) {
+      // The recording has stopped and we have chunks
+      const blob = new Blob(recordedChunks, {
+        type: 'video/webm'
+      });
+
+      // Create a URL for the blob
+      const url = URL.createObjectURL(blob);
+
+      // Create a download link
+      const a = document.createElement('a');
+      document.body.appendChild(a);
+      a.style = 'display: none';
+      a.href = url;
+      a.download = `meeting-recording-${formatDate(new Date())}-${roomId}.webm`;
+      a.click();
+
+      // Clean up
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      setRecordedChunks([]);
+    }
+  }, [recordedChunks, isRecording]);
 
   // Add a socket handler to your useEffect that sets up WebRTC handlers
   useEffect(() => {
@@ -1848,11 +2090,6 @@ function Screen() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Formik state
-  const usersValues = {
-    invitees: [],
-  };
-
   useEffect(() => {
     if (!userId) {
       navigate("/login", { state: { from: `/screen/${roomId}` } });
@@ -1865,7 +2102,7 @@ function Screen() {
   };
 
   return (
-    <div className="j_record" ref={recordingDivRef}>
+    <div className="j_record">
       {location?.state?.status && (
         <Modal
           contentClassName="j_bottom_left_modal"
@@ -2130,12 +2367,10 @@ function Screen() {
         handleMessageInput={handleMessageInput}
         handleTextareaResize={handleTextareaResize}
         renderTypingIndicator={renderTypingIndicator}
-        values={usersValues}
         muteAllUsers={muteAllUsers}
-        handleSubmit={() => {
-          console.log("values", usersValues);
-        }}
-        // setFieldValue={setFieldValue}
+        setFilteredUsers={setFilteredUsers}
+        singleSchedule={singleSchedule}
+      // setFieldValue={setFieldValue}
       />
     </div>
   );
