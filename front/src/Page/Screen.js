@@ -59,7 +59,6 @@ function Screen() {
     }
   }, [location.state]);
 
-  console.log("hostUserId", location?.state?.hostUserId);
 
   // Current user information
   const userId = sessionStorage.getItem("userId");
@@ -73,7 +72,7 @@ function Screen() {
   const userName = currUser?.name;
 
   const allschedule = useSelector((state) => state.schedule.allschedule);
-  console.log("location---------------", location); 
+
 
   useEffect(() => {
       dispatch(getAllschedule());
@@ -82,11 +81,10 @@ function Screen() {
   useEffect(()=>{
 
     let schedule;
-    console.log("schedule", allschedule);
+
     if(allschedule && userId && location.pathname && !meetingStarted){
       if(allschedule.length > 0){
         schedule = allschedule.find(schedule => schedule.meetingLink == location.pathname);
-        console.log("schedule", schedule,allschedule);
       }
       if (schedule && !schedule?.joinBeforeHost) {
         if (schedule?.userId !== userId) {
@@ -180,7 +178,7 @@ function Screen() {
     setIsHost(currentUserIsHost);
   }, [participants, currUser]);
 
-  console.log(participants);
+
   
 
   // Refs

@@ -95,7 +95,8 @@ function Meeting() {
     const FRONT_URL = 'localhost:3000'
 
     const dispatch = useDispatch();
-    const navigate = useNavigate()
+    const navigate = useNavigate();
+    const scheduleSubmitRef = useRef(null);
 
     // Refs 
     const dropdownRef = useRef(null);
@@ -1968,6 +1969,7 @@ function Meeting() {
                                     }}
                                     validationSchema={scheduleSchema}
                                     onSubmit={(values, { resetForm }) => {
+                                        scheduleSubmitRef.current = true;
                                         if (!gettoken && !userId) {
                                             enqueueSnackbar('Please login to create new meeting', {
                                                 variant: 'warning', autoHideDuration: 3000, anchorOrigin: {
@@ -1975,11 +1977,13 @@ function Meeting() {
                                                     horizontal: 'right',
                                                 }
                                             });
+                                            scheduleSubmitRef.current = false;
                                             return;
                                         }
                                         dispatch(createschedule(values)).then((response) => {
                                             console.log(response);
                                             if (response.payload?.status === 200) {
+                                                scheduleSubmitRef.current = false;
                                                 resetForm();
                                                 handleCloseScheduleModel();
                                                 if (meetingdetail) {
@@ -2116,11 +2120,10 @@ function Meeting() {
                                                                 }
                                                             }}
                                                         >
-                                                            <option value="">select</option>
                                                             <option value="DoesNotRepeat">Does not repeat</option>
                                                             <option value="daily">Daily</option>
-                                                            <option value="weekly">Weekly on Monday</option>
-                                                            <option value="monthly">Monthly on 3 February</option>
+                                                            <option value="weekly">Weekly</option>
+                                                            <option value="monthly">Monthly</option>
                                                             <option value="custom">Custom</option>
                                                         </select>
                                                         {touched.recurringMeeting && errors.recurringMeeting &&
@@ -2135,7 +2138,8 @@ function Meeting() {
                                                         >
                                                             Cancel
                                                         </button>
-                                                        <button type="submit" className="btn btn-light j_home_button fw-semibold">
+                                                        <button type="submit" className="btn btn-light j_home_button fw-semibold"
+                                                         disabled={scheduleSubmitRef.current === true}>
                                                             {ScheduleData ? 'Update' : 'Schedule'}
                                                         </button>
                                                     </div>
@@ -2571,14 +2575,16 @@ function Meeting() {
                                         invitees: ScheduleData ? ScheduleData?.invitees : []
                                     }}
                                     validationSchema={scheduleSchema}
-                                    onSubmit={(values, { resetForm }) => {
+                                    onSubmit={async(values, { resetForm }) => {
                                         if (!gettoken || !userId) {
                                             alert('Please login to create a schedule');
                                             return;
                                         }
+                                        scheduleSubmitRef.current = true;
                                         dispatch(updateschedule(values)).then((response) => {
                                             console.log(response);
                                             if (response.payload?.status === 200) {
+                                                scheduleSubmitRef.current = false;
                                                 resetForm();
                                                 handleCloseeditScheduleModel();
                                             }
@@ -2715,11 +2721,10 @@ function Meeting() {
                                                                 }
                                                             }}
                                                         >
-                                                            <option value="">select</option>
                                                             <option value="DoesNotRepeat">Does not repeat</option>
                                                             <option value="daily">Daily</option>
-                                                            <option value="weekly">Weekly on Monday</option>
-                                                            <option value="monthly">Monthly on 3 February</option>
+                                                            <option value="weekly">Weekly</option>
+                                                            <option value="monthly">Monthly</option>
                                                             <option value="custom">Custom</option>
                                                         </select>
                                                         {touched.recurringMeeting && errors.recurringMeeting &&
@@ -2734,7 +2739,8 @@ function Meeting() {
                                                         >
                                                             Cancel
                                                         </button>
-                                                        <button type="submit" className="btn btn-light j_home_button fw-semibold">
+                                                        <button type="submit" className="btn btn-light j_home_button fw-semibold" 
+                                                         disabled={scheduleSubmitRef.current === true}>
                                                             {ScheduleData ? 'Update' : 'Schedule'}
                                                         </button>
                                                     </div>

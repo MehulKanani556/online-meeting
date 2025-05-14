@@ -41,7 +41,6 @@ const BottomBar = React.memo(
 
     const screenShare = participants?.find(participant => participant?.userId === userId)?.screenShare ;
     const userisHost = participants?.find(participant => participant?.userId === userId)?.isHost ;
-    console.log(screenShare,"==========screenShare");
     
 
     const handleShowee = (e) => {

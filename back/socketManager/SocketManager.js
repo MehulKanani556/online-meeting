@@ -8,7 +8,7 @@ const joinRequests = new Map(); // Map of roomId -> array of requests
 const screenShareData = new Map();
 const listOnlineUsers = new Map();
 
-
+console.log("listOnlineUsers", listOnlineUsers);
 
 async function sendReminder(socket) {
     const data = await schedule.find();
@@ -94,32 +94,34 @@ async function sendReminder(socket) {
 function handleDisconnect(socket) {
     if (socket.userId) {
         delete onlineUsers[socket.userId];
+
+        listOnlineUsers.delete(socket.userId);
         // Broadcast updated online users list
-        const onlineUsersList = Object.keys(onlineUsers);
+        const onlineUsersList = Array.from(listOnlineUsers.keys());
         global.io.emit("user-status-changed", onlineUsersList);
     }
 }
 
 async function handleUserLogin(socket, userId) {
-    // Check if the user is already connected
-    if (listOnlineUsers.hasOwnProperty(userId)) {
-        return;
-    }
-
     // Remove any existing socket connection for this user
-    for (const existingUserId in listOnlineUsers) {
-        if (existingUserId === userId && listOnlineUsers[existingUserId] !== socket.id) {
-            const existingSocket = global.io.sockets.sockets.get(onlineUsers[existingUserId]);
+    if (listOnlineUsers.has(userId)) {
+        const oldSocketId = listOnlineUsers.get(userId);
+        if (oldSocketId !== socket.id) {
+            const existingSocket = global.io.sockets.sockets.get(oldSocketId);
             if (existingSocket) {
                 existingSocket.disconnect(); // Disconnect the existing socket
             }
-            delete listOnlineUsers[existingUserId];
+            listOnlineUsers.delete(userId);
         }
     }
 
-    // Add new socket connection
-    listOnlineUsers[userId] = socket.id;
+    // Add or update the user's socket connection
+    listOnlineUsers.set(userId, socket.id);
     socket.userId = userId;
+
+    // Broadcast updated online users list
+    const onlineUsersList = Array.from(listOnlineUsers.keys());
+    global.io.emit("user-status-changed", onlineUsersList);
 }
 
 async function initializeSocket(io) {
@@ -128,9 +130,19 @@ async function initializeSocket(io) {
     io.on("connection", (socket) => {
         console.log("New socket connection:", socket.id);
 
-        listOnlineUsers
         // User joins a room
         socket.on('join-room', async ({ roomId, userId, userName, hostUserId = null , screenShare}) => {
+
+            if(!roomId){
+                socket.emit('error', { message: 'Room ID is required' });
+                return;
+            }
+
+            if(!userId){
+                socket.emit('error', { message: 'User ID is required' });
+                return;
+            }
+            
             try {
                 // Initialize rooms[roomId] if it doesn't exist
                 if (!rooms[roomId]) {
@@ -195,22 +207,29 @@ async function initializeSocket(io) {
                    socket.emit('room-users', rooms[roomId]);
 
                    if (userId == hostUserId) {
+                    const notifiedUsers = new Set();
+                    console.log("zvvvvvvvvvvvvvvvvvvdddddddddddddddddddddd");
+                    
                     (meetingDetails.invitees || []).forEach(invitee => {
                       const inviteeUserId = invitee.userId && invitee.userId.toString();
-                       const socketId = listOnlineUsers[inviteeUserId.toString()]
-                       console.log("socketId", socketId,inviteeUserId.toString());
-                          io.to(socketId).emit('meeting-started', {
+                      if (notifiedUsers.has(inviteeUserId)) {
+                        return;
+                      }
+                       const socketId = listOnlineUsers.get(inviteeUserId)
+                       console.log("socketId------------------------------------", socketId,inviteeUserId.toString());
+                      
+                       if(socketId){
+                        notifiedUsers.add(inviteeUserId);
+                        socket.to(socketId).emit('meeting-started', {
                             message: 'The host has started the meeting.',
                             hostUserId,
                             roomId,
                             timestamp: Date.now()
                           });
-                   
+                       }
                     });
                   }
-                }
-              
-               
+                }       
             } catch (error) {
                 console.error("Error in join-room:", error);
                 socket.emit('error', { message: 'Failed to join room' });

@@ -128,20 +128,15 @@ export const useSocket = (userId, roomId, userName, hostUserId) => {
 
         console.log("currUserwwwwww", currUser?.sharescreen);
 
-        socketRef.current.emit('join-room', {
-            roomId,
-            userId,
-            userName,
-            hostUserId,
-            screenShare: currUser?.sharescreen
-        });
+     
+
 
         socketRef.current.on("user-status-changed", (onlineUserIds) => {
             // console.log("Online users updated:", onlineUserIds);
         });
 
         socketRef.current.on('reminder', (data) => {
-            console.log("ddddd", data);
+            // console.log("ddddd", data);
             setReminders(prevReminders => [...prevReminders, data.message]); // Add new reminder to state
         });
 
@@ -296,7 +291,7 @@ export const useSocket = (userId, roomId, userName, hostUserId) => {
                     }
                     : participant
             ));
-            console.log("participants", participants);
+     
 
         });
 
@@ -383,7 +378,11 @@ export const useSocket = (userId, roomId, userName, hostUserId) => {
             );
         });
 
+   
+        
+
         socketRef.current.on('meeting-started', (data) => {
+      
             enqueueSnackbar(data.message, {
                 variant: 'success', autoHideDuration: 3000, anchorOrigin: {
                   vertical: 'top', // Position at the top
@@ -400,9 +399,29 @@ export const useSocket = (userId, roomId, userName, hostUserId) => {
             }
             if (socketRef.current) {
                 socketRef.current.off('typing-status');
+                socketRef.current.off('meeting-started');
+
             }
         };
     }, [userId, roomId, userName, isChatOpen]);
+
+
+    const hasJoinedRef = useRef(false);
+
+    useEffect(() => {
+        if (userId && roomId && currUser && !hasJoinedRef.current) {
+            console.log("Emitting join-room only once");
+            socketRef.current.emit('join-room', {
+                roomId,
+                userId,
+                userName,
+                hostUserId,
+                screenShare: currUser?.sharescreen
+            });
+            hasJoinedRef.current = true; // Mark as joined
+        }
+    }, [userId, roomId, currUser]);
+    
 
     // Helper function to send a message
     const sendMessage = (message) => {

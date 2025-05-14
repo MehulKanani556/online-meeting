@@ -20,6 +20,33 @@ const oauth2Client = new OAuth2Client(
     process.env.GOOGLE_REDIRECT_URI
 );
 
+ // Function to get next date based on recurring type
+ const getNextDate = (currentDate, type) => {
+    const date = new Date(currentDate);
+    const currentDay = date.getDate(); // Get the current day of the month
+    const currentDayOfWeek = date.getDay(); // Get the current day of the week (0-6)
+
+    switch(type) {
+        case 'daily':
+            date.setDate(date.getDate() + 1);
+            break;
+        case 'weekly':
+            // Add 7 days to get to the same day next week
+            date.setDate(date.getDate() + 7);
+            // Ensure we're on the same day of the week
+            while (date.getDay() !== currentDayOfWeek) {
+                date.setDate(date.getDate() + 1);
+            }
+            break;
+        case 'monthly':
+            date.setMonth(date.getMonth() + 1);
+            break;
+        default:
+            return null;
+    }
+    return date.toISOString().split('T')[0];
+};
+
 exports.createNewschedule = async (req, res) => {
     try {
         let {
@@ -37,66 +64,224 @@ exports.createNewschedule = async (req, res) => {
             status,
         } = req.body;
 
+        const schedulesToCreate = [];
+        let currentDate = date;
+
         // Get the current date and time
         const currentDateTime = new Date();
         const scheduleDateTime = new Date(`${date}T${startTime}`);
-        // console.log("scheduleDateTime", scheduleDateTime, endTime, new Date(`${date}T${endTime}`));
-        console.log("endTime type:", typeof endTime);
-        console.log("endTime format:", endTime);
-
 
         // Check if the schedule time is in the past or future
         if (scheduleDateTime <= currentDateTime && new Date(`${date}T${endTime}`) >= currentDateTime) {
-            status = "Join"; // Set status to join if current time matches
+            status = "Join";
         } else if (scheduleDateTime > currentDateTime) {
-            status = "Upcoming"; // Set status to upcoming if it's a future date
+            status = "Upcoming";
         }
 
-        let scheduleData = {
-            title,
-            date,
-            userId,
-            startTime,
-            endTime,
-            meetingLink,
-            description,
-            reminder,
-            recurringMeeting,
-            invitees,
-            status, // Use the updated status
+        // Create 5 meetings if recurring
+        if (recurringMeeting && ['daily', 'weekly', 'monthly'].includes(recurringMeeting)) {
+            for (let i = 0; i < 5; i++) {
+                const scheduleData = {
+                    title,
+                    date: currentDate,
+                    userId,
+                    startTime,
+                    endTime,
+                    meetingLink,
+                    description,
+                    reminder,
+                    recurringMeeting,
+                    invitees,
+                    status: "Upcoming",
+                    parentMeetingId: i === 0 ? null : schedulesToCreate[0]?._id
+                };
+
+                if (meetingLink === "GenerateaOneTimeMeetingLink") {
+                    const uniqueId = crypto.randomBytes(10).toString('hex');
+                    scheduleData.meetingLink = `/screen/${uniqueId}`;
+                }
+
+                if (meetingLink === "UseMyPersonalRoomLink") {
+                    const uniqueId = Math.floor(100000000000 + Math.random() * 900000000000).toString();
+                    const password = crypto.randomBytes(4).toString('hex');
+                    scheduleData.meetingLink = `/screen/${uniqueId}`;
+                    scheduleData.password = password;
+                }
+
+                schedulesToCreate.push(scheduleData);
+                currentDate = getNextDate(currentDate, recurringMeeting);
+            }
+        } else {
+            // Single meeting
+            const scheduleData = {
+                title,
+                date,
+                userId,
+                startTime,
+                endTime,
+                meetingLink,
+                description,
+                reminder,
+                recurringMeeting,
+                invitees,
+                status,
+            };
+
+            if (meetingLink === "GenerateaOneTimeMeetingLink") {
+                const uniqueId = crypto.randomBytes(10).toString('hex');
+                scheduleData.meetingLink = `/screen/${uniqueId}`;
+            }
+
+            if (meetingLink === "UseMyPersonalRoomLink") {
+                const uniqueId = Math.floor(100000000000 + Math.random() * 900000000000).toString();
+                const password = crypto.randomBytes(4).toString('hex');
+                scheduleData.meetingLink = `/screen/${uniqueId}`;
+                scheduleData.password = password;
+            }
+
+            if (recurringMeeting === 'custom' && customRecurrence) {
+                scheduleData.customRecurrence = {
+                    repeatType: customRecurrence.repeatType,
+                    repeatEvery: customRecurrence.repeatEvery,
+                    ends: customRecurrence.ends,
+                    repeatOn: customRecurrence.repeatType === 'weekly' ? customRecurrence.repeatOn : undefined,
+                    endDate: customRecurrence.ends === 'on' ? customRecurrence.endDate : undefined,
+                    Recurrence: customRecurrence.ends === 'after' ? customRecurrence.Recurrence : undefined,
+                    Monthfirst: customRecurrence.repeatType == 'monthly' ? customRecurrence.Monthfirst : undefined
+                };
+            }
+
+            schedulesToCreate.push(scheduleData);
+        }
+
+        // Create all schedules
+        const createdSchedules = await schedule.create(schedulesToCreate);
+
+        // Send emails for all created meetings
+        if (invitees && invitees.length > 0) {
+            for (const createdSchedule of createdSchedules) {
+                const emailPromises = invitees.map(invitee => {
+                    const mailOptions = {
+                        from: process.env.EMAIL_USER,
+                        to: invitee.email,
+                        subject: `Meeting Invitation: ${title}`,
+                        html: `
+                            <h2>You've been invited to: ${title}</h2>
+                            <p><strong>Date:</strong> ${createdSchedule.date}</p>
+                            <p><strong>Time:</strong> ${startTime} - ${endTime}</p>
+                            <p><strong>Description:</strong> ${description}</p>
+                            <p><strong>Meeting Link:</strong> <a href="${createdSchedule.meetingLink}">${createdSchedule.meetingLink}</a></p>
+                            <p><strong>Password:</strong> ${createdSchedule.password || "N/A"}</p>
+                        `
+                    };
+                    return transporter.sendMail(mailOptions);
+                });
+
+                try {
+                    await Promise.all(emailPromises);
+                } catch (emailError) {
+                    console.log('Error sending emails:', emailError);
+                }
+            }
+        }
+
+        // Google Calendar integration
+        let checkUser = await userModel.findById(userId);
+        if (checkUser.GoogleCalendar) {
+            for (const createdSchedule of createdSchedules) {
+                const event = {
+                    summary: title,
+                    description,
+                    start: {
+                        dateTime: `${createdSchedule.date}T${startTime}:00`,
+                        timeZone: 'Asia/Kolkata',
+                    },
+                    end: {
+                        dateTime: `${createdSchedule.date}T${endTime}:00`,
+                        timeZone: 'Asia/Kolkata',
+                    },
+                    attendees: invitees.map(i => ({ email: i.email })),
+                    reminders: {
+                        useDefault: false,
+                        overrides: [
+                            { method: 'email', minutes: 24 * 60 },
+                            { method: 'popup', minutes: 10 },
+                        ],
+                    },
+                };
+
+                try {
+                    oauth2Client.setCredentials({ refresh_token: checkUser.googleRefreshToken });
+                    const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
+                    const response = await calendar.events.insert({
+                        calendarId: 'primary',
+                        resource: event,
+                    });
+                    if (response && response.data && response.data.id) {
+                        createdSchedule.googleCalendarEventId = response.data.id;
+                        await createdSchedule.save();
+                    }
+                } catch (error) {
+                    console.log('Google Calendar error:', error);
+                }
+            }
+        }
+
+        return res.json({
+            status: 200,
+            message: "Schedule(s) Created Successfully",
+            schedules: createdSchedules
+        });
+
+    } catch (error) {
+        res.json({ status: 500, message: error.message });
+        console.log(error);
+    }
+};
+
+exports.createNextRecurringMeeting = async (completedMeetingId) => {
+    try {
+        const completedMeeting = await schedule.findById(completedMeetingId);
+        if (!completedMeeting || !completedMeeting.recurringMeeting) return;
+
+        const nextDate = getNextDate(completedMeeting.date, completedMeeting.recurringMeeting);
+        const newMeeting = {
+            ...completedMeeting.toObject(),
+            _id: undefined,
+            date: nextDate,
+            status: "Upcoming",
+            parentMeetingId: completedMeetingId
         };
 
-        if (meetingLink === "GenerateaOneTimeMeetingLink") {
+        // Generate new meeting link if needed
+        if (newMeeting.meetingLink === "GenerateaOneTimeMeetingLink") {
             const uniqueId = crypto.randomBytes(10).toString('hex');
-            scheduleData.meetingLink = `/screen/${uniqueId}`;
+            newMeeting.meetingLink = `/screen/${uniqueId}`;
         }
 
-        if (meetingLink === "UseMyPersonalRoomLink") {
-            const uniqueId = Math.floor(100000000000 + Math.random() * 900000000000).toString(); // Generate a 12-digit random number
-            const password = crypto.randomBytes(4).toString('hex'); // Generate a password (8 characters)
-            // const password = crypto.randomBytes(8).toString('base64')
-            // .replace(/[+/]/g, '')
-            // .slice(0, 12)
-            // .replace(/(.{3})/g, '$1-')
-            // .slice(0, -1);
-            scheduleData.meetingLink = `/screen/${uniqueId}`;
-            scheduleData.password = password;
+        if (newMeeting.meetingLink === "UseMyPersonalRoomLink") {
+            const uniqueId = Math.floor(100000000000 + Math.random() * 900000000000).toString();
+            const password = crypto.randomBytes(4).toString('hex');
+            newMeeting.meetingLink = `/screen/${uniqueId}`;
+            newMeeting.password = password;
         }
 
-        // Add email sending functionality
-        if (invitees && invitees.length > 0) {
-            const emailPromises = invitees.map(invitee => {
+        const createdMeeting = await schedule.create(newMeeting);
+
+        // Send emails to invitees
+        if (newMeeting.invitees && newMeeting.invitees.length > 0) {
+            const emailPromises = newMeeting.invitees.map(invitee => {
                 const mailOptions = {
                     from: process.env.EMAIL_USER,
                     to: invitee.email,
-                    subject: `Meeting Invitation: ${title}`,
+                    subject: `Meeting Invitation: ${newMeeting.title}`,
                     html: `
-                        <h2>You've been invited to: ${title}</h2>
-                        <p><strong>Date:</strong> ${date}</p>
-                        <p><strong>Time:</strong> ${startTime} - ${endTime}</p>
-                        <p><strong>Description:</strong> ${description}</p>
-                        <p><strong>Meeting Link:</strong> <a href="${scheduleData.meetingLink}">${scheduleData.meetingLink}</a></p>
-                        <p><strong>Password:</strong> ${scheduleData.password || "N/A"}</p>
+                        <h2>You've been invited to: ${newMeeting.title}</h2>
+                        <p><strong>Date:</strong> ${nextDate}</p>
+                        <p><strong>Time:</strong> ${newMeeting.startTime} - ${newMeeting.endTime}</p>
+                        <p><strong>Description:</strong> ${newMeeting.description}</p>
+                        <p><strong>Meeting Link:</strong> <a href="${newMeeting.meetingLink}">${newMeeting.meetingLink}</a></p>
+                        <p><strong>Password:</strong> ${newMeeting.password || "N/A"}</p>
                     `
                 };
                 return transporter.sendMail(mailOptions);
@@ -109,75 +294,10 @@ exports.createNewschedule = async (req, res) => {
             }
         }
 
-        if (recurringMeeting === 'custom' && customRecurrence) {
-            scheduleData.customRecurrence = {
-                repeatType: customRecurrence.repeatType,
-                repeatEvery: customRecurrence.repeatEvery,
-                ends: customRecurrence.ends,
-                repeatOn: customRecurrence.repeatType === 'weekly' ? customRecurrence.repeatOn : undefined,
-                endDate: customRecurrence.ends === 'on' ? customRecurrence.endDate : undefined,
-                Recurrence: customRecurrence.ends === 'after' ? customRecurrence.Recurrence : undefined,
-                Monthfirst: customRecurrence.repeatType == 'monthly' ? customRecurrence.Monthfirst : undefined
-            };
-        }
-
-        let chekschedule = await schedule.create(scheduleData);
-
-
-        // ===========Google Calendar============
-
-        let checkUser = await userModel.findById(userId);
-
-        if (checkUser.GoogleCalendar) {
-            // Prepare event
-            const event = {
-                summary: title,
-                description,
-                start: {
-                    dateTime: `${date}T${startTime}:00`,
-                    timeZone: 'Asia/Kolkata',
-                },
-                end: {
-                    dateTime: `${date}T${endTime}:00`,
-                    timeZone: 'Asia/Kolkata',
-                },
-                attendees: invitees.map(i => ({ email: i.email })),
-                reminders: {
-                    useDefault: false,
-                    overrides: [
-                        { method: 'email', minutes: 24 * 60 },
-                        { method: 'popup', minutes: 10 },
-                    ],
-                },
-            };
-            try {
-                // Get user info from Google
-                oauth2Client.setCredentials({ refresh_token: checkUser.googleRefreshToken })
-
-                const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
-                const response = await calendar.events.insert({
-                    calendarId: 'primary',
-                    resource: event,
-                });
-                // Store the Google Calendar event ID in the schedule
-                if (response && response.data && response.data.id) {
-                    chekschedule.googleCalendarEventId = response.data.id;
-                    await chekschedule.save();
-                }
-            } catch (error) {
-                console.log(error);
-            }
-
-        }
-        return res.json({
-            status: 200,
-            message: "Schedule Created Successfully",
-            schedules: chekschedule
-        });
-
+        return createdMeeting;
     } catch (error) {
-        res.json({ status: 500, message: error.message });
-        console.log(error);
+        console.error('Error creating next recurring meeting:', error);
+        throw error;
     }
 };
 
@@ -227,7 +347,17 @@ exports.getAllschedule = async (req, res) => {
             } else if (meeting.participants?.length > 1) {
                 // Update status to "Completed" if the meeting has ended
                 schedule.findByIdAndUpdate(meeting._id, { status: "Completed" })
-                    .catch(err => console.error("Error updating meeting status:", err));
+                // .then(async () => {
+                //     // If it's a recurring meeting, create the next one
+                //     if (meeting.recurringMeeting && ['daily', 'weekly', 'monthly'].includes(meeting.recurringMeeting)) {
+                //         try {
+                //             await exports.createNextRecurringMeeting(meeting._id);
+                //         } catch (error) {
+                //             console.error("Error creating next recurring meeting:", error);
+                //         }
+                //     }
+                // })
+                .catch(err => console.error("Error updating meeting status:", err));
                 meeting.status = "Completed";
             }
             return (meeting.userId.toString() === userId.toString() ||

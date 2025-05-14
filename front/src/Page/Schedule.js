@@ -555,11 +555,10 @@ function Schedule() {
                             }
                           }}
                         >
-                          <option value="">select</option>
                           <option value="DoesNotRepeat">Does not repeat</option>
                           <option value="daily">Daily</option>
-                          <option value="weekly">Weekly on Monday</option>
-                          <option value="monthly">Monthly on 3 February</option>
+                          <option value="weekly">Weekly</option>
+                          <option value="monthly">Monthly</option>
                           <option value="custom">Custom</option>
                         </select>
                         {touched.recurringMeeting && errors.recurringMeeting &&
