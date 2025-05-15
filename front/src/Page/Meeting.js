@@ -342,7 +342,6 @@ function Meeting() {
                     {/* Invited By Me Section */}
                     <h6 className="text-white ms-4">Invited Meetings</h6>
                     <div className="row g-5 B_meeting_card_section B_G_space">
-
                         {allschedule
                             .filter(schedule => schedule?.invitees?.some((inv) => inv.userId == userId))
                             .filter(schedule => {
@@ -1842,7 +1841,6 @@ function Meeting() {
             <section className='j_index_main' style={{ backgroundColor: "#060A11" }}>
                 <div className="row">
                     <div className="col-1 p-0 j_sidebar_width">
-
                         {/* .......................SIDEBAR START ....................... */}
                         <SideBar />
                         {/* .......................SIDEBAR END ....................... */}
@@ -1953,7 +1951,7 @@ function Meeting() {
                                         meetingLink: '',
                                         description: meetingdetail ? meetingdetail.description : '',
                                         reminder: meetingdetail ? meetingdetail.reminder : [],
-                                        recurringMeeting: meetingdetail ? meetingdetail.recurringMeeting : '',
+                                        recurringMeeting: meetingdetail ? meetingdetail.recurringMeeting : 'DoesNotRepeat',
                                         customRecurrence: meetingdetail ? meetingdetail.customRecurrence : {
                                             repeatType: '',
                                             repeatEvery: "1",
@@ -2137,7 +2135,7 @@ function Meeting() {
                                                             Cancel
                                                         </button>
                                                         <button type="submit" className="btn btn-light j_home_button fw-semibold"
-                                                         disabled={scheduleSubmitRef.current === true}>
+                                                            disabled={scheduleSubmitRef.current === true}>
                                                             {ScheduleData ? 'Update' : 'Schedule'}
                                                         </button>
                                                     </div>
@@ -2573,7 +2571,7 @@ function Meeting() {
                                         invitees: ScheduleData ? ScheduleData?.invitees : []
                                     }}
                                     validationSchema={scheduleSchema}
-                                    onSubmit={async(values, { resetForm }) => {
+                                    onSubmit={async (values, { resetForm }) => {
                                         if (!gettoken || !userId) {
                                             alert('Please login to create a schedule');
                                             return;
@@ -2737,8 +2735,8 @@ function Meeting() {
                                                         >
                                                             Cancel
                                                         </button>
-                                                        <button type="submit" className="btn btn-light j_home_button fw-semibold" 
-                                                         disabled={scheduleSubmitRef.current === true}>
+                                                        <button type="submit" className="btn btn-light j_home_button fw-semibold"
+                                                            disabled={scheduleSubmitRef.current === true}>
                                                             {ScheduleData ? 'Update' : 'Schedule'}
                                                         </button>
                                                     </div>

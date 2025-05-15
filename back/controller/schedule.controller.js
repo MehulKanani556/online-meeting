@@ -20,13 +20,13 @@ const oauth2Client = new OAuth2Client(
     process.env.GOOGLE_REDIRECT_URI
 );
 
- // Function to get next date based on recurring type
- const getNextDate = (currentDate, type) => {
+// Function to get next date based on recurring type
+const getNextDate = (currentDate, type) => {
     const date = new Date(currentDate);
     const currentDay = date.getDate(); // Get the current day of the month
     const currentDayOfWeek = date.getDay(); // Get the current day of the week (0-6)
 
-    switch(type) {
+    switch (type) {
         case 'daily':
             date.setDate(date.getDate() + 1);
             break;
@@ -354,7 +354,7 @@ exports.createNewschedule = async (req, res) => {
 
         return res.json({
             status: 200,
-            message: "Schedule(s) Created Successfully",
+            message: "Schedule Created Successfully",
             schedules: schedulesToCreate
         });
 
@@ -488,10 +488,7 @@ exports.getAllschedule = async (req, res) => {
                             const lastMeetingSchedule = await schedule.findOne({
                                 parentMeetingId: meeting._id,
                                 date: { $gt: meeting.date }
-                            }).sort({ date: -1 });
-
-                            console.log("lastMeetingSchedule---------------------------------", lastMeetingSchedule,futureMeetingsCount);
-                            
+                            }).sort({ date: -1 });                         
         
                             // Only create new meeting if we have less than 5 future meetings
                             if (futureMeetingsCount < 5) {

@@ -6,32 +6,18 @@ import React, {
   useMemo,
 } from "react";
 import "./../CSS/darshan.css";
-import search from "../Image/Search.png";
 import copytext from "../Image/copytext.svg";
-import left from "../Image/left.svg";
-import inviteuser from "../Image/inviteuser.svg";
 import onmicrophone from "../Image/d_onmicrophone.svg";
 import offmicrophone from "../Image/d_offmicrophone.svg";
-import endcall from "../Image/endcall.svg";
 import oncamera from "../Image/d_oncamera.svg";
 import offcamera from "../Image/d_offcamera.svg";
-import upload from "../Image/d_upload.svg";
-import recording from "../Image/d_target.svg";
-import smile from "../Image/d_smile.svg";
-import podcast from "../Image/d_podcast.svg";
 import hand from "../Image/d_hand.svg";
-import bar from "../Image/d_bar.svg";
-import Button from "react-bootstrap/Button";
-import { HiOutlineDotsVertical } from "react-icons/hi";
-import { IoClose, IoSearch } from "react-icons/io5";
-import { IoMdSend } from "react-icons/io";
+import { IoClose } from "react-icons/io5";
 import { getAllUsers, getUserById } from "../Redux/Slice/user.slice";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useSocket } from "../Hooks/useSocket";
-import html2canvas from "html2canvas";
 import { IMAGE_URL } from "../Utils/baseUrl";
-import { Formik } from "formik";
 import { Modal } from "react-bootstrap";
 import ParticipantVideo from "../Component/ParticipantVideo";
 import BottomBar from "../Component/BottomBar";
@@ -55,7 +41,6 @@ function Screen() {
   useEffect(() => {
     if (location.state && location.state.meetingLink) {
       setMeetingLink(location.state.meetingLink);
-      // setShowMeetingLinkModal(true);
     }
   }, [location.state]);
 
@@ -73,11 +58,6 @@ function Screen() {
   const allschedule = useSelector((state) => state.schedule.allschedule);
 
   useEffect(() => {
-    dispatch(getAllschedule());
-  }, [dispatch]);
-
-  useEffect(() => {
-
     let schedule;
     if (allschedule && userId && location.pathname && !meetingStarted) {
       if (allschedule.length > 0) {
@@ -90,11 +70,7 @@ function Screen() {
         }
       }
     }
-
   }, [allschedule, location.pathname, userId])
-
-
-  // const setid 
 
   // Use the socket hook
   const {
@@ -132,14 +108,11 @@ function Screen() {
   const [isScreenSharing, setIsScreenSharing] = useState(false);
   const [newMessage, setNewMessage] = useState("");
   const [showViewMoreDropdown, setShowViewMoreDropdown] = useState(false);
-  //   const [show, setShow] = useState(false);
-  //   const [showEmojis, setshowEmojis] = useState(false);
   const [localStream, setLocalStream] = useState(null);
   const [remoteStreams, setRemoteStreams] = useState({});
   const [maxVisibleParticipants, setMaxVisibleParticipants] = useState(9);
   const [messageUser, setmessageUser] = useState("Messages");
   const [activeDropdown, setActiveDropdown] = useState(null);
-  //   const [mainSectionMargin, setMainSectionMargin] = useState(0);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const [newName, setNewName] = useState("");
   const [showRenameModal, setShowRenameModal] = useState(false);
@@ -162,11 +135,11 @@ function Screen() {
   const singleSchedule = allschedule.find(schedule => schedule.meetingLink === location.pathname);
 
   useEffect(() => {
+    dispatch(getAllschedule());
     dispatch(getAllUsers());
   }, []);
-  const { isHandRaised, show, mainSectionMargin } = useSelector(
-    (state) => state.meeting
-  );
+
+  const { isHandRaised, show, mainSectionMargin } = useSelector((state) => state.meeting);
 
   useEffect(() => {
     const currentUserId = currUser?._id;
@@ -185,8 +158,6 @@ function Screen() {
   const pendingIceCandidatesRef = useRef({});
   const mediaRecorderRef = useRef(null);
   const recordingTimerRef = useRef(null);
-  const frameCaptureIntervalRef = useRef(null);
-  const canvasRef = useRef(null);
 
   // Effect to update pending join requests from socket
   useEffect(() => {
@@ -207,8 +178,6 @@ function Screen() {
   // Modify handleShow to include scroll behavior
   const handleShow = (e) => {
     if (e) e.preventDefault();
-    // dispatch(setShow(true));
-    // dispatch(setIsChatOpen(true));
 
     // Wait for next tick to ensure DOM is updated
     setTimeout(() => {
@@ -462,9 +431,7 @@ function Screen() {
             await pc.setLocalDescription(answer);
             sendAnswer(from, answer);
           } else {
-            console.log(
-              `Cannot process offer - connection not stable: ${pc.signalingState}`
-            );
+            console.log(`Cannot process offer - connection not stable: ${pc.signalingState}`);
             // Queue or retry mechanism can be implemented here
           }
         } catch (error) {
@@ -688,32 +655,6 @@ function Screen() {
     }
   }, [localStream, updateMediaState]);
 
-  // Video ref setup - CRITICAL FIX
-  // Improve the setVideoRef function
-  // const setVideoRef = (peerId) => (element) => {
-  //     if (element) {
-  //         // Store the reference
-  //         videoRefsMap.current[peerId] = element;
-
-  //         // Get the stream if available
-  //         const stream = remoteStreams[peerId];
-
-  //         // Apply stream and ensure video plays
-  //         if (stream) {
-  //             element.srcObject = stream;
-  //             element.autoplay = true;
-  //             element.playsInline = true;
-
-  //             // Force play with retry mechanism
-  //             const playVideo = () => {
-  //                 element.play().catch(e => {
-  //                     setTimeout(playVideo, 1000);
-  //                 });
-  //             };
-  //             playVideo();
-  //         }
-  //     }
-  // };
   const setVideoRef = useCallback(
     (peerId) => (element) => {
       if (element) {
@@ -932,20 +873,7 @@ function Screen() {
   };
 
   // End meeting
-  // const endMeeting = () => {
-  //     // Stop all media tracks
-  //     if (localStream) {
-  //         localStream.getTracks().forEach(track => track.stop());
-  //     }
 
-  //     // Close all peer connections
-  //     Object.values(peerConnectionsRef.current).forEach(pc => {
-  //         pc.close();
-  //     });
-
-  //     sessionStorage.setItem('openReviewModal', 'true');
-  //     navigate("/home");
-  // };
   let isEndingMeeting = false;
 
   const endMeeting = () => {
@@ -960,7 +888,6 @@ function Screen() {
       document.body.removeChild(controlPanel);
       controlPanel = null; // Clear the reference
     }
-    // console.log("endMeeting called");
 
     // Stop all media tracks
     if (isRecording) {
@@ -994,31 +921,6 @@ function Screen() {
     // Reset the flag after the meeting ends
     isEndingMeeting = false;
   };
-  // const endMeeting = () => {
-  //     // Stop all media tracks
-
-  //     if (isRecording) {
-  //         if (mediaRecorderRef.current) {
-  //             mediaRecorderRef.current.stop();
-  //             setIsRecording(false);
-  //         }
-  //     }
-
-  //     // Then proceed with the original function
-  //     originalEndMeeting();
-
-  //     if (localStream) {
-  //         localStream.getTracks().forEach(track => track.stop());
-  //     }
-
-  //     // Close all peer connections
-  //     Object.values(peerConnectionsRef.current).forEach(pc => {
-  //         pc.close();
-  //     });
-
-  //     sessionStorage.setItem('openReviewModal', 'true');
-  //     navigate("/home");
-  // };
 
   // Calculate grid columns based on participant count
   const getGridColumns = () => {
@@ -1120,10 +1022,7 @@ function Screen() {
     const displayText = `${typingNames.join(" & ")} is typing...`;
 
     return (
-      <div
-        className="typing-indicator mb-2 ms-2 d-flex align-items-center"
-        style={{ color: "#BFBFBF", fontSize: "13px" }}
-      >
+      <div className="j_typing_indicator mb-2 ms-2 d-flex align-items-center" style={{ color: "#BFBFBF", fontSize: "13px" }}>
         <div className="typing-dots me-1">
           <span className="j_typing_loader"></span>
           <span className="j_typing_loader"></span>
@@ -1188,9 +1087,7 @@ function Screen() {
 
     if (renameParticipant.length > 0) {
       if (
-        renameParticipant.some(
-          (p) => p.participantId === selectedParticipant.userId
-        )
+        renameParticipant.some((p) => p.participantId === selectedParticipant.userId)
       ) {
         const updatedParticipants = renameParticipant.map((p) =>
           p.participantId === selectedParticipant.userId
@@ -1585,7 +1482,7 @@ function Screen() {
         //   }
         // };
 
-        // Start recording with 1 second chunks
+        // Start recording
         mediaRecorderRef.current.start();
         setIsRecording(true);
 
@@ -1665,22 +1562,6 @@ function Screen() {
   // const originalStopScreenSharing = stopScreenSharing;
   const originalEndMeeting = endMeeting;
 
-  const [recordingTime, setRecordingTime] = useState(0);
-
-  const formatRecordingTime = (seconds) => {
-    const hrs = Math.floor(seconds / 3600);
-    const mins = Math.floor((seconds % 3600) / 60);
-    const secs = seconds % 60;
-
-    return [
-      hrs > 0 ? String(hrs).padStart(2, "0") : null,
-      String(mins).padStart(2, "0"),
-      String(secs).padStart(2, "0"),
-    ]
-      .filter(Boolean)
-      .join(":");
-  };
-
   const toggleHandRaised = () => {
     dispatch(setIsHandRaised());
     socket.emit("hand-status-change", {
@@ -1688,6 +1569,7 @@ function Screen() {
       hasRaisedHand: !isHandRaised,
     });
   }
+
   // picture in picture
   const togglePictureInPicture = async () => {
     try {
@@ -2129,7 +2011,6 @@ function Screen() {
                 className="form-control j_search_Input text-white"
                 value={meetingLink}
                 readOnly
-                // style={{ width: '100%', marginBottom: '10px' }}
                 style={{
                   padding: "12px",
                   borderRadius: "5px",
@@ -2222,13 +2103,6 @@ function Screen() {
             </div>
           </div>
         ))}
-
-        {/* {isRecording && (
-                    <div className="j_recording_indicator">
-                        <span className="j_recording_dot"></span>
-                        Recording: {formatRecordingTime(recordingTime)}
-                    </div>
-                )} */}
       </div>
       <section
         className="d_mainsec"

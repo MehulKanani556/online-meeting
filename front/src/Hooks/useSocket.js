@@ -21,6 +21,7 @@ export const useSocket = (userId, roomId, userName, hostUserId) => {
     const [systemMessages, setSystemMessages] = useState([]);
     const [requestApprovalStatus, setRequestApprovalStatus] = useState(null);
     const [isVideoOff, setIsVideoOff] = useState(false);
+    const hasJoinedRef = useRef(false);
     const [isMuted, setIsMuted] = useState(false);
 
     const [notificationPermission, setNotificationPermission] = useState(
@@ -282,7 +283,7 @@ export const useSocket = (userId, roomId, userName, hostUserId) => {
                     }
                     : participant
             ));
-     
+
 
         });
 
@@ -369,11 +370,7 @@ export const useSocket = (userId, roomId, userName, hostUserId) => {
             );
         });
 
-   
-        
-
         socketRef.current.on('meeting-started', (data) => {
-      
             enqueueSnackbar(data.message, {
                 variant: 'success', autoHideDuration: 3000, anchorOrigin: {
                     vertical: 'top', // Position at the top
@@ -396,9 +393,6 @@ export const useSocket = (userId, roomId, userName, hostUserId) => {
         };
     }, [userId, roomId, userName, isChatOpen]);
 
-
-    const hasJoinedRef = useRef(false);
-
     useEffect(() => {
         if (userId && roomId && currUser && !hasJoinedRef.current) {
             console.log("Emitting join-room only once");
@@ -412,7 +406,7 @@ export const useSocket = (userId, roomId, userName, hostUserId) => {
             hasJoinedRef.current = true; // Mark as joined
         }
     }, [userId, roomId, currUser]);
-    
+
 
     // Helper function to send a message
     const sendMessage = (message) => {
