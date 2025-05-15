@@ -20,13 +20,13 @@ const oauth2Client = new OAuth2Client(
     process.env.GOOGLE_REDIRECT_URI
 );
 
- // Function to get next date based on recurring type
- const getNextDate = (currentDate, type) => {
+// Function to get next date based on recurring type
+const getNextDate = (currentDate, type) => {
     const date = new Date(currentDate);
     const currentDay = date.getDate(); // Get the current day of the month
     const currentDayOfWeek = date.getDay(); // Get the current day of the week (0-6)
 
-    switch(type) {
+    switch (type) {
         case 'daily':
             date.setDate(date.getDate() + 1);
             break;
@@ -229,7 +229,7 @@ exports.createNewschedule = async (req, res) => {
 
         return res.json({
             status: 200,
-            message: "Schedule(s) Created Successfully",
+            message: "Schedule Created Successfully",
             schedules: createdSchedules
         });
 
@@ -347,17 +347,17 @@ exports.getAllschedule = async (req, res) => {
             } else if (meeting.participants?.length > 1) {
                 // Update status to "Completed" if the meeting has ended
                 schedule.findByIdAndUpdate(meeting._id, { status: "Completed" })
-                // .then(async () => {
-                //     // If it's a recurring meeting, create the next one
-                //     if (meeting.recurringMeeting && ['daily', 'weekly', 'monthly'].includes(meeting.recurringMeeting)) {
-                //         try {
-                //             await exports.createNextRecurringMeeting(meeting._id);
-                //         } catch (error) {
-                //             console.error("Error creating next recurring meeting:", error);
-                //         }
-                //     }
-                // })
-                .catch(err => console.error("Error updating meeting status:", err));
+                    // .then(async () => {
+                    //     // If it's a recurring meeting, create the next one
+                    //     if (meeting.recurringMeeting && ['daily', 'weekly', 'monthly'].includes(meeting.recurringMeeting)) {
+                    //         try {
+                    //             await exports.createNextRecurringMeeting(meeting._id);
+                    //         } catch (error) {
+                    //             console.error("Error creating next recurring meeting:", error);
+                    //         }
+                    //     }
+                    // })
+                    .catch(err => console.error("Error updating meeting status:", err));
                 meeting.status = "Completed";
             }
             return (meeting.userId.toString() === userId.toString() ||

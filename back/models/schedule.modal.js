@@ -51,10 +51,10 @@ const scheduleSchema = mongoose.Schema({
             type: String,
             enum: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
         }],
-        Monthfirst: [{
+        Monthfirst: {
             type: String,
             enum: ['firstmonday', 'firstday']
-        }],
+        },
         ends: {
             type: String,
             enum: ['never', 'on', 'after']
@@ -85,9 +85,9 @@ const scheduleSchema = mongoose.Schema({
     googleCalendarEventId: {
         type: String,
     },
-    joinBeforeHost:{
-        type:Boolean,
-        default:false
+    joinBeforeHost: {
+        type: Boolean,
+        default: false
     },
 }, {
     timestamps: true,

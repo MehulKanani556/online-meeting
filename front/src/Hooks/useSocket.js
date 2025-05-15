@@ -5,7 +5,7 @@ import { getUserById } from '../Redux/Slice/user.slice';
 import { enqueueSnackbar } from 'notistack';
 
 const SOCKET_SERVER_URL = "http://localhost:4000"; // Move to environment variable in production
-// const SOCKET_SERVER_URL = "https://online-meeting-backend-le8t.onrender.com"; // Move to environment variable in production
+// const SOCKET_SERVER_URL = "https://online-meeting-backend-sv0j.onrender.com"; // Move to environment variable in production
 
 export const useSocket = (userId, roomId, userName, hostUserId) => {
     const socketRef = useRef(null);
@@ -21,6 +21,7 @@ export const useSocket = (userId, roomId, userName, hostUserId) => {
     const [systemMessages, setSystemMessages] = useState([]);
     const [requestApprovalStatus, setRequestApprovalStatus] = useState(null);
     const [isVideoOff, setIsVideoOff] = useState(false);
+    const hasJoinedRef = useRef(false);
     const [isMuted, setIsMuted] = useState(false);
 
     const [notificationPermission, setNotificationPermission] = useState(
@@ -124,14 +125,6 @@ export const useSocket = (userId, roomId, userName, hostUserId) => {
             setIsConnected(true);
             // Emit user-login after connection
             socketRef.current.emit("user-login", userId);
-        });
-
-        socketRef.current.emit('join-room', {
-            roomId,
-            userId,
-            userName,
-            hostUserId,
-            screenShare: currUser?.sharescreen
         });
 
         socketRef.current.on("user-status-changed", (onlineUserIds) => {
@@ -290,7 +283,7 @@ export const useSocket = (userId, roomId, userName, hostUserId) => {
                     }
                     : participant
             ));
-     
+
 
         });
 
@@ -377,11 +370,7 @@ export const useSocket = (userId, roomId, userName, hostUserId) => {
             );
         });
 
-   
-        
-
         socketRef.current.on('meeting-started', (data) => {
-      
             enqueueSnackbar(data.message, {
                 variant: 'success', autoHideDuration: 3000, anchorOrigin: {
                     vertical: 'top', // Position at the top
@@ -404,9 +393,6 @@ export const useSocket = (userId, roomId, userName, hostUserId) => {
         };
     }, [userId, roomId, userName, isChatOpen]);
 
-
-    const hasJoinedRef = useRef(false);
-
     useEffect(() => {
         if (userId && roomId && currUser && !hasJoinedRef.current) {
             console.log("Emitting join-room only once");
@@ -420,7 +406,7 @@ export const useSocket = (userId, roomId, userName, hostUserId) => {
             hasJoinedRef.current = true; // Mark as joined
         }
     }, [userId, roomId, currUser]);
-    
+
 
     // Helper function to send a message
     const sendMessage = (message) => {

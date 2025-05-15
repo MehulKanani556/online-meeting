@@ -806,7 +806,7 @@
     }
 }
 
-.typing-indicator {
+.j_typing_indicator {
     color: #BFBFBF;
     animation: j_fadeIn 0.3s ease-in;
 }
