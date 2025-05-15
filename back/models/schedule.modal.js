@@ -34,6 +34,10 @@ const scheduleSchema = mongoose.Schema({
         type: String,
         enum: ['DoesNotRepeat', 'daily', 'weekly', 'monthly', 'custom']
     },
+    parentMeetingId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'schedule',
+    },
     customRecurrence: {
         repeatType: {
             type: String,
@@ -53,7 +57,7 @@ const scheduleSchema = mongoose.Schema({
         }],
         Monthfirst: [{
             type: String,
-            enum: ['firstmonday', 'firstday']
+            enum: ['0','firstmonday', 'firstday']
         }],
         ends: {
             type: String,

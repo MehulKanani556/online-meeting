@@ -238,8 +238,7 @@ function Schedule() {
       .min(1, 'Please select at least one reminder'),
 
     recurringMeeting: Yup.string()
-      .oneOf(['DoesNotRepeat', 'daily', 'weekly', 'monthly', 'custom'], 'Please select a valid recurring option')
-      .required('Please select recurring meeting option'),
+      .oneOf(['DoesNotRepeat', 'daily', 'weekly', 'monthly', 'custom'], 'Please select a valid recurring option'),
 
     customRecurrence: Yup.object().when('recurringMeeting', {
       is: 'custom',

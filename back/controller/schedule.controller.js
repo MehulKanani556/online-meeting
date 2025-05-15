@@ -47,6 +47,80 @@ const oauth2Client = new OAuth2Client(
     return date.toISOString().split('T')[0];
 };
 
+
+function generateCustomRecurrenceDates(startDate, customRecurrence) {
+    const dates = [];
+    let current = new Date(startDate);
+    let count = 0;
+
+    const { repeatType, repeatEvery, ends, endDate, Recurrence, repeatOn, Monthfirst } = customRecurrence;
+
+    function addOccurrence(date) {
+        dates.push(new Date(date));
+        count++;
+    }
+
+    while (true) {
+        // End conditions
+        if (ends === 'after' && count >= Recurrence) break;
+        if (ends === 'on' && current > new Date(endDate)) break;
+        if (ends === 'never' && count >= 10) break; // safety limit
+
+        if (repeatType === 'daily') {
+            addOccurrence(current);
+            current = new Date(current);
+            current.setDate(current.getDate() + repeatEvery);
+            if (current.getDate() === 1) {
+                current.setMonth(current.getMonth() + 1);
+            }
+        }else if (repeatType === 'weekly') {
+            while (true) {
+                // For each week, add for selected days
+                const weekStart = new Date(current);
+                for (let i = 0; i < 7; i++) {
+                    const day = new Date(weekStart);
+                    day.setDate(weekStart.getDate() + i);
+                    const dayName = day.toLocaleDateString('en-US', { weekday: 'long' });
+                    if (repeatOn.includes(dayName) && (dates.length === 0 || day > dates[dates.length - 1])) {
+                        addOccurrence(day);
+                        // Check after each addition
+                        if (ends === 'after' && count >= Recurrence) return dates;
+                    }
+                }
+                current.setDate(current.getDate() + 7 * repeatEvery);
+            }
+        } else if (repeatType === 'monthly') {
+            if (Monthfirst && Monthfirst === 'firstmonday') {
+                // Find first Monday of the month
+                let firstMonday = new Date(current.getFullYear(), current.getMonth(), 1);
+                while (firstMonday.getDay() !== 1) {
+                    firstMonday.setDate(firstMonday.getDate() + 1);
+                }
+                if (firstMonday.getMonth() !== current.getMonth()) {
+                    firstMonday = new Date(current.getFullYear(), current.getMonth() + 1, 1);
+                    while (firstMonday.getDay() !== 1) {
+                        firstMonday.setDate(firstMonday.getDate() + 1);
+                    }
+                }
+                addOccurrence(firstMonday);
+                current.setMonth(current.getMonth() + repeatEvery);
+            } else if (Monthfirst && Monthfirst === 'firstday') {
+                current.setDate(1);
+                addOccurrence(current);
+                current.setMonth(current.getMonth() + repeatEvery);
+            }
+        }else if (repeatType === 'yearly') {
+            addOccurrence(current);
+            current = new Date(current);
+            current.setFullYear(current.getFullYear() + repeatEvery);
+        }  else {
+            break;
+        }
+    }
+    return dates;
+}
+
+
 exports.createNewschedule = async (req, res) => {
     try {
         let {
@@ -108,8 +182,58 @@ exports.createNewschedule = async (req, res) => {
                     scheduleData.password = password;
                 }
 
-                schedulesToCreate.push(scheduleData);
+
+                const createdSchedules = await schedule.create(scheduleData);
+                schedulesToCreate.push(createdSchedules);
                 currentDate = getNextDate(currentDate, recurringMeeting);
+            }
+        } else if (recurringMeeting === 'custom' && customRecurrence) {
+            // Generate all dates for the custom recurrence
+            const recurrenceDates = generateCustomRecurrenceDates(date, customRecurrence);
+        
+            for (let i = 0; i < recurrenceDates.length; i++) {
+                const scheduleData = {
+                    title,
+                    date: recurrenceDates[i],
+                    userId,
+                    startTime,
+                    endTime,
+                    meetingLink,
+                    description,
+                    reminder,
+                    recurringMeeting,
+                    invitees,
+                    status: "Upcoming",
+                    customRecurrence,
+                    parentMeetingId: i === 0 ? null : schedulesToCreate[0]?._id
+                };
+
+                if (meetingLink === "GenerateaOneTimeMeetingLink") {
+                    const uniqueId = crypto.randomBytes(10).toString('hex');
+                    scheduleData.meetingLink = `/screen/${uniqueId}`;
+                }
+    
+                if (meetingLink === "UseMyPersonalRoomLink") {
+                    const uniqueId = Math.floor(100000000000 + Math.random() * 900000000000).toString();
+                    const password = crypto.randomBytes(4).toString('hex');
+                    scheduleData.meetingLink = `/screen/${uniqueId}`;
+                    scheduleData.password = password;
+                }
+        
+                if (recurringMeeting === 'custom' && customRecurrence) {
+                    scheduleData.customRecurrence = {
+                        repeatType: customRecurrence.repeatType,
+                        repeatEvery: customRecurrence.repeatEvery,
+                        ends: customRecurrence.ends,
+                        repeatOn: customRecurrence.repeatType === 'weekly' ? customRecurrence.repeatOn : undefined,
+                        endDate: customRecurrence.ends === 'on' ? customRecurrence.endDate : undefined,
+                        Recurrence: customRecurrence.ends === 'after' ? customRecurrence.Recurrence : undefined,
+                        Monthfirst: customRecurrence.repeatType == 'monthly' ? customRecurrence.Monthfirst : undefined
+                    };
+                }
+        
+                const createdSchedule = await schedule.create(scheduleData);
+                schedulesToCreate.push(createdSchedule);
             }
         } else {
             // Single meeting
@@ -151,15 +275,16 @@ exports.createNewschedule = async (req, res) => {
                 };
             }
 
-            schedulesToCreate.push(scheduleData);
+            const createdSchedules = await schedule.create(scheduleData);
+            schedulesToCreate.push(createdSchedules);
         }
 
         // Create all schedules
-        const createdSchedules = await schedule.create(schedulesToCreate);
+        // const createdSchedules = await schedule.create(schedulesToCreate);
 
         // Send emails for all created meetings
         if (invitees && invitees.length > 0) {
-            for (const createdSchedule of createdSchedules) {
+            for (const createdSchedule of schedulesToCreate) {
                 const emailPromises = invitees.map(invitee => {
                     const mailOptions = {
                         from: process.env.EMAIL_USER,
@@ -188,7 +313,7 @@ exports.createNewschedule = async (req, res) => {
         // Google Calendar integration
         let checkUser = await userModel.findById(userId);
         if (checkUser.GoogleCalendar) {
-            for (const createdSchedule of createdSchedules) {
+            for (const createdSchedule of schedulesToCreate) {
                 const event = {
                     summary: title,
                     description,
@@ -230,7 +355,7 @@ exports.createNewschedule = async (req, res) => {
         return res.json({
             status: 200,
             message: "Schedule(s) Created Successfully",
-            schedules: createdSchedules
+            schedules: schedulesToCreate
         });
 
     } catch (error) {
@@ -239,9 +364,9 @@ exports.createNewschedule = async (req, res) => {
     }
 };
 
-exports.createNextRecurringMeeting = async (completedMeetingId) => {
+exports.createNextRecurringMeeting = async (completedMeetingId, lastMeetingSchedule) => {
     try {
-        const completedMeeting = await schedule.findById(completedMeetingId);
+        const completedMeeting = await schedule.findById(lastMeetingSchedule._id);
         if (!completedMeeting || !completedMeeting.recurringMeeting) return;
 
         const nextDate = getNextDate(completedMeeting.date, completedMeeting.recurringMeeting);
@@ -250,7 +375,7 @@ exports.createNextRecurringMeeting = async (completedMeetingId) => {
             _id: undefined,
             date: nextDate,
             status: "Upcoming",
-            parentMeetingId: completedMeetingId
+            parentMeetingId: completedMeeting.parentMeetingId
         };
 
         // Generate new meeting link if needed
@@ -276,12 +401,12 @@ exports.createNextRecurringMeeting = async (completedMeetingId) => {
                     to: invitee.email,
                     subject: `Meeting Invitation: ${newMeeting.title}`,
                     html: `
-                        <h2>You've been invited to: ${title}</h2>
-                        <p><strong>Date:</strong> ${date}</p>
-                        <p><strong>Time:</strong> ${startTime} - ${endTime}</p>
-                        <p><strong>Description:</strong> ${description}</p>
-                        <p><strong>Meeting Link:</strong> <a href="http://localhost:3000/${scheduleData.meetingLink}">${scheduleData.meetingLink}</a></p>
-                        <p><strong>Password:</strong> ${scheduleData.password || "N/A"}</p>
+                        <h2>You've been invited to: ${newMeeting.title}</h2>
+                        <p><strong>Date:</strong> ${newMeeting.date}</p>
+                        <p><strong>Time:</strong> ${newMeeting.startTime} - ${newMeeting.endTime}</p>
+                        <p><strong>Description:</strong> ${newMeeting.description}</p>
+                        <p><strong>Meeting Link:</strong> <a href="http://localhost:3000/${newMeeting.meetingLink}">${newMeeting.meetingLink}</a></p>
+                        <p><strong>Password:</strong> ${newMeeting.password || "N/A"}</p>
                     `
                 };
                 return transporter.sendMail(mailOptions);
@@ -347,16 +472,36 @@ exports.getAllschedule = async (req, res) => {
             } else if (meeting.participants?.length > 1) {
                 // Update status to "Completed" if the meeting has ended
                 schedule.findByIdAndUpdate(meeting._id, { status: "Completed" })
-                // .then(async () => {
-                //     // If it's a recurring meeting, create the next one
-                //     if (meeting.recurringMeeting && ['daily', 'weekly', 'monthly'].includes(meeting.recurringMeeting)) {
-                //         try {
-                //             await exports.createNextRecurringMeeting(meeting._id);
-                //         } catch (error) {
-                //             console.error("Error creating next recurring meeting:", error);
-                //         }
-                //     }
-                // })
+                .then(async () => {
+                    // If it's a recurring meeting, create the next one
+                    if (meeting.recurringMeeting && ['daily', 'weekly', 'monthly'].includes(meeting.recurringMeeting)  && meeting.userId.toString() === userId.toString()) {
+                        try {
+                            // Check if this is a "never end" recurring meeting
+                            const isNeverEnd = meeting.customRecurrence?.ends === 'never';
+                            
+                            // Count existing future meetings and find the last meeting schedule
+                            const futureMeetingsCount = await schedule.countDocuments({
+                                parentMeetingId: meeting._id,
+                                date: { $gt: meeting.date }
+                            });
+
+                            const lastMeetingSchedule = await schedule.findOne({
+                                parentMeetingId: meeting._id,
+                                date: { $gt: meeting.date }
+                            }).sort({ date: -1 });
+
+                            console.log("lastMeetingSchedule---------------------------------", lastMeetingSchedule,futureMeetingsCount);
+                            
+        
+                            // Only create new meeting if we have less than 5 future meetings
+                            if (futureMeetingsCount < 5) {
+                                await exports.createNextRecurringMeeting(meeting._id, lastMeetingSchedule);
+                            }
+                        } catch (error) {
+                            console.error("Error creating next recurring meeting:", error);
+                        }
+                    }
+                })
                 .catch(err => console.error("Error updating meeting status:", err));
                 meeting.status = "Completed";
             }

@@ -1774,8 +1774,7 @@ function Meeting() {
             .min(1, 'Please select at least one reminder'),
 
         recurringMeeting: Yup.string()
-            .oneOf(['DoesNotRepeat', 'daily', 'weekly', 'monthly', 'custom'], 'Please select a valid recurring option')
-            .required('Please select recurring meeting option'),
+            .oneOf(['DoesNotRepeat', 'daily', 'weekly', 'monthly', 'custom'], 'Please select a valid recurring option'),
 
         customRecurrence: Yup.object().when('recurringMeeting', {
             is: 'custom',
@@ -1804,7 +1803,6 @@ function Meeting() {
                     is: 'on',
                     then: () => Yup.date()
                         .required('End date is required')
-                        .min(Yup.ref('date'), 'End date must be after start date')
                 })
             }),
             otherwise: () => Yup.object().nullable()

@@ -5,7 +5,7 @@ import { getUserById } from '../Redux/Slice/user.slice';
 import { enqueueSnackbar } from 'notistack';
 
 const SOCKET_SERVER_URL = "http://localhost:4000"; // Move to environment variable in production
-// const SOCKET_SERVER_URL = "https://online-meeting-backend-le8t.onrender.com"; // Move to environment variable in production
+// const SOCKET_SERVER_URL = "https://online-meeting-backend-sv0j.onrender.com"; // Move to environment variable in production
 
 export const useSocket = (userId, roomId, userName, hostUserId) => {
     const socketRef = useRef(null);
@@ -124,14 +124,6 @@ export const useSocket = (userId, roomId, userName, hostUserId) => {
             setIsConnected(true);
             // Emit user-login after connection
             socketRef.current.emit("user-login", userId);
-        });
-
-        socketRef.current.emit('join-room', {
-            roomId,
-            userId,
-            userName,
-            hostUserId,
-            screenShare: currUser?.sharescreen
         });
 
         socketRef.current.on("user-status-changed", (onlineUserIds) => {
