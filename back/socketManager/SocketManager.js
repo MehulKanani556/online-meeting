@@ -131,28 +131,28 @@ async function initializeSocket(io) {
         console.log("New socket connection:", socket.id);
 
         // User joins a room
-        socket.on('join-room', async ({ roomId, userId, userName, hostUserId = null , screenShare}) => {
+        socket.on('join-room', async ({ roomId, userId, userName, hostUserId = null, screenShare }) => {
 
-            if(!roomId){
+            if (!roomId) {
                 socket.emit('error', { message: 'Room ID is required' });
                 return;
             }
 
-            if(!userId){
+            if (!userId) {
                 socket.emit('error', { message: 'User ID is required' });
                 return;
             }
-            
+
             try {
                 // Initialize rooms[roomId] if it doesn't exist
                 if (!rooms[roomId]) {
                     rooms[roomId] = [];
                 }
 
-                if(!(screenShareData[roomId] == true || screenShareData[roomId] == false)){
+                if (!(screenShareData[roomId] == true || screenShareData[roomId] == false)) {
                     screenShareData[roomId] = screenShare == true ? true : false;
                 }
-            
+
                 // Check for existing user
                 const existingUser = rooms[roomId].find(user => user.userId === userId);
                 if (existingUser) {
@@ -187,49 +187,49 @@ async function initializeSocket(io) {
                     userName,
                     roomId
                 };
-            
-                if(roomId){
+
+                if (roomId) {
                     rooms[roomId].push({
                         id: socket.id,
                         userId,
-                         userName,
-                         screenShare: screenShareData[roomId],
-                         isHost: userId === hostUserId
-                   });
-   
-                   socket.to(roomId).emit('user-connected', {
-                       socketId: socket.id,
-                       userId,
-                       userName,
-                       screenShare: screenShareData[roomId],
-                       isHost: userId === hostUserId
-                   });
-                   socket.emit('room-users', rooms[roomId]);
-
-                   if (userId == hostUserId) {
-                    const notifiedUsers = new Set();
-                    console.log("zvvvvvvvvvvvvvvvvvvdddddddddddddddddddddd");
-                    
-                    (meetingDetails.invitees || []).forEach(invitee => {
-                      const inviteeUserId = invitee.userId && invitee.userId.toString();
-                      if (notifiedUsers.has(inviteeUserId)) {
-                        return;
-                      }
-                       const socketId = listOnlineUsers.get(inviteeUserId)
-                       console.log("socketId------------------------------------", socketId,inviteeUserId.toString());
-                      
-                       if(socketId){
-                        notifiedUsers.add(inviteeUserId);
-                        socket.to(socketId).emit('meeting-started', {
-                            message: 'The host has started the meeting.',
-                            hostUserId,
-                            roomId,
-                            timestamp: Date.now()
-                          });
-                       }
+                        userName,
+                        screenShare: screenShareData[roomId],
+                        isHost: userId === hostUserId
                     });
-                  }
-                }       
+
+                    socket.to(roomId).emit('user-connected', {
+                        socketId: socket.id,
+                        userId,
+                        userName,
+                        screenShare: screenShareData[roomId],
+                        isHost: userId === hostUserId
+                    });
+                    socket.emit('room-users', rooms[roomId]);
+
+                    if (userId == hostUserId) {
+                        const notifiedUsers = new Set();
+                        console.log("zvvvvvvvvvvvvvvvvvvdddddddddddddddddddddd");
+
+                        (meetingDetails.invitees || []).forEach(invitee => {
+                            const inviteeUserId = invitee.userId && invitee.userId.toString();
+                            if (notifiedUsers.has(inviteeUserId)) {
+                                return;
+                            }
+                            const socketId = listOnlineUsers.get(inviteeUserId)
+                            console.log("socketId------------------------------------", socketId, inviteeUserId.toString());
+
+                            if (socketId) {
+                                notifiedUsers.add(inviteeUserId);
+                                socket.to(socketId).emit('meeting-started', {
+                                    message: 'The host has started the meeting.',
+                                    hostUserId,
+                                    roomId,
+                                    timestamp: Date.now()
+                                });
+                            }
+                        });
+                    }
+                }
             } catch (error) {
                 console.error("Error in join-room:", error);
                 socket.emit('error', { message: 'Failed to join room' });

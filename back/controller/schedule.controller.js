@@ -73,7 +73,7 @@ function generateCustomRecurrenceDates(startDate, customRecurrence) {
             if (current.getDate() === 1) {
                 current.setMonth(current.getMonth() + 1);
             }
-        }else if (repeatType === 'weekly') {
+        } else if (repeatType === 'weekly') {
             while (true) {
                 // For each week, add for selected days
                 const weekStart = new Date(current);
@@ -109,11 +109,11 @@ function generateCustomRecurrenceDates(startDate, customRecurrence) {
                 addOccurrence(current);
                 current.setMonth(current.getMonth() + repeatEvery);
             }
-        }else if (repeatType === 'yearly') {
+        } else if (repeatType === 'yearly') {
             addOccurrence(current);
             current = new Date(current);
             current.setFullYear(current.getFullYear() + repeatEvery);
-        }  else {
+        } else {
             break;
         }
     }
@@ -190,7 +190,7 @@ exports.createNewschedule = async (req, res) => {
         } else if (recurringMeeting === 'custom' && customRecurrence) {
             // Generate all dates for the custom recurrence
             const recurrenceDates = generateCustomRecurrenceDates(date, customRecurrence);
-        
+
             for (let i = 0; i < recurrenceDates.length; i++) {
                 const scheduleData = {
                     title,
@@ -212,14 +212,14 @@ exports.createNewschedule = async (req, res) => {
                     const uniqueId = crypto.randomBytes(10).toString('hex');
                     scheduleData.meetingLink = `/screen/${uniqueId}`;
                 }
-    
+
                 if (meetingLink === "UseMyPersonalRoomLink") {
                     const uniqueId = Math.floor(100000000000 + Math.random() * 900000000000).toString();
                     const password = crypto.randomBytes(4).toString('hex');
                     scheduleData.meetingLink = `/screen/${uniqueId}`;
                     scheduleData.password = password;
                 }
-        
+
                 if (recurringMeeting === 'custom' && customRecurrence) {
                     scheduleData.customRecurrence = {
                         repeatType: customRecurrence.repeatType,
@@ -231,7 +231,7 @@ exports.createNewschedule = async (req, res) => {
                         Monthfirst: customRecurrence.repeatType == 'monthly' ? customRecurrence.Monthfirst : undefined
                     };
                 }
-        
+
                 const createdSchedule = await schedule.create(scheduleData);
                 schedulesToCreate.push(createdSchedule);
             }
@@ -472,34 +472,34 @@ exports.getAllschedule = async (req, res) => {
             } else if (meeting.participants?.length > 1) {
                 // Update status to "Completed" if the meeting has ended
                 schedule.findByIdAndUpdate(meeting._id, { status: "Completed" })
-                .then(async () => {
-                    // If it's a recurring meeting, create the next one
-                    if (meeting.recurringMeeting && ['daily', 'weekly', 'monthly'].includes(meeting.recurringMeeting)  && meeting.userId.toString() === userId.toString()) {
-                        try {
-                            // Check if this is a "never end" recurring meeting
-                            const isNeverEnd = meeting.customRecurrence?.ends === 'never';
-                            
-                            // Count existing future meetings and find the last meeting schedule
-                            const futureMeetingsCount = await schedule.countDocuments({
-                                parentMeetingId: meeting._id,
-                                date: { $gt: meeting.date }
-                            });
+                    .then(async () => {
+                        // If it's a recurring meeting, create the next one
+                        if (meeting.recurringMeeting && ['daily', 'weekly', 'monthly'].includes(meeting.recurringMeeting) && meeting.userId.toString() === userId.toString()) {
+                            try {
+                                // Check if this is a "never end" recurring meeting
+                                const isNeverEnd = meeting.customRecurrence?.ends === 'never';
 
-                            const lastMeetingSchedule = await schedule.findOne({
-                                parentMeetingId: meeting._id,
-                                date: { $gt: meeting.date }
-                            }).sort({ date: -1 });                         
-        
-                            // Only create new meeting if we have less than 5 future meetings
-                            if (futureMeetingsCount < 5) {
-                                await exports.createNextRecurringMeeting(meeting._id, lastMeetingSchedule);
+                                // Count existing future meetings and find the last meeting schedule
+                                const futureMeetingsCount = await schedule.countDocuments({
+                                    parentMeetingId: meeting._id,
+                                    date: { $gt: meeting.date }
+                                });
+
+                                const lastMeetingSchedule = await schedule.findOne({
+                                    parentMeetingId: meeting._id,
+                                    date: { $gt: meeting.date }
+                                }).sort({ date: -1 });
+
+                                // Only create new meeting if we have less than 5 future meetings
+                                if (futureMeetingsCount < 5) {
+                                    await exports.createNextRecurringMeeting(meeting._id, lastMeetingSchedule);
+                                }
+                            } catch (error) {
+                                console.error("Error creating next recurring meeting:", error);
                             }
-                        } catch (error) {
-                            console.error("Error creating next recurring meeting:", error);
                         }
-                    }
-                })
-                .catch(err => console.error("Error updating meeting status:", err));
+                    })
+                    .catch(err => console.error("Error updating meeting status:", err));
                 meeting.status = "Completed";
             }
             return (meeting.userId.toString() === userId.toString() ||

@@ -1,0 +1,5113 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  
+  .row {
+    margin: 0;
+    padding: 0;
+  }
+  
+  .B_container_new {
+    width: 100%;
+    margin: 0 auto;
+  }
+  
+  .B_Main_section {
+    padding: 70px 0;
+  }
+  
+  .B_PTag_text {
+    width: 85%;
+    line-height: 28px;
+  }
+  
+  .B_Button_text {
+    border-radius: 5px;
+    padding: 8px 14px;
+    font-weight: 500;
+    font-size: 17px;
+    margin-top: 18px;
+  }
+  
+  .B_Connecting_section {
+    padding: 70px 0;
+  }
+  
+  .B_Con_head_text {
+    font-size: 32px;
+  }
+  
+  .B_Features_section {
+    padding: 50px 0;
+  }
+  
+  .B_feature-card {
+    background-color: #0D141E;
+    padding: 40px 30px;
+    border-radius: 8px;
+  }
+  
+  .B_feature-icon {
+    font-size: 50px;
+    margin-bottom: 10px;
+  }
+  
+  .B_box_head {
+    font-size: 24px;
+    margin-top: 30px;
+    font-weight: 400;
+  }
+  
+  .B_box_text {
+    font-size: 15px;
+    margin-top: 15px;
+  }
+  
+  .B_Connecting_head_text {
+    width: 75%;
+  }
+  
+  .B_Connecting_text {
+    width: 92%;
+  }
+  
+  .B_Slider_section {
+    padding: 70px 0;
+  }
+  
+  .B_Slider_text1 {
+    font-size: 14px;
+  }
+  
+  
+  .B_testimonial_text {
+    font-size: 15px;
+    text-indent: 10px;
+    padding: 0 20px;
+  }
+  
+  .B_Owl .owl-carousel .owl-stage {
+    display: flex;
+    padding: 30px 0;
+  }
+  
+  .B_Owl .owl-carousel .owl-item {
+    transition: all 0.3s ease;
+  }
+  
+  .B_Owl .owl-carousel .owl-item .testimonial-card {
+    background: #111924;
+    padding: 10px 20px;
+    border-radius: 10px;
+    text-align: center;
+    height: 100%;
+    transition: all 0.3s ease;
+  }
+  
+  .B_Owl .owl-carousel .owl-item .testimonial-image {
+    border-radius: 50%;
+    width: 56px;
+    height: 56px;
+    margin: 0 auto 15px;
+    display: block;
+  }
+  
+  .B_Owl .owl-carousel .owl-item .testimonial_name {
+    border-radius: 50%;
+    text-align: center;
+    background-color: #202F41;
+    font-size: 24px;
+    padding: 8px;
+    width: 56px;
+    height: 56px;
+    margin: 0 auto 15px;
+    display: block;
+  }
+  
+  .owl-theme .owl-nav [class*='owl-']:hover {
+    background-color: #111924 !important;
+  }
+  
+  .B_Owl .owl-carousel .owl-item.active.center {
+    opacity: 1;
+    transform: scale(1.1);
+    z-index: 2;
+  }
+  
+  .B_Owl .owl-carousel .owl-item.active:not(.center) {
+    opacity: 0.6;
+    transform: scale(0.8);
+  }
+  
+  .star {
+    font-size: 24px;
+    margin: 0 4px;
+  }
+  
+  .star.active {
+    color: #FFD700;
+  }
+  
+  .star:not(.active) {
+    color: #BFBFBF;
+  }
+  
+  .B_Owl .owl-nav button {
+    background: transparent;
+    color: white;
+    border: none;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.3s;
+  }
+  
+  .B_Owl .owl-nav button:hover {
+    background: rgba(255, 255, 255, 0.2);
+  }
+  
+  .B_Owl .owl-nav button span {
+    font-size: 36px;
+    position: relative;
+    top: -12px;
+  }
+  
+  .Opacity_section {
+    padding: 10px 0 60px 0;
+  }
+  
+  .Opacity_img {
+    background-image: url(../src/Image/image5.png);
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    height: 410px;
+  }
+  
+  .B_opacity_button1 {
+    padding: 10px 50px;
+  }
+  
+  .B_opacity_button {
+    padding: 10px 40px;
+  }
+  
+  .B_Footer_section {
+    padding: 10px 0px 50px 0;
+  }
+  
+  .B_Footer_text {
+    font-size: 15px;
+  }
+  
+  .B_social_icon {
+    border-radius: 50%;
+    background-color: white;
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.3s, transform 0.3s;
+  }
+  
+  .B_social_icon img {
+    height: 20px;
+    width: 20px;
+  }
+  
+  .B_social_icon:hover {
+    background: linear-gradient(to bottom, #287BE0, #043B7D);
+    transform: scale(1.1);
+    cursor: pointer;
+  }
+  
+  .B_social_icon:hover img {
+    filter: brightness(0) invert(1);
+  }
+  
+  .B_Here_Help {
+    padding: 70px 0;
+  }
+  
+  .B_input_search {
+    width: 38%;
+  }
+  
+  .B_input_search input {
+    padding: 11px 0px;
+  }
+  
+  .B_search-container input::placeholder {
+    color: rgba(255, 255, 255, 0.7);
+  }
+  
+  .search-container input:focus {
+    box-shadow: none;
+    background-color: #1A2634 !important;
+    border: 1px solid #287BE0;
+  }
+  
+  .B_acc_card_section {
+    padding: 0px 0 50px 0;
+  }
+  
+  .B_box_div {
+    background-color: #090E16;
+    padding: 30px 50px 18px;
+    border-radius: 2px;
+    height: 100%;
+    box-shadow: 0 0 2px 0 rgb(113 111 111 / 50%);
+  }
+  
+  .B_card_space {
+    margin: 0 -20px;
+  }
+  
+  .B_card_space1 {
+    padding: 0 30px;
+    margin-bottom: 50px;
+  }
+  
+  .B_Cardicon {
+    height: 38px;
+    width: 38px;
+  }
+  
+  .B_Cardicon1 {
+    height: 33px;
+    width: 38px;
+  }
+  
+  .B_Cardicon1 {
+    height: 31px;
+  }
+  
+  .B_card1_head {
+    margin: 20px 0;
+  }
+  
+  .B_card1_text {
+    font-size: 15px;
+  }
+  
+  .B_FAQ_head_text {
+    margin: 20px 0 60px 0;
+  }
+  
+  .B_FAQ_section {
+    padding: 0 50px;
+  }
+  
+  .B_FAQ_button_text {
+    font-size: 18px;
+  }
+  
+  .B_FAQ_section .accordion-button {
+    background-color: #090E16;
+    color: #87898B;
+  }
+  
+  .B_FAQ_section .accordion {
+    --bs-accordion-border-color: #202122;
+    --bs-accordion-btn-focus-box-shadow: 0 0 0 0.25rem rgba(54, 54, 54, 0.25);
+  }
+  
+  .B_FAQ_section .accordion-button:not(.collapsed) {
+    background-color: #090E16;
+    color: #87898B;
+  }
+  
+  .B_Footer_section1 {
+    padding: 70px 0 0 0;
+  }
+  
+  .B_simple_affordable {
+    padding: 70px 0;
+  }
+  
+  .B_pricing_section {
+    padding: 0 0 70px 0;
+  }
+  
+  .B_pricing_button {
+    padding: 8px 48px;
+  }
+  
+  .B_CARD_Price {
+    padding: 60px 0px;
+  }
+  
+  .B_cardPrice_text {
+    font-size: 14px;
+    margin-bottom: 50px;
+  }
+  
+  .B_Card_padding {
+    padding: 30px;
+    box-shadow: 0 0 2px 0 rgb(113 111 111 / 50%);
+  }
+  
+  .B_price_text {
+    margin-top: 30px;
+  }
+  
+  .B_price_btn {
+    padding: 10px;
+    margin-bottom: 15px;
+  }
+  
+  .B_true_icon {
+    height: 20px;
+    width: 20px;
+    margin-right: 20px;
+  }
+  
+  .B_PRIC_feature {
+    margin-top: 30px;
+  }
+  
+  .B_payment_section {
+    padding: 70px 0;
+  }
+  
+  .B_billing_details {
+    width: 450px;
+  }
+  
+  .B_form_control {
+    background-color: #202F41;
+    border: none;
+    color: white;
+    padding: 11px 15px;
+    margin-bottom: 22px;
+  }
+  
+  .B_form_control::placeholder {
+    color: #979b9e;
+  }
+  
+  .B_payment_card {
+    background-color: #090E16;
+    width: 550px;
+    padding: 40px 50px;
+    box-shadow: 0 0 2px 0 rgb(113 111 111 / 50%);
+  }
+  
+  .B_btn_primary {
+    background-color: #0070ba;
+    border: none;
+  }
+  
+  .B_payment_head_text {
+    margin-bottom: 40px;
+  }
+  
+  .B_biling_text {
+    font-size: 22px;
+  }
+  
+  .B_pay {
+    background-color: #FFFFFF;
+    color: #000000;
+    border-radius: 8px;
+    padding: 10px;
+    border: none;
+    font-weight: 500;
+    margin-top: 15px;
+    width: 75%;
+    transition: all 0.3s ease;
+  }
+  
+  .B_pay_withPay {
+    background-color: transparent;
+    color: #FFFFFF;
+    border-radius: 8px;
+    padding: 10px;
+    border: 1px solid #30363D;
+    font-weight: 500;
+    width: 75%;
+    transition: all 0.3s ease;
+  }
+  
+  .B_form_control:focus {
+    background-color: #202F41;
+    border: none;
+    color: white;
+    border-color: #b2b8c0;
+    outline: 0;
+    box-shadow: 0 0 2px 0 rgb(113 111 111 / 50%);
+  }
+  
+  .B_form_control:-webkit-autofill,
+  .B_form_control:-webkit-autofill:hover,
+  .B_form_control:-webkit-autofill:focus,
+  .B_form_control:-webkit-autofill:active {
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: #fff;
+    transition: background-color 5000s ease-in-out 0s;
+    box-shadow: inset 0 0 20px 20px #202F41;
+  }
+  
+  .B_Get_In_Touch {
+    padding: 70px 0 50px 0;
+  }
+  
+  .B_contact_form {
+    max-width: 1080px;
+    margin: 40px auto;
+    padding: 40px 52px;
+    background-color: #090E16;
+    box-shadow: 0 0 2px 0 rgb(113 111 111 / 50%);
+  }
+  
+  .B_contact_form form {
+    width: 100%;
+  }
+  
+  .B_form_row {
+    display: flex;
+    gap: 24px;
+    margin-bottom: 24px;
+  }
+  
+  .B_form_group {
+    flex: 1;
+  }
+  
+  .B_form_group label {
+    display: block;
+    color: white;
+    margin-bottom: 8px;
+    font-size: 14px;
+  }
+  
+  .B_form_group input,
+  .B_form_group textarea {
+    width: 100%;
+    padding: 12px;
+    background-color: #202F41;
+    border: none;
+    border-radius: 6px;
+    color: #fff;
+    outline: none;
+  }
+  
+  .B_form_group input:-webkit-autofill,
+  .B_form_group input:-webkit-autofill:hover,
+  .B_form_group input:-webkit-autofill:focus,
+  .B_form_group input:-webkit-autofill:active {
+    -webkit-text-fill-color: #fff;
+    transition: background-color 5000s ease-in-out 0s;
+    box-shadow: inset 0 0 20px 20px #202F41;
+  
+  }
+  
+  .B_form_group textarea {
+    height: 90px;
+    resize: none;
+  }
+  
+  .B_contact_form button {
+    width: 40%;
+    padding: 11px 12px;
+    background-color: white;
+    border: none;
+    border-radius: 6px;
+    color: black;
+    font-weight: 500;
+    cursor: pointer;
+    margin-top: 24px;
+  }
+  
+  .B_contact_form button:hover {
+    background-color: #f0f0f0;
+  }
+  
+  .B_form_group input::placeholder,
+  .B_form_group textarea::placeholder {
+    color: #9da2ac;
+  }
+  
+  .B_contact_form_button {
+    margin-top: 20px;
+  }
+  
+  .B_Get_SEC_text {
+    margin-bottom: 70px;
+  }
+  
+  .B_addCARD_section {
+    padding: 0px 0 80px 0;
+  }
+  
+  .B_contact_card {
+    background-color: #090E16;
+    padding: 20px 30px 15px;
+    border-radius: 8px;
+    box-shadow: 0 0 2px 0 rgb(113 111 111 / 60%);
+    height: 100%;
+  }
+  
+  .B_contact_card .B_icon {
+    margin-bottom: 20px;
+  }
+  
+  .B_contact_card .B_icon1 img {
+    width: 34px;
+    height: 39px;
+  }
+  
+  .B_contact_card .B_icon2 img {
+    width: 34px;
+    height: 38px;
+  }
+  
+  .B_contact_card .B_icon3 img {
+    width: 43px;
+    height: 31px;
+  }
+  
+  .B_contact_card h4 {
+    font-size: 24px;
+    margin-bottom: 10px;
+    color: #ababac;
+  }
+  
+  .B_contact_card p {
+    color: #ababac;
+    line-height: 1.6;
+    margin-bottom: 8px;
+  }
+  
+  .B_contact_card_row {
+    --bs-gutter-x: 3.5rem;
+    --bs-gutter-y: 0rem;
+  }
+  
+  .B_footer_hover a:hover {
+    color: #0f82cf !important;
+  }
+  
+  .B_contact_card3:hover img {
+    transform: scale(0.9);
+    filter: brightness(0) saturate(100%) invert(46%) sepia(72%) saturate(2538%) hue-rotate(199deg) brightness(103%) contrast(101%);
+    transition: transform 0.3s ease;
+  }
+  
+  .B_Meeting_head {
+    padding: 35px 50px 30px;
+    border-bottom: 1px solid #30363D;
+  }
+  
+  .B_dropdown_btn1 {
+    background-color: "#080E14";
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 9.5px 25px;
+    border: 1px solid #bbb7b7;
+    --bs-btn-bg: #080E14;
+    --bs-btn-hover-color: #fff;
+    --bs-btn-hover-bg: #121B26;
+    --bs-btn-hover-border-color: #FFF;
+  }
+  
+  .B_dropdown_btn1.btn-check:checked+.btn,
+  .B_dropdown_btn1.btn.active,
+  .B_dropdown_btn1.btn.show,
+  .B_dropdown_btn1.btn:first-child:active,
+  .B_dropdown_btn1:not(.btn-check)+.btn:active {
+    color: var(--bs-btn-active-color);
+    background-color: #121B25;
+    border-color: var(--bs-btn-active-border-color);
+  }
+  
+  .B_dropdown {
+    --bs-dropdown-bg: #121B26;
+    --bs-dropdown-min-width: 13rem;
+    --bs-dropdown-link-hover-bg: #3a556f;
+    --bs-dropdown-font-size: 14px;
+    --bs-dropdown-item-padding-x: 22px;
+    --bs-dropdown-item-padding-y: 7px;
+  }
+  
+  .B_dropdown1 {
+    --bs-dropdown-min-width: 13rem;
+  }
+  
+  .B_dropdown_item {
+    color: white !important;
+  }
+  
+  .B_Meeting_search::placeholder {
+    color: rgb(179, 174, 174);
+  }
+  
+  .B_Meeting_search_icon {
+    top: 6px;
+    left: 10px;
+    font-size: 18px;
+  }
+  
+  .B_Meeting_search {
+    border: none !important;
+    padding: 10px 15px;
+  }
+  
+  .B_Meeting_search:focus {
+    box-shadow: none;
+  }
+  
+  .B_metting_btn {
+    padding: 10px 38px;
+  }
+  
+  .B_contant_width {
+    width: 94%;
+  }
+  
+  .dropdown-item.active,
+  .dropdown-item:active {
+    background-color: #121B25;
+  }
+  
+  .B_Meeting_video_icon img {
+    height: 95px;
+    width: 115px;
+  }
+  
+  .B_Meeting_txt1 {
+    font-size: 17px;
+    margin-bottom: 5px;
+  }
+  
+  .B_Meeting_video_icon {
+    margin-top: 15%;
+  }
+  
+  .B_meeting_card {
+    box-shadow: 0 0 2px 0 rgb(113 111 111 / 50%);
+  }
+  
+  .B_card_title {
+    font-size: 18px;
+  }
+  
+  .B_upcoming_btn {
+    --bs-btn-color: #69B2F5;
+    --bs-btn-border-color: #69B2F5;
+    --bs-btn-hover-bg: #469ef0;
+    --bs-btn-hover-border-color: #69B2F5;
+    --bs-btn-active-bg: #69B2F5;
+    --bs-btn-active-border-color: #69B2F5;
+    --bs-btn-padding-x: 1rem;
+    --bs-btn-padding-y: 0.35rem;
+    --bs-btn-font-size: 13px;
+    border-radius: 4px;
+  }
+  
+  .B_upcoming_btn1 {
+    --bs-btn-padding-x: 1rem;
+    --bs-btn-padding-y: 0.35rem;
+    --bs-btn-font-size: 13px;
+    border-radius: 4px;
+  }
+  
+  .B_upcoming_btn2 {
+    --bs-btn-color: #c5c7c9;
+    --bs-btn-border-color: #b6b8ba;
+  }
+  
+  .B_meetingALl_details span {
+    font-size: 14px;
+  }
+  
+  .B_meetingALl_details_span {
+    width: 130px;
+  }
+  
+  .hover-bg-secondary:hover {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+  }
+  
+  .dropdown-item:active {
+    background-color: rgba(255, 255, 255, 0.2) !important;
+  }
+  
+  .B_boxEdit {
+    background-color: #121B26;
+    font-size: 14px;
+  }
+  
+  .B_schedule_input {
+    width: 185px !important;
+  }
+  
+  .B_invite_people_text {
+    font-size: 14px;
+  }
+  
+  .B_meeting_title {
+    font-size: 14px;
+  }
+  
+  .B_meeting_time_text {
+    font-size: 13.5px !important;
+  }
+  
+  .B_meeting_time_text_div {
+    padding: 30px 15px !important;
+  }
+  
+  .B_meeting_time_text_span {
+    font-size: 14px;
+  }
+  
+  .B_modal_content {
+    background-color: #12161C !important;
+    border-radius: 8px !important;
+  }
+  
+  .B_cancle_model_title {
+    font-size: 18px !important;
+  }
+  
+  .B_invite_people_modal {
+    max-width: 500px;
+  }
+  
+  .B_Repeat_on_btn {
+    gap: 15px;
+  }
+  
+  .B_meeting_time_text_div {
+    padding-bottom: 20px !important;
+  }
+  
+  .B_G_space {
+    --bs-gutter-y: 1.5rem;
+  }
+  
+  .B_radio_input:checked {
+    background-color: #1f1d1d;
+    border-color: #fcfdfe;
+  }
+  
+  .B_meeting_note_div p {
+    font-size: 16px;
+  }
+  
+  .B_review_model .modal-content {
+    background-color: #0C131C !important;
+    color: #fff !important;
+    width: 600px;
+  }
+  
+  .B_review_model_header {
+    justify-content: center !important;
+  }
+  
+  .B_review_model_title {
+    font-size: 17px;
+    font-weight: 400 !important;
+  }
+  
+  .B_review_model_body {
+    text-align: center !important;
+  }
+  
+  .B_yellow_star {
+    color: gold;
+  }
+  
+  .B_grey_star {
+    color: lightgrey;
+  }
+  
+  .B_review_model_text {
+    margin: 30px 0;
+    font-size: 18px;
+  }
+  
+  .B_review_model_Box {
+    background-color: #121B26;
+    padding: 10px 15px;
+    height: 75px;
+    width: 150px;
+  }
+  
+  .B_review_model_Box img {
+    width: 25px;
+    height: 25px;
+  }
+  
+  .B_review_model_Box_img {
+    height: 16px !important;
+    width: 18px !important;
+  }
+  
+  .B_addtional_text {
+    font-size: 14px;
+  }
+  
+  .B_hover_bttn:hover {
+    background-color: white;
+    color: #000000;
+  
+  }
+  
+  .B_hover_bttn {
+    background-color: transparent;
+    border: 1px solid #BFBFBF;
+    color: #BFBFBF;
+    padding: 8px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    width: 170px;
+    text-align: center;
+  }
+  
+  .B_text_Area:focus-visible {
+    outline: none !important;
+  }
+  
+  .B_Gap_Button {
+    gap: 20px !important;
+  }
+  
+  .B_screen_btn:hover {
+    background-color: #202F41 !important;
+  }
+  
+  .B_screen_offcanvas::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  .B_screen_offcanvas::-webkit-scrollbar-track {
+    background: #121a24;
+    border-radius: 4px;
+  }
+  
+  .B_screen_offcanvas::-webkit-scrollbar-thumb {
+    background: #2a323b;
+    border-radius: 4px;
+  }
+  
+  .B_screen_offcanvas::-webkit-scrollbar-thumb:hover {
+    background: #394857;
+  }
+  
+  .B_screen_offcanvas {
+    scrollbar-width: thin;
+    scrollbar-color: #2a323b #121a24;
+  }
+  
+  .B_chat_msg::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  .B_chat_msg::-webkit-scrollbar-track {
+    background: #121a24;
+    border-radius: 4px;
+  }
+  
+  .B_chat_msg::-webkit-scrollbar-thumb {
+    background: #2a323b;
+    border-radius: 4px;
+  }
+  
+  .B_chat_msg::-webkit-scrollbar-thumb:hover {
+    background: #394857;
+  }
+  
+  .B_chat_msg {
+    scrollbar-width: thin;
+    scrollbar-color: #2a323b #121a24;
+  }
+  
+  .B_EditName {
+    font-size: 18px;
+  }
+  
+  /* MiN MEDIA QUERY START.............. */
+  
+  @media (min-width: 540px) {
+    .B_container_new {
+      width: 540px;
+      /* sm */
+    }
+  }
+  
+  @media (min-width: 720px) {
+    .B_container_new {
+      width: 720px;
+      /* md */
+    }
+  }
+  
+  @media (min-width: 960px) {
+    .B_container_new {
+      width: 960px;
+      /* lg */
+    }
+  }
+  
+  @media (min-width: 1140px) {
+    .B_container_new {
+      width: 1140px;
+      /* xl */
+    }
+  }
+  
+  @media (min-width: 1520px) {
+    .B_container_new {
+      width: 1320px;
+      /* xxl */
+    }
+  
+    .B_container_new1 {
+      width: 1600px;
+      margin: 0 auto;
+      /* xxl */
+    }
+  }
+  
+  /* MAX WIDTH QUERY START.............. */
+  
+  @media (max-width: 1440px) {
+    .B_PTag_text {
+      width: 100%;
+    }
+  
+    .B_feature-icon {
+      font-size: 40px;
+    }
+  
+    .B_feature-card {
+      padding: 30px 20px;
+    }
+  
+    .B_box_text {
+      font-size: 14px;
+    }
+  
+    .B_Connecting_head_text {
+      width: 80%;
+    }
+  
+    .B_Connecting_text {
+      width: 100%;
+    }
+  
+    .B_card_space1 {
+      padding: 0 20px;
+      margin-bottom: 40px;
+    }
+  
+    .B_FAQ_body_text {
+      font-size: 15px;
+    }
+  
+    .B_contact_card p {
+      font-size: 15px;
+    }
+  
+    .B_contact_card {
+      padding: 20px 16px 15px;
+    }
+  
+    .B_card_title {
+      font-size: 16px;
+    }
+  
+    .B_upcoming_btn,
+    .B_upcoming_btn1 {
+      margin-right: 0px !important;
+    }
+  
+    .B_upcoming_btn {
+      --bs-btn-padding-x: 0.80rem;
+      --bs-btn-padding-y: 0.30rem;
+    }
+  
+    .B_meeting_card_section {
+      --bs-gutter-x: 1.5rem;
+      --bs-gutter-y: 1.5rem;
+    }
+  
+    .B_meeting_note_div p {
+      font-size: 16px;
+    }
+  
+    .B_ROOM_DETAILS {
+      padding: 10px !important;
+    }
+  
+    .B_ROOM_DETAILS span {
+      font-size: 14px !important;
+    }
+  
+    .B_ROOM_DETAILS_label {
+      font-size: 14px;
+    }
+  
+    .B_ROOM_DETAILS_span {
+      width: 85px !important;
+    }
+  
+    .d_avatar-circle {
+      width: 105px;
+      height: 105px;
+      font-size: 32px;
+    }
+  
+    .d_mainscreen {
+      height: calc(100vh - 158px) !important;
+    }
+  
+  }
+  
+  @media (max-width: 1024px) {
+    .B_Connecting_head_text {
+      width: 90%;
+    }
+  
+    .B_Connecting_section {
+      padding: 40px 0 60px 0;
+    }
+  
+    .B_testimonial_text {
+      font-size: 13px;
+      text-indent: 7px;
+      padding: 0 8px;
+    }
+  
+    .B_Slider_text1 {
+      margin-bottom: 5px;
+    }
+  
+    .star {
+      font-size: 20px;
+    }
+  
+    .stars {
+      margin: 5px 0px;
+    }
+  
+    .B_Slider_section {
+      padding: 55px 0;
+    }
+  
+    .Opacity_img {
+      background-position: left;
+      height: 335px;
+    }
+  
+    .B_opacity_button1 {
+      padding: 8px 40px;
+    }
+  
+    .B_opacity_button {
+      padding: 8px 30px;
+    }
+  
+    .B_box_div {
+      padding: 30px 28px 18px;
+    }
+  
+    .B_FAQ_button_text {
+      font-size: 16px;
+    }
+  
+    .B_FAQ_body_text {
+      font-size: 14px;
+    }
+  
+    .B_Card_padding {
+      padding: 20px;
+    }
+  
+    .B_Ture_text {
+      font-size: 15px;
+    }
+  
+    .B_pricing_section {
+      padding: 0 0 20px 0;
+    }
+  
+    .B_payment_section {
+      padding: 40px 0;
+    }
+  
+    .B_payment_head_text {
+      font-size: 25px;
+    }
+  
+    .B_payment_card {
+      width: 460px;
+      padding: 34px 35px;
+    }
+  
+    .B_billing_details {
+      width: 400px;
+    }
+  
+    .B_GetHead_text {
+      font-size: 24px;
+    }
+  
+    .B_GetText {
+      font-size: 15px;
+    }
+  
+    .B_Get_In_Touch {
+      padding: 60px 0;
+    }
+  
+    .B_Get_SEC_text {
+      margin-bottom: 50px;
+    }
+  
+    .B_contact_form {
+      max-width: 960px;
+      padding: 35px 40px;
+  
+    }
+  
+    .B_form_group input,
+    .B_form_group textarea {
+      padding: 11px;
+  
+    }
+  
+    .B_contact_card_row {
+      --bs-gutter-x: 2rem;
+      --bs-gutter-y: 0rem;
+    }
+  
+    .B_contact_card p {
+      font-size: 14px;
+    }
+  
+    .B_contact_card h4 {
+      font-size: 22px;
+    }
+  
+    .B_addCARD_section {
+      padding: 0px 0 60px 0;
+    }
+  
+    .B_Meeting_head {
+      padding: 28px 27px 24px;
+    }
+  
+    .B_dropdown_btn1 {
+      padding: 8px 12px;
+    }
+  
+    .B_metting_btn {
+      padding: 8px 10px;
+    }
+  
+    .B_Meeting_search {
+      padding-right: 20px !important;
+    }
+  
+    .B_contant_width {
+      width: 92%;
+    }
+  
+    .B_dropdown {
+      --bs-dropdown-min-width: 11rem;
+    }
+  
+    .B_Meeting_video_icon {
+      margin-top: 25%;
+    }
+  
+    .B_Meeting_video_icon img {
+      height: 81px;
+    }
+  
+    .B_schedule_input {
+      width: 160px !important;
+    }
+  
+    .B_cancle_model {
+      padding: 12px 20px !important;
+    }
+  
+    .B_cancle_model_text {
+      font-size: 17px !important;
+    }
+  
+    .B_cancle_model_btn {
+      min-width: 160px !important;
+    }
+  
+    .B_dropdown_btn1 {
+      font-size: 15px;
+    }
+  
+  }
+  
+  @media (max-width: 768px) {
+    .B_Main_section {
+      padding: 50px 0;
+    }
+  
+    .B_Head_text {
+      font-size: 28px;
+    }
+  
+    .B_PTag_text {
+      line-height: 22px;
+      font-size: 14px;
+    }
+  
+    .B_Connecting_section {
+      padding: 50px 0;
+    }
+  
+    .B_Con_head_text {
+      font-size: 24px;
+    }
+  
+    .B_Connecting_text1,
+    .B_Connecting_text2 {
+      font-size: 14px;
+    }
+  
+    .B_Features_section {
+      padding: 30px 0;
+    }
+  
+    .B_feature-card {
+      padding: 20px 15px;
+    }
+  
+    .B_box_text {
+      font-size: 13px;
+    }
+  
+    .B_Connecting_section {
+      padding: 30px 0;
+    }
+  
+    .B_Connecting_head_text {
+      font-size: 25px;
+      width: 100%;
+    }
+  
+    .B_Connecting_text {
+      font-size: 13px;
+    }
+  
+    .B_Slider_section {
+      padding: 30px 0;
+    }
+  
+    .B_Slider_head_text {
+      font-size: 25px;
+    }
+  
+    .B_Slider_text {
+      font-size: 13px;
+    }
+  
+    .B_testimonial_text {
+      font-size: 12px;
+      text-indent: 12px;
+      padding: 0 3px;
+    }
+  
+    .star {
+      font-size: 18px;
+    }
+  
+    .B_Slider_text1 {
+      font-size: 13px;
+    }
+  
+    .owl-carousel .owl-item .testimonial-image {
+      width: 48px;
+      height: 48px;
+    }
+  
+    .owl-nav button span {
+      font-size: 32px;
+      top: -8px;
+    }
+  
+    .B_opacity_head_text {
+      font-size: 25px;
+    }
+  
+    .B_opacity_button1 {
+      padding: 7px 30px;
+      font-size: 15px;
+  
+    }
+  
+    .B_opacity_button {
+      padding: 7px 21px;
+      font-size: 15px;
+    }
+  
+    .Opacity_img {
+      height: 315px;
+    }
+  
+    .B_Footer_text {
+      font-size: 14px;
+    }
+  
+    .B_help_head_text {
+      font-size: 24px;
+    }
+  
+    .B_Here_Help {
+      padding: 30px 0 50px 0;
+    }
+  
+    .B_card1_head {
+      font-size: 20px;
+    }
+  
+    .B_card1_text {
+      font-size: 14px;
+    }
+  
+    .B_FAQ_section {
+      padding: 0 10px;
+    }
+  
+    .B_simple_affordable {
+      padding: 30px 0;
+    }
+  
+    .B_simple_affo_head_text {
+      font-size: 24px;
+    }
+  
+    .B_simple_affo_text {
+      font-size: 14px;
+    }
+  
+    .B_pricing_button {
+      padding: 7px 40px;
+    }
+  
+    .B_card_margin {
+      margin-bottom: 40px;
+    }
+  
+    .B_CARD_Price {
+      padding-bottom: 21px;
+    }
+  
+    .navbar-collapse {
+      margin-top: 25px;
+    }
+  
+    .B_payment_section {
+      padding: 30px 0 50px 0;
+    }
+  
+    .B_payment_head_text {
+      font-size: 24px;
+    }
+  
+    .B_form_responsive {
+      display: flex;
+      justify-content: center;
+    }
+  
+    .B_billing_details {
+      width: 500px;
+    }
+  
+    .B_payment_card {
+      width: 565px;
+      background-color: #060A11;
+    }
+  
+    .B_payment_section {
+      padding: 10px 0 50px 0;
+    }
+  
+    .B_Get_In_Touch {
+      padding: 25px 0 40px 0;
+    }
+  
+    .B_contact_form {
+      max-width: 720px;
+    }
+  
+    .B_contact_form {
+      padding: 25px 30px;
+    }
+  
+    .B_form_group input,
+    .B_form_group textarea {
+      padding: 9px 11px;
+    }
+  
+    .B_contact_card_row {
+      justify-content: center;
+    }
+  
+    .B_contact_card3 {
+      margin-bottom: 30px;
+    }
+  
+    .B_contact_card h4 {
+      font-size: 20px;
+    }
+  
+    .B_contact_card .B_icon1 img {
+      width: 30px;
+      height: 34px;
+    }
+  
+    .B_contact_card .B_icon2 img {
+      width: 29px;
+      height: 33px;
+    }
+  
+    .B_contact_card .B_icon3 img {
+      width: 36px;
+      height: 26px;
+    }
+  
+    .B_contant_width {
+      width: 90%;
+    }
+  
+    .B_dropdown_btn1 {
+      font-size: 14px;
+    }
+  
+    .B_dropdown_btn1 {
+      padding: 8.5px 11px;
+    }
+  
+    .B_metting_btn {
+      font-size: 14px;
+    }
+  
+    .B_Meeting_head {
+      flex-direction: column;
+  
+    }
+  
+    .B_Meeting_head_flex {
+      margin-bottom: 15px;
+      justify-content: center;
+    }
+  
+    .B_Meeting_head_flex1 {
+      justify-content: center;
+    }
+  
+    .B_Meeting_search {
+      padding-right: 4px !important;
+    }
+  
+    .B_dropdown_btn1 {
+      padding: 8.5px 40px;
+    }
+  
+    .B_dropdown_btn1 {
+      padding: 8.5px 44px;
+    }
+  
+    .B_dropdown {
+      --bs-dropdown-min-width: 12rem;
+    }
+  
+    .B_Meeting_video_icon {
+      margin-top: 30%;
+    }
+  
+    .B_schedule_DnT {
+      display: flex !important;
+    }
+  
+    .B_schedule_input {
+      width: 130px !important;
+    }
+  
+    .B_invite_people_modal {
+      max-width: 450px !important;
+    }
+  
+    .B_invite_people_btn {
+      padding: 5px 35px !important;
+    }
+  
+    .B_invite_people_btn1 {
+      padding: 5px 30px !important;
+    }
+  
+    .B_invite_people_body {
+      padding: 15px 11px !important;
+    }
+  
+    .B_meeting_note_div1 {
+      margin-top: 10px !important;
+    }
+  
+    .B_ROOM_DETAILS_span {
+      width: 120px !important;
+    }
+  
+    .B_meeting_note_div {
+      padding: 30px 20px 30px 30px !important;
+  
+    }
+  
+    .B_meeting_note_div p {
+      font-size: 14px;
+    }
+  
+    .B_ROOM_DETAILS_btn {
+      padding: 5px 25px !important;
+    }
+  
+    .B_perosnalMargin {
+      margin: 0px !important;
+    }
+  
+    .B_top_margin {
+      margin-top: 20px !important;
+    }
+  
+    .B_review_model .modal-content {
+      width: 530px;
+    }
+  
+    .B_flex_reverse {
+      flex-direction: column-reverse;
+    }
+  
+    .j_schedule_border {
+      border: none !important;
+    }
+  
+    .B_schedule_input {
+      width: 190px !important;
+    }
+  
+    .B_paddingStart {
+      padding-left: 0 !important;
+      border-bottom: 1px solid #525558;
+    }
+  
+    .B_suggestion {
+      width: 95% !important;
+    }
+  
+    .B_MarGin {
+      margin-bottom: 35px !important;
+    }
+  
+    .j_Schedule_width {
+      padding-left: 0px;
+    }
+  
+  }
+  
+  @media (max-width: 425px) {
+    .B_Head_text {
+      margin: 0 2px;
+      font-size: 20px;
+    }
+  
+    .B_PTag_text {
+      margin: 0 2px;
+      font-size: 14px;
+      line-height: 19px;
+    }
+  
+    .B_Button_text {
+      font-size: 15px;
+      padding: 6px 13px;
+      font-weight: bolder;
+      margin-bottom: 20px;
+    }
+  
+    .B_Btn_center {
+      text-align: center;
+      margin: 10px 0;
+    }
+  
+    .B_Con_head_text {
+      font-size: 20px;
+      margin-top: 30px;
+    }
+  
+    .B_Connecting_text1,
+    .B_Connecting_text2 {
+      font-size: 14px;
+    }
+  
+    .B_Connecting_section {
+      padding: 40px 0;
+    }
+  
+    .B_Features_section {
+      padding: 20px 0;
+    }
+  
+    .B_Feature_head_text {
+      font-size: 20px;
+    }
+  
+    .B_Feature_text {
+      font-size: 14px;
+    }
+  
+    .B_feature-card {
+      text-align: center;
+    }
+  
+    .B_box_head {
+      font-size: 20px;
+    }
+  
+    .B_feature-icon {
+      font-size: 23px;
+    }
+  
+    .B_Connecting_section {
+      padding: 30px 0;
+    }
+  
+    .B_Connecting_head_text {
+      font-size: 20px;
+    }
+  
+    .B_Connecting_text {
+      font-size: 13px;
+      margin-bottom: 40px;
+    }
+  
+    .B_Slider_section {
+      padding: 20px 0;
+    }
+  
+    .B_Slider_head_text {
+      font-size: 20px;
+    }
+  
+    .owl-carousel .owl-item .testimonial-card {
+      margin: 0px 30px;
+    }
+  
+    .B_Slider_text {
+      margin-bottom: 0;
+    }
+  
+    .owl-carousel .owl-stage {
+      padding: 0px 0;
+    }
+  
+    .Opacity_img {
+      height: 235px;
+    }
+  
+    .B_opacity_head_text {
+      font-size: 20px;
+    }
+  
+    .B_opacity_button1 {
+      padding: 7px 30px;
+    }
+  
+    .B_opacity_button {
+      padding: 7px 21px;
+      font-size: 15px;
+    }
+  
+    .B_opacity_button1 {
+      padding: 5px 18px;
+      font-size: 14px;
+  
+    }
+  
+    .B_opacity_button {
+      padding: 6px 11px;
+      font-size: 14px;
+    }
+  
+    .B_Footer_container {
+      display: block !important;
+      text-align: center !important;
+    }
+  
+    .B_footer-links {
+      justify-content: center !important;
+    }
+  
+    .B_footer_link1 {
+      justify-content: center !important;
+    }
+  
+    .B_help_head_text {
+      font-size: 20px;
+    }
+  
+    .B_Here_Help {
+      padding: 20px 0 50px 0;
+    }
+  
+    .B_card_space {
+      margin: 0px 0px;
+    }
+  
+    .B_card_space1 {
+      margin-bottom: 25px;
+    }
+  
+    .B_FAQ_button_text {
+      font-size: 14px;
+    }
+  
+    .B_FAQ_body_text {
+      font-size: 13px;
+    }
+  
+    .B_acc_card_section {
+      padding: 0px 0 20px 0;
+    }
+  
+    .B_Footer_section1 {
+      padding: 30px 0 0 0;
+    }
+  
+    .B_simple_affo_head_text {
+      font-size: 20px;
+    }
+  
+    .B_simple_affo_text {
+      font-size: 13px;
+    }
+  
+    .B_pricing_button {
+      padding: 6px 30px;
+    }
+  
+    .B_price_text {
+      font-size: 20px;
+      margin-top: 20px;
+    }
+  
+    .B_cardPrice_text {
+      font-size: 14px;
+      margin-bottom: 30px;
+    }
+  
+    .B_Ture_text {
+      font-size: 14px;
+    }
+  
+    .B_price_btn {
+      padding: 7px;
+      margin-bottom: 9px;
+    }
+  
+    .B_CARD_Price {
+      padding-bottom: 0px;
+    }
+  
+    .B_payment_head_text {
+      font-size: 20px;
+    }
+  
+    .B_payment_section {
+      padding: 30px 0 50px 0;
+    }
+  
+    .B_billing_details {
+      width: 370px;
+    }
+  
+    .B_payment_card {
+      width: 400px;
+      padding: 20px;
+  
+    }
+  
+    .B_biling_text {
+      font-size: 18px;
+    }
+  
+    .B_form_control {
+      padding: 7px 15px;
+      margin-bottom: 18px;
+    }
+  
+    .B_formStart_padding {
+      padding: 0;
+    }
+  
+    .B_GetHead_text {
+      font-size: 20px;
+    }
+  
+    .B_GetText {
+      font-size: 13px;
+    }
+  
+    .B_Get_In_Touch {
+      padding: 15px 0 40px 0;
+    }
+  
+  
+    .B_form_group input,
+    .B_form_group textarea {
+      padding: 7px 11px;
+      font-size: 14px;
+    }
+  
+    .B_form_row {
+      gap: 20px !important;
+    }
+  
+    .B_contact_form {
+      padding: 18px 19px;
+    }
+  
+    .B_contact_form {
+      max-width: 390px;
+    }
+  
+    .B_form_group input::placeholder {
+      font-size: 14px;
+    }
+  
+    .B_form_row {
+      flex-direction: column;
+    }
+  
+    .B_contact_form button {
+      width: 48%;
+      padding: 7px 14px;
+    }
+  
+    .B_contant_width {
+      width: 82%;
+    }
+  
+    .B_dropdown_btn1 {
+      padding: 7.5px 20px;
+      font-size: 13px;
+    }
+  
+    .B_metting_btn {
+      font-size: 13px;
+      text-wrap-mode: nowrap;
+      padding: 7px 10px;
+    }
+  
+    .B_Meeting_head {
+      padding: 28px 8px 24px;
+    }
+  
+    .B_Meeting_search {
+      border: none !important;
+      padding: 8px 15px;
+    }
+  
+    .B_dropdown {
+      --bs-dropdown-min-width: 10rem;
+      --bs-dropdown-item-padding-x: 12px;
+    }
+  
+    .B_Meeting_video_icon {
+      margin-top: 60%;
+    }
+  
+    .B_Meeting_txt2 {
+      font-size: 14px;
+    }
+  
+    .B_Meeting_head_flex {
+      margin: auto;
+      margin-bottom: 12px !important;
+    }
+  
+    .B_schedule_DnT {
+      display: block !important;
+    }
+  
+    .B_schedule_input {
+      width: 170px !important;
+    }
+  
+    .B_schedule_btn1 {
+      margin-bottom: 15px !important;
+    }
+  
+    .B_cancle_model_body {
+      padding: 15px 10px !important;
+    }
+  
+    .B_cancle_model_btn {
+      min-width: 130px !important;
+      padding: 7px 10px !important;
+    }
+  
+    .B_cancle_model_btn_flex {
+      margin-top: 10px !important;
+      gap: 20px !important;
+    }
+  
+    .B_cancle_model_text {
+      padding-top: 10px !important;
+    }
+  
+    .B_meeting_Date_text_span {
+      font-size: 13px;
+    }
+  
+    .B_cancle_model_title {
+      font-size: 17px !important;
+    }
+  
+    .B_cancle_model_text {
+      font-size: 16px !important;
+    }
+  
+    .B_Repeat_on_btn {
+      gap: 8px;
+    }
+  
+    .B_ROOM_DETAILS span {
+      font-size: 12.5px !important;
+    }
+  
+    .B_ROOM_DETAILS_span {
+      width: 80px !important;
+    }
+  
+    .B_meeting_note_div {
+      padding: 17px 12px 12px 15px !important;
+    }
+  
+    .B_meeting_note_div p {
+      font-size: 13.5px;
+    }
+  
+    .B_ROOM_DETAILS_label {
+      font-size: 12.5px;
+    }
+  
+    .B_ROOM_DETAILS_btn {
+      padding: 4px 15px !important;
+    }
+  
+    .B_ROOM_DETAILS_btn {
+      margin-top: 0px !important;
+    }
+  
+    .B_Link_input {
+      width: 95px !important;
+    }
+  
+    .B_invite_link_Column {
+      flex-direction: column;
+      align-items: flex-start !important;
+    }
+  
+    .B_review_model .modal-content {
+      width: 385px;
+      margin: auto;
+    }
+  
+    .B_review_model_title {
+      font-size: 15px;
+    }
+  
+    .B_gapDiv {
+      gap: 20px !important;
+    }
+  
+    .B_review_model_body div {
+      font-size: 15px;
+    }
+  
+    .B_Box_Textt {
+      font-size: 12px;
+      padding-top: 10px;
+    }
+  
+    .B_textAreaa {
+      margin-top: 30px !important;
+    }
+  
+    .B_hover_bttn {
+      width: 139px;
+    }
+  
+    .B_lastbtn {
+      width: 139px !important;
+    }
+  
+    .B_schedule_input {
+      width: 350px !important;
+    }
+  
+    .B_suggestion {
+      width: 70% !important;
+    }
+  
+    .j_schedule_footer {
+      justify-content: center !important;
+    }
+  
+    .B_schedule_btn1 {
+      margin-bottom: 0 !important;
+    }
+  
+    .j_schedule_footer {
+      gap: 10px;
+    }
+  
+    .B_suggestion {
+      width: 92% !important;
+    }
+  
+    .j_home_button {
+      font-size: 14.5px;
+    }
+  
+    .B_TOP_setMargin {
+      margin-top: 10px !important;
+    }
+  
+    .B_vertical {
+      margin-bottom: 7px;
+      margin-left: 7px;
+    }
+  
+    .d_mainsec {
+      margin-right: 300px;
+    }
+  
+  
+  }
+  
+  @media (max-width: 375px) {
+  
+    .B_Head_text {
+      margin: 0 10px;
+      font-size: 18px;
+    }
+  
+    .B_PTag_text {
+      margin: 0 10px;
+      font-size: 13px;
+    }
+  
+    .B_Button_text {
+      margin: 20px 0 20px 10px;
+      font-size: 15px;
+      padding: 5px 10px;
+      font-weight: bolder;
+    }
+  
+    .B_UL_text {
+      font-size: 14px;
+    }
+  
+    .B_Con_head_text {
+      font-size: 16px;
+    }
+  
+    .B_Connecting_text1,
+    .B_Connecting_text2 {
+      font-size: 13px;
+    }
+  
+    .B_Feature_head_text {
+      font-size: 16px;
+    }
+  
+    .B_Feature_text {
+      font-size: 13px;
+    }
+  
+    .B_Features_section {
+      padding: 5px 0 30px 0;
+    }
+  
+    .B_Connecting_head_text {
+      font-size: 18px;
+    }
+  
+    .B_Connecting_text {
+      font-size: 13px;
+    }
+  
+    .B_Connecting_section {
+      padding: 0px 0 40px 0;
+    }
+  
+    .owl-carousel .owl-item .testimonial-card {
+      padding: 10px 13px;
+    }
+  
+    .B_footer-links {
+      font-size: 15px;
+    }
+  
+    .B_social_icon {
+      padding: 7px;
+    }
+  
+    .B_help_head_text {
+      font-size: 16px;
+    }
+  
+    .B_input_search input {
+      padding: 7% 0px;
+    }
+  
+    .B_card1_text {
+      font-size: 13px;
+    }
+  
+    .B_box_div {
+      padding: 20px 18px 18px;
+    }
+  
+    .B_FAQ_body_text {
+      font-size: 12.5px;
+    }
+  
+    .B_pricing_button {
+      padding: 4px 22px;
+    }
+  
+    .B_billing_details {
+      width: 340px;
+    }
+  
+    .B_payment_card {
+      width: 350px;
+      padding: 18px 16px;
+    }
+  
+    .B_form_control {
+      padding: 6px 15px;
+    }
+  
+    .B_biling_text {
+      font-size: 16px;
+    }
+  
+    .B_contact_form {
+      max-width: 350px;
+    }
+  
+    .B_contact_form button {
+      margin-top: 10px;
+    }
+  
+    .B_contact_form button {
+      width: 50%;
+      padding: 6px 12px;
+    }
+  
+    .B_contact_card p {
+      font-size: 13px;
+    }
+  
+    .B_contact_card .B_icon2 img {
+      width: 27px;
+      height: 29px;
+    }
+  
+    .B_contact_card .B_icon3 img {
+      width: 30px;
+      height: 21px;
+    }
+  
+    .B_contant_width {
+      width: 80%;
+    }
+  
+    .B_Meeting_head_flex1 {
+      flex-direction: column;
+    }
+  
+    .B_Meeting_search {
+      padding-right: 64px !important;
+    }
+  
+    .B_metting_btn {
+      padding: 7px 35px;
+      --bs-btn-border-color: #c0c0c0;
+  
+    }
+  
+    .B_dropdown_btn1 {
+      padding: 7.5px 7px;
+    }
+  
+    .B_dropdown {
+      --bs-dropdown-min-width: 9rem;
+    }
+  
+    .B_meeting_card_section {
+      --bs-gutter-x: 0rem;
+    }
+  
+    .B_card_title {
+      font-size: 14px;
+    }
+  
+    .B_meeting_padding {
+      padding: 10px !important;
+    }
+  
+    .B_meetingALl_details span {
+      font-size: 13px;
+    }
+  
+    .B_upcoming_btn,
+    .B_upcoming_btn1 {
+      --bs-btn-padding-x: 0.6rem;
+      --bs-btn-padding-y: 0.20rem;
+    }
+  
+    .B_schedule_input {
+      width: 145px !important;
+    }
+  
+    .B_cancle_model_text {
+      font-size: 15px !important;
+    }
+  
+    .B_cancle_model_btn {
+      min-width: 110px !important;
+      padding: 4px 6px !important;
+    }
+  
+    .B_invite_people_text_flex {
+      margin-bottom: 10px !important;
+    }
+  
+    .B_Repeat_on_btn {
+      gap: 6px;
+    }
+  
+    .B_ROOM_DETAILS_span {
+      width: 77px !important;
+    }
+  
+    .B_ROOM_DETAILS span {
+      font-size: 12px !important;
+    }
+  
+    .B_col_form {
+      padding: 0;
+    }
+  
+    .B_ROOM_DETAILS_label {
+      font-size: 12px;
+    }
+  
+    .B_Link_input {
+      width: 80px !important;
+    }
+  
+    .B_review_model .modal-content {
+      width: 355px;
+    }
+  
+    .B_gapDiv {
+      gap: 6px !important;
+    }
+  
+    .B_text_Area {
+      height: 75px !important;
+    }
+  
+    .BB_margin_home {
+      margin-top: 20px !important;
+    }
+  
+    .B_schedule_input {
+      width: 300px !important;
+    }
+  
+    .B_suggestion {
+      width: 89% !important;
+    }
+  
+    .j_home_button {
+      font-size: 14px;
+    }
+  
+    .B_schedule_btn1 {
+      padding: 5px 20px !important;
+    }
+  
+    .B_EditName {
+      font-size: 16px;
+    }
+  
+    .B_screen_Margin {
+      margin-top: 25px !important;
+    }
+  
+    .B_screen_Pad {
+      padding: 15px !important;
+    }
+  
+    .B_participateName {
+      font-size: 14px;
+    }
+  
+    .B_Ofcanvasbody {
+      padding: 5px;
+    }
+  
+    .B_circle {
+      height: 35px !important;
+      width: 35px !important;
+    }
+  
+    .B_screen_offcanvas {
+      width: 370px !important;
+    }
+  
+  
+  }
+  
+  @media (max-width: 320px) {
+    .B_Main_section {
+      padding: 20px 0 50px 0;
+    }
+  
+    .B_Head_text {
+      margin: 0 5px;
+      font-size: 16px;
+    }
+  
+    .B_PTag_text {
+      margin: 0 5px;
+    }
+  
+    .B_Button_text {
+      margin: 20px 0 20px 10px;
+      font-size: 14px;
+      padding: 4px 8px;
+      font-weight: bolder;
+    }
+  
+    .B_feature-card {
+      padding: 15px 15px;
+    }
+  
+    .B_Connecting_head_text {
+      font-size: 16px;
+    }
+  
+    .Opacity_img {
+      height: 200px;
+    }
+  
+    .B_opacity_button1 {
+      font-size: 13px;
+  
+    }
+  
+    .B_opacity_button {
+      font-size: 13px;
+    }
+  
+    .B_Card_padding {
+      padding: 15px;
+    }
+  
+    .B_cardPrice_text {
+      font-size: 13px;
+    }
+  
+    .B_Ture_text {
+      font-size: 13px;
+    }
+  
+    .B_price_btn {
+      padding: 6px;
+      margin-bottom: 5px;
+      font-size: 14.5px;
+    }
+  
+    .B_billing_details {
+      width: 290px;
+    }
+  
+    .B_payment_card {
+      width: 296px;
+      padding: 18px 10px
+    }
+  
+    .B_contact_form {
+      max-width: 298px;
+    }
+  
+    .B_contact_form {
+      padding: 14px 13px;
+    }
+  
+    .B_contact_form {
+      margin: 22px auto;
+    }
+  
+    .B_Get_SEC_text {
+      margin-bottom: 40px;
+    }
+  
+    .B_contact_form button {
+      width: 50%;
+      padding: 5px 12px;
+    }
+  
+    .B_contact_card h4 {
+      font-size: 20px;
+    }
+  
+    .B_contact_card .B_icon1 img {
+      width: 26px;
+      height: 29px;
+    }
+  
+    .B_contact_card h4 {
+      font-size: 18px;
+    }
+  
+    .B_Meeting_head_flex {
+      flex-direction: column;
+    }
+  
+    .B_metting_btn {
+      padding: 6px 23px;
+    }
+  
+    .B_dropdown_btn1 {
+      padding: 7.5px 56px;
+    }
+  
+    .B_dropdown_btn2 {
+      padding: 7.5px 56px;
+    }
+  
+    .B_dropdown {
+      --bs-dropdown-min-width: 15rem;
+    }
+  
+    .B_Meeting_txt2 {
+      font-size: 13px;
+    }
+  
+    .B_upcoming_btn,
+    .B_upcoming_btn1 {
+      --bs-btn-font-size: 12px;
+    }
+  
+    .B_card_title {
+      font-size: 11.5px;
+    }
+  
+    .B_meetingALl_details_span {
+      width: 108px;
+    }
+  
+    .B_schedule_input {
+      width: 180px !important;
+    }
+  
+    .B_schedule_input {
+      width: 130px !important;
+    }
+  
+    .B_invite_people_text_flex span {
+      font-size: 14px !important;
+    }
+  
+    .B_invite_people_text_span {
+      width: 78px !important;
+    }
+  
+    .B_meeting_details_flex {
+      flex-wrap: wrap;
+    }
+  
+    .B_meeting_host_img {
+      padding-right: 3px !important;
+    }
+  
+    .B_ROOM_DETAILS_span {
+      width: 65px !important;
+    }
+  
+    .B_meeting_note_div p {
+      font-size: 13px;
+    }
+  
+    .B_password_input {
+      width: 106px !important;
+    }
+  
+    .B_Link_input {
+      width: 44px !important;
+    }
+  
+    .B_review_model .modal-content {
+      width: 295px;
+    }
+  
+    .B_gapDiv {
+      flex-direction: column;
+      justify-self: anchor-center;
+      gap: 10px !important;
+    }
+  
+    .B_review_model_Box {
+      width: 210px;
+    }
+  
+    .B_hover_bttn,
+    .B_lastbtn {
+      font-size: 12px;
+      padding: 0;
+    }
+  
+    .B_review_model_body div {
+      font-size: 13px;
+    }
+  
+    .B_schedule_input {
+      width: 270px !important;
+    }
+  
+    .B_schedule_btn1 {
+      padding: 5px 18px !important;
+    }
+  
+    .j_general_settings h5 {
+      font-size: 10.5px !important;
+    }
+  
+    .B_screen_offcanvas {
+      width: 315px !important;
+    }
+  
+  }
+  
+.d_red {
+    background-color: #E12B2D;
+}
+
+.d_mainsec {
+    min-height: 100%;
+    height: 100vh;
+    background-color: #080E14;
+}
+
+.d_topbar {
+    background-color: #202F41;
+    width: 100%;
+    height: 55px;
+}
+
+.d_mainscreen {
+    padding: 30px 30px 0 30px;
+    background-color: #080E14;
+    height: calc(100vh - 125px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.d_bottombar {
+    position: fixed;
+    /* width: 100%; */
+    bottom: 0;
+    padding: 28px 40px;
+    background-color: #080E14;
+}
+
+.j_search_Input:focus {
+    box-shadow: none !important;
+}
+
+.d_bottombar .d_box {
+    border: 1.2px solid #202F41;
+    border-radius: 4px;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.d_bottombar .d_box1 {
+    border: 1.2px solid #202F41;
+    border-radius: 4px;
+    padding: 10px 14px;
+}
+
+.d_bottombar .d_box img {
+    width: 18px;
+    height: 18px;
+    object-fit: contain;
+}
+
+.d_bottombar .d_box1 p {
+    font-size: 14px;
+    font-weight: 600;
+    color: #fff;
+}
+
+.d_dropdown {
+    background-color: #202F41;
+}
+
+.d_dropdown img {
+    width: 18px;
+}
+
+.d_dropdown span {
+    color: #fff;
+    font-size: 16px;
+}
+
+/* Base grid styling */
+.d_participants-grid {
+    display: grid;
+    grid-gap: 10px;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Single participant layout (Image 1) */
+.d_participants-grid.single-participant {
+    grid-template-columns: 1fr;
+    max-width: 800px;
+}
+
+.single-participant .d_grid-item {
+    aspect-ratio: 16/9;
+}
+
+.single-participant .d_avatar-circle {
+    width: 150px;
+    height: 150px;
+    font-size: 48px;
+}
+
+/* Two participants layout (Image 2) */
+.d_participants-grid.two-participants {
+    grid-template-columns: repeat(2, 1fr);
+}
+
+.two-participants .d_grid-item {
+    aspect-ratio: 16/9;
+}
+
+.two-participants .d_avatar-circle {
+    width: 130px;
+    height: 130px;
+    font-size: 44px;
+}
+
+/* Four participants layout (Image 3) */
+.d_participants-grid.four-participants {
+    grid-template-columns: repeat(2, 1fr);
+}
+
+/* Multi participants layout (Image 4) */
+.d_participants-grid.multi-participants {
+    grid-template-columns: repeat(3, 1fr);
+}
+
+/* Grid item styling */
+.d_grid-item {
+    position: relative;
+    aspect-ratio: 16/9;
+    background-color: #202F41;
+    /* border-radius: 8px; */
+    overflow: hidden;
+}
+
+/* Video container */
+.video-container {
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+
+.d_video-element {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    /* border-radius: 8px; */
+}
+
+.video-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
+    width: 100%;
+}
+
+/* Avatar container */
+.d_avatar-container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+}
+
+.d_avatar-circle {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    font-size: 38px;
+    font-weight: 600;
+}
+
+/* Controls positioning */
+.d_controls-top {
+    position: absolute;
+    top: 0;
+    right: 0;
+    display: flex;
+    align-items: center;
+    padding: 10px 15px;
+}
+
+.d_controls-bottom {
+    position: absolute;
+    bottom: 0px;
+    right: 0px;
+    /* width: 100%; */
+    display: flex;
+    /* justify-content: end; */
+    padding: 10px 15px;
+}
+
+.d_controls-container {
+    display: flex;
+    align-items: center;
+}
+
+.j_no_users {
+    height: 85px;
+    width: 85px;
+}
+
+.j_invite_people {
+    font-weight: 600;
+    font-size: 16px;
+    line-height: 24px;
+}
+
+.j_invite_Btn {
+    width: 20px;
+    height: 20px;
+    color: white;
+}
+
+.j_invite_selected {
+    background-color: #1a2330;
+}
+
+.j_invite_Btn:active {
+    border: none;
+}
+
+.j_invite_user_icon {
+    height: 20px;
+    width: 20px;
+    filter: invert(0);
+    transition: all 0.5s,
+}
+
+.j_system_message {
+    background-color: rgba(0, 0, 0, 0.7);
+    border-radius: 8px;
+    margin-left: 8px;
+    backdrop-filter: blur(10px);
+    opacity: 1;
+}
+
+@keyframes fadeOut {
+    0% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 0;
+        visibility: hidden;
+    }
+}
+
+.j_join_icon,
+.j_leave_icon {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.B_screen_btn:hover .j_invite_user_icon {
+    filter: invert(1);
+}
+
+.j_invite_people_Div {
+    background-color: #12161C;
+}
+
+.j_button_invite {
+    color: black;
+    font-weight: 600;
+    font-size: 16px;
+    padding: 5px 40px;
+    transition: all 0.5s;
+    background-color: white;
+}
+
+.j_button_invite:hover {
+    color: white;
+    background-color: transparent;
+    border: 1px solid #fff;
+}
+
+.d_control-icon {
+    width: 20px;
+    height: 20px;
+    margin-left: 5px;
+    object-fit: contain;
+}
+
+/* Participant name styling */
+.d_participant-name {
+    color: white;
+    font-size: 16px;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+}
+
+/* Mic status styling */
+.d_mic-status {
+    display: flex;
+    align-items: center;
+}
+
+/* Extra participants overlay */
+.d_extra-participants {
+    position: absolute;
+    top: 80px;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    /* background-color: rgba(0, 0, 0, 0.7); */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.d_extra-participants span {
+    color: white;
+    font-size: 18px;
+    font-weight: 500;
+}
+
+
+/* offcanvas */
+
+.B_screen_btn {
+    width: 38%;
+    margin-left: 18px;
+    background-color: #FFF;
+    color: #000000;
+    border: none;
+    transition: all 0.5s;
+    border-radius: 2 0px;
+}
+
+.B_screen_offcanvas {
+    background-color: #12161C !important;
+    color: #fff !important;
+    --bs-list-group-bg: #12161C !important;
+    --bs-list-group-color: #fff !important;
+    --bs-list-group-border-color: none !important;
+    --bs-offcanvas-width: 425px !important;
+
+}
+
+.B_screen_button {
+    padding: 8px 26px;
+}
+
+.B_input_search11 {
+    width: 84%;
+}
+
+.B_input_search22 {
+    width: 95%;
+}
+
+.B_send_msginput {
+    border-radius: 5px;
+    border: none;
+    background-color: #080E14;
+    color: #fff;
+    min-height: 45px;
+    max-height: 120px;
+    /* padding: 10px 15px; */
+    font-size: 14px;
+    width: 100%;
+    resize: none;
+    overflow-y: auto;
+    line-height: 1.4;
+
+}
+
+.d_foucscolor {
+    width: 349px;
+}
+
+.d_foucscolor::placeholder {
+    color: #fff;
+}
+
+.d_foucscolor:focus {
+    background-color: #080E14;
+    color: #fff;
+}
+
+.B_sendMsg {
+    position: absolute;
+    top: 50%;
+    right: 20px;
+    transform: translateY(-50%);
+    font-size: 22px;
+    background: transparent;
+    border: none;
+    color: white;
+}
+
+.j_Invite {
+    background-color: #12161C;
+    width: 440px;
+    border-radius: 6px;
+    transition: opacity 0.3s ease;
+}
+
+.j_deny_button {
+    border: 1px solid #fff;
+    border-radius: 6px;
+    padding: 5px 12px;
+    font-weight: 600;
+    color: white;
+    width: 80px;
+    transition: all 0.5s;
+}
+
+.j_deny_button:hover {
+    font-weight: 600;
+    border: 1px solid #fff;
+    border-radius: 6px;
+    background-color: white;
+    color: black;
+}
+
+.j_accept_button {
+    font-weight: 600;
+    border: 1px solid #fff;
+    border-radius: 6px;
+    padding: 5px 12px;
+    background-color: white;
+    transition: all 0.5s;
+    color: black;
+    width: 80px;
+}
+
+.j_accept_button:hover {
+    border: 1px solid #fff;
+    border-radius: 6px;
+    font-weight: 600;
+    color: white;
+}
+
+.j_join_user {
+    background: #382B82;
+    height: 30px;
+    width: 30px;
+    border-radius: 50%;
+    text-align: center;
+    font-weight: 600;
+    font-size: 16px;
+    padding: 3px;
+    margin-right: 10px;
+}
+
+.j_Box_margin {
+    margin-bottom: 24px;
+}
+
+.B_radio_input {
+    --bs-form-check-bg: transparent !important;
+}
+
+.form-check-input:focus {
+    box-shadow: none;
+    border-color: white;
+}
+
+.j_mobile_containet_emoji {
+    position: absolute;
+    width: 250px;
+    bottom: 45px;
+    background-color: #12161C;
+    border: 1px solid #202f41;
+    padding: 10px;
+    border-radius: 5px;
+    z-index: 1000;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(225, 43, 45, 0.7);
+    }
+
+    70% {
+        transform: scale(1);
+        box-shadow: 0 0 0 10px rgba(225, 43, 45, 0);
+    }
+
+    100% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(225, 43, 45, 0);
+    }
+}
+
+.j_recording_indicator {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    border-radius: 4px;
+    color: #ff3333;
+    font-weight: bold;
+}
+
+.j_recording_dot {
+    width: 10px;
+    height: 10px;
+    background-color: #ff3333;
+    border-radius: 50%;
+    margin-right: 8px;
+    animation: record_blink 1.5s infinite;
+}
+
+@keyframes record_blink {
+    0% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.5;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}
+
+/* Responsive design */
+@media(max-width:1024px) {
+    .d_avatar-circle {
+        width: 100px;
+        height: 100px;
+        font-size: 32px;
+    }
+
+    .single-participant .d_avatar-circle {
+        width: 130px;
+        height: 130px;
+        font-size: 40px;
+    }
+
+    .d_control-icon {
+        width: 18px;
+        height: 18px;
+    }
+
+    .d_participant-name {
+        font-size: 14px;
+    }
+
+    .d_extra-participants {
+        top: 65px;
+    }
+
+    .d_extra-participants span {
+        font-size: 16px;
+    }
+
+    .j_Invite {
+        width: 350px;
+    }
+}
+
+@media (max-width: 992px) {
+    .d_participants-grid.multi-participants {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .d_mainscreen {
+        padding: 25px 25px 0 25px;
+    }
+}
+
+@media (max-width: 768px) {
+    .d_mainscreen {
+        padding: 25px 25px 0 25px;
+    }
+
+    .d_bottombar {
+        padding: 25px;
+    }
+
+    .d_bottombar .d_box {
+        padding: 8px 10px;
+    }
+
+    .single-participant .d_avatar-circle {
+        width: 110px;
+        height: 110px;
+        font-size: 34px;
+    }
+
+    .d_avatar-circle {
+        width: 60px;
+        height: 60px;
+        font-size: 22px;
+    }
+
+    .d_extra-participants {
+        top: 45px;
+    }
+}
+
+@media (max-width: 576px) {
+
+    .d_participants-grid.multi-participants,
+    .d_participants-grid.four-participants {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .d_participants-grid.two-participants {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .d_participants-grid.single-participant {
+        grid-template-columns: 1fr;
+    }
+
+    .d_avatar-circle {
+        width: 70px;
+        height: 70px;
+        font-size: 24px;
+    }
+
+    .single-participant .d_avatar-circle {
+        width: 90px;
+        height: 90px;
+        font-size: 30px;
+    }
+
+    .two-participants .d_avatar-circle {
+        width: 80px;
+        height: 80px;
+        font-size: 26px;
+    }
+
+    .d_grid-item {
+        aspect-ratio: 1 / 1;
+    }
+
+    .single-participant .d_grid-item {
+        aspect-ratio: 4 / 3;
+    }
+}
+
+@media(max-width:425px) {
+    .d_resposive {
+        flex-direction: column;
+    }
+
+    .d_participants-grid.two-participants,
+    .d_participants-grid.four-participants,
+    .d_participants-grid.multi-participants {
+        grid-template-columns: repeat(2, 1fr);
+        max-width: 100%;
+    }
+
+    .d_extra-participants {
+        top: 50px;
+    }
+
+    .j_Invite {
+        width: 325px;
+    }
+
+    .j_Box_margin {
+        margin-bottom: 15px;
+    }
+
+    .j_join_user {
+        height: 32px;
+        width: 32px;
+        padding: 4px;
+    }
+
+    .j_mobile_containet_emoji {
+        width: 200px;
+        right: -15px;
+    }
+}
+
+@media(max-width:375px) {
+    .d_mainscreen {
+        padding: 15px 15px 0 15px;
+    }
+
+    .d_bottombar {
+        padding: 15px;
+    }
+
+    .single-participant .d_avatar-circle {
+        width: 80px;
+        height: 80px;
+        font-size: 26px;
+    }
+
+    .B_input_search22 input {
+        padding: 8px 0px;
+    }
+
+    .B_input_search11 input {
+        padding: 8px 0px;
+    }
+
+    .B_screen_button {
+        padding: 8px 23px;
+    }
+
+    .B_screen_btn {
+        width: 40%;
+
+    }
+
+    .j_Invite {
+        width: 300px;
+    }
+
+    .j_Box_margin p {
+        font-size: 14px;
+    }
+
+    .j_join_user {
+        height: 25px;
+        width: 25px;
+        padding: 2px;
+        font-size: 14px;
+    }
+
+    .j_deny_button,
+    .j_accept_button {
+        padding: 3px 10px;
+        font-size: 14px;
+    }
+}
+
+@media(max-width:320px) {
+    .d_bottombar .d_box p {
+        font-size: 11px;
+    }
+
+    .d_bottombar .d_box {
+        padding: 6px 9px;
+    }
+
+    .d_avatar-circle {
+        width: 50px;
+        height: 50px;
+        font-size: 20px;
+    }
+
+    .single-participant .d_avatar-circle {
+        width: 70px;
+        height: 70px;
+        font-size: 24px;
+    }
+
+    .B_screen_button {
+        padding: 8px 10px;
+        font-size: 14px;
+    }
+
+    .B_screen_btn {
+        font-size: 13px;
+        width: 44%;
+    }
+
+    .j_Invite {
+        width: 250px;
+    }
+
+    .j_join_user {
+        height: 30px;
+        width: 30px;
+        padding: 5px;
+        font-size: 14px;
+    }
+}
+
+@keyframes d_handWave {
+    0% {
+        transform: translateY(-2px) rotate(0deg);
+    }
+
+    25% {
+        transform: translateY(-2px) rotate(-10deg);
+    }
+
+    75% {
+        transform: translateY(-2px) rotate(10deg);
+    }
+
+    100% {
+        transform: translateY(-2px) rotate(0deg);
+    }
+}
+
+.j_typing_indicator {
+    color: #BFBFBF;
+    animation: j_fadeIn 0.3s ease-in;
+}
+
+@keyframes j_fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.typing-dots {
+    display: inline-flex;
+    align-items: center;
+    height: 20px;
+    width: 20px;
+    background-color: #202F41;
+    border-radius: 50%;
+}
+
+.typing-dots .j_typing_loader {
+    animation: j_typingDot 1.4s infinite;
+    animation-fill-mode: both;
+    margin-left: 3px;
+    height: 3px;
+    width: 3px;
+    background-color: white;
+    border-radius: 50%;
+}
+
+.typing-dots .j_typing_loader:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.typing-dots .j_typing_loader:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes j_typingDot {
+    0% {
+        opacity: 0.2;
+        transform: translateY(0);
+    }
+
+    20% {
+        opacity: 1;
+        transform: translateY(-5px);
+    }
+
+    40%,
+    100% {
+        opacity: 0.2;
+        transform: translateY(0);
+    }
+}
+
+.j_login_center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh
+}
+
+.j_pass_center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh
+}
+
+.j_nav_padding {
+    padding: 10px 48px;
+}
+
+.j_login_img {
+    width: 500px;
+    height: 372px;
+}
+
+.signin-container {
+    color: white;
+    padding: 20px;
+    border-radius: 8px;
+    width: 450px;
+    text-align: center;
+}
+
+.j_label {
+    font-size: 13px;
+    display: block;
+    text-align: start;
+}
+
+.j_input {
+    background-color: #202F41;
+    width: 100%;
+    color: white;
+    padding: 10px;
+    margin-top: 5px;
+    margin-bottom: 10px;
+    border: none;
+    border-radius: 4px;
+}
+
+.j_select {
+    --bs-form-select-bg-img: url(../Image/j_down_home.svg);
+    background-color: #202F41;
+    width: 100%;
+    color: white;
+    padding: 10px;
+    margin-top: 5px;
+    margin-bottom: 10px;
+    border: none;
+    border-radius: 4px;
+}
+
+.j_input:focus {
+    color: #fff;
+    background-color: #202F41;
+    border: none;
+    outline: 0;
+    box-shadow: none;
+}
+
+.j_select:focus {
+    color: #fff;
+    background-color: #202F41;
+    border: none;
+    outline: 0;
+    box-shadow: none;
+}
+
+.j_input::placeholder {
+    color: #BFBFBF;
+    font-size: 14px;
+}
+
+.j_select::placeholder {
+    color: #BFBFBF;
+    font-size: 14px;
+}
+
+.j_forget_pass {
+    text-align: end;
+    font-size: 13px;
+}
+
+.j_forget_pass a {
+    text-decoration: none;
+    color: white;
+}
+
+.j_sidebar_width {
+    width: 6%;
+}
+
+.j_Login_button {
+    margin: 50px 0 5px 0;
+    width: 100%;
+    padding: 10px;
+    border: none;
+    border-radius: 4px;
+    background-color: white;
+    color: black;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.j_Login_button:last-of-type {
+    background-color: white;
+}
+
+.j_border_center_left {
+    flex: 1;
+    height: 1px;
+    margin: 0 10px;
+    background: linear-gradient(to right, #090E16, #BFBFBF);
+}
+
+.j_border_center_right {
+    flex: 1;
+    height: 1px;
+    margin: 0 10px;
+    background: linear-gradient(to right, #BFBFBF, #090E16);
+}
+
+.OR-login {
+    margin: 20px 0;
+    display: flex;
+    align-items: center;
+}
+
+.OR-login span {
+    margin: 0 10px;
+}
+
+.google_login {
+    height: 18px;
+    width: 18px;
+}
+
+.j_Login_social {
+    width: 100%;
+    background-color: transparent;
+    border: 1px solid white;
+    padding: 8px 12px;
+    border-radius: 6px;
+}
+
+.j_login_p {
+    color: #bfbfbf;
+    font-size: 14px;
+    margin-top: 20px;
+}
+
+.j_col_pad {
+    padding-left: 0;
+}
+
+.j_col_pad2 {
+    padding-right: 0;
+}
+
+.j_google_social {
+    margin-left: 8px;
+    font-size: 15px;
+    border: none;
+    background-color: transparent;
+    color: white;
+}
+
+.j_signup_button {
+    margin: 30px 0 5px 0;
+    width: 100%;
+    padding: 10px;
+    border: none;
+    border-radius: 4px;
+    background-color: white;
+    color: black;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.j_Code_button {
+    margin: 20px 0 0;
+    width: 100%;
+    padding: 10px;
+    border: none;
+    border-radius: 4px;
+    background-color: white;
+    color: black;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.j_Code_button:last-of-type {
+    background-color: white;
+}
+
+.otp-input {
+    height: 40px;
+    color: white;
+    border-radius: 4px;
+    width: 40px;
+    border: none;
+    background-color: #202F41CC;
+}
+
+.otp-input:focus {
+    outline: none;
+}
+
+.j_nav_btn {
+    transition: all 0.5s;
+}
+
+.j_Home_sidebar {
+    height: 93.4vh;
+    min-height: 100%;
+    background-color: #121B26;
+    color: white;
+    border-top: 2px solid #595E63;
+}
+
+.j_Home_sidebar ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+.j_input:-webkit-autofill,
+.j_input:-webkit-autofill:hover,
+.j_input:-webkit-autofill:focus,
+.j_input:-webkit-autofill:active {
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: #fff;
+    transition: background-color 5000s ease-in-out 0s;
+    box-shadow: inset 0 0 20px 20px #202F41;
+}
+
+.j_sidebar_a img {
+    margin-bottom: 5px;
+    height: 28px;
+    width: 28px;
+}
+
+.j_Home_sidebar .j_sidebar_a {
+    margin-top: 20px;
+    margin-bottom: 30px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+}
+
+.j_home_connent_h4 {
+    font-size: 28px;
+}
+
+.j_home_cards {
+    border-radius: 4px;
+    width: 230px;
+    cursor: pointer;
+    padding: 25px 50px;
+    height: 100%;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: #121B26;
+    text-align: center;
+}
+
+.j_contant_width {
+    flex-direction: column;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.j_modal_schedule {
+    background-color: #12161C;
+}
+
+.j_Schedule_width {
+    max-width: 1020px;
+    margin: 0 auto;
+}
+
+.j_modal_join {
+    background-color: #12161C;
+    padding: 10px 20px;
+}
+
+.j_modal_header {
+    margin: 0px 16px;
+    border-bottom: 1px solid #525558;
+}
+
+.j_join_text {
+    font-size: 14px;
+}
+
+.j_home_button {
+    padding: 7px 60px;
+}
+
+.j_schedule_btn {
+    background-color: #202F41;
+    border: none;
+    padding: 10px 12px;
+    margin: 10px 10px 0 0;
+    color: white;
+    font-size: 14px;
+    border-radius: 6px;
+}
+
+.j_schedule_btn:hover {
+    background-color: #202F41;
+    color: white;
+    border: none;
+}
+
+.j_join_button {
+    padding: 10px 65px;
+    font-weight: 600;
+}
+
+.j_join_title {
+    font-size: 20px;
+}
+
+.j_schedule_border {
+    border-right: 1px solid #525558;
+}
+
+.j_schedule_selected_btn {
+    border: 2px solid white;
+}
+
+.j_schedule_selected_btn:hover {
+    border: 2px solid white;
+}
+
+.j_notification_bell {
+    height: 63px;
+    width: 85px;
+    margin-bottom: 30px;
+}
+
+.j_notification {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    min-height: 100%;
+}
+
+.j_schedule_DnT {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.j_schedule_footer {
+    justify-content: center;
+}
+
+.j_schedule_Repeat {
+    display: flex;
+}
+
+.j_select_fill {
+    width: 50%;
+}
+
+.j_custom_icons {
+    cursor: pointer;
+    position: absolute;
+    display: flex;
+    right: 15px;
+    top: 9px;
+    flex-direction: column;
+}
+
+.btn-check:checked+.j_schedule_btn,
+.j_schedule_btn.active,
+.j_schedule_btn.show,
+.j_schedule_btn:first-child:active,
+:not(.btn-check)+.j_schedule_btn:active {
+    color: white;
+    background-color: #202F41;
+    border: none;
+}
+
+.j_day_btn {
+    height: 30px;
+    width: 30px;
+    background-color: #202F41;
+    border: none;
+    border-radius: 50%;
+    color: white;
+    padding: 0;
+    font-size: 14px;
+}
+
+.j_day_btn:hover {
+    background-color: #202F41;
+    color: white;
+    border: none;
+}
+
+.btn-check:checked+.j_day_btn,
+.j_day_btn.active,
+.j_day_btn.show,
+.j_day_btn:first-child:active,
+:not(.btn-check)+.j_day_btn:active {
+    color: white;
+    background-color: #202F41;
+    border: none;
+}
+
+.j_day_selected_btn {
+    height: 30px;
+    width: 30px;
+    font-size: 14px;
+    padding: 0;
+    border: 2px solid white;
+    border-radius: 50%;
+    color: white;
+    background-color: #202F41;
+}
+
+.j_day_selected_btn:hover {
+    color: white;
+    background-color: #202F41;
+    border: 2px solid white;
+    border-radius: 50%;
+}
+
+.j_custom_footer {
+    justify-content: center;
+    gap: 30px;
+}
+
+.j_input::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+}
+
+.j_special_m {
+    margin-top: 12px;
+}
+
+.j_custom_button {
+    padding: 5px 60px;
+}
+
+.j_homenav_dropdown {
+    height: 40px;
+    width: 40px;
+    padding: 0;
+    border-radius: 50%;
+    text-transform: uppercase;
+    border: none;
+    background-color: #202F41;
+    color: white;
+}
+
+.j_homenav_dropdown:hover,
+.j_homenav_dropdown.show,
+.j_homenav_dropdown:first-child:active {
+    color: white;
+    background-color: #202F41;
+    border: none;
+}
+
+.j_homenav_dropdown:focus-visible {
+    color: white;
+    background-color: #202F41;
+    border: none;
+    outline: 0;
+    box-shadow: none;
+}
+
+.j_homenav_dropdown.show:focus-visible {
+    box-shadow: none;
+}
+
+.j_drop_menu {
+    transform: translate(28%, 45%) !important;
+    background-color: #121b26;
+}
+
+.j_drop_menu .j_drop_item {
+    color: white;
+    font-size: 15px;
+}
+
+.j_drop_item:active {
+    background-color: #121b26;
+}
+
+.j_drop_menu[data-bs-popper] {
+    left: -75px;
+}
+
+.j_drop_menu.active,
+.j_drop_menu:active {
+    color: var(--bs-dropdown-link-active-color);
+    text-decoration: none;
+    background-color: #121b26;
+}
+
+.j_drop_item:focus,
+.j_drop_item:hover {
+    color: white;
+    background-color: #060A11;
+}
+
+.j_my_profile {
+    display: flex;
+}
+
+.j_my_profile {
+    font-size: 15px;
+}
+
+.j_static_data ul,
+.j_dynamic_data ul {
+    padding: 0;
+}
+
+.j_profile {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.j_profile_icon {
+    display: flex;
+    align-items: center;
+}
+
+.j_profile_short {
+    height: 50px;
+    width: 50px;
+    text-align: center;
+    background-color: #202F41;
+    border-radius: 50%;
+    font-size: 24px;
+    padding: 5px;
+    text-transform: uppercase;
+    color: white;
+    margin: 0;
+}
+
+.j_profile_name {
+    margin-left: 15px;
+    font-size: 16px;
+}
+
+.j_profile_name span {
+    font-size: 14px;
+    color: #BFBFBF;
+}
+
+.j_profile_btn {
+    color: white;
+    border: 1px solid #fff;
+    padding: 5px 25px;
+}
+
+.j_profile_btn:hover {
+    color: white;
+    border: 1px solid #fff;
+    padding: 5px 25px;
+}
+
+.j_profile_btn img {
+    height: 16px;
+    width: 16px;
+}
+
+:not(.btn-check)+.j_profile_btn:active {
+    color: white;
+    background-color: transparent;
+    border: 1px solid #fff;
+}
+
+.j_logout_p {
+    margin-bottom: 0;
+    font-size: 18px;
+}
+
+.j_change_short {
+    text-transform: uppercase;
+    height: 70px;
+    cursor: pointer;
+    margin: 0 auto;
+    width: 70px;
+    background: #202F41;
+    border-radius: 50%;
+    color: white;
+    font-weight: 600;
+    text-align: center;
+    padding: 15px;
+    font-size: 25px;
+}
+
+.j_cameraa {
+    position: absolute;
+    left: 45px;
+    bottom: -5px;
+    height: 30px;
+    width: 30px;
+    border-radius: 50%;
+    background-color: #12161C;
+}
+
+.j_cameraa_img {
+    height: 12px;
+    width: 15px;
+}
+
+.j_Modal_backcolor>div>div {
+    background-color: #12161C;
+}
+
+.j_canvas_backcolor {
+    background-color: #12161C;
+}
+
+.j_modal_header_text {
+    font-size: 18px;
+}
+
+.j_custom_footer {
+    padding-top: 0px !important;
+}
+
+
+.j_remove_icon::after {
+    display: none;
+}
+
+.j_image_Upload {
+    display: flex;
+    justify-content: center;
+}
+
+.j_Upload_Btn {
+    margin: 2px;
+    padding: 5px 20px;
+}
+
+.j_setting {
+    background-color: #0A1119;
+    padding: 30px;
+    width: 600px;
+    /* height: 100%; */
+    height: auto;
+    min-height: 500px;
+}
+
+.j_margin_setting {
+    margin: 15px 0;
+}
+
+.j_general_settings h5 {
+    font-size: 16px;
+}
+
+.j_general_settings p {
+    font-size: 14px;
+    color: #BFBFBF;
+}
+
+.j_setting_check[type="checkbox"] {
+    background-color: transparent;
+    cursor: pointer;
+}
+
+.j_setting_check:checked[type=checkbox] {
+    --bs-form-check-bg-image: url(../Image/j_check.svg);
+}
+
+.j_setting_check[type=checkbox]:checked {
+    background-color: #fff;
+    cursor: pointer;
+    border: none;
+}
+
+.j_setting_check:focus {
+    border: 1px solid #fff;
+    outline: 0;
+    box-shadow: none;
+}
+
+.j_home_nav_logo {
+    height: 30px;
+}
+
+.j_setting_button {
+    min-width: 100px;
+    padding: 8px 48px;
+}
+
+.j_profile_nav_Home {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    padding: 0
+}
+
+.j_day_btn:focus-visible {
+    color: #fff;
+    background-color: #202f41;
+    border: none;
+    outline: 0;
+    box-shadow: none;
+}
+
+.j_day_selected_btn:focus-visible {
+    color: #fff;
+    background-color: #202f41;
+    border: 1px solid #fff;
+    outline: 0;
+    box-shadow: none;
+}
+
+.j_schedule_btn:focus-visible {
+    color: #fff;
+    background-color: #202f41;
+    border: none;
+    outline: 0;
+    box-shadow: none;
+}
+
+.j_schedule_selected_btn:focus-visible {
+    color: #fff;
+    background-color: #202f41;
+    border: none;
+    outline: 1px solid #fff;
+    box-shadow: none;
+}
+
+.j_day_selected_btn:active {
+    color: white !important;
+    background-color: #202F41 !;
+}
+
+.j_margin_end {
+    margin-right: 4px;
+}
+
+.j_margin_start {
+    margin-left: 4px;
+}
+
+
+.active-emojis {
+    position: fixed;
+    bottom: -60px;
+    left: 25%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    z-index: 1000;
+}
+
+.emoji-animation {
+    animation: moveUp 10s forwards;
+    font-size: 30px;
+    display: flex;
+    align-items: center;
+    background-color: rgba(18, 22, 28, 0.8);
+    border-radius: 20px;
+    padding: 10px 15px;
+    margin: 5px 0;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.emoji {
+    font-size: 24px;
+    margin-right: 10px;
+}
+
+.user-name {
+    font-size: 15px;
+    color: #fff;
+    font-weight: bold;
+}
+
+@keyframes moveUp {
+    0% {
+        transform: translateY(0);
+        opacity: 1;
+    }
+
+    100% {
+        transform: translateY(-700px);
+        opacity: 0;
+    }
+}
+
+.j_bottom_left_modal {
+    position: fixed;
+    width: 400px !important;
+    bottom: 80px;
+    left: 20px;
+    background-color: #12161C;
+    color: white;
+    margin: 0;
+    transform: none !important;
+}
+
+.j_bottom_left_modal {
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+}
+
+.j_meeting_title {
+    font-size: 20px;
+}
+
+.B_Link_input:focus-visible,
+.B_password_input:focus-visible {
+    outline: none !important;
+}
+
+.j_no_meeting {
+    color: white;
+    font-weight: 500;
+    font-size: 18px;
+}
+
+.j_no_meeting_icon {
+    height: 100px;
+    width: 140px;
+}
+
+/* ====================================== start calendar ======================================== */
+
+/* =================== month calendar start =================== */
+
+.j_calender {
+    height: 100%;
+    width: 100%;
+    margin-left: 50px;
+}
+
+.rbc-calendar {
+    background-color: #060A11 !important;
+    color: #ffffff !important;
+}
+
+.rbc-selected {
+    background-color: #0056b3 !important;
+}
+
+.rbc-day-slot {
+    background-color: #1a1a1a !important;
+}
+
+.rbc-month-view {
+    border: none !important;
+}
+
+.rbc-header {
+    align-items: center !important;
+    background-color: #141E2A !important;
+    color: #ffffff !important;
+    display: flex !important;
+    justify-content: center !important;
+    padding: 10px !important;
+}
+
+.rbc-row-bg {
+    right: 0px !important;
+}
+
+.rbc-header .rbc-toolbar {
+    flex: 1 !important;
+}
+
+.rbc-event {
+    background-color: #1B2838 !important;
+    color: #ffffff !important;
+    border-radius: 4px !important;
+    padding: 5px !important;
+}
+
+.rbc-event:hover {
+    background-color: #1B2838 !important;
+}
+
+.rbc-day-slot {
+    background-color: #141E2A !important;
+}
+
+.rbc-month-view {
+    border: none !important;
+}
+
+.rbc-day-bg {
+    background-color: #0A1119 !important;
+}
+
+.rbc-today {
+    background-color: #141E2A !important;
+}
+
+.rbc-day-bg+.rbc-day-bg {
+    border: none !important;
+}
+
+.rbc-header {
+    border-bottom: 1px solid #353C45 !important;
+}
+
+.rbc-header+.rbc-header {
+    border-left: 1px solid #353C45 !important;
+}
+
+.rbc-month-row+.rbc-month-row {
+    border-top: 1px solid #353C45 !important;
+}
+
+.rbc-toolbar {
+    margin: 10px 0 !important;
+}
+
+.rbc-toolbar button:focus {
+    background-color: #2C343D !important;
+    color: #fff !important;
+}
+
+.rbc-toolbar .j_LR_rbc_btn {
+    display: flex !important;
+}
+
+.j_rbc_toolbar {
+    justify-content: space-between !important;
+}
+
+.rbc-toolbar .j_LR_rbc_btn button {
+    color: #fff !important;
+    display: inline-block;
+    margin: 0;
+    text-align: center;
+    vertical-align: middle;
+    background: none;
+    background-image: none;
+    border: none !important;
+    padding: 0 !important;
+    border-radius: 4px;
+    line-height: normal;
+    white-space: nowrap;
+}
+
+.rbc-toolbar .j_LR_rbc_btn button:hover {
+    background-color: transparent !important;
+}
+
+.rbc-toolbar .j_LR_rbc_btn button:focus {
+    background-color: transparent !important;
+}
+
+.rbc-toolbar .j_btn_rbc_group {
+    margin-left: 0 !important;
+    background-color: #121B26 !important;
+    padding: 5px !important;
+    border-radius: 4px !important;
+}
+
+.rbc-toolbar .j_btn_rbc_group button:hover {
+    background-color: #2C343D !important;
+}
+
+.j_schedule_buttons button {
+    padding: 8px 15px !important;
+    color: white !important;
+    border-radius: 6px !important;
+    font-weight: 600 !important;
+    margin-left: 10px !important;
+}
+
+.j_schedule_buttons button:hover {
+    color: #000 !important;
+    cursor: pointer;
+    background-color: #fff !important;
+    border-color: #fff !important;
+}
+
+.j_schedule_buttons button:active {
+    color: #000 !important;
+    box-shadow: none !important;
+    cursor: pointer;
+    background-color: #fff !important;
+    border-color: #fff !important;
+}
+
+.j_schedule_buttons button:focus {
+    color: #000 !important;
+    cursor: pointer;
+    background-color: #fff !important;
+    border-color: #fff !important;
+}
+
+.j_btn_rbc_group button {
+    outline: none !important;
+}
+
+
+.rbc-day-slot .rbc-event,
+.rbc-day-slot .rbc-background-event {
+    border: none !important;
+}
+
+.rbc-event:focus,
+.rbc-day-slot .rbc-background-event:focus {
+    outline: none !important;
+}
+
+.rbc-event:focus-visible,
+.rbc-day-slot .rbc-background-event:focus-visible {
+    outline: none !important;
+}
+
+/* =================== month calendar end =================== */
+
+/* =================== Week calendar start =================== */
+
+.rbc-time-view {
+    border-radius: 4px !important;
+    border: 1px solid #121B26 !important;
+}
+
+.rbc-time-content {
+    border-top: 1px solid #2E343A !important;
+}
+
+.rbc-time-content>*+*>* {
+    border-left: 1px solid #2E343A !important;
+}
+
+.rbc-timeslot-group {
+    border-bottom: 1px solid #2E343A !important;
+}
+
+.rbc-time-header-content {
+    border-left: 1px solid #2E343A !important;
+}
+
+.rbc-day-slot .rbc-time-slot {
+    /* border-top: 1px solid #2E343A !important; */
+    border: none !important;
+}
+
+.rbc-current-time-indicator {
+    background-color: white !important;
+    left: 30px !important;
+    right: 30px !important;
+}
+
+.rbc-current-time-indicator::before,
+.rbc-current-time-indicator::after {
+    content: '';
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    background-color: white;
+    border-radius: 50%;
+    top: -3px;
+}
+
+.rbc-current-time-indicator::before {
+    left: -3px;
+}
+
+.rbc-current-time-indicator::after {
+    right: -3px;
+}
+
+.rbc-time-view .rbc-time-gutter {
+    text-align: center !important;
+}
+
+.j_LR_rbc_btn button:focus-visible {
+    outline: none !important;
+}
+
+/* =================== Week calendar end =================== */
+
+
+/* ============================================== end calendar ================================================== */
+
+.j_notification_badge {
+    top: 10px;
+    right: 0;
+    background-color: #f95262;
+    border-radius: 50%;
+    height: 18px;
+    width: 18px;
+    font-size: 11px;
+    color: white;
+    font-weight: 700;
+}
+
+.j_notification_style {
+    background-color: #202F41;
+    border-radius: 8px;
+    padding: 10px;
+    margin-bottom: 10px;
+    font-size: 16px;
+}
+
+.j_null_notification {
+    font-size: 16px;
+}
+
+/* ============================================== Media Quary ================================================== */
+
+@media (min-width: 1921px) {
+    .j_Home_sidebar {
+        height: 96vh;
+        min-height: 100%;
+    }
+}
+
+@media (max-width: 1440px) {
+    .j_sidebar_a img {
+        height: 20px;
+        width: 20px;
+    }
+
+    .j_Schedule_width {
+        margin: 40px auto;
+    }
+
+    .j_sidebar_a {
+        font-size: 15px;
+    }
+
+    .j_Home_sidebar {
+        height: 92.8vh;
+    }
+
+    .j_calender {
+        margin-left: 35px;
+    }
+
+}
+
+@media (max-width: 1024px) {
+    .j_login_img {
+        width: 450px;
+        height: 350px;
+    }
+
+    .signin-container {
+        width: 400px;
+    }
+
+    .j_nav_padding {
+        padding: 10px 40px;
+    }
+
+    .j_home_connent_h4 {
+        font-size: 25px;
+    }
+
+    .j_home_cards {
+        width: 210px;
+    }
+
+    .j_sidebar_width {
+        width: 8%;
+    }
+
+    .j_Schedule_width {
+        max-width: 900px;
+    }
+
+    .j_drop_menu {
+        transform: translate(20%, 45%) !important;
+    }
+
+    .j_calender {
+        margin-left: 0;
+        width: 96%;
+    }
+}
+
+@media (max-width: 768px) {
+    .j_home_nav_logo {
+        height: 25px;
+    }
+
+    .j_login_img {
+        width: 400px;
+        height: 275px;
+    }
+
+    .j_sidebar_width {
+        width: 10%;
+    }
+
+    .j_contant_width {
+        width: 90%;
+    }
+
+    .j_Login_button {
+        margin: 20px 0 5px 0;
+    }
+
+    .otp-input {
+        height: 35px;
+        width: 35px;
+    }
+
+    .j_text_sixze {
+        font-size: 13px;
+    }
+
+    .j_home_cards {
+        width: 180px;
+    }
+
+    .j_sidebar_a {
+        font-size: 14px;
+    }
+
+    .j_home_connent_h4 {
+        font-size: 22px;
+    }
+
+    .j_schedule_DnT {
+        display: block;
+    }
+
+    .j_Schedule_width {
+        max-width: 700px;
+    }
+
+    .j_home_button {
+        padding: 6px 50px;
+    }
+
+    .j_Home_sidebar {
+        height: 100%;
+        min-height: 100vh;
+    }
+
+    .rbc-event .rbc-event-content {
+        font-size: 14px;
+    }
+
+    .j_schedule_buttons button {
+        padding: 8px !important;
+        font-size: 14px !important;
+    }
+}
+
+@media (max-width: 425px) {
+    .j_drop_menu {
+        transform: translate(10%, 45%) !important;
+    }
+
+    .j_col_pad {
+        padding: 0;
+        margin-bottom: 20px;
+    }
+
+    .j_col_pad2 {
+        padding: 0;
+    }
+
+    .j_login_center {
+        height: 100%
+    }
+
+    .j_col_img img {
+        margin: 20px 0;
+        height: 300px;
+    }
+
+    .j_nav_padding {
+        padding: 10px 20px;
+    }
+
+    .j_nav_btn {
+        font-size: 13px;
+    }
+
+    .j_flex_direction {
+        flex-direction: column;
+    }
+
+    .j_home_connent_h4 {
+        font-size: 18px;
+    }
+
+    .j_sidebar_width {
+        width: 18%;
+    }
+
+    .j_contant_width {
+        width: 82%;
+        margin-top: 50px;
+        justify-content: start;
+    }
+
+    .j_sidebar_a img {
+        height: 18px;
+        width: 18px;
+    }
+
+    .j_modal_join {
+        width: 350px !important;
+        margin: 0 auto;
+        padding: 10px;
+    }
+
+    .j_join_button {
+        padding: 8px 45px;
+    }
+
+    .j_join_title {
+        font-size: 16px;
+    }
+
+    .j_sidebar_a {
+        font-size: 12.5px;
+    }
+
+    .j_schedule_btn {
+        margin: 5px 5px 0 0;
+    }
+
+    .j_modal_schedule {
+        width: 400px !important;
+        margin: 0 auto;
+    }
+
+    .j_home_button {
+        padding: 5px 25px;
+        margin: 0;
+    }
+
+    .j_schedule_footer {
+        justify-content: space-between;
+    }
+
+    .j_custom_footer {
+        display: flex;
+        gap: 5px;
+        padding-top: 0px !important;
+    }
+
+    .J_Fill_bottom {
+        margin-bottom: 0px !important;
+    }
+
+    .j_custom_footer {
+        flex-wrap: nowrap;
+    }
+
+    .j_custom_button {
+        padding: 5px 47px;
+    }
+
+    .j_setting {
+        padding: 15px;
+        width: 315px;
+    }
+
+    .j_setting_button {
+        min-width: 75px;
+        padding: 8px 18px;
+        font-size: 14px;
+    }
+
+    .j_general_settings h5 {
+        font-size: 14px;
+    }
+
+    .j_general_settings p {
+        font-size: 13px;
+    }
+
+    .j_homenav_dropdown,
+    .j_profile_nav_Home {
+        height: 35px;
+        width: 35px;
+    }
+
+    .j_input,
+    .j_select {
+        font-size: 12px;
+    }
+
+    .rbc-event .rbc-event-content {
+        font-size: 13px;
+    }
+
+    .j_btn_rbc_group {
+        margin: 10px 0 !important;
+    }
+
+    .rbc-date-cell button {
+        font-size: 13px;
+    }
+
+    .rbc-toolbar .j_btn_rbc_group button {
+        font-size: 13px;
+    }
+
+    .rbc-label {
+        font-size: 12px;
+        padding: 0 3px !important;
+    }
+
+    .rbc-button-link {
+        font-size: 10px;
+    }
+
+    .j_schedule_buttons button {
+        padding: 8px !important;
+        font-size: 13px !important;
+    }
+
+    .j_notification_style,
+    .j_null_notification {
+        font-size: 14px;
+    }
+}
+
+@media (max-width: 375px) {
+    .j_col_img img {
+        height: 265px;
+        width: 340px;
+    }
+
+    .signin-container {
+        width: 350px;
+    }
+
+    .j_sidebar_width {
+        width: 20%;
+    }
+
+    .j_contant_width {
+        width: 80%;
+    }
+
+    .j_home_connent_h4 {
+        font-size: 14px;
+    }
+
+    .j_modal_join {
+        background-color: #12161C;
+        padding: 0px;
+        width: 300px !important;
+        margin: 0 auto;
+    }
+
+    .j_join_button {
+        padding: 8px 45px;
+    }
+
+    .j_modal_schedule {
+        width: 350px !important;
+        margin: 0 auto;
+    }
+
+    .j_home_button {
+        padding: 5px 15px;
+    }
+
+    .j_custom_button {
+        padding: 5px 30px;
+    }
+
+    .j_profile_name {
+        margin-left: 5px;
+    }
+
+    .j_profile_btn {
+        padding: 5px 8px;
+    }
+
+    .j_logout_p {
+        margin-bottom: 0;
+        font-size: 15px;
+    }
+
+    .j_setting {
+        width: 280px;
+    }
+
+    .j_setting_button {
+        min-width: 70px;
+        padding: 8px 15px;
+        font-size: 13px;
+    }
+
+    .j_general_settings h5 {
+        font-size: 13px;
+    }
+
+    .j_general_settings p {
+        font-size: 12px;
+    }
+
+    .j_toolbar_label {
+        font-size: 13px;
+    }
+
+    .rbc-toolbar .j_LR_rbc_btn {
+        align-items: baseline !important;
+    }
+
+    .rbc-header {
+        font-size: 12px !important;
+    }
+}
+
+@media (max-width: 320px) {
+    .signin-container {
+        padding: 10px;
+    }
+
+    .j_login_center {
+        height: 100%;
+    }
+
+    .j_col_img img {
+        margin: 29px 0;
+        height: 225px;
+        width: 300px;
+    }
+
+    .signin-container h1 {
+        font-size: 20px !important;
+    }
+
+    .signin-container {
+        width: 300px;
+    }
+
+    .j_nav_btn {
+        font-size: 13px;
+    }
+
+    .j_home_connent_h4 {
+        font-size: 12.5px;
+    }
+
+    .j_home_button {
+        padding: 5px 10px;
+    }
+
+    .j_custom_button {
+        padding: 5px 20px;
+    }
+
+    .j_profile_name span {
+        font-size: 12px;
+    }
+
+    .j_my_profile {
+        font-size: 12px;
+    }
+
+    .j_profile_name {
+        font-size: 12px;
+    }
+
+    .j_profile_btn {
+        margin-top: 10px;
+        padding: 5px 20px;
+        display: flex;
+        justify-self: end;
+        align-items: center;
+    }
+
+    .j_profile {
+        display: block;
+    }
+
+    .j_setting {
+        padding: 10px;
+        width: 230px;
+    }
+
+    .j_setting_button {
+        min-width: 60px;
+        padding: 8px 10px;
+        font-size: 12px;
+    }
+
+    .j_general_settings h5 {
+        font-size: 12px;
+    }
+
+    .j_general_settings p {
+        font-size: 11px;
+    }
+
+    .j_btn_rbc_group button {
+        padding: 5px 15px !important;
+    }
+}

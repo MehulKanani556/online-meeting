@@ -6,12 +6,17 @@ import HomeNavBar from '../Component/HomeNavBar'
 import SideBar from '../Component/SideBar'
 import { updateUser, getUserById } from '../Redux/Slice/user.slice'
 import { enqueueSnackbar } from 'notistack';
+import { useSocket } from '../Hooks/useSocket'
 
 function Setting() {
     const dispatch = useDispatch()
     const [settingformat, setsettingformat] = useState('general')
     const userId = sessionStorage.getItem("userId")
     const currentUser = useSelector((state) => state.user.currUser);
+
+    const {
+        socket
+    } = useSocket(userId)
 
     useEffect(() => {
         if (userId) {
@@ -54,16 +59,14 @@ function Setting() {
 
     // Handle checkbox changes with automatic save
     const handleSettingChange = (fieldName) => {
-     
-
         if (fieldName === 'GoogleCalendar' && !currentUser?.googleRefreshToken) {
             enqueueSnackbar('Google login is required for this feature.', {
                 variant: 'warning', autoHideDuration: 3000, anchorOrigin: {
-                  vertical: 'top', // Position at the top
-                  horizontal: 'right', // Position on the right
+                    vertical: 'top', // Position at the top
+                    horizontal: 'right', // Position on the right
                 }
-              });
-              return;       
+            });
+            return;
         }
         const newValue = !formik.values[fieldName]
         console.log("newValue", newValue);
@@ -139,23 +142,23 @@ function Setting() {
                                         </label>
                                     </p>
                                     {/* {currentUser?.googleRefreshToken && ( */}
-                                        <>
-                                            <h5 className='text-white j_margin_setting py-2'>Add to Google Calendar</h5>
-                                            <p className='d-flex align-items-center'>
-                                                <input
-                                                    type="checkbox"
-                                                    className='form-check-input j_setting_check'
-                                                    checked={formik.values.GoogleCalendar}
-                                                    onChange={() => handleSettingChange('GoogleCalendar')}
-                                                    // disabled={!currentUser?.googleRefreshToken}
-                                                />
-                                                <label className='ms-2' style={{ opacity: !currentUser?.googleRefreshToken ? '0.5' : '1' }}>
-                                                    This feature helps to join meeting in calendar. If meeting is scheduled then automatically
-                                                    it get added in the calender as a event.It helps to remember date and time of meeting
-                                                    easliy and also provide remainder for meeting.
-                                                </label>
-                                            </p>
-                                        </>
+                                    <>
+                                        <h5 className='text-white j_margin_setting py-2'>Add to Google Calendar</h5>
+                                        <p className='d-flex align-items-center'>
+                                            <input
+                                                type="checkbox"
+                                                className='form-check-input j_setting_check'
+                                                checked={formik.values.GoogleCalendar}
+                                                onChange={() => handleSettingChange('GoogleCalendar')}
+                                            // disabled={!currentUser?.googleRefreshToken}
+                                            />
+                                            <label className='ms-2' style={{ opacity: !currentUser?.googleRefreshToken ? '0.5' : '1' }}>
+                                                This feature helps to join meeting in calendar. If meeting is scheduled then automatically
+                                                it get added in the calender as a event.It helps to remember date and time of meeting
+                                                easliy and also provide remainder for meeting.
+                                            </label>
+                                        </p>
+                                    </>
                                     {/* )} */}
                                     <h5 className='text-white j_margin_setting py-2'>Chat notification</h5>
                                     <p className='d-flex align-items-center'>
@@ -251,7 +254,7 @@ function Setting() {
                                             Enable automatic recording all meetings you created
                                         </label>
                                     </p>
-                                    <h5 className='text-white j_margin_setting pt-3'>Recording layout for meeting</h5>
+                                    {/* <h5 className='text-white j_margin_setting pt-3'>Recording layout for meeting</h5>
                                     <select
                                         className="form-select j_select"
                                         value={formik.values.Recordinglayout}
@@ -260,7 +263,7 @@ function Setting() {
                                         <option value="0">Select</option>
                                         <option value="videowithscharescreen">All video feed with shared screen</option>
                                         <option value="activespeakerscreenshare">Active speaker with shared screen</option>
-                                    </select>
+                                    </select> */}
                                 </div>
                             )}
                         </section>

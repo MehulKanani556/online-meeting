@@ -10,7 +10,7 @@ import podcast from "../Image/d_podcast.svg";
 import hand from "../Image/d_hand.svg";
 import bar from "../Image/d_bar.svg";
 import { useDispatch, useSelector } from "react-redux";
-import { setIsChatOpen, setIsHandRaised, setMainSectionMargin, setShow, setShowEmojis } from "../Redux/Slice/meeting.slice";
+import { setIsChatOpen, setIsHandRaised, setMainSectionMargin, setPipWindow, setShow, setShowEmojis } from "../Redux/Slice/meeting.slice";
 import { enqueueSnackbar } from 'notistack';
 
 const BottomBar = React.memo(
@@ -30,12 +30,13 @@ const BottomBar = React.memo(
     PictureInPicture,
     socket,
     roomId,
-    participants
+    participants,
+    openWindow
+    // pipWindow,
+    // setPipWindow
   }) => {
     const dispatch = useDispatch();
-    const { isHandRaised, show, isChatOpen, showEmojis } = useSelector(
-      (state) => state.meeting
-    );
+    const { isHandRaised, show, isChatOpen, showEmojis, pipWindow } = useSelector((state) => state.meeting);
 
     const userId = sessionStorage.getItem("userId");
 
@@ -49,19 +50,13 @@ const BottomBar = React.memo(
     };
 
     const toggleHandRaise = () => {
-      console.log("toggleHandRaise", socket, roomId);
-
-      dispatch(setIsHandRaised());
-      socket.emit("hand-status-change", {
-        roomId,
-        hasRaisedHand: !isHandRaised,
-      });
+      dispatch(setIsHandRaised({ socket, roomId }));
     };
     return (
-      <div className="d-flex justify-content-sm-between justify-content-center align-items-center">
+      <div className="d-flex justify-content-sm-between justify-content-center align-items-center" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
         {/* 1st div */}
         <div className="d-none d-sm-block">
-          <div className="d-flex align-items-center d_resposive">
+          <div className="d-flex align-items-center d_resposive" style={{ display: "flex", alignItems: "center", }}>
             <div
               className="d_box me-sm-3 mb-2 mb-sm-0"
               style={{ cursor: "pointer" }}
@@ -83,9 +78,9 @@ const BottomBar = React.memo(
         </div>
 
         {/* New Div */}
-        <div className="d-flex align-items-center">
+        <div className="d-flex align-items-center" style={{ display: "flex", alignItems: "center", }}>
           <div className="d-none d-sm-block">
-            <div className="d-flex d_resposive">
+            <div className="d-flex d_resposive" style={{ display: "flex", alignItems: "center", }}>
               <div
                 className="d_box me-sm-3 mb-2 mb-sm-0"
                 style={{ cursor: "pointer", opacity: screenShare ? 1 : userisHost ? 1 : 0.5 }}
@@ -109,30 +104,33 @@ const BottomBar = React.memo(
               >
                 <img src={upload} alt="screen share" />
               </div>
-              <div
-                className="d_box me-sm-3"
-                onClick={toggleRecording}
-                style={{
-                  cursor: "pointer",
-                  backgroundColor: isRecording ? "#E12B2D" : "transparent",
-                  transition: "background-color 0.3s",
-                }}
-              >
-                <img src={recording} alt="recording" />
-                {isRecording && (
-                  <span
-                    className="position-absolute top-0 start-100 translate-middle badge rounded-pill"
-                    style={{
-                      padding: "3px",
-                      width: "12px",
-                      height: "12px",
-                      border: "2px solid #12161C",
-                      background: "#E12B2D",
-                      animation: "pulse 1.5s infinite",
-                    }}
-                  ></span>
-                )}
-              </div>
+
+              {!pipWindow &&
+                <div
+                  className="d_box me-sm-3"
+                  onClick={toggleRecording}
+                  style={{
+                    cursor: "pointer",
+                    backgroundColor: isRecording ? "#E12B2D" : "transparent",
+                    transition: "background-color 0.3s",
+                  }}
+                >
+                  <img src={recording} alt="recording" />
+                  {isRecording && (
+                    <span
+                      className="position-absolute top-0 start-100 translate-middle badge rounded-pill"
+                      style={{
+                        padding: "3px",
+                        width: "12px",
+                        height: "12px",
+                        border: "2px solid #12161C",
+                        background: "#E12B2D",
+                        animation: "pulse 1.5s infinite",
+                      }}
+                    ></span>
+                  )}
+                </div>
+              }
             </div>
           </div>
           <div
@@ -143,13 +141,15 @@ const BottomBar = React.memo(
             <p className="mb-0">End Meeting</p>
           </div>
           <div className="position-relative">
-            <div
-              className="d-block d-sm-none d_box1 me-sm-3 mx-3 mx-sm-0"
-              style={{ cursor: "pointer" }}
-              onClick={toggleViewMoreDropdown}
-            >
-              <p className="mb-0">View More</p>
-            </div>
+            {!pipWindow &&
+              <div
+                className="d-block d-sm-none d_box1 me-sm-3 mx-3 mx-sm-0"
+                style={{ cursor: "pointer" }}
+                onClick={toggleViewMoreDropdown}
+              >
+                <p className="mb-0">View More</p>
+              </div>
+            }
             {showViewMoreDropdown && window.innerWidth <= 425 && (
               <div
                 className="d_dropdown position-absolute bottom-100 start-50 translate-middle-x mb-2 rounded shadow-lg p-2"
@@ -158,6 +158,7 @@ const BottomBar = React.memo(
                 <div
                   className="d-flex align-items-center p-2"
                   onClick={toggleAudio}
+                  style={{ display: "flex", alignItems: "center", }}
                 >
                   <img
                     src={isMuted ? offmicrophone : onmicrophone}
@@ -169,6 +170,7 @@ const BottomBar = React.memo(
                 <div
                   className="d-flex align-items-center p-2"
                   onClick={toggleVideo}
+                  style={{ display: "flex", alignItems: "center", }}
                 >
                   <img
                     src={isVideoOff ? offcamera : oncamera}
@@ -180,6 +182,7 @@ const BottomBar = React.memo(
                 <div
                   className="d-flex align-items-center p-2"
                   onClick={toggleScreenShare}
+                  style={{ display: "flex", alignItems: "center", }}
                 >
                   <img src={upload} alt="Share Screen" className="me-2" />
                   <span>Share Screen</span>
@@ -187,6 +190,7 @@ const BottomBar = React.memo(
                 <div
                   className="d-flex align-items-center p-2"
                   onClick={toggleRecording}
+                  style={{ display: "flex", alignItems: "center", }}
                 >
                   <img src={recording} alt="recording" className="me-2" />
                   <span>Record</span>
@@ -194,26 +198,32 @@ const BottomBar = React.memo(
                 <div
                   className="d-flex align-items-center p-2 position-relative"
                   onClick={() => dispatch(setShowEmojis(!showEmojis))}
+                  style={{ display: "flex", alignItems: "center", }}
                 >
                   <img src={smile} alt="Emoji" className="me-2" />
                   <span>Reactions</span>
                   {showEmojis && (
                     <div className="emoji-container j_mobile_containet_emoji">
                       {[
-                        "❤️",
-                        "😃",
-                        "😮",
-                        "🙌",
-                        "😂",
-                        "🎉",
-                        "👏",
-                        "💥",
-                        "😉",
-                        "🔥",
-                        "👍",
-                        "👎",
-                        "▶️",
-                        "✨",
+                        '👍',
+                        '👎',
+                        '👏',
+                        '🎉',
+                        '❤️',
+                        '😊',
+                        '😂',
+                        '😉',
+                        '😮',
+                        '😢',
+                        '😃',
+                        '🙌',
+                        '✋',
+                        '🔥',
+                        '💥',
+                        '💯',
+                        '⭐',
+                        '✨',
+                        '▶️'
                       ].map((emoji, index) => (
                         <span
                           key={index}
@@ -234,6 +244,7 @@ const BottomBar = React.memo(
                 <div
                   className="d-flex align-items-center p-2"
                   onClick={PictureInPicture}
+                  style={{ display: "flex", alignItems: "center", }}
                 >
                   <img
                     src={podcast}
@@ -248,6 +259,7 @@ const BottomBar = React.memo(
                   style={{
                     backgroundColor: isHandRaised ? "#202F41" : "transparent",
                     transition: "background-color 0.3s",
+                    display: "flex", alignItems: "center",
                   }}
                 >
                   <img src={hand} alt="Raise Hand" className="me-2" />
@@ -256,6 +268,7 @@ const BottomBar = React.memo(
                 <div
                   className="d-flex align-items-center p-2"
                   onClick={(e) => handleShowee(e)}
+                  style={{ display: "flex", alignItems: "center", }}
                 >
                   <img src={bar} alt="Bar" className="me-2" />
                   <span>Chat</span>
@@ -276,9 +289,10 @@ const BottomBar = React.memo(
                 </div>
               </div>
             )}
+
           </div>
           <div className="d-none d-sm-block">
-            <div className="d-flex d_resposive">
+            <div className="d-flex d_resposive" style={{ display: "flex", alignItems: "center", }}>
               <div
                 className="d_box me-sm-3 mb-2 mb-sm-0 position-relative"
                 onClick={() => dispatch(setShowEmojis(!showEmojis))}
@@ -301,23 +315,29 @@ const BottomBar = React.memo(
                       padding: "10px",
                       borderRadius: "5px",
                       zIndex: 1000,
+                      textAlign: 'center'
                     }}
                   >
                     {[
-                      "❤️",
-                      "😃",
-                      "😮",
-                      "🙌",
-                      "😂",
-                      "🎉",
-                      "👏",
-                      "💥",
-                      "😉",
-                      "🔥",
-                      "👍",
-                      "👎",
-                      "▶️",
-                      "✨",
+                      '👍',
+                      '👎',
+                      '👏',
+                      '🎉',
+                      '❤️',
+                      '😊',
+                      '😂',
+                      '😉',
+                      '😮',
+                      '😢',
+                      '😃',
+                      '🙌',
+                      '✋',
+                      '🔥',
+                      '💥',
+                      '💯',
+                      '⭐',
+                      '✨',
+                      '▶️'
                     ].map((emoji, index) => (
                       <span
                         key={index}
@@ -335,19 +355,24 @@ const BottomBar = React.memo(
                   </div>
                 )}
               </div>
-              <div
-                className="d_box me-sm-3"
-                style={{ cursor: "pointer" }}
-                onClick={PictureInPicture}
-              >
-                <img src={podcast} alt="Picture In Picture" />
-              </div>
+              {!pipWindow &&
+                <div
+                  className="d_box me-sm-3"
+                  style={{ cursor: "pointer" }}
+                  onClick={() => {
+                    dispatch(setPipWindow(true));
+                    openWindow();
+                  }}
+                >
+                  <img src={podcast} alt="Picture In Picture" />
+                </div>}
+
             </div>
           </div>
         </div>
         {/* 3rd div */}
         <div className="d-none d-sm-block">
-          <div className="d-flex align-items-center d_resposive">
+          <div className="d-flex align-items-center d_resposive" style={{ display: "flex", alignItems: "center", }}>
             <div
               className="d_box me-sm-3 mb-2 mb-sm-0"
               onClick={toggleHandRaise}
@@ -359,17 +384,18 @@ const BottomBar = React.memo(
             >
               <img src={hand} alt="Raise hand" />
             </div>
-            <div
-              className="d_box position-relative"
-              onClick={(e) => handleShowee(e)}
-              style={{
-                cursor: "pointer",
-                backgroundColor: show ? "#202F41" : "transparent",
-                transition: "background-color 0.3s",
-              }}
-            >
-              <img src={bar} alt="Bar" />
-              {/* {unreadMessages > 0 && (
+            {!pipWindow &&
+              <div
+                className="d_box position-relative"
+                onClick={(e) => handleShowee(e)}
+                style={{
+                  cursor: "pointer",
+                  backgroundColor: show ? "#202F41" : "transparent",
+                  transition: "background-color 0.3s",
+                }}
+              >
+                <img src={bar} alt="Bar" />
+                {/* {unreadMessages > 0 && (
                 <span
                   className="position-absolute top-0 start-100 translate-middle badge rounded-pill"
                   style={{
@@ -383,7 +409,8 @@ const BottomBar = React.memo(
                   {unreadMessages}
                 </span>
               )} */}
-            </div>
+              </div>
+            }
           </div>
         </div>
       </div>

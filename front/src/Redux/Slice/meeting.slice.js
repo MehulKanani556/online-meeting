@@ -29,12 +29,25 @@ const initialState = {
   linkCopied: false,
   selectedUsers: [],
   filteredUsers: [],
+  pipWindow: false,
 };
 
 const meetingSlice = createSlice({
   name: "meeting",
   initialState,
   reducers: {
+    setIsHandRaised: (state, action) => {
+      state.isHandRaised = !state.isHandRaised;
+      const { socket, roomId } = action.payload || {};
+
+      // Emit socket event if socket and roomId are provided
+      if (socket && roomId) {
+        socket.emit("hand-status-change", {
+          roomId,
+          hasRaisedHand: state.isHandRaised,
+        });
+      }
+    },
     setIsScreenSharing: (state, action) => {
       state.isScreenSharing = action.payload;
     },
@@ -50,9 +63,9 @@ const meetingSlice = createSlice({
     setIsChatOpen: (state, action) => {
       state.isChatOpen = !state.isChatOpen;
     },
-    setIsHandRaised: (state, action) => {
-      state.isHandRaised = !state.isHandRaised;
-    },
+    // setIsHandRaised: (state, action) => {
+    //   state.isHandRaised = !state.isHandRaised;
+    // },
     setShowEmojis: (state, action) => {
       state.showEmojis = !state.showEmojis;
     },
@@ -119,6 +132,9 @@ const meetingSlice = createSlice({
     setFilteredUsers: (state, action) => {
       state.filteredUsers = action.payload;
     },
+    setPipWindow: (state, action) => {
+      state.pipWindow = action.payload;
+    },
     // Add a reset action to clear all state
     resetMeetingState: (state) => {
       return initialState;
@@ -155,7 +171,8 @@ export const {
   setSelectedUsers,
   setFilteredUsers,
   resetMeetingState,
-  setIsChatOpen
+  setIsChatOpen,
+  setPipWindow
 } = meetingSlice.actions;
 
 export default meetingSlice.reducer;
