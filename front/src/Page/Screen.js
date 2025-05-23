@@ -24,7 +24,7 @@ import { Modal } from "react-bootstrap";
 import ParticipantVideo from "../Component/ParticipantVideo";
 import BottomBar from "../Component/BottomBar";
 import MeetingSidebar from "../Component/MeetingSidebar";
-import { setIsHandRaised, setMainSectionMargin, setShow } from "../Redux/Slice/meeting.slice";
+import { setIsHandRaised, setMainSectionMargin, setShow, setPipWindow } from "../Redux/Slice/meeting.slice";
 import { getAllschedule } from "../Redux/Slice/schedule.slice";
 import PipWindow from "./PipWindow";
 
@@ -2143,7 +2143,7 @@ function Screen() {
           padding: 0;
           background: #1a1a1a;
           color: white;
-          font-family: Arial, sans-serif;
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
         }
         video {
           width: 100%;
@@ -2166,22 +2166,23 @@ function Screen() {
       const pipRoot = ReactDOM.createRoot(dpip.document.getElementById("pip-root"));
       pipRoot.render(
         <Provider store={store}>
-            <PipWindow
-              roomId={roomId}
-              meetingLink={meetingLink}
-              hostUserId={userId}
-              userId={userId}
-              userName={userName}
-              status={true}
-            />
+          <PipWindow
+            roomId={roomId}
+            meetingLink={meetingLink}
+            hostUserId={userId}
+            userId={userId}
+            userName={userName}
+            status={true}
+          />
         </Provider>
       );
 
       // Handle window close
       dpip.addEventListener('pagehide', () => {
         // setPipWindow(null);
+        pipRoot.unmount();
+        dispatch(setPipWindow(false));
       });
-
     } catch (error) {
       console.error("Failed to open DocumentPiP window:", error);
     }
