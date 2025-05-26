@@ -17,7 +17,7 @@ import { IoClose } from "react-icons/io5";
 import { getAllUsers, getUserById } from "../Redux/Slice/user.slice";
 import { Provider, useDispatch, useSelector } from "react-redux";
 import { configureStore } from "../Redux/Store";
-import { useParams, useNavigate, useLocation, Router } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useSocket } from "../Hooks/useSocket";
 import { IMAGE_URL } from "../Utils/baseUrl";
 import { Modal } from "react-bootstrap";
@@ -26,7 +26,6 @@ import BottomBar from "../Component/BottomBar";
 import MeetingSidebar from "../Component/MeetingSidebar";
 import { setIsHandRaised, setMainSectionMargin, setShow } from "../Redux/Slice/meeting.slice";
 import { getAllschedule } from "../Redux/Slice/schedule.slice";
-import PipWindow from "./PipWindow";
 
 function Screen() {
   const { id: roomId } = useParams();
@@ -2024,10 +2023,6 @@ function Screen() {
     sessionStorage.setItem("MeetingLinkModal", false);
   };
 
-
-  // =======================================================================
-
-
   const WindowContents = ({ isPiP = false }) => {
     // Create new refs for PiP window
     const pipLocalVideoRef = useRef(null);
@@ -2166,14 +2161,7 @@ function Screen() {
       const pipRoot = ReactDOM.createRoot(dpip.document.getElementById("pip-root"));
       pipRoot.render(
         <Provider store={store}>
-            <PipWindow
-              roomId={roomId}
-              meetingLink={meetingLink}
-              hostUserId={userId}
-              userId={userId}
-              userName={userName}
-              status={true}
-            />
+          <WindowContents isPiP={true} />
         </Provider>
       );
 
