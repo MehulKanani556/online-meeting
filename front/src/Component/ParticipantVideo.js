@@ -15,6 +15,8 @@ const ParticipantVideo = React.memo(
     onmicrophone,
     offmicrophone,
     imgpath,
+    currentUser,
+    isPiP
   }) => {
     const allUser = useSelector((state) => state.user.allusers);
     const currUser = useSelector((state) => state.user.currUser);
@@ -32,16 +34,15 @@ const ParticipantVideo = React.memo(
               autoPlay
               muted
               playsInline
-              style={{ display: isVideoOff  ? "none" : "block" }}
+              style={{ display: isVideoOff ? "none" : "block" }}
             />
             <div
               className="d_avatar-circle"
               style={{
                 display: isVideoOff ? "flex" : "none",
                 textTransform: "uppercase",
-                backgroundColor: `hsl(${
-                  participant.id.charCodeAt(0) * 60
-                }, 70%, 45%)`,
+                backgroundColor: `hsl(${participant.id.charCodeAt(0) * 60
+                  }, 70%, 45%)`,
               }}
             >
               {singleuser?.photo && currUser?.videomuted ? (
@@ -67,7 +68,7 @@ const ParticipantVideo = React.memo(
               style={{
                 display:
                   remoteStreams[participant.id] &&
-                  participant.hasVideo !== false
+                    participant.hasVideo !== false
                     ? "block"
                     : "none",
               }}
@@ -77,13 +78,12 @@ const ParticipantVideo = React.memo(
               style={{
                 display:
                   !remoteStreams[participant.id] ||
-                  participant.hasVideo === false
+                    participant.hasVideo === false
                     ? "flex"
                     : "none",
                 textTransform: "uppercase",
-                backgroundColor: `hsl(${
-                  participant.id.charCodeAt(0) * 60
-                }, 70%, 45%)`,
+                backgroundColor: `hsl(${participant.id.charCodeAt(0) * 60
+                  }, 70%, 45%)`,
               }}
             >
               {singleuser?.photo ? (
@@ -122,7 +122,7 @@ const ParticipantVideo = React.memo(
 
         <div className="d_controls-bottom">
           <span className="d_participant-name">
-          {currUser?.participantsNameandVideo ? participant?.name : ""}
+            {currUser?.participantsNameandVideo ? participant?.name : currentUser?.participantsNameandVideo ? participant?.name : ""}
             {participant.isHost ? " (Host)" : ""}
           </span>
           <div className="d_mic-status">

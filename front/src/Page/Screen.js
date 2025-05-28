@@ -24,7 +24,7 @@ import { Modal } from "react-bootstrap";
 import ParticipantVideo from "../Component/ParticipantVideo";
 import BottomBar from "../Component/BottomBar";
 import MeetingSidebar from "../Component/MeetingSidebar";
-import { setIsHandRaised, setMainSectionMargin, setShow } from "../Redux/Slice/meeting.slice";
+import { setIsHandRaised, setMainSectionMargin, setPipWindow, setShow } from "../Redux/Slice/meeting.slice";
 import { getAllschedule } from "../Redux/Slice/schedule.slice";
 
 function Screen() {
@@ -68,6 +68,7 @@ function Screen() {
   const allschedule = useSelector((state) => state.schedule.allschedule);
   const singleSchedule = allschedule.find(schedule => schedule.meetingLink === location.pathname);
   const { isHandRaised, show, mainSectionMargin, showEmojis, pipWindow } = useSelector((state) => state.meeting);
+  const [pipWindowRef, setPipWindowRef] = useState(null);
 
   let controlPanel = null;
 
@@ -410,7 +411,6 @@ function Screen() {
   // Set up WebRTC peer connections when participants change
   useEffect(() => {
     if (!socket || !localStream || !isConnected) return;
-
     // Set up WebRTC handlers for signaling
     setupWebRTCHandlers({
       handleOffer: async (from, offer) => {
@@ -889,6 +889,18 @@ function Screen() {
       controlPanel = null; // Clear the reference
     }
 
+    // Close the PiP window if it exists
+    if (pipWindow) {
+      pipWindow.close(); // Close the PiP window
+      dispatch(setPipWindow(null)); // Reset the pipWindow state
+    }
+
+    // Also close pipWindowRef if it exists (fallback)
+    if (pipWindowRef && !pipWindowRef.closed) {
+      pipWindowRef.close();
+      setPipWindowRef(null);
+    }
+
     // Disable Picture-in-Picture
     if (document.pictureInPictureElement) {
       document.exitPictureInPicture().catch(err => {
@@ -909,7 +921,6 @@ function Screen() {
 
     // Ensure originalEndMeeting does not call endMeeting again
     if (typeof originalEndMeeting === "function") {
-      // console.log("Calling originalEndMeeting");
       originalEndMeeting(); // Call the original function safely
     }
 
@@ -1574,427 +1585,426 @@ function Screen() {
   }
 
   // picture in picture
+  //   const togglePictureInPicture = async () => {
+  //     try {
+  //       // First check if PiP is supported
+  //       if (!document.pictureInPictureEnabled) {
+  //         console.warn('Picture-in-Picture not supported by this browser');
+  //         return;
+  //       }
 
-  const togglePictureInPicture = async () => {
-    try {
-      // First check if PiP is supported
-      if (!document.pictureInPictureEnabled) {
-        console.warn('Picture-in-Picture not supported by this browser');
-        return;
-      }
+  //       // If already in PiP mode, exit it
+  //       if (document.pictureInPictureElement) {
+  //         await document.exitPictureInPicture();
+  //         return;
+  //       }
 
-      // If already in PiP mode, exit it
-      if (document.pictureInPictureElement) {
-        await document.exitPictureInPicture();
-        return;
-      }
+  //       // Create a container for all videos
+  //       const pipContainer = document.createElement('div');
+  //       pipContainer.style.width = '640px';
+  //       pipContainer.style.height = '360px';
+  //       pipContainer.style.backgroundColor = '#1a1a1a';
+  //       pipContainer.style.position = 'relative';
+  //       pipContainer.style.display = 'grid';
+  //       pipContainer.style.gap = '8px'; // Increased gap between grid items
+  //       pipContainer.style.padding = '8px'; // Increased padding around the grid
 
-      // Create a container for all videos
-      const pipContainer = document.createElement('div');
-      pipContainer.style.width = '640px';
-      pipContainer.style.height = '360px';
-      pipContainer.style.backgroundColor = '#1a1a1a';
-      pipContainer.style.position = 'relative';
-      pipContainer.style.display = 'grid';
-      pipContainer.style.gap = '8px'; // Increased gap between grid items
-      pipContainer.style.padding = '8px'; // Increased padding around the grid
+  //       // Function to update grid layout based on number of participants
+  //       function updateGridLayout(count) {
+  //         if (count === 1) {
+  //           pipContainer.style.gridTemplateColumns = '1fr';
+  //           pipContainer.style.gridTemplateRows = '1fr';
+  //         } else if (count === 2) {
+  //           pipContainer.style.gridTemplateColumns = 'repeat(2, 1fr)';
+  //           pipContainer.style.gridTemplateRows = '1fr';
+  //         } else if (count === 3) {
+  //           pipContainer.style.gridTemplateColumns = 'repeat(2, 1fr)';
+  //           pipContainer.style.gridTemplateRows = 'repeat(2, 1fr)';
+  //         } else {
+  //           pipContainer.style.gridTemplateColumns = 'repeat(2, 1fr)';
+  //           pipContainer.style.gridTemplateRows = 'repeat(2, 1fr)';
+  //         }
+  //       }
 
-      // Function to update grid layout based on number of participants
-      function updateGridLayout(count) {
-        if (count === 1) {
-          pipContainer.style.gridTemplateColumns = '1fr';
-          pipContainer.style.gridTemplateRows = '1fr';
-        } else if (count === 2) {
-          pipContainer.style.gridTemplateColumns = 'repeat(2, 1fr)';
-          pipContainer.style.gridTemplateRows = '1fr';
-        } else if (count === 3) {
-          pipContainer.style.gridTemplateColumns = 'repeat(2, 1fr)';
-          pipContainer.style.gridTemplateRows = 'repeat(2, 1fr)';
-        } else {
-          pipContainer.style.gridTemplateColumns = 'repeat(2, 1fr)';
-          pipContainer.style.gridTemplateRows = 'repeat(2, 1fr)';
-        }
-      }
+  //       // Create video elements for each participant
+  //       const videoElements = [];
 
-      // Create video elements for each participant
-      const videoElements = [];
+  //       // Function to create a video container with name
+  //       function createVideoContainer(id, name, stream) {
+  //         const container = document.createElement('div');
+  //         container.style.position = 'relative';
+  //         container.style.width = '100%';
+  //         container.style.height = '100%';
+  //         container.style.backgroundColor = '#2a2a2a';
+  //         container.style.borderRadius = '8px'; // Increased border radius
+  //         container.style.overflow = 'hidden';
+  //         container.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.2)'; // Added subtle shadow
 
-      // Function to create a video container with name
-      function createVideoContainer(id, name, stream) {
-        const container = document.createElement('div');
-        container.style.position = 'relative';
-        container.style.width = '100%';
-        container.style.height = '100%';
-        container.style.backgroundColor = '#2a2a2a';
-        container.style.borderRadius = '8px'; // Increased border radius
-        container.style.overflow = 'hidden';
-        container.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.2)'; // Added subtle shadow
+  //         const video = document.createElement('video');
+  //         video.style.width = '100%';
+  //         video.style.height = '100%';
+  //         video.style.objectFit = 'cover';
+  //         video.autoplay = true;
+  //         video.playsInline = true;
+  //         video.srcObject = stream;
 
-        const video = document.createElement('video');
-        video.style.width = '100%';
-        video.style.height = '100%';
-        video.style.objectFit = 'cover';
-        video.autoplay = true;
-        video.playsInline = true;
-        video.srcObject = stream;
+  //         const nameLabel = document.createElement('div');
+  //         nameLabel.style.position = 'absolute';
+  //         nameLabel.style.bottom = '12px'; // Increased bottom spacing
+  //         nameLabel.style.left = '12px'; // Increased left spacing
+  //         nameLabel.style.backgroundColor = 'rgba(0, 0, 0, 0.6)';
+  //         nameLabel.style.color = 'white';
+  //         nameLabel.style.padding = '6px 12px'; // Increased padding
+  //         nameLabel.style.borderRadius = '6px'; // Increased border radius
+  //         nameLabel.style.fontSize = '12px';
+  //         nameLabel.style.fontFamily = 'Arial, sans-serif';
+  //         nameLabel.textContent = name;
 
-        const nameLabel = document.createElement('div');
-        nameLabel.style.position = 'absolute';
-        nameLabel.style.bottom = '12px'; // Increased bottom spacing
-        nameLabel.style.left = '12px'; // Increased left spacing
-        nameLabel.style.backgroundColor = 'rgba(0, 0, 0, 0.6)';
-        nameLabel.style.color = 'white';
-        nameLabel.style.padding = '6px 12px'; // Increased padding
-        nameLabel.style.borderRadius = '6px'; // Increased border radius
-        nameLabel.style.fontSize = '12px';
-        nameLabel.style.fontFamily = 'Arial, sans-serif';
-        nameLabel.textContent = name;
+  //         container.appendChild(video);
+  //         container.appendChild(nameLabel);
+  //         return container;
+  //       }
 
-        container.appendChild(video);
-        container.appendChild(nameLabel);
-        return container;
-      }
+  //       // Add local video if enabled
+  //       if (localStream && !isVideoOff) {
+  //         const localVideoContainer = createVideoContainer(socket?.id, userName, localStream);
+  //         pipContainer.appendChild(localVideoContainer);
+  //         videoElements.push(localVideoContainer);
+  //       }
 
-      // Add local video if enabled
-      if (localStream && !isVideoOff) {
-        const localVideoContainer = createVideoContainer(socket?.id, userName, localStream);
-        pipContainer.appendChild(localVideoContainer);
-        videoElements.push(localVideoContainer);
-      }
+  //       // Add remote videos
+  //       participants.forEach(participant => {
+  //         if (participant.id !== socket?.id && participant.hasVideo !== false) {
+  //           const stream = remoteStreams[participant.id];
+  //           if (stream) {
+  //             const videoContainer = createVideoContainer(participant.id, participant.name, stream);
+  //             pipContainer.appendChild(videoContainer);
+  //             videoElements.push(videoContainer);
+  //           }
+  //         }
+  //       });
 
-      // Add remote videos
-      participants.forEach(participant => {
-        if (participant.id !== socket?.id && participant.hasVideo !== false) {
-          const stream = remoteStreams[participant.id];
-          if (stream) {
-            const videoContainer = createVideoContainer(participant.id, participant.name, stream);
-            pipContainer.appendChild(videoContainer);
-            videoElements.push(videoContainer);
-          }
-        }
-      });
+  //       // Update grid layout based on number of videos
+  //       updateGridLayout(videoElements.length);
 
-      // Update grid layout based on number of videos
-      updateGridLayout(videoElements.length);
+  //       // Create a canvas to capture the container
+  //       const canvas = document.createElement('canvas');
+  //       canvas.width = 640;
+  //       canvas.height = 360;
+  //       const ctx = canvas.getContext('2d');
 
-      // Create a canvas to capture the container
-      const canvas = document.createElement('canvas');
-      canvas.width = 640;
-      canvas.height = 360;
-      const ctx = canvas.getContext('2d');
+  //       // Function to draw the container to canvas
+  //       function drawToCanvas() {
+  //         ctx.fillStyle = '#1a1a1a';
+  //         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // Function to draw the container to canvas
-      function drawToCanvas() {
-        ctx.fillStyle = '#1a1a1a';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+  //         const totalVideos = videoElements.length;
+  //         const cols = totalVideos <= 2 ? totalVideos : 2;
+  //         const rows = totalVideos <= 2 ? 1 : Math.ceil(totalVideos / 2);
 
-        const totalVideos = videoElements.length;
-        const cols = totalVideos <= 2 ? totalVideos : 2;
-        const rows = totalVideos <= 2 ? 1 : Math.ceil(totalVideos / 2);
+  //         // Calculate cell dimensions with spacing
+  //         const gap = 8; // Gap between cells
+  //         const padding = 8; // Padding around the grid
+  //         const availableWidth = canvas.width - (padding * 2) - (gap * (cols - 1));
+  //         const availableHeight = canvas.height - (padding * 2) - (gap * (rows - 1));
+  //         const cellWidth = availableWidth / cols;
+  //         const cellHeight = availableHeight / rows;
 
-        // Calculate cell dimensions with spacing
-        const gap = 8; // Gap between cells
-        const padding = 8; // Padding around the grid
-        const availableWidth = canvas.width - (padding * 2) - (gap * (cols - 1));
-        const availableHeight = canvas.height - (padding * 2) - (gap * (rows - 1));
-        const cellWidth = availableWidth / cols;
-        const cellHeight = availableHeight / rows;
+  //         videoElements.forEach((container, index) => {
+  //           const video = container.querySelector('video');
+  //           const nameLabel = container.querySelector('div');
 
-        videoElements.forEach((container, index) => {
-          const video = container.querySelector('video');
-          const nameLabel = container.querySelector('div');
+  //           if (video) {
+  //             const col = index % cols;
+  //             const row = Math.floor(index / cols);
+  //             const x = padding + (col * (cellWidth + gap));
+  //             const y = padding + (row * (cellHeight + gap));
 
-          if (video) {
-            const col = index % cols;
-            const row = Math.floor(index / cols);
-            const x = padding + (col * (cellWidth + gap));
-            const y = padding + (row * (cellHeight + gap));
+  //             // Draw rounded rectangle background
+  //             ctx.fillStyle = '#2a2a2a';
+  //             roundRect(ctx, x, y, cellWidth, cellHeight, 8);
 
-            // Draw rounded rectangle background
-            ctx.fillStyle = '#2a2a2a';
-            roundRect(ctx, x, y, cellWidth, cellHeight, 8);
+  //             // Draw video
+  //             ctx.drawImage(video, x, y, cellWidth, cellHeight);
 
-            // Draw video
-            ctx.drawImage(video, x, y, cellWidth, cellHeight);
+  //             // Draw name label
+  //             if (nameLabel) {
+  //               const labelWidth = 100;
+  //               const labelHeight = 24;
+  //               const labelX = x + 12;
+  //               const labelY = y + cellHeight - labelHeight - 12;
 
-            // Draw name label
-            if (nameLabel) {
-              const labelWidth = 100;
-              const labelHeight = 24;
-              const labelX = x + 12;
-              const labelY = y + cellHeight - labelHeight - 12;
+  //               // Draw label background
+  //               ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+  //               roundRect(ctx, labelX, labelY, labelWidth, labelHeight, 6);
 
-              // Draw label background
-              ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
-              roundRect(ctx, labelX, labelY, labelWidth, labelHeight, 6);
+  //               // Draw label text
+  //               ctx.fillStyle = 'white';
+  //               ctx.font = '12px Arial';
+  //               ctx.fillText(nameLabel.textContent, labelX + 6, labelY + 16);
+  //             }
+  //           }
+  //         });
 
-              // Draw label text
-              ctx.fillStyle = 'white';
-              ctx.font = '12px Arial';
-              ctx.fillText(nameLabel.textContent, labelX + 6, labelY + 16);
-            }
-          }
-        });
+  //         requestAnimationFrame(drawToCanvas);
+  //       }
 
-        requestAnimationFrame(drawToCanvas);
-      }
+  //       // Helper function to draw rounded rectangles
+  //       function roundRect(ctx, x, y, width, height, radius) {
+  //         ctx.beginPath();
+  //         ctx.moveTo(x + radius, y);
+  //         ctx.lineTo(x + width - radius, y);
+  //         ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+  //         ctx.lineTo(x + width, y + height - radius);
+  //         ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+  //         ctx.lineTo(x + radius, y + height);
+  //         ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+  //         ctx.lineTo(x, y + radius);
+  //         ctx.quadraticCurveTo(x, y, x + radius, y);
+  //         ctx.closePath();
+  //         ctx.fill();
+  //       }
 
-      // Helper function to draw rounded rectangles
-      function roundRect(ctx, x, y, width, height, radius) {
-        ctx.beginPath();
-        ctx.moveTo(x + radius, y);
-        ctx.lineTo(x + width - radius, y);
-        ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
-        ctx.lineTo(x + width, y + height - radius);
-        ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
-        ctx.lineTo(x + radius, y + height);
-        ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
-        ctx.lineTo(x, y + radius);
-        ctx.quadraticCurveTo(x, y, x + radius, y);
-        ctx.closePath();
-        ctx.fill();
-      }
+  //       // Start drawing
+  //       drawToCanvas();
 
-      // Start drawing
-      drawToCanvas();
+  //       // Create a stream from the canvas
+  //       const canvasStream = canvas.captureStream(30);
 
-      // Create a stream from the canvas
-      const canvasStream = canvas.captureStream(30);
+  //       // Create a video element for PiP
+  //       const pipVideo = document.createElement('video');
+  //       pipVideo.muted = true;
+  //       pipVideo.autoplay = true;
+  //       pipVideo.srcObject = canvasStream;
 
-      // Create a video element for PiP
-      const pipVideo = document.createElement('video');
-      pipVideo.muted = true;
-      pipVideo.autoplay = true;
-      pipVideo.srcObject = canvasStream;
+  //       // Play the video and enter PiP mode
+  //       await pipVideo.play();
+  //       await pipVideo.requestPictureInPicture();
 
-      // Play the video and enter PiP mode
-      await pipVideo.play();
-      await pipVideo.requestPictureInPicture();
+  //       // Create a floating control panel in the main window
+  //       controlPanel = document.createElement('div');
+  //       controlPanel.style.position = 'fixed';
+  //       controlPanel.style.bottom = '20px';
+  //       controlPanel.style.right = '0%';
+  //       controlPanel.style.transform = 'translateX(-50%)';
+  //       controlPanel.style.backgroundColor = 'rgba(32, 33, 36, 0.9)';
+  //       controlPanel.style.padding = '8px 16px';
+  //       controlPanel.style.borderRadius = '24px';
+  //       controlPanel.style.zIndex = '9999';
+  //       controlPanel.style.display = 'flex';
+  //       controlPanel.style.alignItems = 'center';
+  //       controlPanel.style.justifyContent = 'center';
+  //       controlPanel.style.gap = '16px';
+  //       controlPanel.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.25)';
 
-      // Create a floating control panel in the main window
-      controlPanel = document.createElement('div');
-      controlPanel.style.position = 'fixed';
-      controlPanel.style.bottom = '20px';
-      controlPanel.style.right = '0%';
-      controlPanel.style.transform = 'translateX(-50%)';
-      controlPanel.style.backgroundColor = 'rgba(32, 33, 36, 0.9)';
-      controlPanel.style.padding = '8px 16px';
-      controlPanel.style.borderRadius = '24px';
-      controlPanel.style.zIndex = '9999';
-      controlPanel.style.display = 'flex';
-      controlPanel.style.alignItems = 'center';
-      controlPanel.style.justifyContent = 'center';
-      controlPanel.style.gap = '16px';
-      controlPanel.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.25)';
+  //       // Add control buttons
+  //       const createButton = (icon, label, action, color = "#5f6368") => {
+  //         const button = document.createElement('button');
+  //         button.innerHTML = icon;
+  //         button.title = label;
+  //         button.style.width = '44px';
+  //         button.style.height = '44px';
+  //         button.style.borderRadius = '50%';
+  //         button.style.border = 'none';
+  //         button.style.backgroundColor = 'transparent';
+  //         button.style.color = color;
+  //         button.style.cursor = 'pointer';
+  //         button.style.display = 'flex';
+  //         button.style.alignItems = 'center';
+  //         button.style.justifyContent = 'center';
+  //         button.style.transition = 'background-color 0.2s';
 
-      // Add control buttons
-      const createButton = (icon, label, action, color = "#5f6368") => {
-        const button = document.createElement('button');
-        button.innerHTML = icon;
-        button.title = label;
-        button.style.width = '44px';
-        button.style.height = '44px';
-        button.style.borderRadius = '50%';
-        button.style.border = 'none';
-        button.style.backgroundColor = 'transparent';
-        button.style.color = color;
-        button.style.cursor = 'pointer';
-        button.style.display = 'flex';
-        button.style.alignItems = 'center';
-        button.style.justifyContent = 'center';
-        button.style.transition = 'background-color 0.2s';
+  //         // Add hover effect
+  //         button.onmouseover = () => {
+  //           button.style.backgroundColor = 'rgba(232, 234, 237, 0.08)';
+  //         };
 
-        // Add hover effect
-        button.onmouseover = () => {
-          button.style.backgroundColor = 'rgba(232, 234, 237, 0.08)';
-        };
+  //         button.onmouseout = () => {
+  //           button.style.backgroundColor = 'transparent';
+  //         };
 
-        button.onmouseout = () => {
-          button.style.backgroundColor = 'transparent';
-        };
+  //         button.onclick = action;
+  //         return button;
+  //       };
 
-        button.onclick = action;
-        return button;
-      };
+  //       // Mic toggle button
+  //       const micButton = createButton(`
+  //    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+  //      <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z" fill="currentColor"/>
+  //      <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z" fill="currentColor"/>
+  //    </svg>
+  //  `, 'Toggle Audio', () => {
+  //         toggleAudio();
+  //         micButton.style.backgroundColor = isMuted ? '#ea4335' : 'transparent';
+  //         micButton.style.color = isMuted ? '#ffffff' : '#5f6368';
+  //       });
 
-      // Mic toggle button
-      const micButton = createButton(`
-   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-     <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z" fill="currentColor"/>
-     <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z" fill="currentColor"/>
-   </svg>
- `, 'Toggle Audio', () => {
-        toggleAudio();
-        micButton.style.backgroundColor = isMuted ? '#ea4335' : 'transparent';
-        micButton.style.color = isMuted ? '#ffffff' : '#5f6368';
-      });
+  //       // If audio is already muted, show muted state
+  //       if (isMuted) {
+  //         micButton.style.backgroundColor = '#ea4335';
+  //         micButton.style.color = '#ffffff';
+  //       }
 
-      // If audio is already muted, show muted state
-      if (isMuted) {
-        micButton.style.backgroundColor = '#ea4335';
-        micButton.style.color = '#ffffff';
-      }
+  //       // Video toggle button
+  //       const videoButton = createButton(`
+  //    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+  //      <path d="M15 8v8H5V8h10m1-2H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4V7c0-.55-.45-1-1-1z" fill="currentColor"/>
+  //    </svg>
+  //  `, 'Toggle Video', () => {
+  //         toggleVideo();
+  //         videoButton.style.backgroundColor = isVideoOff ? '#ea4335' : 'transparent';
+  //         videoButton.style.color = isVideoOff ? '#ffffff' : '#5f6368';
+  //       });
 
-      // Video toggle button
-      const videoButton = createButton(`
-   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-     <path d="M15 8v8H5V8h10m1-2H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4V7c0-.55-.45-1-1-1z" fill="currentColor"/>
-   </svg>
- `, 'Toggle Video', () => {
-        toggleVideo();
-        videoButton.style.backgroundColor = isVideoOff ? '#ea4335' : 'transparent';
-        videoButton.style.color = isVideoOff ? '#ffffff' : '#5f6368';
-      });
+  //       // If video is already off, show disabled state
+  //       if (isVideoOff) {
+  //         videoButton.style.backgroundColor = '#ea4335';
+  //         videoButton.style.color = '#ffffff';
+  //       }
 
-      // If video is already off, show disabled state
-      if (isVideoOff) {
-        videoButton.style.backgroundColor = '#ea4335';
-        videoButton.style.color = '#ffffff';
-      }
+  //       // Hand raise button
+  //       const handButton = createButton(`
+  //    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M16.438 14.25V4.84375C16.438 3.96875 15.6568 3.21875 14.6567 3.21875C14.4067 3.21875 14.188 3.25 14.0005 3.34375V2.75C14.0005 1.875 13.2192 1.125 12.2192 1.125C11.813 1.125 11.4692 1.25 11.188 1.4375C10.8755 1.0625 10.3442 0.8125 9.78175 0.8125C8.96925 0.8125 8.313 1.3125 8.09425 1.96875C7.8755 1.875 7.6255 1.8125 7.34425 1.8125C6.3755 1.8125 5.563 2.53125 5.563 3.4375V10.5L4.90675 9.6875C4.2505 8.8125 3.0005 8.53125 2.063 9.03125C1.59425 9.28125 1.28175 9.71875 1.15675 10.2188C1.03175 10.75 1.15675 11.2813 1.5005 11.7188C2.063 12.4688 2.65675 13.25 3.21925 14L4.2505 15.375C4.40675 15.5625 4.53175 15.7812 4.688 15.9688C5.1255 16.5938 5.59425 17.2188 6.21925 17.75C7.40675 18.75 9.03175 19.125 10.563 19.125C11.313 19.125 12.0317 19.0312 12.688 18.9062C16.438 18.125 16.438 15.3125 16.438 14.25ZM12.4692 17.875C10.8443 18.2188 8.40675 18.1875 6.938 16.9688C6.438 16.5312 6.03175 15.9688 5.59425 15.375C5.438 15.1563 5.28175 14.9375 5.1255 14.75L4.09425 13.375C3.53175 12.625 2.938 11.8438 2.3755 11.0938C2.21925 10.9062 2.188 10.6875 2.21925 10.4688C2.2505 10.2812 2.3755 10.125 2.563 10C3.03175 9.75 3.688 9.90625 4.0005 10.3437C4.0005 10.3437 4.0005 10.375 4.03175 10.375L5.688 12.3438C5.84425 12.5313 6.063 12.5938 6.28175 12.5C6.5005 12.4062 6.65675 12.2188 6.65675 12V3.46875C6.65675 3.1875 6.96925 2.9375 7.34425 2.9375C7.688 2.9375 8.0005 3.15625 8.0005 3.4375V8.875C8.0005 9.1875 8.2505 9.4375 8.563 9.4375C8.8755 9.4375 9.1255 9.1875 9.1255 8.875V2.46875C9.1255 2.1875 9.438 1.9375 9.813 1.9375C10.188 1.9375 10.5005 2.1875 10.5005 2.46875V9.125C10.5005 9.4375 10.7505 9.6875 11.063 9.6875C11.3755 9.6875 11.6255 9.4375 11.6255 9.125V2.75C11.6255 2.46875 11.938 2.21875 12.313 2.21875C12.688 2.21875 13.0005 2.46875 13.0005 2.75V9.6875C13.0005 10 13.2505 10.25 13.563 10.25C13.8755 10.25 14.1255 10 14.1255 9.6875V4.8125C14.1567 4.53125 14.438 4.3125 14.7817 4.3125C15.1567 4.3125 15.4692 4.5625 15.4692 4.84375V14.2813C15.3442 15.3125 15.3442 17.25 12.4692 17.875Z" fill="currentColor"/></svg>
+  //  `, 'Raise Hand', () => {
+  //         toggleHandRaised();
+  //         handButton.style.backgroundColor = isHandRaised ? '#fbbc04' : 'transparent';
+  //         handButton.style.color = isHandRaised ? '#ffffff' : '#5f6368';
+  //       });
 
-      // Hand raise button
-      const handButton = createButton(`
-   <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M16.438 14.25V4.84375C16.438 3.96875 15.6568 3.21875 14.6567 3.21875C14.4067 3.21875 14.188 3.25 14.0005 3.34375V2.75C14.0005 1.875 13.2192 1.125 12.2192 1.125C11.813 1.125 11.4692 1.25 11.188 1.4375C10.8755 1.0625 10.3442 0.8125 9.78175 0.8125C8.96925 0.8125 8.313 1.3125 8.09425 1.96875C7.8755 1.875 7.6255 1.8125 7.34425 1.8125C6.3755 1.8125 5.563 2.53125 5.563 3.4375V10.5L4.90675 9.6875C4.2505 8.8125 3.0005 8.53125 2.063 9.03125C1.59425 9.28125 1.28175 9.71875 1.15675 10.2188C1.03175 10.75 1.15675 11.2813 1.5005 11.7188C2.063 12.4688 2.65675 13.25 3.21925 14L4.2505 15.375C4.40675 15.5625 4.53175 15.7812 4.688 15.9688C5.1255 16.5938 5.59425 17.2188 6.21925 17.75C7.40675 18.75 9.03175 19.125 10.563 19.125C11.313 19.125 12.0317 19.0312 12.688 18.9062C16.438 18.125 16.438 15.3125 16.438 14.25ZM12.4692 17.875C10.8443 18.2188 8.40675 18.1875 6.938 16.9688C6.438 16.5312 6.03175 15.9688 5.59425 15.375C5.438 15.1563 5.28175 14.9375 5.1255 14.75L4.09425 13.375C3.53175 12.625 2.938 11.8438 2.3755 11.0938C2.21925 10.9062 2.188 10.6875 2.21925 10.4688C2.2505 10.2812 2.3755 10.125 2.563 10C3.03175 9.75 3.688 9.90625 4.0005 10.3437C4.0005 10.3437 4.0005 10.375 4.03175 10.375L5.688 12.3438C5.84425 12.5313 6.063 12.5938 6.28175 12.5C6.5005 12.4062 6.65675 12.2188 6.65675 12V3.46875C6.65675 3.1875 6.96925 2.9375 7.34425 2.9375C7.688 2.9375 8.0005 3.15625 8.0005 3.4375V8.875C8.0005 9.1875 8.2505 9.4375 8.563 9.4375C8.8755 9.4375 9.1255 9.1875 9.1255 8.875V2.46875C9.1255 2.1875 9.438 1.9375 9.813 1.9375C10.188 1.9375 10.5005 2.1875 10.5005 2.46875V9.125C10.5005 9.4375 10.7505 9.6875 11.063 9.6875C11.3755 9.6875 11.6255 9.4375 11.6255 9.125V2.75C11.6255 2.46875 11.938 2.21875 12.313 2.21875C12.688 2.21875 13.0005 2.46875 13.0005 2.75V9.6875C13.0005 10 13.2505 10.25 13.563 10.25C13.8755 10.25 14.1255 10 14.1255 9.6875V4.8125C14.1567 4.53125 14.438 4.3125 14.7817 4.3125C15.1567 4.3125 15.4692 4.5625 15.4692 4.84375V14.2813C15.3442 15.3125 15.3442 17.25 12.4692 17.875Z" fill="currentColor"/></svg>
- `, 'Raise Hand', () => {
-        toggleHandRaised();
-        handButton.style.backgroundColor = isHandRaised ? '#fbbc04' : 'transparent';
-        handButton.style.color = isHandRaised ? '#ffffff' : '#5f6368';
-      });
+  //       // If hand is already raised, show active state
+  //       if (isHandRaised) {
+  //         handButton.style.backgroundColor = '#fbbc04';
+  //         handButton.style.color = '#ffffff';
+  //       }
 
-      // If hand is already raised, show active state
-      if (isHandRaised) {
-        handButton.style.backgroundColor = '#fbbc04';
-        handButton.style.color = '#ffffff';
-      }
+  //       // Screen share button
+  //       const shareButton = createButton(`
+  //    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+  //      <path d="M20 18c1.1 0 1.99-.9 1.99-2L22 6c0-1.11-.9-2-2-2H4c-1.11 0-2 .89-2 2v10c0 1.1.89 2 2 2H0v2h24v-2h-4zm-7-3.53v-2.19c-2.78 0-4.61.85-6 2.72.56-2.67 2.11-5.33 6-5.87V7l4 3.73-4 3.74z" fill="currentColor"/>
+  //    </svg>
+  //  `, 'Share Screen', () => {
+  //         toggleScreenShare();
+  //         shareButton.style.backgroundColor = isScreenSharing ? '#34a853' : 'transparent';
+  //         shareButton.style.color = isScreenSharing ? '#ffffff' : '#5f6368';
+  //       });
 
-      // Screen share button
-      const shareButton = createButton(`
-   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-     <path d="M20 18c1.1 0 1.99-.9 1.99-2L22 6c0-1.11-.9-2-2-2H4c-1.11 0-2 .89-2 2v10c0 1.1.89 2 2 2H0v2h24v-2h-4zm-7-3.53v-2.19c-2.78 0-4.61.85-6 2.72.56-2.67 2.11-5.33 6-5.87V7l4 3.73-4 3.74z" fill="currentColor"/>
-   </svg>
- `, 'Share Screen', () => {
-        toggleScreenShare();
-        shareButton.style.backgroundColor = isScreenSharing ? '#34a853' : 'transparent';
-        shareButton.style.color = isScreenSharing ? '#ffffff' : '#5f6368';
-      });
+  //       // If already screen sharing, show active state
+  //       if (isScreenSharing) {
+  //         shareButton.style.backgroundColor = '#34a853';
+  //         shareButton.style.color = '#ffffff';
+  //       }
 
-      // If already screen sharing, show active state
-      if (isScreenSharing) {
-        shareButton.style.backgroundColor = '#34a853';
-        shareButton.style.color = '#ffffff';
-      }
+  //       // Add emoji reaction button
+  //       const emojiButton = createButton(`
+  //    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+  //      <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm3.5-9c.83 0 1.5-.67 1.5-1.5S16.33 8 15.5 8 14 8.67 14 9.5s.67 1.5 1.5 1.5zm-7 0c.83 0 1.5-.67 1.5-1.5S9.33 8 8.5 8 7 8.67 7 9.5 7.67 11 8.5 11zm3.5 6.5c2.33 0 4.31-1.46 5.11-3.5H6.89c.8 2.04 2.78 3.5 5.11 3.5z" fill="currentColor"/>
+  //    </svg>
+  //  `, 'Reactions', () => {
+  //         emojiContainer.style.display = emojiContainer.style.display === 'none' ? 'flex' : 'none';
+  //       });
 
-      // Add emoji reaction button
-      const emojiButton = createButton(`
-   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-     <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm3.5-9c.83 0 1.5-.67 1.5-1.5S16.33 8 15.5 8 14 8.67 14 9.5s.67 1.5 1.5 1.5zm-7 0c.83 0 1.5-.67 1.5-1.5S9.33 8 8.5 8 7 8.67 7 9.5 7.67 11 8.5 11zm3.5 6.5c2.33 0 4.31-1.46 5.11-3.5H6.89c.8 2.04 2.78 3.5 5.11 3.5z" fill="currentColor"/>
-   </svg>
- `, 'Reactions', () => {
-        emojiContainer.style.display = emojiContainer.style.display === 'none' ? 'flex' : 'none';
-      });
+  //       // End call button - with red background
+  //       const endButton = createButton(`
+  //    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+  //      <path d="M12 9c-1.6 0-3.15.25-4.6.72v3.1c0 .39-.23.74-.56.9-.98.49-1.87 1.12-2.66 1.85-.18.18-.43.28-.7.28-.28 0-.53-.11-.71-.29L.29 13.08c-.18-.17-.29-.42-.29-.7 0-.28.11-.53.29-.71C3.34 8.78 7.46 7 12 7s8.66 1.78 11.71 4.67c.18.18.29.43.29.71 0 .28-.11.53-.29.71l-2.48 2.48c-.18.18-.43.29-.71.29-.27 0-.52-.11-.7-.28-.79-.74-1.69-1.36-2.67-1.85-.33-.16-.56-.5-.56-.9v-3.1C15.15 9.25 13.6 9 12 9z" fill="white"/>
+  //    </svg>
+  //  `, 'End Call', endMeeting, '#ffffff');
+  //       endButton.style.backgroundColor = '#ea4335';
 
-      // End call button - with red background
-      const endButton = createButton(`
-   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-     <path d="M12 9c-1.6 0-3.15.25-4.6.72v3.1c0 .39-.23.74-.56.9-.98.49-1.87 1.12-2.66 1.85-.18.18-.43.28-.7.28-.28 0-.53-.11-.71-.29L.29 13.08c-.18-.17-.29-.42-.29-.7 0-.28.11-.53.29-.71C3.34 8.78 7.46 7 12 7s8.66 1.78 11.71 4.67c.18.18.29.43.29.71 0 .28-.11.53-.29.71l-2.48 2.48c-.18.18-.43.29-.71.29-.27 0-.52-.11-.7-.28-.79-.74-1.69-1.36-2.67-1.85-.33-.16-.56-.5-.56-.9v-3.1C15.15 9.25 13.6 9 12 9z" fill="white"/>
-   </svg>
- `, 'End Call', endMeeting, '#ffffff');
-      endButton.style.backgroundColor = '#ea4335';
+  //       // Prevent hover effect for end call button
+  //       endButton.onmouseover = () => {
+  //         endButton.style.backgroundColor = '#ea4335';
+  //       };
 
-      // Prevent hover effect for end call button
-      endButton.onmouseover = () => {
-        endButton.style.backgroundColor = '#ea4335';
-      };
+  //       endButton.onmouseout = () => {
+  //         endButton.style.backgroundColor = '#ea4335';
+  //       };
 
-      endButton.onmouseout = () => {
-        endButton.style.backgroundColor = '#ea4335';
-      };
+  //       // Add all buttons to control panel
+  //       controlPanel.appendChild(micButton);
+  //       controlPanel.appendChild(videoButton);
+  //       controlPanel.appendChild(handButton);
+  //       controlPanel.appendChild(shareButton);
+  //       controlPanel.appendChild(emojiButton);
+  //       controlPanel.appendChild(endButton);
 
-      // Add all buttons to control panel
-      controlPanel.appendChild(micButton);
-      controlPanel.appendChild(videoButton);
-      controlPanel.appendChild(handButton);
-      controlPanel.appendChild(shareButton);
-      controlPanel.appendChild(emojiButton);
-      controlPanel.appendChild(endButton);
+  //       // Create emoji reaction container
+  //       const emojiContainer = document.createElement('div');
+  //       emojiContainer.style.position = 'absolute';
+  //       emojiContainer.style.bottom = '80px';
+  //       emojiContainer.style.right = '0%';
+  //       emojiContainer.style.transform = 'translateX(-50%)';
+  //       emojiContainer.style.backgroundColor = 'rgba(32, 33, 36, 0.95)';
+  //       emojiContainer.style.borderRadius = '24px';
+  //       emojiContainer.style.padding = '12px';
+  //       emojiContainer.style.display = 'none';
+  //       emojiContainer.style.flexWrap = 'wrap';
+  //       emojiContainer.style.justifyContent = 'center';
+  //       emojiContainer.style.gap = '12px';
+  //       emojiContainer.style.maxWidth = '320px';
+  //       emojiContainer.style.boxShadow = '0 2px 10px rgba(0, 0, 0, 0.3)';
+  //       emojiContainer.style.zIndex = '10000';
 
-      // Create emoji reaction container
-      const emojiContainer = document.createElement('div');
-      emojiContainer.style.position = 'absolute';
-      emojiContainer.style.bottom = '80px';
-      emojiContainer.style.right = '0%';
-      emojiContainer.style.transform = 'translateX(-50%)';
-      emojiContainer.style.backgroundColor = 'rgba(32, 33, 36, 0.95)';
-      emojiContainer.style.borderRadius = '24px';
-      emojiContainer.style.padding = '12px';
-      emojiContainer.style.display = 'none';
-      emojiContainer.style.flexWrap = 'wrap';
-      emojiContainer.style.justifyContent = 'center';
-      emojiContainer.style.gap = '12px';
-      emojiContainer.style.maxWidth = '320px';
-      emojiContainer.style.boxShadow = '0 2px 10px rgba(0, 0, 0, 0.3)';
-      emojiContainer.style.zIndex = '10000';
+  //       // Add emojis to the container
+  //       ['👍', '👎', '👏', '🎉', '❤️', '😊', '😂', '😉', '😮', '😢', '😃', '🙌', '✋', '🔥', '💥', '💯', '⭐', '✨', '▶️'].forEach(emoji => {
+  //         const emojiButton = document.createElement('button');
+  //         emojiButton.innerText = emoji;
+  //         emojiButton.style.fontSize = '24px';
+  //         emojiButton.style.width = '50px';
+  //         emojiButton.style.height = '50px';
+  //         emojiButton.style.borderRadius = '50%';
+  //         emojiButton.style.border = 'none';
+  //         emojiButton.style.backgroundColor = 'rgba(232, 234, 237, 0.12)';
+  //         emojiButton.style.cursor = 'pointer';
+  //         emojiButton.style.display = 'flex';
+  //         emojiButton.style.alignItems = 'center';
+  //         emojiButton.style.justifyContent = 'center';
 
-      // Add emojis to the container
-      ['👍', '👎', '👏', '🎉', '❤️', '😊', '😂', '😉', '😮', '😢', '😃', '🙌', '✋', '🔥', '💥', '💯', '⭐', '✨', '▶️'].forEach(emoji => {
-        const emojiButton = document.createElement('button');
-        emojiButton.innerText = emoji;
-        emojiButton.style.fontSize = '24px';
-        emojiButton.style.width = '50px';
-        emojiButton.style.height = '50px';
-        emojiButton.style.borderRadius = '50%';
-        emojiButton.style.border = 'none';
-        emojiButton.style.backgroundColor = 'rgba(232, 234, 237, 0.12)';
-        emojiButton.style.cursor = 'pointer';
-        emojiButton.style.display = 'flex';
-        emojiButton.style.alignItems = 'center';
-        emojiButton.style.justifyContent = 'center';
+  //         // Add hover effect
+  //         emojiButton.onmouseover = () => {
+  //           emojiButton.style.backgroundColor = 'rgba(232, 234, 237, 0.2)';
+  //         };
 
-        // Add hover effect
-        emojiButton.onmouseover = () => {
-          emojiButton.style.backgroundColor = 'rgba(232, 234, 237, 0.2)';
-        };
+  //         emojiButton.onmouseout = () => {
+  //           emojiButton.style.backgroundColor = 'rgba(232, 234, 237, 0.12)';
+  //         };
 
-        emojiButton.onmouseout = () => {
-          emojiButton.style.backgroundColor = 'rgba(232, 234, 237, 0.12)';
-        };
+  //         emojiButton.onclick = () => {
+  //           sendEmoji(emoji);
+  //           emojiContainer.style.display = 'none';
+  //         };
 
-        emojiButton.onclick = () => {
-          sendEmoji(emoji);
-          emojiContainer.style.display = 'none';
-        };
+  //         emojiContainer.appendChild(emojiButton);
+  //       });
 
-        emojiContainer.appendChild(emojiButton);
-      });
+  //       document.body.appendChild(controlPanel);
+  //       // Add emoji container to document
+  //       document.body.appendChild(emojiContainer);
 
-      document.body.appendChild(controlPanel);
-      // Add emoji container to document
-      document.body.appendChild(emojiContainer);
+  //       // Add click outside functionality to close emoji panel
+  //       document.addEventListener('click', (event) => {
+  //         if (emojiContainer.style.display !== 'none' &&
+  //           !emojiContainer.contains(event.target) &&
+  //           !emojiButton.contains(event.target)) {
+  //           emojiContainer.style.display = 'none';
+  //         }
+  //       });
 
-      // Add click outside functionality to close emoji panel
-      document.addEventListener('click', (event) => {
-        if (emojiContainer.style.display !== 'none' &&
-          !emojiContainer.contains(event.target) &&
-          !emojiButton.contains(event.target)) {
-          emojiContainer.style.display = 'none';
-        }
-      });
+  //       // Clean up when PiP is closed
+  //       pipVideo.addEventListener('leavepictureinpicture', () => {
+  //         if (controlPanel && document.body.contains(controlPanel)) {
+  //           document.body.removeChild(controlPanel);
+  //           controlPanel = null;
+  //         }
+  //         if (emojiContainer && document.body.contains(emojiContainer)) {
+  //           document.body.removeChild(emojiContainer);
+  //         }
+  //       }, { once: true });
 
-      // Clean up when PiP is closed
-      pipVideo.addEventListener('leavepictureinpicture', () => {
-        if (controlPanel && document.body.contains(controlPanel)) {
-          document.body.removeChild(controlPanel);
-          controlPanel = null;
-        }
-        if (emojiContainer && document.body.contains(emojiContainer)) {
-          document.body.removeChild(emojiContainer);
-        }
-      }, { once: true });
-
-    } catch (error) {
-      console.error('Failed to enter Picture-in-Picture mode:', error);
-    }
-  };
+  //     } catch (error) {
+  //       console.error('Failed to enter Picture-in-Picture mode:', error);
+  //     }
+  //   };
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -2023,11 +2033,26 @@ function Screen() {
     sessionStorage.setItem("MeetingLinkModal", false);
   };
 
-  const WindowContents = ({ isPiP = false }) => {
+  const WindowContents = ({ isPiP = false, currentUser, pipWindowInstance = null }) => {
     // Create new refs for PiP window
     const pipLocalVideoRef = useRef(null);
     const pipVideoRefs = useRef({});
     const { isHandRaised, show, mainSectionMargin, showEmojis, pipWindow } = useSelector((state) => state.meeting);
+
+    // Create a PiP-specific end meeting handler
+    const handlePipEndMeeting = () => {
+      // Close the PiP window first
+      if (pipWindowInstance && !pipWindowInstance.closed) {
+        pipWindowInstance.close();
+      }
+
+      // Reset PiP state
+      dispatch(setPipWindow(null));
+      setPipWindowRef(null);
+
+      // Then call the main end meeting function
+      endMeeting();
+    };
 
     // Effect to handle video streams in PiP window
     useEffect(() => {
@@ -2068,7 +2093,7 @@ function Screen() {
             >
               {visibleParticipants.map((participant, index) => (
                 <div key={participant.id} className="d_grid-item">
-                  <ParticipantVideo
+                  {/* <ParticipantVideo
                     participant={participant}
                     isLocal={participant.id === socket?.id}
                     localVideoRef={isPiP ? pipLocalVideoRef : localVideoRef}
@@ -2082,40 +2107,145 @@ function Screen() {
                     offmicrophone={offmicrophone}
                     imgpath={IMAGE_URL}
                     isPiP={isPiP}
-                  />
+                    currentUser={currUser}
+                  />  */}
+                  <div className="d_avatar-container">
+                    {participant.id === socket?.id ? (
+                      // Local user video
+                      <>
+                        <video
+                          ref={pipLocalVideoRef}
+                          className="d_video-element"
+                          autoPlay
+                          muted
+                          playsInline
+                          style={{ display: isVideoOff ? "none" : "block" }}
+                        />
+                        <div
+                          className="d_avatar-circle"
+                          style={{
+                            display: isVideoOff ? "flex" : "none",
+                            textTransform: "uppercase",
+                            backgroundColor: `hsl(${participant.id.charCodeAt(0) * 60
+                              }, 70%, 45%)`,
+                          }}
+                        >
+                          {participant.initials}
+                        </div>
+                      </>
+                    ) : (
+                      // Remote participant video
+                      <>
+                        <video
+                          ref={setPipVideoRef(participant.id)}
+                          id={`video-${participant.id}`}
+                          className="d_video-element"
+                          autoPlay
+                          playsInline
+                          style={{
+                            display:
+                              remoteStreams[participant.id] &&
+                                participant.hasVideo !== false
+                                ? "block"
+                                : "none",
+                          }}
+                        />
+                        <div
+                          className="d_avatar-circle"
+                          style={{
+                            display:
+                              !remoteStreams[participant.id] ||
+                                participant.hasVideo === false
+                                ? "flex"
+                                : "none",
+                            textTransform: "uppercase",
+                            backgroundColor: `hsl(${participant.id.charCodeAt(0) * 60
+                              }, 70%, 45%)`,
+                          }}
+                        >
+                          {participant.initials}
+                        </div>
+                      </>
+                    )}
+
+                    <div className="d_controls-top">
+                      <div className="d_controls-container">
+                        {participant.hasRaisedHand && (
+                          <img
+                            src={hand}
+                            className="d_control-icon"
+                            alt="Hand raised"
+                            style={{
+                              animation: "d_handWave 1s infinite",
+                              transform: "translateY(-2px)",
+                            }}
+                          />
+                        )}
+                        <img
+                          src={participant.hasVideo ? oncamera : offcamera}
+                          className="d_control-icon"
+                          alt={participant.hasVideo ? "Camera on" : "Camera off"}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="d_controls-bottom">
+                      <span className="d_participant-name">
+                        {currUser?.participantsNameandVideo ? participant?.name : currentUser?.participantsNameandVideo ? participant?.name : ""}
+                        {participant.isHost ? " (Host)" : ""}
+                      </span>
+                      <div className="d_mic-status">
+                        <img
+                          src={participant.hasAudio ? onmicrophone : offmicrophone}
+                          className="d_control-icon"
+                          alt={participant.hasAudio ? "Microphone on" : "Microphone off"}
+                        />
+                      </div>
+                    </div>
+                  </div>
                 </div>
               ))}
             </div>
           </div>
-          <div className="d_bottombar">
-            <BottomBar
-              toggleAudio={toggleAudio}
-              isMuted={isMuted}
-              isVideoOff={isVideoOff}
-              toggleVideo={toggleVideo}
-              toggleScreenShare={toggleScreenShare}
-              toggleRecording={toggleRecording}
-              isRecording={isRecording}
-              endMeeting={endMeeting}
-              toggleViewMoreDropdown={toggleViewMoreDropdown}
-              showViewMoreDropdown={showViewMoreDropdown}
-              handleEmojiClick={handleEmojiClick}
-              handleShow={handleShow}
-              unreadMessages={unreadMessages}
-              show={show}
-              PictureInPicture={openWindow}
-              socket={socket}
-              roomId={roomId}
-              participants={participants}
-              isPiP={isPiP}
-            />
+          {/* <div className="d_bottombar" style={{ width: "100%" }}> */}
+          <div className="" style={{ width: "100%" }}>
+            <div className="" style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
+              {/* <div className="d-flex align-items-center d_resposive" style={{ display: "flex", alignItems: "center", }}>
+                <div
+                  className="d_box"
+                  style={{ cursor: "pointer", marginRight: '10px' }}
+                  onClick={toggleAudio}
+                >
+                  <img
+                    src={isMuted ? offmicrophone : onmicrophone}
+                    alt="microphone"
+                  />
+                </div>
+                <div
+                  className="d_box"
+                  style={{ cursor: "pointer" }}
+                  onClick={toggleVideo}
+                >
+                  <img src={isVideoOff ? offcamera : oncamera} alt="camera" />
+                </div>
+              </div> */}
+              <div className="d-flex align-items-center" style={{ display: "flex", alignItems: "center", }}>
+                <div
+                  className="d_box1 d_red"
+                  style={{ cursor: "pointer", padding: '10px 14px', borderRadius: '4px', border: '1.2px solid #202F41' }}
+                  onClick={isPiP ? handlePipEndMeeting : endMeeting}
+                >
+                  <p className="mb-0">End Meeting</p>
+                </div>
+              </div>
+            </div>
           </div>
         </section>
       </div>
     );
   };
 
-  const openWindow = useCallback(async () => {
+  const togglePictureInPicture = useCallback(async () => {
     try {
       if (!window.documentPictureInPicture) {
         alert("Document Picture-in-Picture is not supported in this browser.");
@@ -2123,12 +2253,13 @@ function Screen() {
       }
 
       const dpip = await window.documentPictureInPicture.requestWindow({
-        width: 800,
+        width: 450,
         height: 600,
       });
 
       // Store the PiP window reference
-      // setPipWindow(dpip);
+      setPipWindowRef(dpip);
+      dispatch(setPipWindow(dpip));
 
       // Add necessary styles to the PiP window
       const style = dpip.document.createElement('style');
@@ -2138,7 +2269,7 @@ function Screen() {
           padding: 0;
           background: #1a1a1a;
           color: white;
-          font-family: Arial, sans-serif;
+          font-family: -apple-system, sans-serif;
         }
         video {
           width: 100%;
@@ -2161,13 +2292,16 @@ function Screen() {
       const pipRoot = ReactDOM.createRoot(dpip.document.getElementById("pip-root"));
       pipRoot.render(
         <Provider store={store}>
-          <WindowContents isPiP={true} />
+          <WindowContents isPiP={true} currentUser={currUser} pipWindowInstance={dpip} />
         </Provider>
       );
 
       // Handle window close
       dpip.addEventListener('pagehide', () => {
         // setPipWindow(null);
+        setPipWindowRef(null);
+        pipRoot.unmount();
+        dispatch(setPipWindow(false));
       });
 
     } catch (error) {
@@ -2402,7 +2536,7 @@ function Screen() {
             socket={socket}
             roomId={roomId}
             participants={participants}
-            openWindow={openWindow}
+          // openWindow={openWindow}
           />
         </div>
       </section>
@@ -2475,6 +2609,3 @@ function Screen() {
 }
 
 export default Screen;
-
-
-

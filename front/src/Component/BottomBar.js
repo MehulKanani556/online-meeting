@@ -105,32 +105,32 @@ const BottomBar = React.memo(
                 <img src={upload} alt="screen share" />
               </div>
 
-              {!pipWindow &&
-                <div
-                  className="d_box me-sm-3"
-                  onClick={toggleRecording}
-                  style={{
-                    cursor: "pointer",
-                    backgroundColor: isRecording ? "#E12B2D" : "transparent",
-                    transition: "background-color 0.3s",
-                  }}
-                >
-                  <img src={recording} alt="recording" />
-                  {isRecording && (
-                    <span
-                      className="position-absolute top-0 start-100 translate-middle badge rounded-pill"
-                      style={{
-                        padding: "3px",
-                        width: "12px",
-                        height: "12px",
-                        border: "2px solid #12161C",
-                        background: "#E12B2D",
-                        animation: "pulse 1.5s infinite",
-                      }}
-                    ></span>
-                  )}
-                </div>
-              }
+              {/* {!pipWindow && */}
+              <div
+                className="d_box me-sm-3"
+                onClick={toggleRecording}
+                style={{
+                  cursor: "pointer",
+                  backgroundColor: isRecording ? "#E12B2D" : "transparent",
+                  transition: "background-color 0.3s",
+                }}
+              >
+                <img src={recording} alt="recording" />
+                {isRecording && (
+                  <span
+                    className="position-absolute top-0 start-100 translate-middle badge rounded-pill"
+                    style={{
+                      padding: "3px",
+                      width: "12px",
+                      height: "12px",
+                      border: "2px solid #12161C",
+                      background: "#E12B2D",
+                      animation: "pulse 1.5s infinite",
+                    }}
+                  ></span>
+                )}
+              </div>
+              {/* } */}
             </div>
           </div>
           <div
@@ -141,15 +141,15 @@ const BottomBar = React.memo(
             <p className="mb-0">End Meeting</p>
           </div>
           <div className="position-relative">
-            {!pipWindow &&
-              <div
-                className="d-block d-sm-none d_box1 me-sm-3 mx-3 mx-sm-0"
-                style={{ cursor: "pointer" }}
-                onClick={toggleViewMoreDropdown}
-              >
-                <p className="mb-0">View More</p>
-              </div>
-            }
+            {/* {!pipWindow && */}
+            <div
+              className="d-block d-sm-none d_box1 me-sm-3 mx-3 mx-sm-0"
+              style={{ cursor: "pointer" }}
+              onClick={toggleViewMoreDropdown}
+            >
+              <p className="mb-0">View More</p>
+            </div>
+            {/* } */}
             {showViewMoreDropdown && window.innerWidth <= 425 && (
               <div
                 className="d_dropdown position-absolute bottom-100 start-50 translate-middle-x mb-2 rounded shadow-lg p-2"
@@ -355,18 +355,16 @@ const BottomBar = React.memo(
                   </div>
                 )}
               </div>
-              {!pipWindow &&
-                <div
-                  className="d_box me-sm-3"
-                  style={{ cursor: "pointer" }}
-                  onClick={() => {
-                    dispatch(setPipWindow(true));
-                    openWindow();
-                  }}
-                >
-                  <img src={podcast} alt="Picture In Picture" />
-                </div>}
-
+              <div
+                className="d_box me-sm-3"
+                style={{ cursor: "pointer" }}
+                onClick={() => {
+                  dispatch(setPipWindow(true));
+                  PictureInPicture();
+                }}
+              >
+                <img src={podcast} alt="Picture In Picture" />
+              </div>
             </div>
           </div>
         </div>
@@ -384,18 +382,18 @@ const BottomBar = React.memo(
             >
               <img src={hand} alt="Raise hand" />
             </div>
-            {!pipWindow &&
-              <div
-                className="d_box position-relative"
-                onClick={(e) => handleShowee(e)}
-                style={{
-                  cursor: "pointer",
-                  backgroundColor: show ? "#202F41" : "transparent",
-                  transition: "background-color 0.3s",
-                }}
-              >
-                <img src={bar} alt="Bar" />
-                {/* {unreadMessages > 0 && (
+            {/* {!pipWindow && */}
+            <div
+              className="d_box position-relative"
+              onClick={(e) => handleShowee(e)}
+              style={{
+                cursor: "pointer",
+                backgroundColor: show ? "#202F41" : "transparent",
+                transition: "background-color 0.3s",
+              }}
+            >
+              <img src={bar} alt="Bar" />
+              {/* {unreadMessages > 0 && (
                 <span
                   className="position-absolute top-0 start-100 translate-middle badge rounded-pill"
                   style={{
@@ -409,8 +407,8 @@ const BottomBar = React.memo(
                   {unreadMessages}
                 </span>
               )} */}
-              </div>
-            }
+            </div>
+            {/* } */}
           </div>
         </div>
       </div>
