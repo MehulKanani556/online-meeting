@@ -735,7 +735,7 @@ function Screen() {
     }
   }, [localStream, updateMediaState]);
 
-  // Separate function to stop screen sharing and restore camera
+  // stop Screen Sharing Separate function to stop screen sharing and restore camera
   const stopScreenSharing = async () => {
     try {
       // Get all screen share tracks and stop them
@@ -821,9 +821,7 @@ function Screen() {
 
         Object.values(peerConnectionsRef.current).forEach((pc) => {
           const senders = pc.getSenders();
-          const sender = senders.find(
-            (s) => s.track && s.track.kind === "video"
-          );
+          const sender = senders.find((s) => s.track && s.track.kind === "video");
 
           if (sender) {
             sender.replaceTrack(videoTrack);
@@ -850,6 +848,9 @@ function Screen() {
             isScreenSharing: true,
           });
         }
+
+        // Open Picture-in-Picture and set the reference
+        await togglePictureInPicture();
       } catch (error) {
         console.error("Error sharing screen:", error);
       }
