@@ -11,7 +11,7 @@ function Payment() {
     return (
         <div>
 
-            <section style={{ backgroundColor: "#060A11" }}>
+            <section style={{ backgroundColor: "#060A11", minHeight: '100vh' }}>
                 <div className='B_container_new' >
                     {/* NavBar Section Start.............. */}
                     <NavBar />

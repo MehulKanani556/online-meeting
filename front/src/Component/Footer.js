@@ -31,7 +31,7 @@ function Footer() {
 
                             </div>
                             <div>
-                                <p className='B_Footer_text' style={{ color: "#87898B" }}>&copy; 2021 Gentler Streak. All rights reserved</p>
+                                <p className='B_Footer_text' style={{ color: "#87898B" }}>&copy; {new Date().getFullYear()} Gentler Streak. All rights reserved</p>
                             </div>
                         </div>
 

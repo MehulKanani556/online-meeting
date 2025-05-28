@@ -5,16 +5,16 @@ import Footer from '../Component/Footer';
 import check_icon from '../Image/True.svg';
 
 function Pricing() {
-    
+
     useEffect(() => {
         window.scrollTo(0, 0);
     }, []);
 
-    const [billingCycle, setBillingCycle] = useState('yearly');
+    const [Pricing, setPricing] = useState('monthly');
 
     return (
         <div>
-            <section style={{ backgroundColor: "#060A11" }}>
+            <section style={{ backgroundColor: "#060A11", minHeight: '100vh' }}>
                 <div className='B_container_new' >
                     {/* NavBar Section Start.............. */}
                     <NavBar />
@@ -41,10 +41,10 @@ function Pricing() {
                                     className="B_pricing_button border-0 rounded"
                                     style={{
                                         minWidth: '100px',
-                                        backgroundColor: billingCycle === 'monthly' ? '#2A323B' : 'transparent',
-                                        color: billingCycle === 'monthly' ? '#ffffff' : '#87898B'
+                                        backgroundColor: Pricing === 'monthly' ? '#2A323B' : 'transparent',
+                                        color: Pricing === 'monthly' ? '#ffffff' : '#87898B'
                                     }}
-                                    onClick={() => setBillingCycle('monthly')}
+                                    onClick={() => setPricing('monthly')}
                                 >
                                     Monthly
                                 </button>
@@ -53,10 +53,10 @@ function Pricing() {
                                     className="B_pricing_button border-0 rounded"
                                     style={{
                                         minWidth: '100px',
-                                        backgroundColor: billingCycle === 'yearly' ? '#2A323B' : 'transparent',
-                                        color: billingCycle === 'yearly' ? '#ffffff' : '#87898B'
+                                        backgroundColor: Pricing === 'yearly' ? '#2A323B' : 'transparent',
+                                        color: Pricing === 'yearly' ? '#ffffff' : '#87898B'
                                     }}
-                                    onClick={() => setBillingCycle('yearly')}
+                                    onClick={() => setPricing('yearly')}
                                 >
                                     Yearly
                                 </button>
@@ -70,10 +70,10 @@ function Pricing() {
                                     <div className='B_Card_padding h-100' style={{ backgroundColor: '#090E16', borderRadius: '5px' }}>
                                         <h5 className='text-white'>Basic</h5>
                                         <h4 className='text-white B_price_text'>
-                                            ${billingCycle === 'yearly' ? '44.50' : '4.50'}/
-                                            <span style={{ fontSize: '16px', color: '#87898B' }}>{billingCycle}</span>
+                                            ${Pricing === 'yearly' ? '44.50' : '4.50'}/
+                                            <span style={{ fontSize: '16px', color: '#87898B' }}>{Pricing}</span>
                                         </h4>
-                                        <p className='B_cardPrice_text' style={{ color: '#b8babb' }}>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ip</p>
+                                        <p className='B_cardPrice_text' style={{ color: '#b8babb' }}>Best for individuals and small teams.</p>
 
                                         <Link to="/payment">
                                             <button className='btn B_price_btn btn-light fw-bold w-100 '>Continue To Pay</button>
@@ -110,10 +110,10 @@ function Pricing() {
                                     <div className='B_Card_padding h-100' style={{ backgroundColor: '#090E16', borderRadius: '5px' }}>
                                         <h5 className='text-white'>Professional</h5>
                                         <h4 className='text-white B_price_text'>
-                                            ${billingCycle === 'yearly' ? '94.50' : '9.50'}/
-                                            <span style={{ fontSize: '16px', color: '#87898B' }}>{billingCycle}</span>
+                                            ${Pricing === 'yearly' ? '94.50' : '9.50'}/
+                                            <span style={{ fontSize: '16px', color: '#87898B' }}>{Pricing}</span>
                                         </h4>
-                                        <p className='B_cardPrice_text' style={{ color: '#b8babb' }}>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ip</p>
+                                        <p className='B_cardPrice_text' style={{ color: '#b8babb' }}>Perfect for growing teams.</p>
 
                                         <Link to="/payment">
                                             <button className='btn B_price_btn btn-light fw-bold w-100 '>Continue To Pay</button>
@@ -154,10 +154,10 @@ function Pricing() {
                                     <div className='B_Card_padding h-100' style={{ backgroundColor: '#090E16', borderRadius: '5px' }}>
                                         <h5 className='text-white'>Business</h5>
                                         <h4 className='text-white B_price_text'>
-                                            ${billingCycle === 'yearly' ? '150.50' : '15.50'}/
-                                            <span style={{ fontSize: '16px', color: '#87898B' }}>{billingCycle}</span>
+                                            ${Pricing === 'yearly' ? '150.50' : '15.50'}/
+                                            <span style={{ fontSize: '16px', color: '#87898B' }}>{Pricing}</span>
                                         </h4>
-                                        <p className='B_cardPrice_text' style={{ color: '#b8babb' }}>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ip</p>
+                                        <p className='B_cardPrice_text' style={{ color: '#b8babb' }}>Designed for large teams and organizations.</p>
 
                                         <Link to="/payment">
                                             <button className='btn B_price_btn btn-light fw-bold w-100 '>Continue To Pay</button>

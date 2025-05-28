@@ -34,7 +34,7 @@ function ContactUs() {
     return (
         <div>
 
-            <section style={{ backgroundColor: "#060A11" }}>
+            <section style={{ backgroundColor: "#060A11", minHeight: '100vh' }}>
                 <div className='B_container_new'>
 
                     {/* NavBar Section Start.............. */}
@@ -52,7 +52,7 @@ function ContactUs() {
 
                     <div>
                         <div className="B_contact_form">
-                            
+
                             <Formik
                                 initialValues={{
                                     firstname: '', lastname: '', email: '', phoneno: '', message: ''
@@ -133,28 +133,32 @@ function ContactUs() {
                                 </a>
                             </div>
                             <div className="col-lg-4 col-md-6 col-12 B_contact_card3">
-                                <a href="#" className='text-decoration-none'>
-                                    <div className="B_contact_card text-center text-white">
-                                        <div className="B_icon2 mb-4 B_contact-icon">
-                                            <img src={call} alt="phone" />
-                                        </div>
-                                        <h4 className="B_contact_card_head">Call Us</h4>
-                                        <p>0261 5858 5858</p>
-                                        <p>0261 7474 6363</p>
+                                <div className="B_contact_card text-center text-white">
+                                    <div className="B_icon2 mb-4 B_contact-icon">
+                                        <img src={call} alt="phone" />
                                     </div>
-                                </a>
+                                    <h4 className="B_contact_card_head">Call Us</h4>
+                                    <a href="tel:0261 5858 5858" className='text-decoration-none'>
+                                        <p>0261 5858 5858</p>
+                                    </a>
+                                    <a href="tel:0261 7474 6363" className='text-decoration-none'>
+                                        <p>0261 7474 6363</p>
+                                    </a>
+                                </div>
                             </div>
                             <div className="col-lg-4 col-md-6 col-12 B_contact_card3">
-                                <a href="#" className='text-decoration-none'>
-                                    <div className="B_contact_card  text-center text-white">
-                                        <div className="B_icon3 mb-4 B_contact-icon">
-                                            <img src={email} alt="email" />
-                                        </div>
-                                        <h4 className="B_contact_card_head">Email Us</h4>
-                                        <p>example@gmail.com</p>
-                                        <p>johan123@gmail.com</p>
+                                <div className="B_contact_card  text-center text-white">
+                                    <div className="B_icon3 mb-4 B_contact-icon">
+                                        <img src={email} alt="email" />
                                     </div>
-                                </a>
+                                    <h4 className="B_contact_card_head">Email Us</h4>
+                                    <a href="mailto:example@gmail.com" className='text-decoration-none'>
+                                        <p>example@gmail.com</p>
+                                    </a>
+                                    <a href="mailto:johan123@gmail.com" className='text-decoration-none'>
+                                        <p>johan123@gmail.com</p>
+                                    </a>
+                                </div>
                             </div>
                         </div>
                     </div>

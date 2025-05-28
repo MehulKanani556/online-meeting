@@ -53,6 +53,7 @@ img {
   background-color: #0D141E;
   padding: 40px 30px;
   border-radius: 8px;
+  height: 100%;
 }
 
 .B_feature-icon {
@@ -348,7 +349,7 @@ img {
 }
 
 .B_cardPrice_text {
-  font-size: 14px;
+  font-size: 16px;
   margin-bottom: 50px;
 }
 
@@ -364,6 +365,13 @@ img {
 .B_price_btn {
   padding: 10px;
   margin-bottom: 15px;
+  transition: 0.3s ease-in-out;
+}
+
+.B_price_btn:hover {
+  background-color: transparent;
+  border: 1px solid #fff;
+  color: white;
 }
 
 .B_true_icon {

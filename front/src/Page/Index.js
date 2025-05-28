@@ -132,7 +132,7 @@ function Index() {
     return (
         <div>
 
-            <section style={{ backgroundColor: "#060A11" }}>
+            <section style={{ backgroundColor: "#060A11", minHeight: '100vh' }}>
 
                 <div className='B_container_new' >
                     {/* TOP NAV BAR START.............. */}
@@ -147,7 +147,8 @@ function Index() {
                                     Where Innovation Meets Conversation
                                 </h1>
                                 <p className='mt-3 B_PTag_text' style={{ color: "#87898B" }}>
-                                    Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's stan
+                                    Empower your team to connect, collaborate, and communicate - no matter where they are.
+                                    Our lightweight, browser-based meeting app delivers crystal-clear audio, smooth video, and real-time collaboration tools.
                                 </p>
                                 <div className='B_Btn_center'>
                                     <Link to={isAuthenticated ? '/home' : '/login'}>
@@ -177,11 +178,12 @@ function Index() {
                                 <h2 className='B_Con_head_text'>Connecting Beyond Work</h2>
 
                                 <p style={{ color: "#87898B" }} className='B_Connecting_text1'>
-                                    Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's stan Lorem Ipsum is simply dummy text of the printing and typesetting industry.
+                                    Virtual meetings aren’t just about productivity - they’re about building real relationships.
+                                    Whether you’re brainstorming with your team, checking in with clients, or catching up with friends, our platform makes every interaction seamless and personal.
                                 </p>
 
                                 <p style={{ color: "#87898B" }} className='B_Connecting_text2'>
-                                    Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's stan Lorem Ipsum
+                                    Stay engaged with high-definition video, AI-powered noise cancellation, and smart meeting insights designed to help you focus on what really matters.
                                 </p>
 
                             </div>
@@ -199,7 +201,7 @@ function Index() {
                                     Smart Features for smarter <br /> meetings
                                 </h2>
                                 <p className='B_Feature_text' style={{ color: "#87898B" }}>
-                                    Lorem Ipsum is simply dummy text of the printing and typesetting industry. <br /> Lorem Ipsum has been the industry's stan Lorem Ipsum
+                                    Enhance your virtual meeting experience with features built for productivity, collaboration, and clarity—all in one seamless platform.
                                 </p>
                             </div>
                         </div>
@@ -209,15 +211,14 @@ function Index() {
                     {/* Box Section Start.............. */}
                     <section className='B_Features_section'>
 
-                        <div className="row text-white" >
+                        <div className="row text-white d-flex justify-content-center" >
                             <div className="col-md-6 col-lg-4 col-12 mb-4">
                                 <div className="B_feature-card ">
                                     <div className="B_feature-icon">
                                         <img src={image3} style={{ height: "42px", width: "53px" }} alt="" />
                                     </div>
                                     <h4 className='B_box_head'>HD video quality</h4>
-                                    <p className='B_box_text' style={{ color: "#BFBFBF" }}>Lorem ipsum dolor sit amet, consectetur adipiscing <br />
-                                        elit. Sed erat nibh tristique ipsum.</p>
+                                    <p className='B_box_text' style={{ color: "#87898B" }}>Experience crystal-clear video with adaptive resolution that keeps you connected - no matter your bandwidth.</p>
                                 </div>
                             </div>
                             <div className="col-md-6 col-lg-4 col-12 mb-4">
@@ -226,8 +227,7 @@ function Index() {
                                         <img src={image4} style={{ height: "42px", width: "50px" }} alt="" />
                                     </div>
                                     <h3 className='B_box_head'>Video recording</h3>
-                                    <p className='B_box_text' style={{ color: "#87898B" }}>Lorem ipsum dolor sit amet, consectetur adipiscing <br />
-                                        elit. Sed erat nibh tristique ipsum.</p>
+                                    <p className='B_box_text' style={{ color: "#87898B" }}>Capture important discussions and decisions with one-click recording. Rewatch or share anytime.</p>
                                 </div>
                             </div>
                             <div className="col-md-6 col-lg-4 col-12 mb-4">
@@ -236,8 +236,7 @@ function Index() {
                                         <img src={image5} style={{ height: "43px", width: "50px" }} alt="" />
                                     </div>
                                     <h3 className='B_box_head'>Built-in chat</h3>
-                                    <p className='B_box_text' style={{ color: "#87898B" }}>Lorem ipsum dolor sit amet, consectetur adipiscing <br />
-                                        elit. Sed erat nibh tristique ipsum.</p>
+                                    <p className='B_box_text' style={{ color: "#87898B" }}>Communicate in real time with in-meeting chat. Share messages, links, and quick notes without interrupting the flow.</p>
                                 </div>
                             </div>
                             <div className="col-md-6 col-lg-4 col-12 mb-4">
@@ -246,8 +245,7 @@ function Index() {
                                         <img src={image6} style={{ height: "38px", width: "50px" }} alt="" />
                                     </div>
                                     <h3 className='B_box_head'>Screen sharing</h3>
-                                    <p className='B_box_text' style={{ color: "#87898B" }}>Lorem ipsum dolor sit amet, consectetur adipiscing <br />
-                                        elit. Sed erat nibh tristique ipsum.</p>
+                                    <p className='B_box_text' style={{ color: "#87898B" }}>Share your screen or specific apps to present documents, slides, or live demos effortlessly.</p>
                                 </div>
                             </div>
                             <div className="col-md-6 col-lg-4 col-12 mb-4">
@@ -256,18 +254,7 @@ function Index() {
                                         <img src={image7} style={{ height: "49px", width: "50px" }} alt="" />
                                     </div>
                                     <h3 className='B_box_head'>Instant meetings</h3>
-                                    <p className='B_box_text' style={{ color: "#87898B" }}>Lorem ipsum dolor sit amet, consectetur adipiscing <br />
-                                        elit. Sed erat nibh tristique ipsum.</p>
-                                </div>
-                            </div>
-                            <div className="col-md-6 col-lg-4 col-12 mb-4">
-                                <div className="B_feature-card">
-                                    <div className="B_feature-icon">
-                                        <img src={image8} style={{ height: "55px", width: "50px" }} alt="" />
-                                    </div>
-                                    <h3 className='B_box_head'>File sharing</h3>
-                                    <p className='B_box_text' style={{ color: "#87898B" }}>Lorem ipsum dolor sit amet, consectetur adipiscing <br />
-                                        elit. Sed erat nibh tristique ipsum.</p>
+                                    <p className='B_box_text' style={{ color: "#87898B" }}>Launch a meeting in seconds - no calendar invite needed, ideal for quick team discussions.</p>
                                 </div>
                             </div>
                         </div>
@@ -280,7 +267,9 @@ function Index() {
                         <div className="row text-white ">
                             <div className="col-md-6 col-12 align-content-center">
                                 <h2 className='B_Connecting_head_text'>Connecting teams, anywhere, anytime</h2>
-                                <p className='B_Connecting_text mt-2' style={{ color: "#87898B" }}>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's stan Lorem Ipsum is simply dummy text of the printing and typesetting industry. </p>
+                                <p className='B_Connecting_text mt-2' style={{ color: "#87898B" }}>
+                                    Stay productive from any location with seamless video conferencing tools that bring your team together. Whether you're working from home or collaborating across continents, our platform ensures crystal-clear communication and effortless teamwork - anytime, anywhere.
+                                </p>
                             </div>
                             <div className="col-md-6 col-12">
                                 <img src={image9} alt="" />
