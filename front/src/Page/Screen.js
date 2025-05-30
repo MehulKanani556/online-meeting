@@ -758,28 +758,44 @@ function Screen() {
         }
       });
 
-      // Update the local video reference
+      // Create a combined stream with existing audio and new video
+      const combinedStream = new MediaStream();
+
+      // Add existing audio tracks if any
+      localStream.getAudioTracks().forEach((track) => {
+        combinedStream.addTrack(track);
+      });
+
+      // Add the new video track
+      combinedStream.addTrack(videoTrack);
+
+      // Update the main screen local video reference
       if (localVideoRef.current) {
-        // Create a combined stream with existing audio and new video
-        const combinedStream = new MediaStream();
-
-        // Add existing audio tracks if any
-        localStream.getAudioTracks().forEach((track) => {
-          combinedStream.addTrack(track);
-        });
-
-        // Add the new video track
-        combinedStream.addTrack(videoTrack);
-
-        // Set this combined stream to the video element
         localVideoRef.current.srcObject = combinedStream;
-
-        // Also update the localStream reference
-        localStream.getVideoTracks().forEach((track) => {
-          localStream.removeTrack(track);
-        });
-        localStream.addTrack(videoTrack);
       }
+
+      // Update the PiP window video reference if it exists
+      if (pipWindow && !pipWindow.closed) {
+        const pipLocalVideo = pipWindow.document.querySelector('video[ref="pipLocalVideoRef"]');
+        if (pipLocalVideo) {
+          pipLocalVideo.srcObject = combinedStream;
+        }
+
+        // Alternative approach: find the video element by looking for the local user's video
+        const pipVideos = pipWindow.document.querySelectorAll('video');
+        pipVideos.forEach(video => {
+          // Check if this is the local video (typically the muted one)
+          if (video.muted) {
+            video.srcObject = combinedStream;
+          }
+        });
+      }
+
+      // Also update the localStream reference
+      localStream.getVideoTracks().forEach((track) => {
+        localStream.removeTrack(track);
+      });
+      localStream.addTrack(videoTrack);
 
       setIsScreenSharing(false);
 
@@ -2059,19 +2075,35 @@ function Screen() {
     useEffect(() => {
       if (isPiP) {
         // Set up local video stream
-        if (pipLocalVideoRef.current && localVideoRef.current) {
-          pipLocalVideoRef.current.srcObject = localVideoRef.current.srcObject;
+        if (pipLocalVideoRef.current) {
+          // Always sync with the main local video stream
+          const mainLocalStream = localVideoRef.current?.srcObject;
+          if (mainLocalStream && pipLocalVideoRef.current.srcObject !== mainLocalStream) {
+            pipLocalVideoRef.current.srcObject = mainLocalStream;
+          }
         }
 
         // Set up remote video streams
         Object.keys(remoteStreams).forEach(participantId => {
           const videoElement = pipVideoRefs.current[participantId];
           if (videoElement && remoteStreams[participantId]) {
-            videoElement.srcObject = remoteStreams[participantId];
+            if (videoElement.srcObject !== remoteStreams[participantId]) {
+              videoElement.srcObject = remoteStreams[participantId];
+            }
           }
         });
       }
-    }, [isPiP, remoteStreams, localVideoRef.current?.srcObject]);
+    }, [isPiP, remoteStreams, localVideoRef.current?.srcObject, localStream]);
+
+    // Alternative approach: Add a separate effect to monitor localStream changes
+    useEffect(() => {
+      if (isPiP && pipLocalVideoRef.current && localStream) {
+        // Update PiP local video whenever localStream changes
+        if (pipLocalVideoRef.current.srcObject !== localStream) {
+          pipLocalVideoRef.current.srcObject = localStream;
+        }
+      }
+    }, [isPiP, localStream]);
 
     const setPipVideoRef = (participantId, element) => {
       if (isPiP) {
@@ -2169,7 +2201,7 @@ function Screen() {
                       </>
                     )}
 
-                    <div className="d_controls-top">
+                    {/* <div className="d_controls-top">
                       <div className="d_controls-container">
                         {participant.hasRaisedHand && (
                           <img
@@ -2188,20 +2220,20 @@ function Screen() {
                           alt={participant.hasVideo ? "Camera on" : "Camera off"}
                         />
                       </div>
-                    </div>
+                    </div> */}
 
                     <div className="d_controls-bottom">
                       <span className="d_participant-name">
                         {currUser?.participantsNameandVideo ? participant?.name : currentUser?.participantsNameandVideo ? participant?.name : ""}
                         {participant.isHost ? " (Host)" : ""}
                       </span>
-                      <div className="d_mic-status">
+                      {/* <div className="d_mic-statu+s">
                         <img
                           src={participant.hasAudio ? onmicrophone : offmicrophone}
                           className="d_control-icon"
                           alt={participant.hasAudio ? "Microphone on" : "Microphone off"}
                         />
-                      </div>
+                      </div> */}
                     </div>
                   </div>
                 </div>

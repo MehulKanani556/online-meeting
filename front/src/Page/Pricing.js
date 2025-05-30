@@ -75,7 +75,7 @@ function Pricing() {
                                         </h4>
                                         <p className='B_cardPrice_text' style={{ color: '#b8babb' }}>Best for individuals and small teams.</p>
 
-                                        <Link to="/payment">
+                                        <Link to="/payment" state={{ price: Pricing === 'yearly' ? '44.50' : '4.50' }}>
                                             <button className='btn B_price_btn btn-light fw-bold w-100 '>Continue To Pay</button>
                                         </Link>
 
@@ -115,7 +115,7 @@ function Pricing() {
                                         </h4>
                                         <p className='B_cardPrice_text' style={{ color: '#b8babb' }}>Perfect for growing teams.</p>
 
-                                        <Link to="/payment">
+                                        <Link to="/payment" state={{ price: Pricing === 'yearly' ? '94.50' : '9.50' }}>
                                             <button className='btn B_price_btn btn-light fw-bold w-100 '>Continue To Pay</button>
                                         </Link>
 
@@ -159,7 +159,7 @@ function Pricing() {
                                         </h4>
                                         <p className='B_cardPrice_text' style={{ color: '#b8babb' }}>Designed for large teams and organizations.</p>
 
-                                        <Link to="/payment">
+                                        <Link to="/payment" state={{ price: Pricing === 'yearly' ? '150.50' : '15.50' }}>
                                             <button className='btn B_price_btn btn-light fw-bold w-100 '>Continue To Pay</button>
                                         </Link>
 
@@ -193,7 +193,7 @@ function Pricing() {
                                             </div>
                                             <div className='d-flex align-items-center mb-3'>
                                                 <img src={check_icon} className='B_true_icon' alt="check_icon" />
-                                                <span style={{ color: "#dadada" }} className='B_Ture_text'>Share screen & files</span>
+                                                <span style={{ color: "#dadada" }} className='B_Ture_text'>Share screen</span>
                                             </div>
                                         </div>
                                     </div>

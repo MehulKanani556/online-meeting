@@ -8,7 +8,6 @@ const { Server } = require('socket.io');
 const indexRoutes = require('./routes/index.routes');
 const socketManager = require("./socketManager/SocketManager");
 
-
 const app = express();
 const port = process.env.PORT || 4000
 // const socketPort = process.env.SOCKET_PORT || 5000;
