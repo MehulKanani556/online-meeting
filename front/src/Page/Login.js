@@ -632,7 +632,7 @@ function Login() {
                     <div className="social-login">
                       <div className="row">
                         {/* <div className="col-md-6 col-12 j_col_pad"> */}
-                        <div className="col-12">
+                        {/* <div className="col-12">
                           <GoogleLogin
                             onSuccess={handleGoogleLogin}
                             onError={(error) => {
@@ -659,6 +659,19 @@ function Login() {
                               </button>
                             )}
                           />
+                        </div> */}
+                        <div className="col-12">
+                          <button
+                            onClick={() => loging()}
+                            className="j_Login_social d-flex justify-content-center align-items-center"
+                          >
+                            <img
+                              src={google_login}
+                              alt="google_login"
+                              className="google_login"
+                            />
+                            <span className="j_google_social">Google</span>
+                          </button>
                         </div>
                         {/* <div className="col-md-6 col-12 j_col_pad2">
                           <button className="j_Login_social d-flex justify-content-center align-items-center">
@@ -773,7 +786,7 @@ function Login() {
       {forgotPasswordStep === 2 && (
         <OTPInput
           length={6}
-          onComplete={(otpValue) => {}}
+          onComplete={(otpValue) => { }}
           resendTimer={resendTimer}
           setResendTimer={setResendTimer}
           handleVerifyOTP={handleVerifyOTP}

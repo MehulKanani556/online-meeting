@@ -42,11 +42,17 @@ function Home() {
   const { enqueueSnackbar } = useSnackbar();
   const handleCloseReviewModel = () => setReviewModel(false);
   const handleShowReviewModel = () => setReviewModel(true);
-  const handleScheduleclose = () => setScheduleModal(false)
+  const handleScheduleclose = () => {
+    setScheduleModal(false);
+    setActiveItem(null)
+  }
   const handleScheduleshow = () => setScheduleModal(true)
   const handlecustomclose = () => setcustomModal(false)
   const handlecustomshow = () => setcustomModal(true)
-  const handlejoinclose = () => setjoinModal(false)
+  const handlejoinclose = () => {
+    setjoinModal(false);
+    setActiveItem(null)
+  }
   const handlejoinshow = () => setjoinModal(true)
 
   const IMG_URL = IMAGE_URL
@@ -57,6 +63,9 @@ function Home() {
 
   const currentUser = allusers.find((id) => id._id === userId)
   const userName = currentUser?.name;
+
+  console.log("currentUser", currentUser?.planType);
+
 
   const [requestSent, setRequestSent] = useState(false);
   const [joinRequestStatus, setJoinRequestStatus] = useState('');
@@ -328,6 +337,17 @@ function Home() {
     return Array.from(array, byte => ('0' + byte.toString(16)).slice(-2)).join(''); // Convert to hex string
   };
 
+  const calculateMeetingDuration = (startTime, endTime) => {
+    const start = new Date(`1970-01-01T${startTime}:00`); // Use a fixed date
+    const end = new Date(`1970-01-01T${endTime}:00`); // Use a fixed date
+
+    // Calculate the difference in milliseconds
+    const durationInMilliseconds = end - start;
+
+    // Convert milliseconds to minutes
+    return Math.max(0, Math.floor(durationInMilliseconds / 60000)); // Return 0 if negative
+  };
+
   return (
     <div>
       <HomeNavBar />
@@ -466,7 +486,7 @@ function Home() {
                 meetingLink: '',
                 description: '',
                 reminder: [],
-                recurringMeeting: '',
+                recurringMeeting: 'DoesNotRepeat',
                 customRecurrence: {
                   repeatType: '',
                   repeatEvery: "1",
@@ -480,15 +500,90 @@ function Home() {
               }}
               validationSchema={scheduleSchema}
               onSubmit={(values, { resetForm }) => {
-                console.log("Submitting values:", values);
-                if (!gettoken || !userId) {
-                  alert('Please login to create a schedule');
+                if (!gettoken && !userId) {
+                  enqueueSnackbar('Please login to create a schedule', {
+                    variant: 'error', autoHideDuration: 3000, anchorOrigin: {
+                      vertical: 'top', // Position at the top
+                      horizontal: 'right', // Position on the right
+                    }
+                  });
                   return;
                 }
-                // Check if the end date is required and set
-                // if (values.recurringMeeting === 'custom') {
-                // console.log("Custom recurring meeting selected:", values.customRecurrence);
-                // }
+                const currentUserPlanType = currentUser?.planType; // Adjust this based on your actual user object structure
+
+                // Check if the user is trying to schedule a meeting that exceeds their plan limits
+                if (currentUserPlanType === 'Basic') {
+                  const meetingDuration = calculateMeetingDuration(values.startTime, values.endTime);
+                  if (meetingDuration > 30) {
+                    enqueueSnackbar('Your plan allows meetings up to 30 minutes only.', {
+                      variant: 'warning', autoHideDuration: 3000, anchorOrigin: {
+                        vertical: 'top', // Position at the top
+                        horizontal: 'right', // Position on the right
+                      }
+                    });
+                    return;
+                  }
+
+                  // Check if the number of participants exceeds 50
+                  if (values.invitees.length >= 50) {
+                    // alert('Your Basic plan allows a maximum of 50 participants.');
+                    enqueueSnackbar('Your plan allows a maximum of 50 participants.', {
+                      variant: 'warning', autoHideDuration: 3000, anchorOrigin: {
+                        vertical: 'top', // Position at the top
+                        horizontal: 'right', // Position on the right
+                      }
+                    });
+                    return;
+                  }
+                } else if (currentUserPlanType === 'Professional') {
+                  // Example: Check if the meeting duration exceeds 40 minutes
+                  const meetingDuration = calculateMeetingDuration(values.startTime, values.endTime); // Implement this function based on your logic
+                  if (meetingDuration > 300) {
+                    enqueueSnackbar('Your plan allows meetings up to 5 hours only.', {
+                      variant: 'warning', autoHideDuration: 3000, anchorOrigin: {
+                        vertical: 'top', // Position at the top
+                        horizontal: 'right', // Position on the right
+                      }
+                    });
+                    return;
+                  }
+
+                  // Check if the number of participants exceeds 50
+                  if (values.invitees.length >= 150) {
+                    // alert('Your Basic plan allows a maximum of 150 participants.');
+                    enqueueSnackbar('Your plan allows a maximum of 150 participants.', {
+                      variant: 'warning', autoHideDuration: 3000, anchorOrigin: {
+                        vertical: 'top', // Position at the top
+                        horizontal: 'right', // Position on the right
+                      }
+                    });
+                    return;
+                  }
+                } else {
+                  const meetingDuration = calculateMeetingDuration(values.startTime, values.endTime); // Implement this function based on your logic
+                  if (meetingDuration > 600) {
+                    enqueueSnackbar('Your plan allows meetings up to 10 hours only.', {
+                      variant: 'warning', autoHideDuration: 3000, anchorOrigin: {
+                        vertical: 'top', // Position at the top
+                        horizontal: 'right', // Position on the right
+                      }
+                    });
+                    return;
+                  }
+
+                  // Check if the number of participants exceeds 50
+                  if (values.invitees.length >= 300) {
+                    // alert('Your Basic plan allows a maximum of 300  participants.');
+                    enqueueSnackbar('Your plan allows a maximum of 300  participants.', {
+                      variant: 'warning', autoHideDuration: 3000, anchorOrigin: {
+                        vertical: 'top', // Position at the top
+                        horizontal: 'right', // Position on the right
+                      }
+                    });
+                    return;
+                  }
+                }
+
                 dispatch(createschedule(values)).then((response) => {
                   // console.log("Response from API:", response);
                   if (response.payload?.status === 200) {

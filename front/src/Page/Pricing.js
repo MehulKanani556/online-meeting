@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import NavBar from '../Component/NavBar';
 import Footer from '../Component/Footer';
 import check_icon from '../Image/True.svg';
+import { enqueueSnackbar } from 'notistack';
 
 function Pricing() {
 
@@ -11,6 +12,7 @@ function Pricing() {
     }, []);
 
     const [Pricing, setPricing] = useState('monthly');
+    const userId = sessionStorage.getItem('userId')
 
     return (
         <div>
@@ -70,14 +72,33 @@ function Pricing() {
                                     <div className='B_Card_padding h-100' style={{ backgroundColor: '#090E16', borderRadius: '5px' }}>
                                         <h5 className='text-white'>Basic</h5>
                                         <h4 className='text-white B_price_text'>
-                                            ${Pricing === 'yearly' ? '44.50' : '4.50'}/
-                                            <span style={{ fontSize: '16px', color: '#87898B' }}>{Pricing}</span>
+                                            Free
+                                            {/* ${Pricing === 'yearly' ? '44.50' : '4.50'}/ */}
+                                            {/* <span style={{ fontSize: '16px', color: '#87898B' }}>{Pricing}</span> */}
                                         </h4>
                                         <p className='B_cardPrice_text' style={{ color: '#b8babb' }}>Best for individuals and small teams.</p>
 
-                                        <Link to="/payment" state={{ price: Pricing === 'yearly' ? '44.50' : '4.50' }}>
-                                            <button className='btn B_price_btn btn-light fw-bold w-100 '>Continue To Pay</button>
-                                        </Link>
+                                        {/* <Link to="/home">
+                                            <button className='btn B_price_btn btn-light fw-bold w-100 '>Continue</button>
+                                        </Link> */}
+
+                                        {userId ? (
+                                            <Link to="/home">
+                                                <button className='btn B_price_btn btn-light fw-bold w-100 '>Continue</button>
+                                            </Link>
+                                        ) : (
+                                            <button className='btn B_price_btn btn-light fw-bold w-100 opacity-50'
+                                                onClick={() => {
+                                                    enqueueSnackbar('Please Login to Continue', {
+                                                        variant: 'error', autoHideDuration: 3000, anchorOrigin: {
+                                                            vertical: 'top', // Position at the top
+                                                            horizontal: 'right', // Position on the right
+                                                        }
+                                                    });
+                                                    return;
+                                                }}
+                                            >Continue To Pay</button>
+                                        )}
 
                                         <div>
                                             <div className='OR-login'>
@@ -87,7 +108,7 @@ function Pricing() {
                                             </div>
                                             <div className='d-flex align-items-center mb-3 B_PRIC_feature'>
                                                 <img src={check_icon} className='B_true_icon' alt="check_icon" />
-                                                <span style={{ color: "#dadada" }} className='B_Ture_text'>Meetings up to 40 minute</span>
+                                                <span style={{ color: "#dadada" }} className='B_Ture_text'>Meetings up to 30 minute</span>
                                             </div>
                                             <div className='d-flex align-items-center mb-3'>
                                                 <img src={check_icon} className='B_true_icon' alt="check_icon" />
@@ -115,9 +136,26 @@ function Pricing() {
                                         </h4>
                                         <p className='B_cardPrice_text' style={{ color: '#b8babb' }}>Perfect for growing teams.</p>
 
-                                        <Link to="/payment" state={{ price: Pricing === 'yearly' ? '94.50' : '9.50' }}>
+                                        {/* <Link to="/payment" state={{ price: Pricing === 'yearly' ? '94.50' : '9.50' }}>
                                             <button className='btn B_price_btn btn-light fw-bold w-100 '>Continue To Pay</button>
-                                        </Link>
+                                        </Link> */}
+                                        {userId ? (
+                                            <Link to="/payment" state={{ price: Pricing === 'yearly' ? '94.50' : '9.50', Pricing: Pricing, planType: 'Professional' }}>
+                                                <button className='btn B_price_btn btn-light fw-bold w-100 '>Continue To Pay</button>
+                                            </Link>
+                                        ) : (
+                                            <button className='btn B_price_btn btn-light fw-bold w-100 opacity-50'
+                                                onClick={() => {
+                                                    enqueueSnackbar('Please Login to Upgrade Plan', {
+                                                        variant: 'error', autoHideDuration: 3000, anchorOrigin: {
+                                                            vertical: 'top', // Position at the top
+                                                            horizontal: 'right', // Position on the right
+                                                        }
+                                                    });
+                                                    return;
+                                                }}
+                                            >Continue To Pay</button>
+                                        )}
 
                                         <div>
                                             <div className='OR-login'>
@@ -127,7 +165,7 @@ function Pricing() {
                                             </div>
                                             <div className='d-flex align-items-center mb-3 B_PRIC_feature'>
                                                 <img src={check_icon} className='B_true_icon' alt="check_icon" />
-                                                <span style={{ color: "#dadada" }} className='B_Ture_text'>Meetings up to 30 hours</span>
+                                                <span style={{ color: "#dadada" }} className='B_Ture_text'>Meetings up to 5 hours</span>
                                             </div>
                                             <div className='d-flex align-items-center mb-3'>
                                                 <img src={check_icon} className='B_true_icon' alt="check_icon" />
@@ -159,9 +197,26 @@ function Pricing() {
                                         </h4>
                                         <p className='B_cardPrice_text' style={{ color: '#b8babb' }}>Designed for large teams and organizations.</p>
 
-                                        <Link to="/payment" state={{ price: Pricing === 'yearly' ? '150.50' : '15.50' }}>
+                                        {/* <Link to="/payment" state={{ price: Pricing === 'yearly' ? '150.50' : '15.50' }}>
                                             <button className='btn B_price_btn btn-light fw-bold w-100 '>Continue To Pay</button>
-                                        </Link>
+                                        </Link> */}
+                                        {userId ? (
+                                            <Link to="/payment" state={{ price: Pricing === 'yearly' ? '150.50' : '15.50', Pricing: Pricing, planType: 'Business' }}>
+                                                <button className='btn B_price_btn btn-light fw-bold w-100 '>Continue To Pay</button>
+                                            </Link>
+                                        ) : (
+                                            <button className='btn B_price_btn btn-light fw-bold w-100 opacity-50'
+                                                onClick={() => {
+                                                    enqueueSnackbar('Please Login to Upgrade Plan', {
+                                                        variant: 'error', autoHideDuration: 3000, anchorOrigin: {
+                                                            vertical: 'top', // Position at the top
+                                                            horizontal: 'right', // Position on the right
+                                                        }
+                                                    });
+                                                    return;
+                                                }}
+                                            >Continue To Pay</button>
+                                        )}
 
                                         <div>
 
@@ -173,7 +228,7 @@ function Pricing() {
 
                                             <div className='d-flex align-items-center mb-3 B_PRIC_feature' >
                                                 <img src={check_icon} className='B_true_icon' alt="check_icon" />
-                                                <span style={{ color: "#dadada" }} className='B_Ture_text'>Meetings up to 48 hours</span>
+                                                <span style={{ color: "#dadada" }} className='B_Ture_text'>Meetings up to 10 hours</span>
                                             </div>
                                             <div className='d-flex align-items-center mb-3'>
                                                 <img src={check_icon} className='B_true_icon' alt="check_icon" />
@@ -210,8 +265,8 @@ function Pricing() {
 
                     {/* Footer Section End.............. */}
                 </div>
-            </section>
-        </div>
+            </section >
+        </div >
     )
 }
 

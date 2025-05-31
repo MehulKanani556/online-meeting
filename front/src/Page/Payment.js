@@ -11,7 +11,8 @@ import PayPalButton from './PayPalButton';
 function Payment() {
     const dispatch = useDispatch();
     const location = useLocation();
-    const { price } = location.state || { price: '0.00' };
+    const { price, Pricing, planType } = location.state || { price: '0.00' };
+    const userId = sessionStorage.getItem('userId')
 
     useEffect(() => {
         window.scrollTo(0, 0);
@@ -25,7 +26,12 @@ function Payment() {
         state: Yup.string().required('State is required'),
         city: Yup.string().required('City is required'),
         cardName: Yup.string().required('Name on card is required'),
-        cardNumber: Yup.string().required('Card number is required').matches(/^\d{16}$/, 'Card number must be 16 digits'),
+        cardNumber: Yup.string()
+            .required('Card number is required')
+            .test('card-length', 'Card number must be 16 digits', (value) => {
+                const cleanValue = value?.replace(/\s+/g, '') || '';
+                return cleanValue.length === 16;
+            }),
         validThrough: Yup.string().required('Valid through date is required').matches(/^(0[1-9]|1[0-2])\/\d{2}$/, 'Valid through must be in MM/YY format'),
         cvv: Yup.string().required('CVV is required').matches(/^\d{3}$/, 'CVV must be 3 digits'),
     });
@@ -34,10 +40,11 @@ function Payment() {
     const razorpay_key = 'rzp_test_kw3UIwvQV6qFpp'
     const razorpay_secret = 'DGIBTGQqvJa0qV7Yl4HCvwf5'
 
-    // paypal client id
-    const paypal_client_id = 'AS3zPrJ7Y9DtfL2VfSFKs8kJaELe9jInYRsa5N_OvEU2l6-GTDY2CESHZWm2GJo2H7yjZto6kwlAtJkw'
-
     const handlePayment = async (values) => {
+
+        const cleanCardNumber = values.cardNumber.replace(/\s+/g, '');
+        const paymentValues = { ...values, cardNumber: cleanCardNumber };
+
         // Handle Razorpay integration here
         const options = {
             key: razorpay_key,
@@ -51,15 +58,33 @@ function Payment() {
                 contact: values.phone,
             },
             handler: async (response) => {
-                await dispatch(createpayment({ amount: price, ...values, rayzorpaymentId: response.razorpay_payment_id }));
+                await dispatch(createpayment({ amount: price, ...paymentValues, rayzorpaymentId: response.razorpay_payment_id }));
             },
             theme: {
-                color: "#3399cc",
+                color: "#000", // change the color razorpay theme
             },
         };
 
         const rzp = new window.Razorpay(options);
         rzp.open();
+    };
+
+    // Function to format card number with spaces
+    const formatCardNumber = (value) => {
+        // Remove all spaces and non-digit characters
+        const cleanValue = value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
+
+        // Add space after every 4 digits
+        const formattedValue = cleanValue.match(/.{1,4}/g)?.join(' ') || cleanValue;
+
+        // Limit to 19 characters (16 digits + 3 spaces)
+        return formattedValue.substring(0, 19);
+    };
+
+    // Function to handle card number change
+    const handleCardNumberChange = (event, setFieldValue) => {
+        const formattedValue = formatCardNumber(event.target.value);
+        setFieldValue('cardNumber', formattedValue);
     };
 
     return (
@@ -79,6 +104,9 @@ function Payment() {
                         <div>
                             <Formik
                                 initialValues={{
+                                    userId: userId,
+                                    Pricing: Pricing,
+                                    planType: planType,
                                     name: '',
                                     email: '',
                                     phone: '',
@@ -92,11 +120,11 @@ function Payment() {
                                 }}
                                 validationSchema={PaymentSchema}
                                 onSubmit={async (values, { resetForm }) => {
-                                    await handlePayment(values); // Call the payment handler
+                                    await handlePayment(values);
                                     resetForm();
                                 }}
                             >
-                                {({ values, handleChange, handleSubmit, errors, touched }) => (
+                                {({ values, handleChange, handleSubmit, errors, touched, setFieldValue }) => (
                                     <form onSubmit={handleSubmit}>
                                         <div className="row">
                                             <div className="col-lg-6 col-12 B_form_responsive">
@@ -220,7 +248,7 @@ function Payment() {
                                                             id='cardNumber'
                                                             className="form-control B_form_control"
                                                             placeholder="**** **** **** ****"
-                                                            onChange={handleChange}
+                                                            onChange={(e) => handleCardNumberChange(e, setFieldValue)}
                                                             value={values.cardNumber}
                                                         />
                                                         {errors.cardNumber && touched.cardNumber && (

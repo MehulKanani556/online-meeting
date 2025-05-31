@@ -27,6 +27,17 @@ exports.userLogin = async (req, res) => {
         .json({ status: 404, message: "Password Not Match" });
     }
 
+    // Check if the plan has expired
+    const currentDate = new Date();
+    if (checkEmailIsExist.endDate && currentDate > checkEmailIsExist.endDate) {
+      // Set planType to default if expired
+      checkEmailIsExist.planType = 'Basic'; // or any default value you want
+      checkEmailIsExist.endDate = null;
+      checkEmailIsExist.startDate = null;
+      checkEmailIsExist.Pricing = null;
+      await checkEmailIsExist.save(); // Save the updated user
+    }
+
     let token = await jwt.sign(
       { _id: checkEmailIsExist._id },
       process.env.SECRET_KEY,
@@ -77,7 +88,7 @@ exports.googleLogin = async (req, res) => {
 
       // Extract tokens
       const { access_token, refresh_token, id_token, expiry_date } = tokens;
-      
+
       if (!access_token) {
         return res.status(400).json({
           status: 400,
@@ -116,13 +127,24 @@ exports.googleLogin = async (req, res) => {
         checkUser.googleAccessToken = access_token;
         if (refresh_token) {
           checkUser.googleRefreshToken = refresh_token;
-        }else if(access_token){
+        } else if (access_token) {
           checkUser.googleAccessToken = access_token;
         }
         checkUser.googleTokenExpiry = new Date(expiry_date || (Date.now() + (tokens.expires_in * 1000)));
         await checkUser.save();
       }
-      
+
+      // Check if the plan has expired
+      const currentDate = new Date();
+      if (checkUser.endDate && currentDate > checkUser.endDate) {
+        // Set planType to default if expired
+        checkUser.planType = 'Basic'; // or any default value you want
+        checkUser.endDate = null;
+        checkUser.startDate = null;
+        checkUser.Pricing = null;
+        await checkUser.save(); // Save the updated user
+      }
+
       // Convert to plain object for response
       checkUser = checkUser.toObject();
 
@@ -139,7 +161,7 @@ exports.googleLogin = async (req, res) => {
 
       return res.status(200).json({
         status: 200,
-        message: "Google Login successfully...",
+        message: "User Login successfully...",
         success: true,
         user: checkUser,
         token: token,

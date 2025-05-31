@@ -78,7 +78,21 @@ const userSchema = mongoose.Schema({
     },
     googleTokenExpiry: {
         type: Date,
-    }
+    },
+    Pricing: {
+        type: String,
+    },
+    planType: {
+        type: String,
+        enum: ['Basic', 'Professional', 'Business'], // Add your plan types here
+        default: 'Basic'
+    },
+    startDate: {
+        type: Date,
+    },
+    endDate: {
+        type: Date,
+    },
 }, {
     timestamps: true,
     versionKey: false

@@ -1832,6 +1832,17 @@ function Meeting() {
         return date.toISOString().split('T')[0];
     };
 
+    const calculateMeetingDuration = (startTime, endTime) => {
+        const start = new Date(`1970-01-01T${startTime}:00`); // Use a fixed date
+        const end = new Date(`1970-01-01T${endTime}:00`); // Use a fixed date
+
+        // Calculate the difference in milliseconds
+        const durationInMilliseconds = end - start;
+
+        // Convert milliseconds to minutes
+        return Math.max(0, Math.floor(durationInMilliseconds / 60000)); // Return 0 if negative
+    };
+
     return (
         <div>
             {/* .......................NAVBAR START ....................... */}
@@ -1976,6 +1987,84 @@ function Meeting() {
                                             scheduleSubmitRef.current = false;
                                             return;
                                         }
+
+                                        const currentUserPlanType = singleuser?.planType; // Adjust this based on your actual user object structure
+
+                                        // Check if the user is trying to schedule a meeting that exceeds their plan limits
+                                        if (currentUserPlanType === 'Basic') {
+                                            // Example: Check if the meeting duration exceeds 40 minutes
+                                            const meetingDuration = calculateMeetingDuration(values.startTime, values.endTime); // Implement this function based on your logic
+                                            if (meetingDuration > 40) {
+                                                // alert('Your Basic plan allows meetings up to 40 minutes only.');
+                                                enqueueSnackbar('Your plan allows meetings up to 40 minutes only.', {
+                                                    variant: 'warning', autoHideDuration: 3000, anchorOrigin: {
+                                                        vertical: 'top', // Position at the top
+                                                        horizontal: 'right', // Position on the right
+                                                    }
+                                                });
+                                                return;
+                                            }
+
+                                            // Check if the number of participants exceeds 50
+                                            if (values.invitees.length >= 50) {
+                                                // alert('Your Basic plan allows a maximum of 50 participants.');
+                                                enqueueSnackbar('Your plan allows a maximum of 50 participants.', {
+                                                    variant: 'warning', autoHideDuration: 3000, anchorOrigin: {
+                                                        vertical: 'top', // Position at the top
+                                                        horizontal: 'right', // Position on the right
+                                                    }
+                                                });
+                                                return;
+                                            }
+                                        } else if (currentUserPlanType === 'Professional') {
+                                            // Example: Check if the meeting duration exceeds 40 minutes
+                                            const meetingDuration = calculateMeetingDuration(values.startTime, values.endTime); // Implement this function based on your logic
+                                            if (meetingDuration > 300) {
+                                                enqueueSnackbar('Your plan allows meetings up to 5 hours only.', {
+                                                    variant: 'warning', autoHideDuration: 3000, anchorOrigin: {
+                                                        vertical: 'top', // Position at the top
+                                                        horizontal: 'right', // Position on the right
+                                                    }
+                                                });
+                                                return;
+                                            }
+
+                                            // Check if the number of participants exceeds 50
+                                            if (values.invitees.length >= 150) {
+                                                // alert('Your Basic plan allows a maximum of 150 participants.');
+                                                enqueueSnackbar('Your plan allows a maximum of 150 participants.', {
+                                                    variant: 'warning', autoHideDuration: 3000, anchorOrigin: {
+                                                        vertical: 'top', // Position at the top
+                                                        horizontal: 'right', // Position on the right
+                                                    }
+                                                });
+                                                return;
+                                            }
+                                        } else {
+                                            const meetingDuration = calculateMeetingDuration(values.startTime, values.endTime); // Implement this function based on your logic
+                                            if (meetingDuration > 600) {
+                                                enqueueSnackbar('Your plan allows meetings up to 10 hours only.', {
+                                                    variant: 'warning', autoHideDuration: 3000, anchorOrigin: {
+                                                        vertical: 'top', // Position at the top
+                                                        horizontal: 'right', // Position on the right
+                                                    }
+                                                });
+                                                return;
+                                            }
+
+                                            // Check if the number of participants exceeds 50
+                                            if (values.invitees.length >= 300) {
+                                                // alert('Your Basic plan allows a maximum of 300  participants.');
+                                                enqueueSnackbar('Your plan allows a maximum of 300  participants.', {
+                                                    variant: 'warning', autoHideDuration: 3000, anchorOrigin: {
+                                                        vertical: 'top', // Position at the top
+                                                        horizontal: 'right', // Position on the right
+                                                    }
+                                                });
+                                                return;
+                                            }
+                                        }
+
                                         dispatch(createschedule(values)).then((response) => {
                                             console.log(response);
                                             if (response.payload?.status === 200) {

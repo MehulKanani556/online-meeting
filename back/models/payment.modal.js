@@ -1,6 +1,24 @@
 const mongoose = require('mongoose');
 
 const PaymentSchema = new mongoose.Schema({
+    userId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+    },
+    Pricing: {
+        type: String,
+    },
+    planType: {
+        type: String,
+        enum: ['Basic', 'Professional', 'Business'], // Add your plan types here
+        default: 'Basic'
+    },
+    startDate: {
+        type: Date,
+    },
+    endDate: {
+        type: Date,
+    },
     rayzorpaymentId: {
         type: String,
     },

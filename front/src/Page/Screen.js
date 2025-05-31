@@ -17,7 +17,7 @@ import { IoClose } from "react-icons/io5";
 import { getAllUsers, getUserById } from "../Redux/Slice/user.slice";
 import { Provider, useDispatch, useSelector } from "react-redux";
 import { configureStore } from "../Redux/Store";
-import { useParams, useNavigate, useLocation } from "react-router-dom";
+import { useParams, useNavigate, useLocation, Link } from "react-router-dom";
 import { useSocket } from "../Hooks/useSocket";
 import { IMAGE_URL } from "../Utils/baseUrl";
 import { Modal } from "react-bootstrap";
@@ -26,6 +26,7 @@ import BottomBar from "../Component/BottomBar";
 import MeetingSidebar from "../Component/MeetingSidebar";
 import { setIsHandRaised, setMainSectionMargin, setPipWindow, setShow } from "../Redux/Slice/meeting.slice";
 import { getAllschedule } from "../Redux/Slice/schedule.slice";
+import { IoIosWarning } from "react-icons/io";
 
 function Screen() {
   const { id: roomId } = useParams();
@@ -88,6 +89,12 @@ function Screen() {
     }`
     : "U";
   const userName = currUser?.name;
+
+  const [upgrademodal, setupgrademodal] = useState(false)
+  const [Screensharemodal, setScreensharemodal] = useState(false)
+
+  const handlecloseupgrademodal = () => setupgrademodal(false)
+  const handlecloseScreensharemodal = () => setScreensharemodal(false)
 
   useEffect(() => {
     let schedule;
@@ -813,6 +820,11 @@ function Screen() {
 
   // Share screen
   const toggleScreenShare = async () => {
+    if (["Basic", "Professional"].includes(currUser?.planType)) {
+      setScreensharemodal(true);
+      return;
+    }
+
     if (!isScreenSharing) {
       try {
         const screenStream = await navigator.mediaDevices.getDisplayMedia({
@@ -1321,6 +1333,13 @@ function Screen() {
   // };
 
   const toggleRecording = async () => {
+    if (currUser?.planType === "Basic") {
+      // Open the upgrade plan popup
+      setupgrademodal(true)
+      // alert("Please upgrade your plan to start recording."); // Replace this with your actual popup logic
+      return; // Exit the function without starting the recording
+    }
+
     if (isRecording) {
       // Stop recording
       if (mediaRecorderRef.current) {
@@ -2637,6 +2656,44 @@ function Screen() {
         singleSchedule={singleSchedule}
       // setFieldValue={setFieldValue}
       />
+
+
+      {/* ============= Upgrade Plan Modal ============= */}
+      <Modal show={upgrademodal} onHide={handlecloseupgrademodal} className='j_Modal_backcolor' centered>
+        <Modal.Header className='border-0 d-flex justify-content-between align-items-center'>
+          <Modal.Title className='j_modal_header_text text-white'> Upgrade Plan</Modal.Title>
+          <IoClose style={{ color: '#fff', fontSize: '22px', cursor: 'pointer' }} onClick={handlecloseupgrademodal} />
+        </Modal.Header>
+        <div className="j_modal_header"></div>
+        <Modal.Body>
+          <div className="text-white text-center">
+            <IoIosWarning size={40} style={{ color: 'orange' }} />
+            <p className="font-Bold">Warning!</p>
+            <p>You need to upgrade your plan to start recording.</p>
+            <Link to={'/pricing'} target="_blank" onClick={handlecloseupgrademodal}>
+              <button className="j_upgrade_plan">Upgrade Plan</button>
+            </Link>
+          </div>
+        </Modal.Body>
+      </Modal>
+      {/* =============  Screen share Modal ============= */}
+      <Modal show={Screensharemodal} onHide={handlecloseScreensharemodal} className='j_Modal_backcolor' centered>
+        <Modal.Header className='border-0 d-flex justify-content-between align-items-center'>
+          <Modal.Title className='j_modal_header_text text-white'> Upgrade Plan</Modal.Title>
+          <IoClose style={{ color: '#fff', fontSize: '22px', cursor: 'pointer' }} onClick={handlecloseScreensharemodal} />
+        </Modal.Header>
+        <div className="j_modal_header"></div>
+        <Modal.Body>
+          <div className="text-white text-center">
+            <IoIosWarning size={40} style={{ color: 'orange' }} />
+            <p className="font-Bold">Warning!</p>
+            <p>You need to upgrade your plan to Share Screen.</p>
+            <Link to={'/pricing'} target="_blank" onClick={handlecloseScreensharemodal}>
+              <button className="j_upgrade_plan">Upgrade Plan</button>
+            </Link>
+          </div>
+        </Modal.Body>
+      </Modal>
     </div>
   );
 }

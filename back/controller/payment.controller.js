@@ -1,5 +1,6 @@
 const Payment = require('../models/payment.modal');
 const Razorpay = require("razorpay");
+const User = require('../models/user.model');
 
 const razorpay = new Razorpay({
     key_id: process.env.razorpay_key,
@@ -7,7 +8,9 @@ const razorpay = new Razorpay({
 });
 
 exports.createPayment = async (req, res) => {
-    let { rayzorpaymentId, name, email, phone, address, state, city, cardName, cardNumber, validThrough, cvv, amount } = req.body;
+    let { userId, startDate, endDate, Pricing, planType, rayzorpaymentId, name, email, phone, address, state, city, cardName, cardNumber, validThrough, cvv, amount } = req.body;
+
+    startDate = new Date();
 
     const options = {
         amount: amount * 100,
@@ -18,8 +21,19 @@ exports.createPayment = async (req, res) => {
         // Create the order with Razorpay
         const order = await razorpay.orders.create(options);
 
+        if (Pricing === 'monthly') {
+            endDate = new Date(startDate);
+            endDate.setMonth(startDate.getMonth() + 1);
+        } else if (Pricing === 'yearly') {
+            endDate = new Date(startDate);
+            endDate.setFullYear(startDate.getFullYear() + 1);
+        }
+
         // Save payment details to the database
         const checkpayment = await Payment.create({
+            userId,
+            Pricing,
+            planType,
             rayzorpaymentId,
             name,
             email,
@@ -32,7 +46,17 @@ exports.createPayment = async (req, res) => {
             validThrough,
             cvv,
             amount,
+            startDate,
+            endDate,
         });
+
+        // Update user with payment details
+        await User.findByIdAndUpdate(userId, {
+            Pricing,
+            planType,
+            startDate,
+            endDate,
+        }, { new: true });
 
         // res.json(order);
 

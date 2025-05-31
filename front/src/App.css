@@ -448,6 +448,26 @@ img {
   transition: all 0.3s ease;
 }
 
+.j_upgrade_plan {
+  background-color: #FFFFFF;
+  color: #000000;
+  border-radius: 8px;
+  padding: 10px;
+  width: 50%;
+  border: none;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.j_upgrade_plan:hover {
+  background-color: transparent;
+  color: #fff;
+  border-radius: 8px;
+  padding: 10px;
+  outline: 1px solid #fff;
+  font-weight: 500;
+}
+
 .B_pay_withPay {
   background-color: transparent;
   color: #FFFFFF;

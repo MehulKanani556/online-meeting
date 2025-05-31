@@ -15,6 +15,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { createschedule, getAllschedule } from '../Redux/Slice/schedule.slice';
 import { getAllUsers } from '../Redux/Slice/user.slice';
 import { useNavigate } from 'react-router-dom';
+import { enqueueSnackbar } from 'notistack';
 
 
 const localizer = momentLocalizer(moment);
@@ -139,6 +140,7 @@ function Schedule() {
   const dropdownRef = useRef(null);
   const searchInputRef = useRef(null);
   const allusers = useSelector((state) => state.user.allusers);
+  const currentUser = allusers.find((id) => id._id === userId)
 
 
   const handleScheduleclose = () => setScheduleModal(false);
@@ -341,6 +343,17 @@ function Schedule() {
     }
   })
 
+  const calculateMeetingDuration = (startTime, endTime) => {
+    const start = new Date(`1970-01-01T${startTime}:00`); // Use a fixed date
+    const end = new Date(`1970-01-01T${endTime}:00`); // Use a fixed date
+
+    // Calculate the difference in milliseconds
+    const durationInMilliseconds = end - start;
+
+    // Convert milliseconds to minutes
+    return Math.max(0, Math.floor(durationInMilliseconds / 60000)); // Return 0 if negative
+  };
+
   return (
     <div>
       <HomeNavBar />
@@ -395,7 +408,7 @@ function Schedule() {
                 meetingLink: '',
                 description: '',
                 reminder: [],
-                recurringMeeting: '',
+                recurringMeeting: 'DoesNotRepeat',
                 customRecurrence: {
                   repeatType: '',
                   repeatEvery: "1",
@@ -414,10 +427,83 @@ function Schedule() {
                   alert('Please login to create a schedule');
                   return;
                 }
-                // Check if the end date is required and set
-                // if (values.recurringMeeting === 'custom') {
-                // console.log("Custom recurring meeting selected:", values.customRecurrence);
-                // }
+                const currentUserPlanType = currentUser?.planType; // Adjust this based on your actual user object structure
+
+                // Check if the user is trying to schedule a meeting that exceeds their plan limits
+                if (currentUserPlanType === 'Basic') {
+                  // Example: Check if the meeting duration exceeds 40 minutes
+                  const meetingDuration = calculateMeetingDuration(values.startTime, values.endTime); // Implement this function based on your logic
+                  if (meetingDuration > 40) {
+                    // alert('Your Basic plan allows meetings up to 40 minutes only.');
+                    enqueueSnackbar('Your plan allows meetings up to 40 minutes only.', {
+                      variant: 'warning', autoHideDuration: 3000, anchorOrigin: {
+                        vertical: 'top', // Position at the top
+                        horizontal: 'right', // Position on the right
+                      }
+                    });
+                    return;
+                  }
+
+                  // Check if the number of participants exceeds 50
+                  if (values.invitees.length >= 50) {
+                    // alert('Your Basic plan allows a maximum of 50 participants.');
+                    enqueueSnackbar('Your plan allows a maximum of 50 participants.', {
+                      variant: 'warning', autoHideDuration: 3000, anchorOrigin: {
+                        vertical: 'top', // Position at the top
+                        horizontal: 'right', // Position on the right
+                      }
+                    });
+                    return;
+                  }
+                } else if (currentUserPlanType === 'Professional') {
+                  // Example: Check if the meeting duration exceeds 40 minutes
+                  const meetingDuration = calculateMeetingDuration(values.startTime, values.endTime); // Implement this function based on your logic
+                  if (meetingDuration > 300) {
+                    enqueueSnackbar('Your plan allows meetings up to 5 hours only.', {
+                      variant: 'warning', autoHideDuration: 3000, anchorOrigin: {
+                        vertical: 'top', // Position at the top
+                        horizontal: 'right', // Position on the right
+                      }
+                    });
+                    return;
+                  }
+
+                  // Check if the number of participants exceeds 50
+                  if (values.invitees.length >= 150) {
+                    // alert('Your Basic plan allows a maximum of 150 participants.');
+                    enqueueSnackbar('Your plan allows a maximum of 150 participants.', {
+                      variant: 'warning', autoHideDuration: 3000, anchorOrigin: {
+                        vertical: 'top', // Position at the top
+                        horizontal: 'right', // Position on the right
+                      }
+                    });
+                    return;
+                  }
+                } else {
+                  const meetingDuration = calculateMeetingDuration(values.startTime, values.endTime); // Implement this function based on your logic
+                  if (meetingDuration > 600) {
+                    enqueueSnackbar('Your plan allows meetings up to 10 hours only.', {
+                      variant: 'warning', autoHideDuration: 3000, anchorOrigin: {
+                        vertical: 'top', // Position at the top
+                        horizontal: 'right', // Position on the right
+                      }
+                    });
+                    return;
+                  }
+
+                  // Check if the number of participants exceeds 50
+                  if (values.invitees.length >= 300) {
+                    // alert('Your Basic plan allows a maximum of 300  participants.');
+                    enqueueSnackbar('Your plan allows a maximum of 300  participants.', {
+                      variant: 'warning', autoHideDuration: 3000, anchorOrigin: {
+                        vertical: 'top', // Position at the top
+                        horizontal: 'right', // Position on the right
+                      }
+                    });
+                    return;
+                  }
+                }
+
                 dispatch(createschedule(values)).then((response) => {
                   // console.log("Response from API:", response);
                   if (response.payload?.status === 200) {
