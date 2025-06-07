@@ -155,7 +155,12 @@ function Schedule() {
 
   // Function to handle showing the custom modal
   const handleCustomModalShow = () => setCustomModalVisible(true);
-  const handleCustomModalClose = () => setCustomModalVisible(false);
+  const handleCustomModalClose = (setFieldValue) => {
+    setCustomModalVisible(false);
+    // Reset the select dropdown to its previous value if no custom recurrence was set
+    // This allows the user to select "custom" again
+    setFieldValue('recurringMeeting', 'DoesNotRepeat');
+  };
 
   const toggleDay = (day) => {
     setSelectedDays(prev =>
@@ -1267,16 +1272,48 @@ function Schedule() {
                         <div className="j_custom_footer d-flex border-0 p-0 pt-4 pb-3">
                           <button
                             className="btn btn-outline-light j_custom_button fw-semibold"
-                            onClick={handleCustomModalClose}
+                            onClick={() => {
+                              // Reset all custom recurrence fields to default
+                              setFieldValue('customRecurrence', {
+                                repeatType: '',
+                                repeatEvery: "1",
+                                repeatOn: [],
+                                ends: '0',
+                                endDate: '',
+                                Recurrence: '1',
+                                Monthfirst: '',
+                              });
+                              handleCustomModalClose(setFieldValue); // This will also reset recurringMeeting to 'DoesNotRepeat'
+                            }}
                           >
                             Cancel
                           </button>
                           <button
                             className="btn btn-light j_custom_button fw-semibold"
                             onClick={() => {
-                              // Handle the done action
-                              setFieldValue('customRecurrence', values.customRecurrence);
-                              handleCustomModalClose();
+                              // Validate that required fields are filled
+                              if (values.customRecurrence.repeatType &&
+                                values.customRecurrence.repeatType !== '0' &&
+                                values.customRecurrence.ends &&
+                                values.customRecurrence.ends !== '0') {
+
+                                // Keep the custom option selected only if properly configured
+                                setFieldValue('recurringMeeting', 'custom');
+                                setFieldValue('customRecurrence', values.customRecurrence);
+                                setCustomModalVisible(false); // Don't use handleCustomModalClose here
+                              } else {
+                                // If validation fails, reset everything
+                                // alert('Please fill all required fields of Custom Recurrence');
+                                // Or you could close and reset:
+                                // handleCustomModalClose();
+                                enqueueSnackbar('Please fill all required fields of Custom Recurrence', {
+                                  variant: 'error', autoHideDuration: 3000, anchorOrigin: {
+                                    vertical: 'top', // Position at the top
+                                    horizontal: 'right', // Position on the right
+                                  }
+                                });
+                                return;
+                              }
                             }}
                           >
                             Done
