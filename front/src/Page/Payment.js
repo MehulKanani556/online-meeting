@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import NavBar from '../Component/NavBar';
 import Footer from '../Component/Footer';
 import { useLocation } from 'react-router-dom';
@@ -19,20 +19,41 @@ function Payment() {
     }, []);
 
     const PaymentSchema = Yup.object().shape({
-        name: Yup.string().required('Name is required'),
-        email: Yup.string().email('Invalid email').required('Email is required'),
-        phone: Yup.string().required('Phone number is required'),
+        name: Yup.string()
+            .matches(/^[A-Za-z\s]+$/, 'Name must only contain letters')
+            .required('Name is required'),
+        email: Yup.string()
+            .email('Invalid email format')
+            .matches(/^[^\d]+@[^\d]+\.[^\d]+$/, 'Email should not contain numbers before @')
+            .required('Email is required'),
+        phone: Yup.string()
+            .matches(/^\d{10}$/, 'Phone number must be exactly 10 digits')
+            .required('Phone number is required'),
         address: Yup.string().required('Address is required'),
-        state: Yup.string().required('State is required'),
-        city: Yup.string().required('City is required'),
-        cardName: Yup.string().required('Name on card is required'),
+        state: Yup.string().matches(/^[A-Za-z\s]+$/, 'state must only contain letters').required('State is required'),
+        city: Yup.string().matches(/^[A-Za-z\s]+$/, 'City must only contain letters').required('City is required'),
+        cardName: Yup.string().matches(/^[A-Za-z\s]+$/, 'Name on card must only contain letters').required('Name on card is required'),
         cardNumber: Yup.string()
             .required('Card number is required')
             .test('card-length', 'Card number must be 16 digits', (value) => {
                 const cleanValue = value?.replace(/\s+/g, '') || '';
                 return cleanValue.length === 16;
             }),
-        validThrough: Yup.string().required('Valid through date is required').matches(/^(0[1-9]|1[0-2])\/\d{2}$/, 'Valid through must be in MM/YY format'),
+        // validThrough: Yup.string().required('Valid through date is required').matches(/^(0[1-9]|1[0-2])\/\d{2}$/, 'Valid through must be in MM/YY format'),
+        validThrough: Yup.string()
+            .required('Valid through date is required')
+            .matches(/^(0[1-9]|1[0-2])\/\d{2}$/, 'Valid through must be in MM/YY format')
+            .test('month-validation', 'Month must be between 01 and 12', (value) => {
+                if (!value) return false;
+                const month = parseInt(value.substring(0, 2));
+                return month >= 1 && month <= 12;
+            })
+            .test('year-validation', 'Year must be current year or future', (value) => {
+                if (!value || value.length < 5) return false;
+                const currentYear = new Date().getFullYear() % 100; // Get last 2 digits of current year
+                const inputYear = parseInt(value.substring(3, 5));
+                return inputYear >= currentYear;
+            }),
         cvv: Yup.string().required('CVV is required').matches(/^\d{3}$/, 'CVV must be 3 digits'),
     });
 
@@ -85,6 +106,35 @@ function Payment() {
     const handleCardNumberChange = (event, setFieldValue) => {
         const formattedValue = formatCardNumber(event.target.value);
         setFieldValue('cardNumber', formattedValue);
+    };
+
+
+    const formatValidThrough = (value) => {
+        // Remove all non-digit characters
+        const cleanValue = value.replace(/[^0-9]/g, '');
+
+        // Limit to 4 digits maximum
+        const limitedValue = cleanValue.substring(0, 4);
+
+        // Add slash after 2 digits
+        if (limitedValue.length >= 2) {
+            return limitedValue.substring(0, 2) + '/' + limitedValue.substring(2);
+        }
+
+        return limitedValue;
+    };
+
+    // Function to handle valid through change
+    const handleValidThroughChange = (event, setFieldValue) => {
+        const formattedValue = formatValidThrough(event.target.value);
+        setFieldValue('validThrough', formattedValue);
+    };
+
+    const handleCVVChange = (event, setFieldValue) => {
+        const value = event.target.value;
+        // Remove all non-digit characters and limit to 3 digits
+        const cleanValue = value.replace(/[^0-9]/g, '').substring(0, 3);
+        setFieldValue('cvv', cleanValue);
     };
 
     return (
@@ -163,13 +213,26 @@ function Payment() {
 
                                                     <div className="mb-3">
                                                         <label className="mb-2" style={{ fontSize: "13px", color: "#dfe2e4" }}>Phone No.</label>
-                                                        <input
+                                                        {/* <input
                                                             type="tel"
                                                             id='phone'
                                                             className="form-control B_form_control"
                                                             placeholder="Enter phone no."
                                                             onChange={handleChange}
                                                             value={values.phone}
+                                                        /> */}
+                                                        <input
+                                                            type="tel"
+                                                            id="phone"
+                                                            className="form-control B_form_control"
+                                                            placeholder="Enter phone no."
+                                                            onChange={handleChange}
+                                                            value={values.phone}
+                                                            onKeyPress={(e) => {
+                                                                if (!/[0-9]/.test(e.key)) {
+                                                                    e.preventDefault();
+                                                                }
+                                                            }}
                                                         />
                                                         {errors.phone && touched.phone && (
                                                             <div style={{ color: '#cd1425', fontSize: '13px', marginTop: '5px' }}>{errors.phone}</div>
@@ -263,15 +326,22 @@ function Payment() {
                                                                 type="text"
                                                                 className="form-control B_form_control"
                                                                 id='validThrough'
-                                                                placeholder="MM / YY"
-                                                                onChange={handleChange}
+                                                                placeholder="MM/YY"
+                                                                onChange={(e) => handleValidThroughChange(e, setFieldValue)}
                                                                 value={values.validThrough}
+                                                                maxLength="5"
+                                                                onKeyPress={(e) => {
+                                                                    // Only allow numbers
+                                                                    if (!/[0-9]/.test(e.key)) {
+                                                                        e.preventDefault();
+                                                                    }
+                                                                }}
                                                             />
                                                             {errors.validThrough && touched.validThrough && (
                                                                 <div style={{ color: '#cd1425', fontSize: '13px', marginTop: '5px' }}>{errors.validThrough}</div>
                                                             )}
                                                         </div>
-                                                        <div className="col-md-6 mb-3 pe-0 B_formStart_padding">
+                                                        {/* <div className="col-md-6 mb-3 pe-0 B_formStart_padding">
                                                             <label className="mb-2" style={{ fontSize: "13px", color: "#dfe2e4" }}>CVV</label>
                                                             <input
                                                                 type="text"
@@ -280,6 +350,34 @@ function Payment() {
                                                                 placeholder="***"
                                                                 onChange={handleChange}
                                                                 value={values.cvv}
+                                                            />
+                                                            {errors.cvv && touched.cvv && (
+                                                                <div style={{ color: '#cd1425', fontSize: '13px', marginTop: '5px' }}>{errors.cvv}</div>
+                                                            )}
+                                                        </div> */}
+                                                        <div className="col-md-6 mb-3 pe-0 B_formStart_padding">
+                                                            <label className="mb-2" style={{ fontSize: "13px", color: "#dfe2e4" }}>CVV</label>
+                                                            <input
+                                                                type="password"
+                                                                id='cvv'
+                                                                className="form-control B_form_control"
+                                                                placeholder="***"
+                                                                onChange={(e) => handleCVVChange(e, setFieldValue)}
+                                                                value={values.cvv} // Display masked value
+                                                                maxLength="3"
+                                                                onKeyPress={(e) => {
+                                                                    // Only allow numbers
+                                                                    if (!/[0-9]/.test(e.key)) {
+                                                                        e.preventDefault();
+                                                                    }
+                                                                }}
+                                                                onPaste={(e) => {
+                                                                    // Handle paste events to only allow numbers
+                                                                    e.preventDefault();
+                                                                    const paste = e.clipboardData.getData('text');
+                                                                    const numericPaste = paste.replace(/[^0-9]/g, '').substring(0, 3);
+                                                                    setFieldValue('cvv', numericPaste);
+                                                                }}
                                                             />
                                                             {errors.cvv && touched.cvv && (
                                                                 <div style={{ color: '#cd1425', fontSize: '13px', marginTop: '5px' }}>{errors.cvv}</div>

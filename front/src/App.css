@@ -54,6 +54,11 @@ img {
   padding: 40px 30px;
   border-radius: 8px;
   height: 100%;
+  transition: all 0.2s;
+}
+
+.B_feature-card:hover {
+  box-shadow: 3px 3px 5px #0af, -3px -3px 5px #4361ee;
 }
 
 .B_feature-icon {
@@ -135,6 +140,10 @@ img {
 
 .owl-theme .owl-nav [class*='owl-']:hover {
   background-color: #111924 !important;
+}
+
+.j_review_margin {
+  margin-bottom: 48px;
 }
 
 .B_Owl .owl-carousel .owl-item.active.center {
@@ -1104,7 +1113,7 @@ img {
   }
 
   .B_ROOM_DETAILS_span {
-    width: 85px !important;
+    width: 80px !important;
   }
 
   .d_avatar-circle {
@@ -1147,12 +1156,25 @@ img {
   }
 
   .B_Slider_section {
-    padding: 55px 0;
+    padding: 30px 0;
+  }
+
+  .Opacity_section {
+    padding: 10px 0 30px 0;
+  }
+
+  .B_Footer_section {
+    padding: 10px 0px 30px 0;
   }
 
   .Opacity_img {
     background-position: left;
-    height: 335px;
+    /* height: 335px; */
+    height: 250px;
+  }
+
+  .j_review_margin {
+    margin-bottom: 20px;
   }
 
   .B_opacity_button1 {
@@ -1213,7 +1235,7 @@ img {
   }
 
   .B_Get_In_Touch {
-    padding: 60px 0;
+    padding: 30px 0;
   }
 
   .B_Get_SEC_text {
@@ -1246,7 +1268,7 @@ img {
   }
 
   .B_addCARD_section {
-    padding: 0px 0 60px 0;
+    padding: 0px;
   }
 
   .B_Meeting_head {
@@ -1301,6 +1323,9 @@ img {
     font-size: 15px;
   }
 
+  .B_simple_affordable {
+    padding: 30px 0;
+  }
 }
 
 @media (max-width: 768px) {
@@ -1406,9 +1431,9 @@ img {
     font-size: 15px;
   }
 
-  .Opacity_img {
+  /* .Opacity_img {
     height: 315px;
-  }
+  } */
 
   .B_Footer_text {
     font-size: 14px;
@@ -1481,6 +1506,7 @@ img {
 
   .B_payment_card {
     width: 565px;
+    margin-top: 20px;
     background-color: #060A11;
   }
 
@@ -1489,7 +1515,7 @@ img {
   }
 
   .B_Get_In_Touch {
-    padding: 25px 0 40px 0;
+    padding: 25px 0;
   }
 
   .B_contact_form {
@@ -1766,7 +1792,7 @@ img {
   }
 
   .Opacity_img {
-    height: 235px;
+    height: 200px;
   }
 
   .B_opacity_head_text {
@@ -1843,11 +1869,13 @@ img {
   }
 
   .B_simple_affo_text {
+    width: 70%;
+    margin: 0 auto;
     font-size: 13px;
   }
 
   .B_pricing_button {
-    padding: 6px 30px;
+    padding: 6px 15px;
   }
 
   .B_price_text {
@@ -1909,6 +1937,8 @@ img {
   }
 
   .B_GetText {
+    width: 70%;
+    margin: 0 auto;
     font-size: 13px;
   }
 
@@ -2240,7 +2270,7 @@ img {
   }
 
   .B_pricing_button {
-    padding: 4px 22px;
+    padding: 4px 12px;
   }
 
   .B_billing_details {
@@ -2437,6 +2467,9 @@ img {
     width: 370px !important;
   }
 
+  .B_GetText {
+    width: 80%;
+  }
 
 }
 
@@ -2543,20 +2576,24 @@ img {
     font-size: 18px;
   }
 
-  .B_Meeting_head_flex {
+  /* .B_Meeting_head_flex {
     flex-direction: column;
-  }
+  } */
 
   .B_metting_btn {
     padding: 6px 23px;
   }
 
   .B_dropdown_btn1 {
-    padding: 7.5px 56px;
+    padding: 7.5px 15px;
   }
 
   .B_dropdown_btn2 {
-    padding: 7.5px 56px;
+    padding: 7.5px 15px;
+  }
+
+  .B_Meeting_head_flex {
+    gap: 5px !important;
   }
 
   .B_dropdown {
@@ -2658,6 +2695,18 @@ img {
 
   .B_screen_offcanvas {
     width: 315px !important;
+  }
+
+  .B_simple_affo_head_text {
+    font-size: 18px;
+  }
+
+  .B_simple_affo_text {
+    width: 80%;
+  }
+
+  .B_GetText {
+    width: 90%;
   }
 
 }

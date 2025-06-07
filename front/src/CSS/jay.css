@@ -157,6 +157,10 @@
     margin-top: 20px;
 }
 
+.j_complete_padding {
+    padding: 16px;
+}
+
 .j_col_pad {
     padding-left: 0;
 }
@@ -229,7 +233,6 @@
 .j_Home_sidebar ul {
     list-style-type: none;
     padding: 0;
-    margin: 0;
 }
 
 .j_input:-webkit-autofill,
@@ -249,8 +252,8 @@
 }
 
 .j_Home_sidebar .j_sidebar_a {
-    margin-top: 20px;
-    margin-bottom: 30px;
+    /* margin-top: 20px;
+    margin-bottom: 30px; */
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -313,7 +316,7 @@
 
 .j_schedule_btn {
     background-color: #202F41;
-    border: none;
+    border: 2px solid transparent;
     padding: 10px 12px;
     margin: 10px 10px 0 0;
     color: white;
@@ -324,7 +327,7 @@
 .j_schedule_btn:hover {
     background-color: #202F41;
     color: white;
-    border: none;
+    border: 2px solid transparent;
 }
 
 .j_join_button {
@@ -396,7 +399,7 @@
 :not(.btn-check)+.j_schedule_btn:active {
     color: white;
     background-color: #202F41;
-    border: none;
+    border: 2px solid transparent;
 }
 
 .j_day_btn {
@@ -666,7 +669,43 @@
     width: 600px;
     /* height: 100%; */
     height: auto;
-    min-height: 500px;
+    min-height: 560px;
+}
+
+.custom-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.custom-modal-content {
+    border-radius: 8px;
+    width: 70%;
+    max-width: 600px;
+    background-color: #12161C;
+    padding: 10px 20px;
+}
+
+.custom-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.custom-modal-body {
+    margin: 20px 0;
+}
+
+.custom-modal-footer {
+    display: flex;
+    justify-content: flex-end;
 }
 
 .j_margin_setting {
@@ -845,6 +884,19 @@
 .j_no_meeting_icon {
     height: 100px;
     width: 140px;
+}
+
+.j_sidebar_UL {
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+    margin-top: 40px;
+}
+
+.j_sidebar_Gap {
+    display: flex;
+    gap: 15px;
+    cursor: pointer;
 }
 
 /* ====================================== start calendar ======================================== */
@@ -1198,6 +1250,10 @@
         margin-left: 0;
         width: 96%;
     }
+
+    .j_sidebar_Gap {
+        gap: 8px;
+    }
 }
 
 @media (max-width: 768px) {
@@ -1442,6 +1498,18 @@
     .j_null_notification {
         font-size: 14px;
     }
+
+    .j_canvas_backcolor {
+        max-width: 75% !important;
+    }
+
+    .B_offcanvas {
+        max-width: 80% !important;
+    }
+
+    .j_complete_padding {
+        padding: 0px;
+    }
 }
 
 @media (max-width: 375px) {
@@ -1474,7 +1542,7 @@
     }
 
     .j_join_button {
-        padding: 8px 45px;
+        padding: 8px 40px;
     }
 
     .j_modal_schedule {

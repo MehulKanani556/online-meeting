@@ -190,7 +190,7 @@ const BottomBar = React.memo(
                 <div
                   className="d-flex align-items-center p-2"
                   onClick={toggleRecording}
-                  style={{ display: "flex", alignItems: "center", }}
+                  style={{ display: "flex", alignItems: "center", backgroundColor: isRecording ? "#E12B2D" : "transparent", }}
                 >
                   <img src={recording} alt="recording" className="me-2" />
                   <span>Record</span>

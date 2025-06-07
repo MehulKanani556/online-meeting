@@ -20,14 +20,20 @@ function ContactUs() {
     }, []);
 
     const contactSchema = Yup.object().shape({
-
-        firstname: Yup.string().required("First Name is required"),
-        lastname: Yup.string().required("Last Name is required"),
-        email: Yup.string().email("Invalid email").required("Email is required"),
+        firstname: Yup.string()
+            .matches(/^[A-Za-z\s]+$/, 'First Name must only contain letters')
+            .required("First Name is required"),
+        lastname: Yup.string()
+            .matches(/^[A-Za-z\s]+$/, 'Last Name must only contain letters')
+            .required("Last Name is required"),
+        email: Yup.string()
+            .email('Invalid email format')
+            .matches(/^[^\d]+@[^\d]+\.[^\d]+$/, 'Email should not contain numbers before @')
+            .required('Email is required'),
         phoneno: Yup.string()
-            .required("Phone No. is required")
-            .matches(/^\d{10}$/, "Phone No. must be exactly 10 digits"),
-        message: Yup.string().required("message is required"),
+            .matches(/^\d{10}$/, 'Phone number must be exactly 10 digits')
+            .required('Phone number is required'),
+        message: Yup.string().required("Message is required"),
     });
 
 
@@ -47,7 +53,7 @@ function ContactUs() {
                 <section className='B_Get_In_Touch'>
                     <div className='text-white text-center B_Get_SEC_text'>
                         <h3 className='B_GetHead_text'>Get in touch with us</h3>
-                        <p className='B_GetText mt-3' style={{ color: "#ababac" }}>Need help or have questions? Contact us - we're here to assist you with <br /> your online meetings!</p>
+                        <p className='B_GetText mt-3' style={{ color: "#ababac" }}>Need help or have questions? Contact us - we're here to assist you with your online meetings!</p>
                     </div>
 
                     <div>
@@ -89,7 +95,11 @@ function ContactUs() {
                                             </div>
                                             <div className="B_form_group">
                                                 <label>Phone No.</label>
-                                                <Field name="phoneno" type="tel" placeholder="Enter Phone No." value={values.phoneno} onChange={handleChange} />
+                                                <Field name="phoneno" type="tel" placeholder="Enter Phone No." value={values.phoneno} onChange={handleChange} onKeyPress={(e) => {
+                                                    if (!/[0-9]/.test(e.key)) {
+                                                        e.preventDefault();
+                                                    }
+                                                }} />
                                                 <ErrorMessage name="phoneno" component="div" style={{ color: '#cd1425', fontSize: '14px', marginTop: '5px' }} />
                                             </div>
                                         </div>

@@ -10,7 +10,7 @@ function SideBar() {
     const navigate = useNavigate()
 
     const getActiveItem = (pathname) => {
-        switch(pathname) {
+        switch (pathname) {
             case '/':
                 return 'Home'
             case '/meeting':
@@ -28,7 +28,7 @@ function SideBar() {
 
     const handleNavigation = (item) => {
         setActiveItem(item)
-        switch(item) {
+        switch (item) {
             case 'Home':
                 navigate('/home')
                 break
@@ -52,29 +52,33 @@ function SideBar() {
 
     return (
         <div className="j_Home_sidebar">
-            <ul>
+            <ul className='j_sidebar_UL'>
                 {['Home', 'Meeting', 'Schedule', 'Setting'].map(item => (
                     <li
                         key={item}
                     >
-                        <a className='j_sidebar_a text-decoration-none text-white'
+                        <a className='text-decoration-none text-white j_sidebar_Gap'
                             onClick={() => handleNavigation(item)}
                             style={{
                                 opacity: activeItem === item ? 1 : 0.5,
-                                borderLeft: activeItem === item ? '4px solid #fff' : 'none',
-                                cursor: 'pointer'
+                                // borderLeft: activeItem === item ? '4px solid #fff' : 'none',
+                                // borderRadius: '5px',
                             }}
                         >
-                            <img
-                                src={item === 'Home' ? home : item === 'Meeting' ? meeting : item === 'Schedule' ? Schedule : setting}
-                                alt={item.toLowerCase()}
-                            />
-                            {item}
+                            <div className="" style={{ width: '5px', background: activeItem === item ? 'white' : 'none', borderRadius: " 0px 10px 10px 0" }}></div>
+                            <div className="j_sidebar_a" style={{ width: '70%' }}>
+
+                                <img
+                                    src={item === 'Home' ? home : item === 'Meeting' ? meeting : item === 'Schedule' ? Schedule : setting}
+                                    alt={item.toLowerCase()}
+                                />
+                                {item}
+                            </div>
                         </a>
                     </li>
                 ))}
             </ul>
-        </div>
+        </div >
     )
 }
 

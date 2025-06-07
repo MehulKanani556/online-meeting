@@ -26,9 +26,11 @@ const userSchema = mongoose.Schema({
     },
     language: {
         type: String,
+        default: 'English'
     },
     timeZone: {
         type: String,
+        default: 'Asia/Kolkata'
     },
     originalaudio: {
         type: Boolean,

@@ -159,7 +159,7 @@ function HelpCenter() {
 
     const getTextStyle = (section) => {
         if (activeFAQ === section) {
-            return { color: '#FFFFFF', cursor: 'pointer' };
+            return { color: '#FFFFFF', backgroundColor: '#121B26E5', cursor: 'pointer' };
         }
         return { color: '#87898B', cursor: 'pointer' };
     };
@@ -292,7 +292,7 @@ function HelpCenter() {
                                     </div>
 
                                     <div className="col-md-6 col-lg-4 col-12 B_card_space1" onClick={() => handleCardClick('schedule')}>
-                                        <div className="B_box_div text-center">
+                                        <div className="B_box_div text-center" style={getTextStyle('schedule')}>
                                             <div>
                                                 <img src={image4} className='B_Cardicon' alt="" style={getIconStyle('schedule')} />
                                             </div>
@@ -306,7 +306,7 @@ function HelpCenter() {
                                     </div>
 
                                     <div className="col-md-6 col-lg-4 col-12 B_card_space1" onClick={() => handleCardClick('others')}>
-                                        <div className="B_box_div text-center">
+                                        <div className="B_box_div text-center" style={getTextStyle('others')}>
                                             <div>
                                                 <img src={image5} className='B_Cardicon' alt="" style={getIconStyle('others')} />
                                             </div>

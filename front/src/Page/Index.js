@@ -285,7 +285,7 @@ function Index() {
 
             <section className='B_Slider_section B_Owl ' style={{ backgroundColor: "#060A11" }} >
                 <div className='B_container_new1'>
-                    <div className="row text-center mb-5 text-white">
+                    <div className="row text-center j_review_margin text-white">
                         <div className="col-12">
                             <h2 className='B_Slider_head_text'>
                                 Testimonial

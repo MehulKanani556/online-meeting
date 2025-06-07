@@ -118,7 +118,7 @@ function HomeNavBar() {
         <div>
             <nav className="navbar navbar-expand-lg j_nav_padding" style={{ backgroundColor: '#121B26' }} >
                 <div className="container-fluid p-0">
-                    <Link className="navbar-brand text-white" to={"/home"}>
+                    <Link className="navbar-brand text-white" to={"/"}>
                         <img src={logo} style={{ width: "35 px" }} className='j_home_nav_logo' alt="j_home_nav_logo" />
                     </Link>
 
