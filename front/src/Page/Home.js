@@ -22,6 +22,7 @@ import MeetingAudio from '../Image/B_Audioo.svg'
 import MeetingVideo from '../Image/B_Videoo.svg'
 import MeetingConnection from '../Image/B_shearing.svg'
 import { useSnackbar } from 'notistack';
+import { getAllpersonalroom } from '../Redux/Slice/personalroom.slice';
 
 function Home() {
   const dispatch = useDispatch()
@@ -61,6 +62,7 @@ function Home() {
   const gettoken = sessionStorage.getItem('token')
   const allusers = useSelector((state) => state.user.allusers);
   const allschedule = useSelector((state) => state.schedule.allschedule);
+  const personal = useSelector((state) => (state.personalroom.allpersonalroom))
 
   const currentUser = allusers.find((id) => id._id === userId)
   const userName = currentUser?.name;
@@ -122,20 +124,24 @@ function Home() {
       schedule.meetingLink.includes(meetingId.trim())
     );
 
-    if (!meeting) {
+    const personalroom = personal.find(schedule =>
+      schedule.MeetingID == meetingId.trim()
+    );
+
+    if (!meeting && !personalroom) {
       setError('Invalid meeting ID');
       return;
     }
 
     // Check if current time is within meeting time
-    const meetingDate = new Date(meeting.date);
+    const meetingDate = meeting ? new Date(meeting?.date) : new Date(personalroom?.createdAt);
     const today = new Date();
-    const startTime = meeting.startTime.split(':');
-    const endTime = meeting.endTime.split(':');
+    const startTime = meeting?.startTime.split(':');
+    const endTime = meeting?.endTime.split(':');
 
-    meetingDate.setHours(parseInt(startTime[0]), parseInt(startTime[1]));
-    const meetingEndDate = new Date(meeting.date);
-    meetingEndDate.setHours(parseInt(endTime[0]), parseInt(endTime[1]));
+    meetingDate.setHours(parseInt(startTime?.[0]), parseInt(startTime?.[1]));
+    const meetingEndDate = meeting ? new Date(meeting?.date) : new Date(personalroom?.createdAt);
+    meetingEndDate.setHours(parseInt(endTime?.[0]), parseInt(endTime?.[1]));
 
     // Check if meeting is in progress
     // if (today < meetingDate) {
@@ -479,6 +485,7 @@ function Home() {
                     }
                     setActiveItem('Join Meeting');
                     handlejoinshow()
+                    dispatch(getAllpersonalroom())
                   }}
                   style={{
                     border: activeItem === 'Join Meeting' ? '2px solid #bfbfbf' : 'none',

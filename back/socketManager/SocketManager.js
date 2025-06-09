@@ -1,5 +1,6 @@
 const { createchat } = require('../controller/chat.controller');
 const schedule = require('../models/schedule.modal')
+const personalroom = require('../models/personalroom.models')
 
 const onlineUsers = new Map();
 const rooms = {};
@@ -65,7 +66,7 @@ async function sendReminder(socket) {
                     const socketId = onlineUsers[userId];
 
                     if (socketId) {
-                        // console.log(`Sending reminder to ${userId}: ${reminderMessage}`);
+                        console.log(`Sending reminder to ${userId}: ${reminderMessage}`);
                         socket.to(socketId).emit('reminder', {
                             message: reminderMessage
                         });
@@ -378,8 +379,11 @@ async function initializeSocket(io) {
                 const meetingDetails = await schedule.findOne({
                     meetingLink: { $regex: roomId }
                 });
+                const personal = await personalroom.findOne({
+                    MeetingID: { roomId }
+                });
 
-                if (!meetingDetails) {
+                if (!meetingDetails && !personal) {
                     socket.emit('join-request-status', {
                         status: 'error',
                         message: 'Meeting not found.'

@@ -648,16 +648,31 @@
         font-size: 26px;
     }
 
-    .d_grid-item {
+    /* .d_grid-item {
         aspect-ratio: 1 / 1;
-    }
+    }*/
 
     .single-participant .d_grid-item {
         aspect-ratio: 4 / 3;
     }
+
+    .d_participants-grid.mobile-three-participants {
+        display: grid;
+        gap: 10px;
+    }
+
+    .d_participants-grid.mobile-three-participants> :first-child {
+        grid-column: 1 / -1;
+        /* First participant spans full width */
+    }
+
+    .d_participants-grid.mobile-three-participants> :nth-child(2),
+    .d_participants-grid.mobile-three-participants> :nth-child(3) {
+        grid-column: span 1;
+    }
 }
 
-@media(max-width:425px) {
+@media (max-width:425px) {
     .d_resposive {
         flex-direction: column;
     }

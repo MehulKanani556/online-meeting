@@ -86,7 +86,7 @@ export const updateschedule = createAsyncThunk(
 
         const transformedData = {
             ...data,
-            invitees: data.invitees.map(invitee => ({ email: invitee.email, userId: invitee._id, name: invitee.name })),
+            invitees: data.invitees.map(invitee => ({ email: invitee.email, userId: invitee.userId ? invitee.userId : invitee._id, name: invitee.name })),
         };
         try {
             const token = await sessionStorage.getItem("token");

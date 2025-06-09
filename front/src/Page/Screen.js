@@ -972,8 +972,14 @@ function Screen() {
   // Calculate grid columns based on participant count
   const getGridColumns = () => {
     const count = participants.length;
+    // if (window.innerWidth <= 425) {
+    //   return 2; // Always use 2 columns for small mobile screens
+    // }
     if (window.innerWidth <= 425) {
-      return 2; // Always use 2 columns for small mobile screens
+      if (count === 1) return 1;
+      if (count === 2) return 2;
+      if (count === 3) return 2; // For 3 participants, use 2 columns to create 1-2 layout
+      return 2; // Default to 2 for mobile
     }
     if (count === 1) return 1;
     if (count === 2) return 2;
@@ -982,8 +988,22 @@ function Screen() {
   };
 
   // Calculate grid class based on participant count
+  // const getGridClass = () => {
+  //   const count = participants.length;
+  //   if (count === 1) return "single-participant";
+  //   if (count === 2) return "two-participants";
+  //   if (count <= 4) return "four-participants";
+  //   return "multi-participants";
+  // };
   const getGridClass = () => {
     const count = participants.length;
+    if (window.innerWidth <= 425) {
+      if (count === 1) return "mobile-single-participant";
+      if (count === 2) return "mobile-two-participants";
+      if (count === 3) return "mobile-three-participants";
+      return "mobile-multi-participants";
+    }
+    // Desktop/tablet classes
     if (count === 1) return "single-participant";
     if (count === 2) return "two-participants";
     if (count <= 4) return "four-participants";
