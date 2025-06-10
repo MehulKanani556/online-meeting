@@ -64,7 +64,8 @@ const MeetingSidebar = ({
   renderTypingIndicator,
   muteAllUsers,
   singleSchedule,
-  roomId, 
+  roomId,
+  toggleUserAudio,
 }) => {
   const usersValues = {
     _id: singleSchedule?._id,
@@ -636,7 +637,7 @@ const MeetingSidebar = ({
                                             </div>
                                             <div
                                               className="px-3 py-2 hover-bg-secondary cursor-pointer"
-                                              onClick={toggleAudio}
+                                              onClick={() => participant.userId === userId ? toggleAudio() : toggleUserAudio(participant.userId)}
                                             >
                                               {participant.hasAudio
                                                 ? "Mute"
@@ -663,14 +664,16 @@ const MeetingSidebar = ({
                                             >
                                               Rename
                                             </div>
-                                            <div
-                                              className="px-3 py-2 hover-bg-secondary cursor-pointer"
-                                              onClick={toggleAudio}
-                                            >
-                                              {participant.hasAudio
-                                                ? "Mute"
-                                                : "Unmute"}
-                                            </div>
+                                            {participant.userId === userId &&
+                                              <div
+                                                className="px-3 py-2 hover-bg-secondary cursor-pointer"
+                                                onClick={toggleAudio}
+                                              >
+                                                {participant.hasAudio
+                                                  ? "Mute"
+                                                  : "Unmute"}
+                                              </div>
+                                            }
                                           </>
                                         )}
                                       </div>

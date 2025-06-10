@@ -298,7 +298,7 @@ function Index() {
 
                     {allreviews && allreviews.length > 0 ? (
                         <OwlCarousel className='owl-theme  text-white' {...options}>
-                            {allreviews.map((testimonial, index) => {
+                            {allreviews.slice(0, 5).map((testimonial, index) => {
                                 return (
                                     <div className='item' key={index} >
                                         <div className='testimonial-card'>

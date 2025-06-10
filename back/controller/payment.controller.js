@@ -20,6 +20,8 @@ exports.createPayment = async (req, res) => {
     try {
         // Create the order with Razorpay
         const order = await razorpay.orders.create(options);
+        console.log("order", order);
+
 
         if (Pricing === 'monthly') {
             endDate = new Date(startDate);
@@ -62,6 +64,7 @@ exports.createPayment = async (req, res) => {
 
         // return res.json({ status: 200, message: "Payment details saved successfully...", paymentsDetails: checkpayment });
 
+        console.log("checkpayment", checkpayment);
         // Respond with the order and payment details
         return res.json({
             status: 200,

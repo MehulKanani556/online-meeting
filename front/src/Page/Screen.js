@@ -140,7 +140,8 @@ function Screen() {
     joinRequests,
     handleJoinRequest,
     systemMessages,
-    muteAllUsers
+    muteAllUsers,
+    muteUser
   } = useSocket(userId, roomId, userName, location?.state?.hostUserId);
 
   useEffect(() => {
@@ -741,6 +742,11 @@ function Screen() {
       setIsMuted(!isMuted);
     }
   }, [localStream, updateMediaState]);
+
+  const toggleUserAudio = (id) => {
+    console.log(id);
+    muteUser(id)
+  }
 
   // stop Screen Sharing Separate function to stop screen sharing and restore camera
   const stopScreenSharing = async () => {
@@ -2675,6 +2681,7 @@ function Screen() {
         muteAllUsers={muteAllUsers}
         setFilteredUsers={setFilteredUsers}
         singleSchedule={singleSchedule}
+        toggleUserAudio={toggleUserAudio}
       // setFieldValue={setFieldValue}
       />
 

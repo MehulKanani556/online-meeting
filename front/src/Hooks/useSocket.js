@@ -301,6 +301,20 @@ export const useSocket = (userId, roomId, userName, hostUserId) => {
             }
         });
 
+        socketRef.current.on('muted-user', ({ hostId, id }) => {
+            // Update participants state to show all non-host users as muted
+            setParticipants(prev => prev.map(participant =>
+                participant.userId === id
+                    ? { ...participant, hasAudio: !participant.hasAudio }
+                    : participant
+            ));
+
+            // Only mute the current user's audio if they are not the host
+            if (userId == id) {
+                setIsMuted(true);
+            }
+        });
+
         // Handle media state changes
         socketRef.current.on('media-state-change', (update) => {
             const { userId, hasVideo, hasAudio } = update;
@@ -430,6 +444,16 @@ export const useSocket = (userId, roomId, userName, hostUserId) => {
             });
         }
     };
+
+    const muteUser = (id) => {
+        if (socketRef.current) {
+            socketRef.current.emit('mute-user', {
+                roomId,
+                hostId: userId, // Send the host's userId
+                id: id
+            });
+        }
+    }
 
     // Helper function to send an emoji
     const sendEmoji = (emoji) => {
@@ -615,6 +639,7 @@ export const useSocket = (userId, roomId, userName, hostUserId) => {
         isMuted,
         setIsMuted,
         systemMessages,
-        muteAllUsers
+        muteAllUsers,
+        muteUser
     };
 }

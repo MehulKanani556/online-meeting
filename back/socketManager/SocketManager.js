@@ -63,10 +63,10 @@ async function sendReminder(socket) {
 
                 invitees.forEach(v => {
                     const userId = v.userId.toString();
-                    const socketId = onlineUsers[userId];
+                    const socketId = listOnlineUsers.get(userId);
 
                     if (socketId) {
-                        console.log(`Sending reminder to ${userId}: ${reminderMessage}`);
+                        // console.log(`Sending reminder to ${userId}: ${reminderMessage}`);
                         socket.to(socketId).emit('reminder', {
                             message: reminderMessage
                         });
@@ -77,7 +77,7 @@ async function sendReminder(socket) {
             } else if (startMinutes - currentMinutes == 0 && daysDifference > 0) {
                 invitees.forEach(v => {
                     const userId = v.userId.toString();
-                    const socketId = onlineUsers[userId];
+                    const socketId = listOnlineUsers.get(userId);
 
                     if (socketId) {
                         socket.to(socketId).emit('reminder', {
@@ -380,7 +380,7 @@ async function initializeSocket(io) {
                     meetingLink: { $regex: roomId }
                 });
                 const personal = await personalroom.findOne({
-                    MeetingID: { roomId }
+                    MeetingID: roomId // Corrected to directly use roomId as a string
                 });
 
                 if (!meetingDetails && !personal) {
@@ -392,7 +392,9 @@ async function initializeSocket(io) {
                 }
 
                 // Check if the password is required and validate it
-                if (meetingDetails.password && meetingDetails.password !== password) {
+                const passwordValidation = meetingDetails?.password && meetingDetails?.password !== password ||
+                    personal?.Password && personal?.Password !== password;
+                if (passwordValidation) {
                     socket.emit('join-request-status', {
                         status: 'error',
                         message: 'Incorrect password.'
@@ -520,6 +522,13 @@ async function initializeSocket(io) {
         socket.on('mute-all-users', ({ roomId, hostId }) => {
             // Broadcast to ALL users in the room including the host
             io.to(roomId).emit('mute-all-users', { hostId });
+        });
+
+        // mute all users
+        socket.on('mute-user', ({ roomId, hostId, id }) => {
+            // Broadcast to ALL users in the room including the host
+            io.to(roomId).emit('muted-user', { hostId, id });
+            // io.emit('muted-user', { hostId, id });
         });
 
         // User disconnects

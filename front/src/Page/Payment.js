@@ -58,8 +58,8 @@ function Payment() {
     });
 
     // razorpay key
-    const razorpay_key = 'rzp_test_kw3UIwvQV6qFpp'
-    const razorpay_secret = 'DGIBTGQqvJa0qV7Yl4HCvwf5'
+    const razorpay_key = 'rzp_test_hcOAZE21OIvoXv'
+    const razorpay_secret = 'RJwrqMD5YDcBMszCZ6zUmwzI'
 
     const handlePayment = async (values) => {
 

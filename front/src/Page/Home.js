@@ -110,6 +110,95 @@ function Home() {
   }, [requestApprovalStatus, meetingToJoin]);
 
 
+  // const handleJoinSubmit = (e) => {
+  //   e.preventDefault();
+
+  //   // Validation logic
+  //   if (!meetingId || !meetingId.trim()) {
+  //     setError('Please enter a meeting ID');
+  //     return;
+  //   }
+
+  //   // Find meeting in allschedule that matches the entered ID
+  //   const meeting = allschedule.find(schedule =>
+  //     schedule.meetingLink.includes(meetingId.trim())
+  //   );
+
+  //   const personalroom = personal.find(schedule =>
+  //     schedule.MeetingID == meetingId.trim()
+  //   );
+
+  //   if (!meeting && !personalroom) {
+  //     setError('Invalid meeting ID');
+  //     return;
+  //   }
+
+  //   // Check if current time is within meeting time
+  //   const meetingDate = meeting ? new Date(meeting?.date) : new Date(personalroom?.createdAt);
+  //   const today = new Date();
+  //   const startTime = meeting?.startTime.split(':');
+  //   const endTime = meeting?.endTime.split(':');
+
+  //   meetingDate.setHours(parseInt(startTime?.[0]), parseInt(startTime?.[1]));
+  //   const meetingEndDate = meeting ? new Date(meeting?.date) : new Date(personalroom?.createdAt);
+  //   meetingEndDate.setHours(parseInt(endTime?.[0]), parseInt(endTime?.[1]));
+
+  //   // Check if meeting is in progress
+  //   // if (today < meetingDate) {
+  //   //   setError('This meeting has not started yet');
+  //   //   return;
+  //   // }
+
+  //   // if (today > meetingEndDate) {
+  //   //   setError('This meeting has already ended');
+  //   //   return;
+  //   // }
+
+  //   // Check if user is connected
+  //   if (!socket) {
+  //     setError('Socket not connect.');
+  //     return;
+  //   }
+
+  //   // Check if user is logged in
+  //   if (!userName || !userId) {
+  //     setError('Please log in to join the meeting');
+  //     return;
+  //   }
+
+  //   // Check if meetingId is numeric and password is required
+  //   const password = document?.getElementById('meetingPassword')?.value;
+  //   if (/^\d+$/.test(meetingId) && meeting.password && !password) {
+  //     setError('Please enter the password to join the meeting');
+  //     return;
+  //   }
+
+  //   // Set the meeting to join for later navigation
+  //   setMeetingToJoin(meetingId);
+
+  //   // Send join request
+  //   socket.emit('request-to-join', {
+  //     roomId: meetingId,
+  //     userId: userId,
+  //     userName: userName,
+  //     password: password
+  //   });
+
+  //   setRequestSent(true);
+  //   setJoinRequestStatus('Waiting for Host Approval...');
+
+  //   // Listen for the response from the server
+  //   socket.on('join-request-status', (response) => {
+  //     if (response.status === 'error') {
+  //       setError(response.message); // Show error message if password is incorrect
+  //       setRequestSent(false);
+  //     } else if (response.status === 'approved') {
+  //       handlejoinclose();
+  //       navigate(`/screen/${meetingId}`);
+  //     }
+  //   });
+  // };
+
   const handleJoinSubmit = (e) => {
     e.preventDefault();
 
@@ -143,17 +232,6 @@ function Home() {
     const meetingEndDate = meeting ? new Date(meeting?.date) : new Date(personalroom?.createdAt);
     meetingEndDate.setHours(parseInt(endTime?.[0]), parseInt(endTime?.[1]));
 
-    // Check if meeting is in progress
-    // if (today < meetingDate) {
-    //   setError('This meeting has not started yet');
-    //   return;
-    // }
-
-    // if (today > meetingEndDate) {
-    //   setError('This meeting has already ended');
-    //   return;
-    // }
-
     // Check if user is connected
     if (!socket) {
       setError('Socket not connect.');
@@ -168,7 +246,9 @@ function Home() {
 
     // Check if meetingId is numeric and password is required
     const password = document?.getElementById('meetingPassword')?.value;
-    if (/^\d+$/.test(meetingId) && meeting.password && !password) {
+    const requiredPassword = meeting ? meeting.password : personalroom ? personalroom.Password : null;
+
+    if (/^\d+$/.test(meetingId) && requiredPassword && !password) {
       setError('Please enter the password to join the meeting');
       return;
     }

@@ -28,10 +28,18 @@ import { enqueueSnackbar } from 'notistack';
 function Meeting() {
 
     // Function to generate a random meeting ID of specified length
+    // const generateMeetingId = (length) => {
+    //     const array = new Uint8Array(length / 2);
+    //     window.crypto.getRandomValues(array);
+    //     return Array.from(array, byte => ('0' + byte.toString(16)).slice(-2)).join('');
+    // };
+
     const generateMeetingId = (length) => {
-        const array = new Uint8Array(length / 2);
-        window.crypto.getRandomValues(array);
-        return Array.from(array, byte => ('0' + byte.toString(16)).slice(-2)).join('');
+        let meetingId = '';
+        for (let i = 0; i < length; i++) {
+            meetingId += Math.floor(Math.random() * 10); // Generate a random digit (0-9)
+        }
+        return meetingId;
     };
 
     const generatePassword = () => {
@@ -1315,15 +1323,15 @@ function Meeting() {
                                         MeetingID: linkNumber,
                                         InviteLink: `/screen/`,
                                         Security: securityType,
-                                        password: password,
+                                        Password: password,
                                     }}
                                     validate={values => {
                                         const errors = {};
                                         if (!validateLink(values.MeetingID)) {
                                             errors.MeetingID = linkError;
                                         }
-                                        if (!validatePassword(values.password)) {
-                                            errors.password = passwordError;
+                                        if (!validatePassword(values.Password)) {
+                                            errors.Password = passwordError;
                                         }
                                         return errors;
                                     }}
@@ -1333,7 +1341,7 @@ function Meeting() {
                                             // console.log("response", response);
                                             if (response.payload.status == 200) {
                                                 const { InviteLink, MeetingID } = response.payload.personalroom;
-                                                navigate(`${InviteLink}${MeetingID}`);
+                                                navigate(`${InviteLink}${MeetingID}`, { state: { InviteLink, status: false, hostUserId: userId } });
                                                 resetForm();
                                             }
                                         });
@@ -1371,7 +1379,7 @@ function Meeting() {
                                         const handlePasswordChange = (e) => {
                                             const newValue = e.target.value;
                                             setPassword(newValue);
-                                            setFieldValue('password', newValue)
+                                            setFieldValue('Password', newValue)
                                             validatePassword(newValue);
                                         };
 
@@ -1521,7 +1529,7 @@ function Meeting() {
                                                                     isEditingPassword ? (
                                                                         <input
                                                                             type="text"
-                                                                            value={values.password}
+                                                                            value={values.Password}
                                                                             onChange={handlePasswordChange}
                                                                             onKeyDown={handlePasswordEdit}
                                                                             className='B_password_input'
@@ -1539,7 +1547,7 @@ function Meeting() {
                                                                             }}
                                                                         />
                                                                     ) : (
-                                                                        <span>{values.password}</span>
+                                                                        <span>{values.Password}</span>
                                                                     )
                                                                 }</span>
                                                                 {isEditingPassword ? (
@@ -1548,7 +1556,7 @@ function Meeting() {
                                                                             className="btn btn-link p-0 ms-2"
                                                                             style={{ color: '#fff' }}
                                                                             onClick={() => {
-                                                                                if (validatePassword(values.password)) {
+                                                                                if (validatePassword(values.Password)) {
                                                                                     setIsEditingPassword(false);
                                                                                 }
                                                                             }}
@@ -1559,7 +1567,7 @@ function Meeting() {
                                                                             className="btn btn-link p-0 ms-2"
                                                                             style={{ color: '#fff' }}
                                                                             onClick={() => {
-                                                                                setPassword(values.password);
+                                                                                setPassword(values.Password);
                                                                                 setPasswordError('');
                                                                                 setIsEditingPassword(false);
                                                                             }}
