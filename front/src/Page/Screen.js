@@ -2626,6 +2626,7 @@ function Screen() {
       {/* Participants and Chat sidebar (Off-canvas) */}
       <MeetingSidebar
         show={show}
+        roomId={roomId}
         // handleClose={handleClose}
         windowWidth={windowWidth}
         InvitePeople={InvitePeople}

@@ -64,6 +64,7 @@ const MeetingSidebar = ({
   renderTypingIndicator,
   muteAllUsers,
   singleSchedule,
+  roomId, 
 }) => {
   const usersValues = {
     _id: singleSchedule?._id,
