@@ -110,6 +110,7 @@ img {
 }
 
 .B_Owl .owl-carousel .owl-item .testimonial-card {
+  min-height: 250px;
   background: #111924;
   padding: 10px 20px;
   border-radius: 10px;
@@ -734,6 +735,11 @@ img {
 .B_Meeting_video_icon img {
   height: 95px;
   width: 115px;
+}
+
+.j_set_height {
+  height: 100%;
+  min-height: 64px;
 }
 
 .B_Meeting_txt1 {
@@ -2130,7 +2136,7 @@ img {
   }
 
   .B_hover_bttn {
-    width: 139px;
+    width: 145px;
   }
 
   .B_lastbtn {
@@ -2671,10 +2677,15 @@ img {
     width: 210px;
   }
 
+
   .B_hover_bttn,
   .B_lastbtn {
     font-size: 12px;
     padding: 0;
+  }
+
+  .B_hover_bttn {
+    padding: 6px;
   }
 
   .B_review_model_body div {

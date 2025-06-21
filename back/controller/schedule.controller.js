@@ -120,7 +120,6 @@ function generateCustomRecurrenceDates(startDate, customRecurrence) {
     return dates;
 }
 
-
 exports.createNewschedule = async (req, res) => {
     try {
         let {
@@ -303,7 +302,7 @@ exports.createNewschedule = async (req, res) => {
                 });
 
                 try {
-                    await Promise.all(emailPromises);
+                    Promise.all(emailPromises);
                 } catch (emailError) {
                     console.log('Error sending emails:', emailError);
                 }
@@ -469,38 +468,47 @@ exports.getAllschedule = async (req, res) => {
                 schedule.findByIdAndUpdate(meeting._id, { status: "Join" })
                     .catch(err => console.error("Error updating meeting status:", err));
                 meeting.status = "Join";
-            } else if (meeting.participants?.length > 1) {
-                // Update status to "Completed" if the meeting has ended
-                schedule.findByIdAndUpdate(meeting._id, { status: "Completed" })
-                    .then(async () => {
-                        // If it's a recurring meeting, create the next one
-                        if (meeting.recurringMeeting && ['daily', 'weekly', 'monthly'].includes(meeting.recurringMeeting) && meeting.userId.toString() === userId.toString()) {
-                            try {
-                                // Check if this is a "never end" recurring meeting
-                                const isNeverEnd = meeting.customRecurrence?.ends === 'never';
+            } else if (scheduleEndTime < currentDateTime) {
+                // Meeting has ended - check if it was started or not
+                if (meeting.participants?.length > 1) {
+                    // Update status to "Completed" if the meeting has ended
+                    schedule.findByIdAndUpdate(meeting._id, { status: "Completed" })
+                        .then(async () => {
+                            // If it's a recurring meeting, create the next one
+                            if (meeting.recurringMeeting && ['daily', 'weekly', 'monthly'].includes(meeting.recurringMeeting) && meeting.userId.toString() === userId.toString()) {
+                                try {
+                                    // Check if this is a "never end" recurring meeting
+                                    const isNeverEnd = meeting.customRecurrence?.ends === 'never';
 
-                                // Count existing future meetings and find the last meeting schedule
-                                const futureMeetingsCount = await schedule.countDocuments({
-                                    parentMeetingId: meeting._id,
-                                    date: { $gt: meeting.date }
-                                });
+                                    // Count existing future meetings and find the last meeting schedule
+                                    const futureMeetingsCount = await schedule.countDocuments({
+                                        parentMeetingId: meeting._id,
+                                        date: { $gt: meeting.date }
+                                    });
 
-                                const lastMeetingSchedule = await schedule.findOne({
-                                    parentMeetingId: meeting._id,
-                                    date: { $gt: meeting.date }
-                                }).sort({ date: -1 });
+                                    const lastMeetingSchedule = await schedule.findOne({
+                                        parentMeetingId: meeting._id,
+                                        date: { $gt: meeting.date }
+                                    }).sort({ date: -1 });
 
-                                // Only create new meeting if we have less than 5 future meetings
-                                if (futureMeetingsCount < 5) {
-                                    await exports.createNextRecurringMeeting(meeting._id, lastMeetingSchedule);
+                                    // Only create new meeting if we have less than 5 future meetings
+                                    if (futureMeetingsCount < 5) {
+                                        await exports.createNextRecurringMeeting(meeting._id, lastMeetingSchedule);
+                                    }
+                                } catch (error) {
+                                    console.error("Error creating next recurring meeting:", error);
                                 }
-                            } catch (error) {
-                                console.error("Error creating next recurring meeting:", error);
                             }
-                        }
-                    })
-                    .catch(err => console.error("Error updating meeting status:", err));
-                meeting.status = "Completed";
+                        })
+                        .catch(err => console.error("Error updating meeting status:", err));
+                    meeting.status = "Completed";
+                }
+                else {
+                    // Meeting ended without being started - mark as "Cancelled"
+                    schedule.findByIdAndUpdate(meeting._id, { status: "Cancelled" })
+                        .catch(err => console.error("Error updating meeting status:", err));
+                    meeting.status = "Cancelled";
+                }
             }
             return (meeting.userId.toString() === userId.toString() ||
                 meeting?.invitees?.some((invitee) => invitee?.userId?.toString() === userId?.toString()));

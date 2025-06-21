@@ -3,13 +3,14 @@ import { io } from 'socket.io-client';
 import { useDispatch, useSelector } from "react-redux";
 import { getUserById } from '../Redux/Slice/user.slice';
 import { enqueueSnackbar } from 'notistack';
+import { setReminders } from '../Redux/Slice/meeting.slice';
 
 const SOCKET_SERVER_URL = "http://localhost:4000"; // Move to environment variable in production
 // const SOCKET_SERVER_URL = "https://online-meeting-backend-sv0j.onrender.com"; // Move to environment variable in production
 
 export const useSocket = (userId, roomId, userName, hostUserId) => {
     const socketRef = useRef(null);
-    const [reminders, setReminders] = useState([]); // State to hold reminders 
+    // const [reminders, setReminders] = useState([]); // State to hold reminders 
     const [isConnected, setIsConnected] = useState(false);
     const [participants, setParticipants] = useState([]);
     const [messages, setMessages] = useState([]);
@@ -23,6 +24,8 @@ export const useSocket = (userId, roomId, userName, hostUserId) => {
     const [isVideoOff, setIsVideoOff] = useState(false);
     const hasJoinedRef = useRef(false);
     const [isMuted, setIsMuted] = useState(false);
+
+    const { reminders } = useSelector((state) => state.meeting)
 
     const [notificationPermission, setNotificationPermission] = useState(
         Notification.permission
@@ -128,12 +131,12 @@ export const useSocket = (userId, roomId, userName, hostUserId) => {
         });
 
         socketRef.current.on("user-status-changed", (onlineUserIds) => {
-            // console.log("Online users updated:", onlineUserIds);
+            console.log("Online users updated:", onlineUserIds);
         });
 
         socketRef.current.on('reminder', (data) => {
-            // console.log("ddddd", data);
-            setReminders(prevReminders => [...prevReminders, data.message]); // Add new reminder to state
+            console.log("ddddd", data);
+            dispatch(setReminders([...reminders, data.message])); // Add new reminder to state
         });
 
         const renameParticipant = JSON.parse(sessionStorage.getItem("renameParticipant"));
@@ -611,7 +614,7 @@ export const useSocket = (userId, roomId, userName, hostUserId) => {
     return {
         socket: socketRef.current,
         isConnected,
-        reminders, // Return reminders state
+        // reminders, // Return reminders state
         participants,
         setParticipants,
         messages,

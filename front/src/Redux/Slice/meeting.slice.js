@@ -30,6 +30,7 @@ const initialState = {
   selectedUsers: [],
   filteredUsers: [],
   pipWindow: false,
+  reminders: [],
 };
 
 const meetingSlice = createSlice({
@@ -50,6 +51,9 @@ const meetingSlice = createSlice({
     },
     setIsScreenSharing: (state, action) => {
       state.isScreenSharing = action.payload;
+    },
+    setReminders: (state, action) => {
+      state.reminders = action.payload;
     },
     setNewMessage: (state, action) => {
       state.newMessage = action.payload;
@@ -172,7 +176,8 @@ export const {
   setFilteredUsers,
   resetMeetingState,
   setIsChatOpen,
-  setPipWindow
+  setPipWindow,
+  setReminders
 } = meetingSlice.actions;
 
 export default meetingSlice.reducer;

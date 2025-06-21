@@ -405,6 +405,17 @@ function Schedule() {
     return Math.max(0, Math.floor(durationInMilliseconds / 60000)); // Return 0 if negative
   };
 
+  const [calendarKey, setCalendarKey] = useState(0); // Add this line
+
+  // Add this useEffect to listen for window resize
+  useEffect(() => {
+    const handleResize = () => {
+      setCalendarKey(prev => prev + 1); // Change key to force re-render
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   return (
     <div>
       <HomeNavBar />
@@ -416,6 +427,7 @@ function Schedule() {
           <div className="col-11 p-0 j_contant_width B_TOP_setMargin">
             <div className='j_calender'>
               <Calendar
+                key={calendarKey}
                 localizer={localizer}
                 events={events}
                 startAccessor="start"

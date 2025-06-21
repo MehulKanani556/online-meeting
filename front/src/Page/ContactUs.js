@@ -28,7 +28,6 @@ function ContactUs() {
             .required("Last Name is required"),
         email: Yup.string()
             .email('Invalid email format')
-            .matches(/^[^\d]+@[^\d]+\.[^\d]+$/, 'Email should not contain numbers before @')
             .required('Email is required'),
         phoneno: Yup.string()
             .matches(/^\d{10}$/, 'Phone number must be exactly 10 digits')

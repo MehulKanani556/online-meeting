@@ -81,6 +81,7 @@ function Screen() {
 
   // Current user information
   const userId = sessionStorage.getItem("userId");
+  const token = sessionStorage.getItem("token");
   const meetingStarted = sessionStorage.getItem("meetingStarted");
 
   const currUser = useSelector((state) => state.user.currUser);
@@ -2418,6 +2419,11 @@ function Screen() {
     participants
   ]);
 
+  const handlerecording = () => {
+    window.open('/pricing', '_blank');
+    handlecloseupgrademodal();
+  }
+
   return (
     <div className="j_record">
       {location?.state?.status && (
@@ -2484,7 +2490,7 @@ function Screen() {
       )}
       <div
         className="position-fixed top-0 end-0 p-3 ps-0 pb-0"
-        style={{ zIndex: "1" }}
+        style={{ zIndex: "99" }}
       >
         {pendingJoinRequests.map((request) => (
           <div key={request.requestId} className="j_Invite text-white p-3 mb-2">
@@ -2698,9 +2704,9 @@ function Screen() {
             <IoIosWarning size={40} style={{ color: 'orange' }} />
             <p className="font-Bold">Warning!</p>
             <p>You need to upgrade your plan to start recording.</p>
-            <Link to={'/pricing'} target="_blank" onClick={handlecloseupgrademodal}>
-              <button className="j_upgrade_plan">Upgrade Plan</button>
-            </Link>
+            {/* <Link to={'/pricing'} target="_blank" state={{ userId: userId, token: token }} onClick={handlecloseupgrademodal}> */}
+            <button onClick={handlerecording} className="j_upgrade_plan">Upgrade Plan</button>
+            {/* </Link> */}
           </div>
         </Modal.Body>
       </Modal>
@@ -2716,9 +2722,9 @@ function Screen() {
             <IoIosWarning size={40} style={{ color: 'orange' }} />
             <p className="font-Bold">Warning!</p>
             <p>You need to upgrade your plan to Share Screen.</p>
-            <Link to={'/pricing'} target="_blank" onClick={handlecloseScreensharemodal}>
-              <button className="j_upgrade_plan">Upgrade Plan</button>
-            </Link>
+            {/* <Link to={'/pricing'} target="_blank" onClick={handlecloseScreensharemodal}> */}
+            <button onClick={handlerecording} className="j_upgrade_plan">Upgrade Plan</button>
+            {/* </Link> */}
           </div>
         </Modal.Body>
       </Modal>

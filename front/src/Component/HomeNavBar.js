@@ -37,10 +37,7 @@ function HomeNavBar() {
     const [uploadedFile, setUploadedFile] = useState(null);
     const fileInputRef = useRef(null);
     const IMG_URL = IMAGE_URL
-    const {
-        socket,
-        reminders
-    } = useSocket(userId);
+    const { reminders } = useSelector((state) => state.meeting)
 
     const handleCloseProfilePicOptions = () => setshowProfilePicOptions(false)
     const handlechangeprofileClose = () => setchangeprofileshow(false);

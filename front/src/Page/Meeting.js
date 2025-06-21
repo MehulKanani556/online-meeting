@@ -266,7 +266,7 @@ function Meeting() {
                                         <div key={index} className="col-xl-3 col-lg-4 col-md-6 col-12 mt-4">
                                             <div className="B_meeting_card" style={{ backgroundColor: '#0A1119', borderRadius: '6px' }}>
                                                 <div className="d-flex justify-content-between align-items-center  p-3 B_meeting_padding">
-                                                    <h6 className="text-white m-0 B_card_title">{schedule.title}</h6>
+                                                    <h6 className="text-white m-0 B_card_title" title={schedule.title}>{schedule.title.length > 12 ? `${schedule.title.substring(0, 12)}...` : schedule.title}</h6>
                                                     <div>
                                                         {schedule.status === 'Upcoming' && (
                                                             <>
@@ -383,8 +383,9 @@ function Meeting() {
                                     return (
                                         <div key={index} className="col-xl-3 col-lg-4 col-md-6 col-12 mt-4">
                                             <div className="B_meeting_card" style={{ backgroundColor: '#0A1119', borderRadius: '6px' }}>
-                                                <div className="d-flex justify-content-between align-items-center  p-3 B_meeting_padding">
-                                                    <h6 className="text-white m-0 B_card_title">{schedule.title}</h6>
+                                                <div className="d-flex justify-content-between align-items-center  p-3 B_meeting_padding j_set_height">
+                                                    {/* <h6 className="text-white m-0 B_card_title">{schedule.title}</h6> */}
+                                                    <h6 className="text-white m-0 B_card_title" title={schedule.title}>{schedule.title.length > 12 ? `${schedule.title.substring(0, 12)}...` : schedule.title}</h6>
                                                     <div>
                                                         {schedule.status === 'Join' && (
                                                             <button type="button" class="btn btn-outline-secondary B_upcoming_btn1 B_upcoming_btn2 me-2"
@@ -393,6 +394,9 @@ function Meeting() {
                                                         )}
                                                         {schedule.status === 'Completed' && (
                                                             <button type="button" class="btn btn-outline-success B_upcoming_btn1 me-2">Completed</button>
+                                                        )}
+                                                        {schedule.status === 'Cancelled' && (
+                                                            <button type="button" class="btn btn-outline-danger B_upcoming_btn1 me-2">Cancelled</button>
                                                         )}
                                                     </div>
                                                 </div>
@@ -459,7 +463,7 @@ function Meeting() {
                                         <div key={index} className="col-xl-3 col-lg-4 col-md-6 col-12">
                                             <div className="B_meeting_card" style={{ backgroundColor: '#0A1119', borderRadius: '6px' }}>
                                                 <div className="d-flex justify-content-between align-items-center  p-3 B_meeting_padding">
-                                                    <h6 className="text-white m-0 B_card_title">{schedule.title}</h6>
+                                                    <h6 className="text-white m-0 B_card_title" title={schedule.title}>{schedule.title.length > 12 ? `${schedule.title.substring(0, 12)}...` : schedule.title}</h6>
                                                     <div>
                                                         {schedule.status === 'Upcoming' && (
                                                             <>
@@ -591,9 +595,12 @@ function Meeting() {
                                     return (
                                         <div key={index} className="col-xl-3 col-lg-4 col-md-6 col-12 mt-4">
                                             <div className="B_meeting_card" style={{ backgroundColor: '#0A1119', borderRadius: '6px' }}>
-                                                <div className="d-flex justify-content-between align-items-center  p-3 B_meeting_padding">
-                                                    <h6 className="text-white m-0 B_card_title">{schedule.title}</h6>
+                                                <div className="d-flex justify-content-between align-items-center  p-3 B_meeting_padding j_set_height">
+                                                    <h6 className="text-white m-0 B_card_title" title={schedule.title}>{schedule.title.length > 12 ? `${schedule.title.substring(0, 12)}...` : schedule.title}</h6>
                                                     <div>
+                                                        {schedule.status === 'Cancelled' && (
+                                                            <button type="button" class="btn btn-outline-danger B_upcoming_btn1 me-2">Cancelled</button>
+                                                        )}
                                                         {schedule.status === 'Join' && (
                                                             <button type="button" class="btn btn-outline-secondary B_upcoming_btn1 B_upcoming_btn2 me-2"
                                                                 onClick={() => window.location.href = schedule.meetingLink}
@@ -667,7 +674,7 @@ function Meeting() {
                                     <div key={index} className="col-xl-3 col-lg-4 col-md-6 col-12">
                                         <div className="B_meeting_card" style={{ backgroundColor: '#0A1119', borderRadius: '6px' }}>
                                             <div className="d-flex justify-content-between align-items-center  p-3 B_meeting_padding">
-                                                <h6 className="text-white m-0 B_card_title">{schedule.title}</h6>
+                                                <h6 className="text-white m-0 B_card_title" title={schedule.title}>{schedule.title.length > 12 ? `${schedule.title.substring(0, 12)}...` : schedule.title}</h6>
                                                 <div>
                                                     <HiOutlineDotsVertical
                                                         className='text-white'
@@ -777,9 +784,12 @@ function Meeting() {
                                 return (
                                     <div key={index} className="col-xl-3 col-lg-4 col-md-6 col-12">
                                         <div className="B_meeting_card" style={{ backgroundColor: '#0A1119', borderRadius: '6px' }}>
-                                            <div className="d-flex justify-content-between align-items-center  p-3 B_meeting_padding">
-                                                <h6 className="text-white m-0 B_card_title">{schedule.title}</h6>
+                                            <div className="d-flex justify-content-between align-items-center  p-3 B_meeting_padding j_set_height">
+                                                <h6 className="text-white m-0 B_card_title" title={schedule.title}>{schedule.title.length > 12 ? `${schedule.title.substring(0, 12)}...` : schedule.title}</h6>
                                                 <div>
+                                                    {schedule.status === 'Cancelled' && (
+                                                        <button type="button" class="btn btn-outline-danger B_upcoming_btn1 me-2">Cancelled</button>
+                                                    )}
                                                     {schedule.status === 'Join' && (
                                                         <button type="button" class="btn btn-outline-secondary B_upcoming_btn1 B_upcoming_btn2 me-2"
                                                             onClick={() => window.location.href = schedule.meetingLink}
@@ -848,7 +858,7 @@ function Meeting() {
                                     <div key={index} className="col-xl-3 col-lg-4 col-md-6 col-12">
                                         <div className="B_meeting_card" style={{ backgroundColor: '#0A1119', borderRadius: '6px' }}>
                                             <div className="d-flex justify-content-between align-items-center  p-3 B_meeting_padding">
-                                                <h6 className="text-white m-0 B_card_title">{schedule.title}</h6>
+                                                <h6 className="text-white m-0 B_card_title" title={schedule.title}>{schedule.title.length > 12 ? `${schedule.title.substring(0, 12)}...` : schedule.title}</h6>
                                                 <div>
                                                     <HiOutlineDotsVertical
                                                         className='text-white'
@@ -962,9 +972,12 @@ function Meeting() {
                                 return (
                                     <div key={index} className="col-xl-3 col-lg-4 col-md-6 col-12">
                                         <div className="B_meeting_card" style={{ backgroundColor: '#0A1119', borderRadius: '6px' }}>
-                                            <div className="d-flex justify-content-between align-items-center  p-3 B_meeting_padding">
-                                                <h6 className="text-white m-0 B_card_title">{schedule.title}</h6>
+                                            <div className="d-flex justify-content-between align-items-center  p-3 B_meeting_padding j_set_height">
+                                                <h6 className="text-white m-0 B_card_title" title={schedule.title}>{schedule.title.length > 12 ? `${schedule.title.substring(0, 12)}...` : schedule.title}</h6>
                                                 <div>
+                                                    {schedule.status === 'Cancelled' && (
+                                                        <button type="button" class="btn btn-outline-danger B_upcoming_btn1 me-2">Cancelled</button>
+                                                    )}
                                                     {schedule.status === 'Join' && (
                                                         <button type="button" class="btn btn-outline-secondary B_upcoming_btn1 B_upcoming_btn2 me-2"
                                                             onClick={() => window.location.href = schedule.meetingLink}
@@ -1042,7 +1055,7 @@ function Meeting() {
                                         }} className="col-xl-3 col-lg-4 col-md-6 col-12 mt-4 mb-4">
                                             <div className="B_meeting_card" style={{ backgroundColor: '#0A1119', borderRadius: '6px', cursor: "pointer" }}>
                                                 <div className="d-flex justify-content-between align-items-center  p-3 B_meeting_padding">
-                                                    <h6 className="text-white m-0 B_card_title">{schedule.title}</h6>
+                                                    <h6 className="text-white m-0 B_card_title" title={schedule.title}>{schedule.title.length > 12 ? `${schedule.title.substring(0, 12)}...` : schedule.title}</h6>
                                                     <div>
                                                         {schedule.status === 'Completed' && (
                                                             <button type="button" class="btn btn-outline-success B_upcoming_btn1 me-2">Completed</button>
@@ -1115,8 +1128,8 @@ function Meeting() {
                                             }}
                                             className="col-xl-3 col-lg-4 col-md-6 col-12 mt-4 mb-4">
                                             <div className="B_meeting_card" style={{ backgroundColor: '#0A1119', borderRadius: '6px', cursor: "pointer" }}>
-                                                <div className="d-flex justify-content-between align-items-center  p-3 B_meeting_padding">
-                                                    <h6 className="text-white m-0 B_card_title">{schedule.title}</h6>
+                                                <div className="d-flex justify-content-between align-items-center  p-3 B_meeting_padding j_set_height">
+                                                    <h6 className="text-white m-0 B_card_title" title={schedule.title}>{schedule.title.length > 12 ? `${schedule.title.substring(0, 12)}...` : schedule.title}</h6>
                                                     <div>
                                                         {schedule.status === 'Completed' && (
                                                             <button type="button" class="btn btn-outline-success B_upcoming_btn1 me-2">Completed</button>
@@ -1193,7 +1206,7 @@ function Meeting() {
                                         }} className="col-xl-3 col-lg-4 col-md-6 col-12">
                                             <div className="B_meeting_card" style={{ backgroundColor: '#0A1119', borderRadius: '6px', cursor: "pointer" }}>
                                                 <div className="d-flex justify-content-between align-items-center  p-3 B_meeting_padding">
-                                                    <h6 className="text-white m-0 B_card_title">{schedule.title}</h6>
+                                                    <h6 className="text-white m-0 B_card_title" title={schedule.title}>{schedule.title.length > 12 ? `${schedule.title.substring(0, 12)}...` : schedule.title}</h6>
                                                     <div>
                                                         {schedule.status === 'Completed' && (
                                                             <button type="button" class="btn btn-outline-success B_upcoming_btn1 me-2">Completed</button>
@@ -1271,8 +1284,8 @@ function Meeting() {
                                             }}
                                             className="col-xl-3 col-lg-4 col-md-6 col-12 mt-4 mb-4">
                                             <div className="B_meeting_card" style={{ backgroundColor: '#0A1119', borderRadius: '6px', cursor: "pointer" }}>
-                                                <div className="d-flex justify-content-between align-items-center  p-3 B_meeting_padding">
-                                                    <h6 className="text-white m-0 B_card_title">{schedule.title}</h6>
+                                                <div className="d-flex justify-content-between align-items-center  p-3 B_meeting_padding j_set_height">
+                                                    <h6 className="text-white m-0 B_card_title" title={schedule.title}>{schedule.title.length > 12 ? `${schedule.title.substring(0, 12)}...` : schedule.title}</h6>
                                                     <div>
                                                         {schedule.status === 'Completed' && (
                                                             <button type="button" class="btn btn-outline-success B_upcoming_btn1 me-2">Completed</button>
@@ -1315,7 +1328,7 @@ function Meeting() {
                         {/* Room Details Section */}
                         <div className="col-lg-5 col-12 B_col_form">
                             <div className="mb-4 mt-5 B_top_margin">
-                                <h5 className="text-white mb-4">Room Details</h5>
+                                <h5 className="text-white mb-2" style={{ paddingLeft: '20px' }}>Room Details</h5>
                                 <Formik
                                     initialValues={{
                                         userId: userId,

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import NavBar from '../Component/NavBar';
 import Footer from '../Component/Footer';
 import check_icon from '../Image/True.svg';
@@ -12,7 +12,11 @@ function Pricing() {
     }, []);
 
     const [Pricing, setPricing] = useState('monthly');
-    const userId = sessionStorage.getItem('userId')
+    const location = useLocation();
+    console.log("dfgh",location);
+    
+    const userId = sessionStorage.getItem('userId') || location.state?.userId;
+    const token = sessionStorage.getItem('token') || location.state?.token;
 
     return (
         <div>
@@ -76,7 +80,8 @@ function Pricing() {
                                             {/* ${Pricing === 'yearly' ? '44.50' : '4.50'}/ */}
                                             {/* <span style={{ fontSize: '16px', color: '#87898B' }}>{Pricing}</span> */}
                                         </h4>
-                                        <p className='B_cardPrice_text' style={{ color: '#b8babb' }}>Best for individuals and small teams.</p>
+                                        {/* <p className='B_cardPrice_text' style={{ color: '#b8babb' }}>For small teams.</p> */}
+                                        <p className='B_cardPrice_text' style={{ color: '#b8babb' }}>Essential tools for small meetings with chat and scheduling.</p>
 
                                         {/* <Link to="/home">
                                             <button className='btn B_price_btn btn-light fw-bold w-100 '>Continue</button>
@@ -134,7 +139,8 @@ function Pricing() {
                                             ${Pricing === 'yearly' ? '94.50' : '9.50'}/
                                             <span style={{ fontSize: '16px', color: '#87898B' }}>{Pricing}</span>
                                         </h4>
-                                        <p className='B_cardPrice_text' style={{ color: '#b8babb' }}>Perfect for growing teams.</p>
+                                        {/* <p className='B_cardPrice_text' style={{ color: '#b8babb' }}>Perfect for growing teams.</p> */}
+                                        <p className='B_cardPrice_text' style={{ color: '#b8babb' }}>Extended meetings and full recording support included.</p>
 
                                         {/* <Link to="/payment" state={{ price: Pricing === 'yearly' ? '94.50' : '9.50' }}>
                                             <button className='btn B_price_btn btn-light fw-bold w-100 '>Continue To Pay</button>
@@ -195,7 +201,8 @@ function Pricing() {
                                             ${Pricing === 'yearly' ? '150.50' : '15.50'}/
                                             <span style={{ fontSize: '16px', color: '#87898B' }}>{Pricing}</span>
                                         </h4>
-                                        <p className='B_cardPrice_text' style={{ color: '#b8babb' }}>Designed for large teams and organizations.</p>
+                                        {/* <p className='B_cardPrice_text' style={{ color: '#b8babb' }}>For large teams.</p> */}
+                                        <p className='B_cardPrice_text' style={{ color: '#b8babb' }}>Maximum features: share screen, record, scale meetings.</p>
 
                                         {/* <Link to="/payment" state={{ price: Pricing === 'yearly' ? '150.50' : '15.50' }}>
                                             <button className='btn B_price_btn btn-light fw-bold w-100 '>Continue To Pay</button>
