@@ -5,8 +5,8 @@ import { getUserById } from '../Redux/Slice/user.slice';
 import { enqueueSnackbar } from 'notistack';
 import { setReminders } from '../Redux/Slice/meeting.slice';
 
-const SOCKET_SERVER_URL = "http://localhost:4000"; // Move to environment variable in production
-// const SOCKET_SERVER_URL = "https://online-meeting-backend-sv0j.onrender.com"; // Move to environment variable in production
+// const SOCKET_SERVER_URL = "http://localhost:4000"; // Move to environment variable in production
+const SOCKET_SERVER_URL = "https://online-meeting-vzbb.onrender.com"; // Move to environment variable in production
 
 export const useSocket = (userId, roomId, userName, hostUserId) => {
     const socketRef = useRef(null);
